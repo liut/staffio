@@ -6,7 +6,7 @@ import (
 
 func NewServerConfig() *osin.ServerConfig {
 	return &osin.ServerConfig{
-		AuthorizationExpiration: 250,
+		AuthorizationExpiration: 900,
 		AccessExpiration:        3600,
 		TokenType:               "bearer",
 		AllowedAuthorizeTypes: osin.AllowedAuthorizeType{

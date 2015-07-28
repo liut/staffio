@@ -29,6 +29,7 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 			return loginForm(w, r, ctx)
 			// resp.SetRedirect(reverse("login") + "?referer=" + reverse("authorize"))
 		} else {
+			ar.UserData = ctx.User.Uid
 			ar.Authorized = true
 			server.FinishAuthorizeRequest(resp, r, ar)
 		}

@@ -33,6 +33,7 @@ type config struct {
 
 	HttpListen string
 	ResUrl     string
+	Backend    struct{ DSN string }
 }
 
 var (
@@ -61,8 +62,10 @@ func init() {
 	fs.StringVar(&Settings.LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 	fs.StringVar(&Settings.HttpListen, "http-listen", "localhost:5000", "bind address and port")
 	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
+	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
+	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.BoolVar(&printVersion, "version", false, "Print the version and exit")
 
 }
