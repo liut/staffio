@@ -1,0 +1,130 @@
+{{ define "title" }}Login{{ end }}
+{{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+    <link href="{{ .ctx.ResUrl }}css/font-awesome.min.css" rel="stylesheet">
+{{ end }}
+
+{{ define "content" }}
+
+    <form class="form-horizontal" id="form1" method="post" action="/login">
+      <div class="form-group">
+        <label for="username" class="col-sm-2 control-label">Username</label>
+        <div class="col-sm-10 col-md-8">
+          <input type="text" class="form-control" name="username" id="username" placeholder="Username" required autofocus>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password" class="col-sm-2 control-label">Password</label>
+        <div class="col-sm-10 col-md-8">
+          <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10 col-md-8">
+          <label><input type="checkbox" name="remember" value="remember-me"> Remember me </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <input type="hidden" name="referer" value="{{ .ctx.Referer }}">
+          <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+      </div>
+    </form>
+
+{{ end }}
+
+{{ define "tail" }}
+
+  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
+  <script type="text/javascript">
+  var lastUid = "{{if .ctx.User}}{{.ctx.User.Uid}}{{end}}"
+      jQuery(document).ready(function () {
+
+        $('#form1')
+        .bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                username: {
+                    message: 'The username is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: 'The username is required and can\'t be empty'
+                        },
+                        stringLength: {
+                            min: 4,
+                            max: 30,
+                            message: 'The username must be more than 4 and less than 30 characters long'
+                        },
+                        /*remote: {
+                            url: 'remote.php',
+                            message: 'The username is not available'
+                        },*/
+                        regexp: {
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: 'The username can only consist of alphabetical, number, dot and underscore'
+                        },
+                        callback: {
+                          callback: function(value, validator) {return true;}
+                        }
+                    }
+                },
+                password: {
+                    validators: {
+                        notEmpty: {
+                            message: 'The old password is required and can\'t be empty'
+                        },
+                        callback: {
+                          callback: function(value, validator) {return true;}
+                        }
+                    }
+                }
+            }
+        })
+        .on('success.form.bv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the BootstrapValidator instance
+            var bv = $form.data('bootstrapValidator');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(res) {
+                // console.log(res);
+                if (!!res.ok) {
+                  Dust.alert('成功', 'OK', function(){
+                    bv.resetForm(true);
+                    // $("#form1").get(0).reset();
+                    var ref = '/';
+                    if (typeof res.referer == 'string') {
+                      ref = res.referer;
+                    }
+                    location.href = ref;
+                  });
+                } else if (typeof res.error != "undefined") {
+                  var error = res.error
+                  if (typeof error.field === "string") {
+                    bv.updateMessage(error.field, 'callback', error.message);
+                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                    // Dust.alert(error.message);
+                  }
+                } else {
+                  alertAjaxResult(res);
+                }
+            }, 'json');
+            console.log(bv)
+        });
+
+      });
+  </script>
+{{ end }}
+

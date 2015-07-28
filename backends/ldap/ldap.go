@@ -46,6 +46,12 @@ func AddSource(addr, base string) *LdapSource {
 	return ls
 }
 
+func CloseAll() {
+	for _, ls := range AuthenSource {
+		ls.Close()
+	}
+}
+
 func (ls *LdapSource) dial() (*ldap.Conn, error) {
 	if ls.c != nil {
 		return ls.c, nil
@@ -71,10 +77,16 @@ func (ls *LdapSource) dial() (*ldap.Conn, error) {
 	return ls.c, nil
 }
 
+func (ls *LdapSource) Close() {
+	if ls.c != nil {
+		ls.c.Close()
+		ls.c = nil
+	}
+}
+
 func Login(name, passwd string) (r bool, staff *models.Staff) {
 	r = false
 	for _, ls := range AuthenSource {
-
 		r, staff = ls.SearchEntry(name, passwd)
 		if r {
 			return
@@ -99,7 +111,6 @@ func (ls *LdapSource) SearchEntry(name, passwd string) (bool, *models.Staff) {
 	if err != nil {
 		return false, nil
 	}
-	defer l.Close()
 
 	dn := fmt.Sprintf(userDnFmt, name, ls.Base)
 	err = l.Bind(dn, passwd)
@@ -136,7 +147,6 @@ func (ls *LdapSource) ListPaged(limit int) (staffs []*models.Staff) {
 	if err != nil {
 		return nil
 	}
-	defer l.Close()
 
 	err = l.Bind(ls.BindDN, ls.Passwd)
 	if err != nil {

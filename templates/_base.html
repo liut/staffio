@@ -23,6 +23,7 @@
     <div class="container">
 
 
+
       <!-- Static navbar -->
       <nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -39,8 +40,8 @@
             {{ if ne .ctx.NavSimple true }}
             <ul class="nav navbar-nav">
               <li class="active"><a href="/">Home</a></li>
-              <li><a href="/home/about">About</a></li>
-              <li><a href="#">Contact</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contacts">Contacts</a></li>
 
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -51,11 +52,11 @@
                 </a>
                 <ul class="dropdown-menu dropdown-user">
                   <li><a href="/profile"><i class="glyphicon glyphicon-cog"></i> Profile</a></li>
-                  <li><a href="/sign/out"><i class="glyphicon glyphicon-log-out"></i> Sign out</a></li>
+                  <li><a href="/logout"><i class="glyphicon glyphicon-log-out"></i> Sign out</a></li>
                 </ul>
               </li>
               {{ else }}
-              <li><a href="/sign/in">Sign in</a></li>
+              <li><a href="/login">Sign in</a></li>
               {{ end }}
               <li><a href="/password">Change Password</a></li>
             </ul>
@@ -63,6 +64,13 @@
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
+
+
+    {{ range .ctx.Session.Flashes }}
+        <div class="alert alert-warning">
+          {{ . }}
+        </div>
+    {{ end }}
 
 
     {{ template "content" . }}

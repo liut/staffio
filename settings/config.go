@@ -27,6 +27,7 @@ type config struct {
 
 	Session struct {
 		Name   string
+		Domain string
 		Secret string
 	} `ini:"sess"`
 
