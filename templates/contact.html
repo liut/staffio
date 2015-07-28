@@ -1,0 +1,28 @@
+{{ define "title" }}Contact list{{ end }}
+
+{{ define "head" }}
+{{ end }}
+
+{{ define "content" }}
+<table class="table table-striped">
+	<tr>
+		<th>Uid</th>
+		<th>CN</th>
+		<th>Email</th>
+		<th>Mobile</th>
+		<th>Nickname</th>
+	</tr>
+	{{ range .staffs }}
+	<tr>
+		<td>{{ .Uid }}</td>
+		<td>{{ .CommonName }}</td>
+		<td>{{ .Email }}</td>
+		<td>{{ .Mobile }}</td>
+		<td>{{ .Name }}</td>
+	</tr>
+	{{ end }}
+</table>
+{{ end }}
+
+{{ define "tail" }}
+{{ end }}
