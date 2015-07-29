@@ -1,9 +1,14 @@
 package backends
 
 import (
-	"fmt"
+	"errors"
+	"log"
 	"tuluu.com/liut/staffio/backends/ldap"
 	"tuluu.com/liut/staffio/models"
+)
+
+var (
+	ErrLogin = errors.New("Invalid Username/Password")
 )
 
 func Login(username, password string) (*models.Staff, error) {
@@ -11,5 +16,6 @@ func Login(username, password string) (*models.Staff, error) {
 	if r {
 		return staff, nil
 	}
-	return nil, fmt.Errorf("Login failed %s", username)
+	log.Printf("Login failed %s", username)
+	return nil, ErrLogin
 }

@@ -23,6 +23,10 @@ func Prepare() {
 	backendReady = true
 }
 
+func CloseAll() {
+	ldap.CloseAll()
+}
+
 func ListPaged(limit int) []*models.Staff {
 	return ldap.ListPaged(limit)
 }

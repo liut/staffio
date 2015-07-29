@@ -45,7 +45,8 @@ func withTxQuery(query func(tx *sql.Tx) error) error {
 
 	if err := query(tx); err != nil {
 		tx.Rollback()
-		return err
+		log.Printf("tx query error: %s", err)
+		return dbError
 	}
 	tx.Commit()
 	return nil

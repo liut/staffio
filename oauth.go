@@ -15,6 +15,7 @@ func NewServerConfig() *osin.ServerConfig {
 		},
 		AllowedAccessTypes: osin.AllowedAccessType{
 			osin.AUTHORIZATION_CODE,
+			osin.IMPLICIT,
 			osin.REFRESH_TOKEN,
 			osin.PASSWORD,
 			osin.CLIENT_CREDENTIALS,

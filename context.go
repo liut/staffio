@@ -5,13 +5,21 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
-	"tuluu.com/liut/staffio/backends/ldap"
+	"tuluu.com/liut/staffio/backends"
 	. "tuluu.com/liut/staffio/settings"
 )
 
 type User struct {
 	Uid  string
 	Name string
+}
+
+func (u *User) IsKeeper() bool {
+	if u == nil {
+		return false
+	}
+	keeper := backends.GetGroup("keeper")
+	return keeper.Has(u.Uid)
 }
 
 type Context struct {
@@ -23,7 +31,7 @@ type Context struct {
 }
 
 func (c *Context) Close() {
-	ldap.CloseAll()
+	backends.CloseAll()
 }
 
 func NewContext(req *http.Request) (*Context, error) {

@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
+	"strings"
 	"tuluu.com/liut/staffio/backends"
 	. "tuluu.com/liut/staffio/settings"
 )
@@ -50,9 +51,11 @@ func main() {
 
 	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
 	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")
-	router.Handle("/info", handler(oauthToken)).Methods("GET", "POST").Name("token")
+	router.Handle("/info", handler(oauthInfo)).Methods("GET", "POST").Name("info")
 
-	app(Settings.HttpListen)
+	if strings.HasPrefix(Settings.HttpListen, "localhost") {
+		appDemo(Settings.HttpListen)
+	}
 
 	router.Handle("/", handler(index)).Name("index")
 

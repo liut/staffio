@@ -10,7 +10,12 @@ import (
 )
 
 // addr = localhost:3000
-func app(addr string) {
+func appDemo(addr string) {
+
+	const (
+		demoId     = "1234"
+		demoSecret = "aabbccdd"
+	)
 
 	// Application home endpoint
 	router.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +54,7 @@ func app(addr string) {
 		// if parse, download and parse json
 		if r.Form.Get("doparse") == "1" {
 			err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-				&osin.BasicAuth{"1234", "aabbccdd"}, jr)
+				&osin.BasicAuth{demoId, demoSecret}, jr)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				w.Write([]byte("<br/>"))
@@ -115,7 +120,7 @@ func app(addr string) {
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-			&osin.BasicAuth{Username: "1234", Password: "aabbccdd"}, jr)
+			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.Write([]byte("<br/>"))
@@ -160,7 +165,7 @@ func app(addr string) {
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-			&osin.BasicAuth{Username: "1234", Password: "aabbccdd"}, jr)
+			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.Write([]byte("<br/>"))
@@ -205,7 +210,7 @@ func app(addr string) {
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-			&osin.BasicAuth{Username: "1234", Password: "aabbccdd"}, jr)
+			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.Write([]byte("<br/>"))
@@ -258,7 +263,7 @@ func app(addr string) {
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-			&osin.BasicAuth{Username: "1234", Password: "aabbccdd"}, jr)
+			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.Write([]byte("<br/>"))
@@ -309,7 +314,7 @@ func app(addr string) {
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
-			&osin.BasicAuth{Username: "1234", Password: "aabbccdd"}, jr)
+			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			w.Write([]byte("<br/>"))

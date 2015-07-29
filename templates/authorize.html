@@ -1,0 +1,56 @@
+{{ define "title" }}Contact list{{ end }}
+
+{{ define "head" }}
+{{ end }}
+
+{{ define "content" }}
+    <h3>
+        <!-- Welcome to the OAuth2.0 Server! -->
+        第三方应用授权
+    </h3>
+    <p>
+        <!-- You have been sent here by <strong>{{ .client.Name }}</strong>.  {{ .client.Name }} would like to access the following data: -->
+		来自 <strong>{{ .client.Name }}</strong> 的应用需要您的授权，它可能会访问如下数据:
+    </p>
+    <!-- <ul>
+        <li>friends</li>
+        <li>memories</li>
+        <li>hopes, dreams, passions, etc.</li>
+        <li>sock drawer</li>
+    </ul> -->
+    <dl class="dl-horizontal">
+    	{{ range .scopes}}
+    	<dt>{{ .Label }}</dt><dd>{{ .Description }}</dd>
+    	{{ end }}
+    </dl>
+    <p><!-- It will use this data to -->以上数据可能会被用于:</p>
+    <ul>
+        <!-- <li>integrate with friends</li>
+        <li>make your life better</li>
+        <li>miscellaneous nefarious purposes</li> -->
+        <li>应用间交互</li>
+        <li>让生活更美好</li>
+        <li>其他不可告人的目的</li>
+    </ul>
+    <p>
+    <!-- Click the button below to complete the authorize request and grant an <code>{{ if eq .response_type "code" }} Authoriation Code{{ else }}Access Token{{ end }}</code> to {{ .client.Name }}. -->
+    点击下面的按钮进行操作
+    </p>
+    <ul class="list-inline">
+        <li>
+            <form action="{{ .link }}" method="post">
+                <input type="submit" class="btn btn-primary" value="好的，我授权此请求" />
+                <input type="hidden" name="authorize" value="1" />
+            </form>
+        </li>
+        <li class="cancel">
+            <form id="cancel" action="{{ .link }}" method="post">
+                <a class="btn btn-link btn-sm" href="#" onclick="document.getElementById('cancel').submit(); return false;">Cancel</a>
+                <input type="hidden" name="authorize" value="0" />
+            </form>
+        </li>
+    </ul>
+{{ end }}
+
+{{ define "tail" }}
+{{ end }}

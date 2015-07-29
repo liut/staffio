@@ -1,17 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	// "github.com/gorilla/sessions"
 	"github.com/RangelReale/osin"
 	"github.com/goods/httpbuf"
 	"log"
 	"net/http"
-	"tuluu.com/liut/staffio/backends"
-	// "tuluu.com/liut/staffio/models"
-	// . "tuluu.com/liut/staffio/settings"
-	"encoding/json"
 	"net/url"
+	"tuluu.com/liut/staffio/backends"
+	"tuluu.com/liut/staffio/models"
+	. "tuluu.com/liut/staffio/settings"
 )
 
 // Authorization code endpoint
@@ -21,17 +20,36 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 
 	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
 
+		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&state=%s&redirect_uri=%s",
+			ar.Type, ar.Client.GetId(), ar.State, url.QueryEscape(ar.RedirectUri))
 		// HANDLE LOGIN PAGE HERE
 		if ctx.User == nil {
-			referer := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&state=%s&redirect_uri=%s",
-				ar.Type, ar.Client.GetId(), ar.State, url.QueryEscape(ar.RedirectUri))
-			ctx.Referer = referer
+			ctx.Referer = link
 			return loginForm(w, r, ctx)
 			// resp.SetRedirect(reverse("login") + "?referer=" + reverse("authorize"))
 		} else {
-			ar.UserData = ctx.User.Uid
-			ar.Authorized = true
-			server.FinishAuthorizeRequest(resp, r, ar)
+			if r.Method == "GET" {
+				scopes, err := backends.LoadScopes()
+				if err != nil {
+					return err
+				}
+				return T("authorize.html").Execute(w, map[string]interface{}{
+					"link":          link,
+					"response_type": ar.Type,
+					"scopes":        scopes,
+					"client":        ar.Client.(*models.Client),
+					"ctx":           ctx,
+				})
+			}
+
+			if r.PostForm.Get("authorize") == "1" {
+				ar.UserData = ctx.User.Uid
+				ar.Authorized = true
+				server.FinishAuthorizeRequest(resp, r, ar)
+			} else {
+				resp.SetRedirect(reverse("index"))
+			}
+
 		}
 
 	}
@@ -39,9 +57,9 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 	if resp.IsError && resp.InternalError != nil {
 		log.Printf("authorize ERROR: %s\n", resp.InternalError)
 	}
-	if !resp.IsError {
-		resp.Output["custom_parameter"] = 19923
-	}
+	// if !resp.IsError {
+	// 	resp.Output["uid"] = ctx.User.Uid
+	// }
 
 	osin.OutputJSON(resp, w, r)
 	return resp.InternalError
@@ -59,9 +77,19 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 		case osin.REFRESH_TOKEN:
 			ar.Authorized = true
 		case osin.PASSWORD:
-			if ar.Username == "test" && ar.Password == "test" {
+			if Settings.HttpListen == "localhost:3000" && ar.Username == "test" && ar.Password == "test" {
 				ar.Authorized = true
+				break
 			}
+			staff, err := backends.Login(ar.Username, ar.Password)
+			if err != nil {
+				// resp.InternalError = err
+				resp.SetError("authentication_failed", err.Error())
+			} else {
+				ar.Authorized = true
+				ar.UserData = staff.Uid
+			}
+
 		case osin.CLIENT_CREDENTIALS:
 			ar.Authorized = true
 		case osin.ASSERTION:
@@ -75,9 +103,9 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 	if resp.IsError && resp.InternalError != nil {
 		log.Printf("token ERROR: %s\n", resp.InternalError)
 	}
-	if !resp.IsError {
-		resp.Output["custom_parameter"] = 19923
-	}
+	// if !resp.IsError {
+	// 	resp.Output["uid"] = ctx.User.Uid
+	// }
 
 	osin.OutputJSON(resp, w, r)
 	return resp.InternalError
@@ -88,7 +116,10 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	resp := server.NewResponse()
 	defer resp.Close()
 
+	var uid string
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
+		log.Printf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
+		uid = ir.AccessData.UserData.(string)
 		server.FinishInfoRequest(resp, r, ir)
 	}
 
@@ -96,7 +127,7 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		log.Printf("info ERROR: %s\n", resp.InternalError)
 	}
 	if !resp.IsError {
-		resp.Output["custom_parameter"] = 19923
+		resp.Output["uid"] = uid
 	}
 
 	osin.OutputJSON(resp, w, r)
@@ -118,11 +149,10 @@ func contactListHandler(rw http.ResponseWriter, req *http.Request, ctx *Context)
 	backends.Prepare()
 	limit := 5
 	staffs := backends.ListPaged(limit)
-	keeper := backends.GetGroup("keeper")
+	models.ByUid.Sort(staffs)
 
 	return T("contact.html").Execute(rw, map[string]interface{}{
 		"staffs": staffs,
-		"keeper": keeper,
 		"ctx":    ctx,
 	})
 }
@@ -152,7 +182,7 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 
 	res := make(osin.ResponseData)
 	res["ok"] = true
-	res["referer"] = reverse("index")
+	res["referer"] = ctx.Referer
 	outputJson(res, w)
 	// http.Redirect(w, req, reverse("index"), http.StatusSeeOther)
 	return nil
