@@ -1,7 +1,7 @@
 # staffio
 ## define
 
-    A oauth2 server provider for enterprise employees
+    An OAuth2 server with management for enterprise employees
 
 
 ## prepare
