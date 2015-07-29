@@ -70,9 +70,21 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 	resp := server.NewResponse()
 	defer resp.Close()
 
+	var (
+		uid  string = ""
+		user *User
+	)
 	if ar := server.HandleAccessRequest(resp, r); ar != nil {
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
+			uid = ar.UserData.(string)
+			staff, err := backends.GetStaff(uid)
+			if err != nil {
+				resp.SetError("get_user_error", "staff not found")
+				resp.InternalError = err
+			} else {
+				user = UserFromStaff(staff)
+			}
 			ar.Authorized = true
 		case osin.REFRESH_TOKEN:
 			ar.Authorized = true
@@ -81,13 +93,14 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 				ar.Authorized = true
 				break
 			}
-			staff, err := backends.Login(ar.Username, ar.Password)
+			staff, err := backends.Authenticate(ar.Username, ar.Password)
 			if err != nil {
 				// resp.InternalError = err
 				resp.SetError("authentication_failed", err.Error())
 			} else {
 				ar.Authorized = true
 				ar.UserData = staff.Uid
+				user = UserFromStaff(staff)
 			}
 
 		case osin.CLIENT_CREDENTIALS:
@@ -103,9 +116,15 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 	if resp.IsError && resp.InternalError != nil {
 		log.Printf("token ERROR: %s\n", resp.InternalError)
 	}
-	// if !resp.IsError {
-	// 	resp.Output["uid"] = ctx.User.Uid
-	// }
+	if !resp.IsError {
+		if uid != "" {
+			resp.Output["uid"] = uid
+		}
+		if user != nil {
+			resp.Output["user"] = user
+		}
+
+	}
 
 	osin.OutputJSON(resp, w, r)
 	return resp.InternalError
@@ -116,10 +135,20 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	resp := server.NewResponse()
 	defer resp.Close()
 
-	var uid string
+	var (
+		uid  string
+		user *User
+	)
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
 		log.Printf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
 		uid = ir.AccessData.UserData.(string)
+		staff, err := backends.GetStaff(uid)
+		if err != nil {
+			resp.SetError("get_user_error", "staff not found")
+			resp.InternalError = err
+		} else {
+			user = UserFromStaff(staff)
+		}
 		server.FinishInfoRequest(resp, r, ir)
 	}
 
@@ -127,6 +156,9 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		log.Printf("info ERROR: %s\n", resp.InternalError)
 	}
 	if !resp.IsError {
+		if user != nil {
+			resp.Output["user"] = user
+		}
 		resp.Output["uid"] = uid
 	}
 
@@ -166,7 +198,7 @@ func loginForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 	username, password := req.FormValue("username"), req.FormValue("password")
 
-	user, e := backends.Login(username, password)
+	user, e := backends.Authenticate(username, password)
 	if e != nil {
 		// ctx.Session.AddFlash("Invalid Username/Password")
 

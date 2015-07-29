@@ -32,6 +32,28 @@ func init() {
 	// glog.CopyStandardLogTo("WARNING")
 }
 
+func NewServerConfig() *osin.ServerConfig {
+	return &osin.ServerConfig{
+		AuthorizationExpiration: 900,
+		AccessExpiration:        3600,
+		TokenType:               "bearer",
+		AllowedAuthorizeTypes: osin.AllowedAuthorizeType{
+			osin.CODE,
+			osin.TOKEN,
+		},
+		AllowedAccessTypes: osin.AllowedAccessType{
+			osin.AUTHORIZATION_CODE,
+			osin.IMPLICIT,
+			osin.REFRESH_TOKEN,
+			osin.PASSWORD,
+			osin.CLIENT_CREDENTIALS,
+		},
+		ErrorStatusCode:           200,
+		AllowClientSecretInParams: true,
+		AllowGetAccessRequest:     false,
+	}
+}
+
 func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	Settings.Parse()

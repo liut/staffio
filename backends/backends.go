@@ -1,10 +1,16 @@
 package backends
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"tuluu.com/liut/staffio/backends/ldap"
 	"tuluu.com/liut/staffio/models"
 	. "tuluu.com/liut/staffio/settings"
+)
+
+var (
+	ErrLogin = errors.New("Invalid Username/Password")
 )
 
 var (
@@ -33,4 +39,20 @@ func ListPaged(limit int) []*models.Staff {
 
 func GetGroup(name string) *models.Group {
 	return ldap.SearchGroup(name)
+}
+
+func GetStaff(uid string) (*models.Staff, error) {
+	return ldap.GetStaff(uid)
+}
+
+func Authenticate(username, password string) (*models.Staff, error) {
+	if ldap.Authenticate(username, password) {
+		staff, err := ldap.GetStaff(username)
+		if err != nil {
+			log.Printf("call GetStaff error: %s", err)
+		}
+		return staff, nil
+	}
+	log.Printf("Login failed %s", username)
+	return nil, ErrLogin
 }

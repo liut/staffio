@@ -86,11 +86,11 @@ func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 	err = getDb().QueryRow("SELECT client_id, username, redirect_uri, expires_in, scopes, created FROM oauth_authorization_code WHERE code = $1",
 		code).Scan(&client_id, &username, &a.RedirectUri, &a.ExpiresIn, &a.Scope, &a.CreatedAt)
 	if err == nil {
+		a.UserData = username
 		a.Client, err = GetClientWithCode(client_id)
 		if err != nil {
 			return nil, err
 		}
-		a.UserData = username
 		log.Printf("loaded authorization ok, createdAt %s", a.CreatedAt)
 		return a, nil
 	}

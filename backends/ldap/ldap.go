@@ -19,6 +19,7 @@ type LdapSource struct {
 	Attributes []string   // Select fileds
 	Enabled    bool       // if this source is disabled
 	c          *ldap.Conn // conn
+	bound      bool
 }
 
 //Global LDAP directory pool
@@ -78,17 +79,28 @@ func (ls *LdapSource) dial() (*ldap.Conn, error) {
 }
 
 func (ls *LdapSource) Close() {
+	ls.bound = false
 	if ls.c != nil {
 		ls.c.Close()
 		ls.c = nil
 	}
 }
 
-func Login(name, passwd string) (r bool, staff *models.Staff) {
-	r = false
+func Authenticate(uid, passwd string) bool {
 	for _, ls := range AuthenSource {
-		r, staff = ls.SearchEntry(name, passwd)
-		if r {
+		dn := fmt.Sprintf(userDnFmt, uid, ls.Base)
+		err := ls.Bind(dn, passwd, true)
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func GetStaff(uid string) (staff *models.Staff, err error) {
+	for _, ls := range AuthenSource {
+		staff, err = ls.GetStaff(uid)
+		if err == nil {
 			return
 		}
 	}
@@ -105,52 +117,53 @@ func ListPaged(limit int) (staffs []*models.Staff) {
 	return
 }
 
-// searchEntry : search an LDAP source if an entry (name, passwd) is valide and in the specific filter
-func (ls *LdapSource) SearchEntry(name, passwd string) (bool, *models.Staff) {
+func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
+	if !force && ls.bound {
+		return nil
+	}
+
 	l, err := ls.dial()
 	if err != nil {
-		return false, nil
+		return err
 	}
 
-	dn := fmt.Sprintf(userDnFmt, name, ls.Base)
 	err = l.Bind(dn, passwd)
 	if err != nil {
-		log.Printf("LDAP Authan failed for %s, reason: %s", dn, err.Error())
-		return false, nil
+		log.Printf("LDAP Authen failed for %s, reason: %s", dn, err.Error())
+		return err
 	}
+	ls.bound = true
+	return nil
+}
 
+// GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
+func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
+	err := ls.Bind(ls.BindDN, ls.Passwd, false)
+	if err != nil {
+		return nil, err
+	}
 	search := ldap.NewSearchRequest(
-		dn,
+		fmt.Sprintf(userDnFmt, uid, ls.Base),
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		ls.Filter,
 		ls.Attributes,
 		nil)
-	sr, err := l.Search(search)
+	sr, err := ls.c.Search(search)
 	if err != nil {
-		log.Printf("LDAP Authen OK but not in filter %s", name)
-		return false, nil
+		log.Printf("LDAP Search '%s' Error: ", uid, err)
+		return nil, err
 	}
-	log.Printf("LDAP Authen OK: %s", name)
+	log.Printf("LDAP Authen OK: %s", uid)
 	if len(sr.Entries) > 0 {
-		return true, entryToUser(sr.Entries[0])
-		// cn := sr.Entries[0].GetAttributeValue(ls.AttributeUsername)
-		// name := sr.Entries[0].GetAttributeValue(ls.AttributeName)
-		// sn := sr.Entries[0].GetAttributeValue(ls.AttributeSurname)
-		// mail := sr.Entries[0].GetAttributeValue(ls.AttributeMail)
-		// return cn, name, sn, mail, true
+		return entryToUser(sr.Entries[0]), nil
 	}
-	return true, nil
+	return nil, nil
 }
 
 func (ls *LdapSource) ListPaged(limit int) (staffs []*models.Staff) {
-	l, err := ls.dial()
+	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
-		return nil
-	}
-
-	err = l.Bind(ls.BindDN, ls.Passwd)
-	if err != nil {
-		log.Printf("ERROR: Cannot bind: %s\n", err.Error())
+		// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
 		return nil
 	}
 
@@ -164,7 +177,7 @@ func (ls *LdapSource) ListPaged(limit int) (staffs []*models.Staff) {
 		ls.Attributes,
 		nil)
 
-	sr, err := l.SearchWithPaging(search, uint32(limit))
+	sr, err := ls.c.SearchWithPaging(search, uint32(limit))
 	if err != nil {
 		log.Printf("ERROR: %s for search %v\n", err, search)
 		return

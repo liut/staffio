@@ -6,12 +6,13 @@ import (
 	"log"
 	"net/http"
 	"tuluu.com/liut/staffio/backends"
+	"tuluu.com/liut/staffio/models"
 	. "tuluu.com/liut/staffio/settings"
 )
 
 type User struct {
-	Uid  string
-	Name string
+	Uid  string `json:"uid"`
+	Name string `json:"name"`
 }
 
 func (u *User) IsKeeper() bool {
@@ -20,6 +21,10 @@ func (u *User) IsKeeper() bool {
 	}
 	keeper := backends.GetGroup("keeper")
 	return keeper.Has(u.Uid)
+}
+
+func UserFromStaff(staff *models.Staff) *User {
+	return &User{staff.Uid, staff.Name()}
 }
 
 type Context struct {
