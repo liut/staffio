@@ -1,7 +1,7 @@
 
 BEGIN;
 
-CREATE TABLE oauth_client
+CREATE TABLE IF NOT EXISTS oauth_client
 (
 	id serial,
 	code varchar(80) NOT NULL, -- client_id
@@ -18,7 +18,7 @@ CREATE TABLE oauth_client
 );
 -- INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://localhost:3000/appauth', '{}', now());
 
-CREATE TABLE oauth_access_token
+CREATE TABLE IF NOT EXISTS oauth_access_token
 (
 	id serial,
 	client_id varchar(120) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE oauth_access_token
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE oauth_authorization_code
+CREATE TABLE IF NOT EXISTS oauth_authorization_code
 (
 	id serial,
 	code varchar(40) NOT NULL,
@@ -48,21 +48,7 @@ CREATE TABLE oauth_authorization_code
 	PRIMARY KEY (id)
 );
 
--- CREATE TABLE oauth_refresh_token
--- (
--- 	id serial,
--- 	client_id varchar(120) NOT NULL,
--- 	username varchar(120) NOT NULL DEFAULT '',
--- 	refresh_token varchar(40) NOT NULL,
--- 	expires_in int NOT NULL DEFAULT 86400,
--- 	scopes varchar(255) NOT NULL DEFAULT '',
--- 	is_frozen BOOLEAN NOT NULL DEFAULT false,
--- 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
--- 	UNIQUE (refresh_token),
--- 	PRIMARY KEY (refresh_token)
--- );
-
-CREATE TABLE oauth_scope
+CREATE TABLE IF NOT EXISTS oauth_scope
 (
 	id serial,
 	name varchar(64) NOT NULL, -- ascii code
@@ -78,28 +64,6 @@ INSERT INTO oauth_scope(name,label,description,is_default) VALUES('basic', 'Basi
 INSERT INTO oauth_scope(name,label,description) VALUES('user_info', 'Personal Information', 'Read your GivenName, Surname, Email, etc.');
 */
 
--- CREATE TABLE oauth_user
--- (
--- 	id serial,
--- 	username VARCHAR(120) NOT NULL,
--- 	password VARCHAR(200),
--- 	first_name VARCHAR(255),
--- 	last_name VARCHAR(255),
--- 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
--- 	UNIQUE (username),
--- 	PRIMARY KEY (id)
--- );
 
-
-CREATE TABLE oauth_public_key
-(
-	id serial,
-	client_id varchar(120) NOT NULL,
-	public_key TEXT,
-	private_key TEXT,
-	encryption_algorithm VARCHAR(80) DEFAULT 'RS256',
-	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (id)
-);
 
 END;
