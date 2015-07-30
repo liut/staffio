@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"path/filepath"
 	"sync"
+	. "tuluu.com/liut/staffio/settings"
 )
 
 var (
@@ -39,8 +40,8 @@ func T(name string) *template.Template {
 
 	t := template.New("_base.html").Funcs(funcs)
 	t = template.Must(t.ParseFiles(
-		"templates/_base.html",
-		filepath.Join("templates", name),
+		filepath.Join(Settings.Root, "templates/_base.html"),
+		filepath.Join(Settings.Root, "templates", name),
 	))
 	cachedTemplates[name] = t
 

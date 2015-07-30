@@ -47,7 +47,7 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 				ar.Authorized = true
 				server.FinishAuthorizeRequest(resp, r, ar)
 			} else {
-				resp.SetRedirect(reverse("index"))
+				resp.SetRedirect(reverse("welcome"))
 			}
 
 		}
@@ -166,13 +166,13 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	return resp.InternalError
 }
 
-func index(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 
 	log.Printf("session Name: %s, Values: %v", ctx.Session.Name(), ctx.Session.Values)
 	log.Printf("ctx User %v", ctx.User)
 
 	//execute the template
-	return T("index.html").Execute(w, map[string]interface{}{
+	return T("welcome.html").Execute(w, map[string]interface{}{
 		"ctx": ctx,
 	})
 }
@@ -209,20 +209,20 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 		return nil
 	}
 
-	//store the user id in the values and redirect to index
+	//store the user id in the values and redirect to welcome
 	ctx.Session.Values["user"] = &User{user.Uid, user.Name()}
 
 	res := make(osin.ResponseData)
 	res["ok"] = true
 	res["referer"] = ctx.Referer
 	outputJson(res, w)
-	// http.Redirect(w, req, reverse("index"), http.StatusSeeOther)
+	// http.Redirect(w, req, reverse("welcome"), http.StatusSeeOther)
 	return nil
 }
 
 func logout(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 	delete(ctx.Session.Values, "user")
-	http.Redirect(w, req, reverse("index"), http.StatusSeeOther)
+	http.Redirect(w, req, reverse("welcome"), http.StatusSeeOther)
 	return nil
 }
 

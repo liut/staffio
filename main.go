@@ -5,11 +5,14 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
+	// "path/filepath"
 	"strings"
 	"tuluu.com/liut/staffio/backends"
 	. "tuluu.com/liut/staffio/settings"
+	_ "tuluu.com/liut/staffio/statik"
 )
 
 var (
@@ -79,11 +82,22 @@ func main() {
 		appDemo(Settings.HttpListen)
 	}
 
-	router.Handle("/", handler(index)).Name("index")
+	router.Handle("/", handler(welcome)).Name("welcome")
 
-	router.NotFoundHandler = http.HandlerFunc(NotFoundHandler)
+	// router.NotFoundHandler = http.HandlerFunc(NotFoundHandler)
 
-	fmt.Printf("Start service %s at addr %s\n", Settings.Version, Settings.HttpListen)
+	statikFS, se := fs.New()
+	if se != nil {
+		log.Fatalf(se.Error())
+	}
+
+	// statikFS := http.Dir(filepath.Join(Settings.Root, "htdocs"))
+	ss := http.FileServer(statikFS)
+	router.PathPrefix("/static/").Handler(ss).Methods("GET", "HEAD")
+	router.Path("/favicon.ico").Handler(ss).Methods("GET", "HEAD")
+	router.Path("/robots.txt").Handler(ss).Methods("GET", "HEAD")
+
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", Settings.Version, Settings.HttpListen, Settings.Root)
 	err := http.ListenAndServe(Settings.HttpListen, router) // Start the server!
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

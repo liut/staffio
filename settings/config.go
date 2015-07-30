@@ -34,6 +34,7 @@ type config struct {
 	HttpListen string
 	ResUrl     string
 	Backend    struct{ DSN string }
+	Root       string
 }
 
 var (
@@ -66,6 +67,7 @@ func init() {
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
+	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
 	fs.BoolVar(&printVersion, "version", false, "Print the version and exit")
 
 }
