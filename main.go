@@ -20,7 +20,7 @@ var (
 	router             *mux.Router
 	resUrl             string
 	jsonRequestHeaders = []string{
-		// "Content-Type", "application/json",
+		// "Accept", "application/json",
 		"X-Requested-With", "XMLHttpRequest",
 	}
 	server *osin.Server
@@ -29,10 +29,6 @@ var (
 func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(rw, "Not Found")
-}
-
-func init() {
-	// glog.CopyStandardLogTo("WARNING")
 }
 
 func NewServerConfig() *osin.ServerConfig {
@@ -71,6 +67,8 @@ func main() {
 	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")
 	router.Handle("/login", handler(login)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/logout", handler(logout)).Name("logout")
+	router.Handle("/password", handler(passwordForm)).Methods("GET").Name("password")
+	router.Handle("/password", handler(passwordChange)).Methods("POST").Headers(jsonRequestHeaders...)
 
 	router.Handle("/contacts", handler(contactListHandler)).Methods("GET")
 

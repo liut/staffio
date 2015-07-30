@@ -31,6 +31,7 @@ type Context struct {
 	Session   *sessions.Session
 	ResUrl    string
 	User      *User
+	LastUid   string
 	NavSimple bool
 	Referer   string
 }
@@ -43,7 +44,13 @@ func NewContext(req *http.Request) (*Context, error) {
 	sess, err := store.Get(req, Settings.Session.Name)
 	sess.Options.Domain = Settings.Session.Domain
 	sess.Options.HttpOnly = true
-	var user *User
+	var (
+		lastUid string
+		user    *User
+	)
+	if v, ok := sess.Values["last_uid"]; ok {
+		lastUid = v.(string)
+	}
 	if v, ok := sess.Values["user"]; ok {
 		user = v.(*User)
 	}
@@ -55,6 +62,7 @@ func NewContext(req *http.Request) (*Context, error) {
 		Session: sess,
 		ResUrl:  Settings.ResUrl,
 		Referer: referer,
+		LastUid: lastUid,
 		User:    user,
 	}
 	if err != nil {

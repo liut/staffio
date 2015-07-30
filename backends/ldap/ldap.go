@@ -1,10 +1,10 @@
 package ldap
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap"
 	"log"
-	"strings"
 	"tuluu.com/liut/staffio/models"
 )
 
@@ -20,6 +20,7 @@ type LdapSource struct {
 	Enabled    bool       // if this source is disabled
 	c          *ldap.Conn // conn
 	bound      bool
+	Debug      bool
 }
 
 //Global LDAP directory pool
@@ -28,6 +29,7 @@ var (
 	defaultAttributes = []string{"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "employeeNumber", "employeeType", "description", "title"}
 	defaultFilter     = "(objectclass=inetOrgPerson)"
 	AuthenSource      []*LdapSource
+	ErrLogin          = errors.New("049: Invalid Username/Password")
 )
 
 // Add a new source (LDAP directory) to the global pool
@@ -71,9 +73,7 @@ func (ls *LdapSource) dial() (*ldap.Conn, error) {
 		return nil, err
 	}
 
-	if strings.HasPrefix(ls.Addr, "localhost:") {
-		ls.c.Debug = true
-	}
+	// ls.c.Debug = ls.Debug
 
 	return ls.c, nil
 }
@@ -86,15 +86,15 @@ func (ls *LdapSource) Close() {
 	}
 }
 
-func Authenticate(uid, passwd string) bool {
+func Authenticate(uid, passwd string) (err error) {
 	for _, ls := range AuthenSource {
-		dn := fmt.Sprintf(userDnFmt, uid, ls.Base)
-		err := ls.Bind(dn, passwd, true)
+		dn := ls.UDN(uid)
+		err = ls.Bind(dn, passwd, true)
 		if err == nil {
-			return true
+			return nil
 		}
 	}
-	return false
+	return err
 }
 
 func GetStaff(uid string) (staff *models.Staff, err error) {
@@ -117,6 +117,10 @@ func ListPaged(limit int) (staffs []*models.Staff) {
 	return
 }
 
+func (ls *LdapSource) UDN(uid string) string {
+	return fmt.Sprintf(userDnFmt, uid, ls.Base)
+}
+
 func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
 	if !force && ls.bound {
 		return nil
@@ -129,7 +133,12 @@ func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
 
 	err = l.Bind(dn, passwd)
 	if err != nil {
-		log.Printf("LDAP Authen failed for %s, reason: %s", dn, err.Error())
+		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err.Error())
+		if le, ok := err.(*ldap.Error); ok {
+			if le.ResultCode == 49 {
+				return ErrLogin
+			}
+		}
 		return err
 	}
 	ls.bound = true
@@ -143,7 +152,7 @@ func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
 		return nil, err
 	}
 	search := ldap.NewSearchRequest(
-		fmt.Sprintf(userDnFmt, uid, ls.Base),
+		ls.UDN(uid),
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		ls.Filter,
 		ls.Attributes,

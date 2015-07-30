@@ -1,8 +1,14 @@
 FROM alpine:3.2
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV VERSION v0.0.1
+ENV VERSION v0.0.2
 ENV DOWNLOAD_URL https://github.com/liut/staffio/releases/download/$VERSION/staffio-linux-amd64-$VERSION.tar.gz
+
+ENV STAFFIO_HTTP_LISTEN=":80"
+ENV STAFFIO_ROOT /app
+
+RUN mkdir /app
+WORKDIR /app
 
 RUN apk add --virtual build-dependencies --update \
   curl \
@@ -11,14 +17,8 @@ RUN apk add --virtual build-dependencies --update \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*
 
-RUN mkdir /app
-WORKDIR /app
-
 ADD templates /app/templates
-ADD htdocs /app/htdocs
-
-ENV STAFFIO_ROOT /app
-ENV STAFFIO_HTTP_LISTEN=":80"
+# ADD htdocs /app/htdocs
 
 EXPOSE 80
 
