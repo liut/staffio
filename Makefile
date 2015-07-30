@@ -46,3 +46,7 @@ check-gofmt:
 
 test:
 	go test
+
+docker-build:
+	docker build --rm -t staffio -f docker-local/Dockerfile .
+
