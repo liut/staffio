@@ -25,7 +25,8 @@ func reverse(name string, things ...interface{}) string {
 	//grab the route
 	u, err := router.GetRoute(name).URL(strs...)
 	if err != nil {
-		panic(err)
+		return "/" + name
+		// panic(err)
 	}
 	return u.Path
 }

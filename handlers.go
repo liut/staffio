@@ -182,13 +182,15 @@ func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error)
 	})
 }
 
-func contactListHandler(rw http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	backends.Prepare()
+func contactListHandler(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+	}
 	limit := 5
 	staffs := backends.ListPaged(limit)
 	models.ByUid.Sort(staffs)
 
-	return T("contact.html").Execute(rw, map[string]interface{}{
+	return T("contact.html").Execute(w, map[string]interface{}{
 		"staffs": staffs,
 		"ctx":    ctx,
 	})
