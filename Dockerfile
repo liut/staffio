@@ -11,4 +11,15 @@ RUN apk add --virtual build-dependencies --update \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["/usr/local/bin/staffio"]
+RUN mkdir /app
+WORKDIR /app
+
+ADD templates /app/templates
+ADD htdocs /app/htdocs
+
+ENV STAFFIO_ROOT /app
+ENV STAFFIO_HTTP_LISTEN=":80"
+
+EXPOSE 80
+
+# ENTRYPOINT ["/usr/local/bin/staffio"]
