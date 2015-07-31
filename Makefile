@@ -11,7 +11,7 @@ staffio:
 	go build -ldflags "$(LDFLAGS)"
 
 dist-clean:
-	rm -rf dist
+	rm -rf dist dist-tight
 	rm -f staffio-linux-*.tar.gz
 	rm -f staffio-darwin-*.tar.gz
 
@@ -48,5 +48,9 @@ test:
 	go test
 
 docker-build:
-	docker build --rm -t staffio -f docker-local/Dockerfile .
+	docker build --rm -t staffio .
+
+docker-build-tight:
+	mkdir -p dist-tight/linux/amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux/amd64/staffio ./staffio-tight
+	docker build --rm -t staffio:tight -f staffio-tight/Dockerfile .
 

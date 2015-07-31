@@ -20,7 +20,7 @@ ENV PGHOST "staffio-db"
 RUN mkdir /app
 WORKDIR /app
 
-ADD dist/linux/amd64/staffio /usr/local/bin/
+ADD dist-tight/linux/amd64/staffio /usr/local/bin/
 
 ADD templates /app/templates
 # ADD htdocs /app/htdocs

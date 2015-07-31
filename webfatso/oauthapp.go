@@ -1,21 +1,25 @@
-package main
+package webfatso
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/RangelReale/osin"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/url"
+	. "tuluu.com/liut/staffio/settings"
 )
 
 // addr = localhost:3000
-func appDemo(addr string) {
+func AppDemo(router *mux.Router) {
 
 	const (
 		demoId     = "1234"
 		demoSecret = "aabbccdd"
 	)
+
+	addr := Settings.HttpListen
 
 	// Application home endpoint
 	router.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {

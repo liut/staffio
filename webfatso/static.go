@@ -1,13 +1,14 @@
-package main
+package webfatso
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
-	_ "tuluu.com/liut/staffio/statik"
+	_ "tuluu.com/liut/staffio/webfatso/statik"
 )
 
-func staticServ() {
+func ServStatic(router *mux.Router) {
 
 	statikFS, se := fs.New()
 	if se != nil {
