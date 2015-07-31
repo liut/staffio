@@ -1,0 +1,23 @@
+{{ define "title" }}Profile{{ end }}
+{{ define "head" }}
+{{ end }}
+{{ define "content" }}
+
+      <dl class="dl-horizontal">
+        <dt>Login:</dt>
+        <dd>{{ .staff.Uid }}</dd>
+        <dt>Display name:</dt>
+        <dd>{{ .staff.Name }}</dd>
+        <dt>Fullname:</dt>
+        <dd>{{ .staff.CommonName }}</dd>
+        <dt>Email:</dt>
+        <dd>{{ .staff.Email }}</dd>
+        <dt>Mobile:</dt>
+        <dd>{{ .staff.Mobile }}</dd>
+        <dt>Is keeper:</dt>
+        <dd>{{ if .ctx.User.IsKeeper }}Yes{{else}}No{{end}}</dd>
+      </dl>
+
+{{ end }}
+{{ define "tail" }}
+{{ end }}

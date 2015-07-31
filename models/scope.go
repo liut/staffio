@@ -1,4 +1,4 @@
-package backends
+package models
 
 type Scope struct {
 	Name        string

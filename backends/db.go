@@ -2,13 +2,20 @@ package backends
 
 import (
 	"database/sql"
+	"errors"
 	_ "github.com/lib/pq"
 	"log"
 	. "tuluu.com/liut/staffio/settings"
 )
 
 var (
-	dbc *sql.DB
+	dbError = errors.New("db error")
+	dbc     *sql.DB
+)
+
+const (
+	ASCENDING  = 1
+	DESCENDING = -1
 )
 
 func openDb() *sql.DB {
@@ -32,6 +39,16 @@ func getDb() *sql.DB {
 	return dbc
 }
 
+func withDbQuery(query func(db *sql.DB) error) error {
+	db := getDb()
+	defer db.Close()
+	if err := query(db); err != nil {
+		log.Printf("db query error: %s", err)
+		return dbError
+	}
+	return nil
+}
+
 func withTxQuery(query func(tx *sql.Tx) error) error {
 
 	db := getDb()
@@ -50,4 +67,13 @@ func withTxQuery(query func(tx *sql.Tx) error) error {
 	}
 	tx.Commit()
 	return nil
+}
+
+func inSortable(k string, fields []string) bool {
+	for _, sf := range fields {
+		if k == sf {
+			return true
+		}
+	}
+	return false
 }

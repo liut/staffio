@@ -19,8 +19,7 @@ func (u *User) IsKeeper() bool {
 	if u == nil {
 		return false
 	}
-	keeper := backends.GetGroup("keeper")
-	return keeper.Has(u.Uid)
+	return backends.InGroup("keeper", u.Uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {

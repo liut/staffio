@@ -29,7 +29,8 @@ func CloseAll() {
 	ldap.CloseAll()
 }
 
-func ListPaged(limit int) []*models.Staff {
+func LoadStaffs() []*models.Staff {
+	limit := 20
 	return ldap.ListPaged(limit)
 }
 
@@ -65,4 +66,9 @@ func PasswordChange(uid, passwordOld, passwordNew string) error {
 	}
 
 	return err
+}
+
+func InGroup(group, uid string) bool {
+	g := GetGroup(group)
+	return g.Has(uid)
 }

@@ -171,6 +171,42 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	return resp.InternalError
 }
 
+func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+	var (
+		limit  = 20
+		offset = 0
+		sort   = map[string]int{"id": backends.ASCENDING}
+	)
+	clients, err := backends.LoadClients(limit, offset, sort)
+	if err != nil {
+		return err
+	}
+	return T("clients.html").Execute(w, map[string]interface{}{
+		"ctx":     ctx,
+		"clients": clients,
+	})
+}
+
+func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+	scopes, err := backends.LoadScopes()
+	if err != nil {
+		return err
+	}
+	return T("scopes.html").Execute(w, map[string]interface{}{
+		"ctx":    ctx,
+		"scopes": scopes,
+	})
+	return nil
+}
+
 func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 
 	log.Printf("session Name: %s, Values: %v", ctx.Session.Name(), ctx.Session.Values)
@@ -182,12 +218,13 @@ func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error)
 	})
 }
 
-func contactListHandler(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+func contactsTable(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 	if ctx.User == nil {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
 	}
-	limit := 5
-	staffs := backends.ListPaged(limit)
+
+	staffs := backends.LoadStaffs()
 	models.ByUid.Sort(staffs)
 
 	return T("contact.html").Execute(w, map[string]interface{}{
@@ -260,6 +297,22 @@ func passwordChange(w http.ResponseWriter, req *http.Request, ctx *Context) erro
 	}
 
 	return outputJson(res, w)
+}
+
+func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
+	if ctx.User == nil {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+	staff, err := backends.GetStaff(ctx.User.Uid)
+	if err != nil {
+		return err
+	}
+
+	return T("profile.html").Execute(w, map[string]interface{}{
+		"ctx":   ctx,
+		"staff": staff,
+	})
 }
 
 func outputJson(res map[string]interface{}, w http.ResponseWriter) error {

@@ -162,7 +162,7 @@ func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
 		log.Printf("LDAP Search '%s' Error: ", uid, err)
 		return nil, err
 	}
-	log.Printf("LDAP Authen OK: %s", uid)
+
 	if len(sr.Entries) > 0 {
 		return entryToUser(sr.Entries[0]), nil
 	}

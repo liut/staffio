@@ -6,12 +6,13 @@ import (
 	"github.com/RangelReale/osin"
 	_ "github.com/lib/pq"
 	"log"
+	"strings"
 	"time"
 	"tuluu.com/liut/staffio/models"
 )
 
 var (
-	dbError = errors.New("db error")
+	clients_sortable_fields = []string{"id", "created"}
 )
 
 type DbStorage struct {
@@ -48,13 +49,6 @@ func (s *DbStorage) GetClient(id string) (osin.Client, error) {
 	}
 	return nil, errors.New("Client not found")
 }
-
-// func (s *DbStorage) SetClient(id string, client osin.Client) error {
-// 	log.Printf("SetClient: %s\n", id)
-// 	// unused
-// 	// s.clients[id] = client
-// 	return nil
-// }
 
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 	log.Printf("SaveAuthorize: '%s'\n", data.Code)
@@ -200,30 +194,107 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 
 func GetClientWithCode(code string) (*models.Client, error) {
 	c := new(models.Client)
-	err := getDb().QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
-		code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.Created)
-	if err == nil {
-		return c, nil
+	qs := func(db *sql.DB) error {
+		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
+			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.Created)
 	}
-	log.Printf("GetClientWithCode ERROR: %s", err)
-	return nil, dbError
+	if err := withDbQuery(qs); err != nil {
+		log.Printf("GetClientWithCode ERROR: %s", err)
+		return nil, err
+	}
+	return c, nil
 }
 
-func LoadScopes() (scopes []*Scope, err error) {
-	scopes = make([]*Scope, 0)
-	rows, err := getDb().Query("SELECT name, label, description, is_default FROM oauth_scope")
-	if err != nil {
-		log.Fatalf("load scopes error: %s", err)
-		return
+func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Client, err error) {
+	if limit < 1 {
+		limit = 1
 	}
-	defer rows.Close()
-	for rows.Next() {
-		s := new(Scope)
-		err = rows.Scan(&s.Name, &s.Label, &s.Description, &s.IsDefault)
-		if err != nil {
-			log.Printf("rows scan error: %s", err)
+	if offset < 0 {
+		offset = 0
+	}
+
+	var orders []string
+	for k, v := range sort {
+		if inSortable(k, clients_sortable_fields) {
+			var o string
+			if v == ASCENDING {
+				o = "ASC"
+			} else {
+				o = "DESC"
+			}
+			orders = append(orders, k+" "+o)
 		}
-		scopes = append(scopes, s)
 	}
-	return scopes, rows.Err()
+
+	str := "SELECT id, name, code, secret, redirect_uri, created FROM oauth_client "
+
+	if len(orders) > 0 {
+		str = str + " ORDER BY " + strings.Join(orders, ",")
+	}
+
+	clients = make([]*models.Client, 0)
+	qs := func(db *sql.DB) error {
+		rows, err := db.Query(str)
+		if err != nil {
+			log.Fatalf("db query error: %s for sql %s", err, str)
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			c := new(models.Client)
+			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.Created)
+			if err != nil {
+				log.Printf("rows scan error: %s", err)
+				continue
+			}
+			clients = append(clients, c)
+		}
+		return rows.Err()
+	}
+
+	if err := withDbQuery(qs); err != nil {
+		return nil, err
+	}
+
+	return clients, nil
+}
+
+func CountClients() (total uint) {
+	qs := func(db *sql.DB) error {
+		return db.QueryRow("SELECT COUND(id) FROM oauth_client").Scan(&total)
+	}
+	withDbQuery(qs)
+	return
+}
+
+func SaveClient(id string, client *models.Client) error {
+	log.Printf("SetClient: %s\n", id)
+	return nil
+}
+
+func LoadScopes() (scopes []*models.Scope, err error) {
+	scopes = make([]*models.Scope, 0)
+	qs := func(db *sql.DB) error {
+		rows, err := getDb().Query("SELECT name, label, description, is_default FROM oauth_scope")
+		if err != nil {
+			log.Fatalf("load scopes error: %s", err)
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			s := new(models.Scope)
+			err = rows.Scan(&s.Name, &s.Label, &s.Description, &s.IsDefault)
+			if err != nil {
+				log.Printf("rows scan error: %s", err)
+			}
+			scopes = append(scopes, s)
+		}
+		return rows.Err()
+	}
+
+	if err := withDbQuery(qs); err != nil {
+		return nil, err
+	}
+
+	return scopes, nil
 }

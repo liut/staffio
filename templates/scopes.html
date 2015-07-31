@@ -1,0 +1,25 @@
+{{ define "title" }}Scopes{{ end }}
+{{ define "head" }}
+{{ end }}
+{{ define "content" }}
+
+      <table class="table">
+          <tr>
+              <th>name</th>
+              <th>label</th>
+              <th>description</th>
+              <th>default</th>
+          </tr>
+          {{ range .scopes }}
+          <tr>
+              <td>{{ .Name }}</td>
+              <td>{{ .Label }}</td>
+              <td>{{ .Description }}</td>
+              <td>{{ if .IsDefault }}Yes{{else}}No{{end}}</td>
+          </tr>
+          {{ end }}
+      </table>
+
+{{ end }}
+{{ define "tail" }}
+{{ end }}

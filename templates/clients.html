@@ -1,0 +1,31 @@
+{{ define "title" }}Clients{{ end }}
+{{ define "head" }}
+{{ end }}
+{{ define "content" }}
+
+      <table class="table">
+          <tr>
+              <th>name</th>
+              <th>client_id</th>
+              <th>client_secret</th>
+              <th>redirect_uri</th>
+              <th>grant_types</th>
+              <th>response_types</th>
+              <th>scopes</th>
+          </tr>
+          {{ range .clients }}
+          <tr>
+              <td>{{ .Name }}</td>
+              <td>{{ .Code }}</td>
+              <td>{{ .Secret }}</td>
+              <td>{{ .RedirectUri }}</td>
+              <td>{{ .AllowedGrantTypes }}</td>
+              <td>{{ .AllowedResponseTypes }}</td>
+              <td>{{ .AllowedScopes }}</td>
+          </tr>
+          {{ end }}
+      </table>
+
+{{ end }}
+{{ define "tail" }}
+{{ end }}
