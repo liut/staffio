@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	store              sessions.Store
+	store              *sessions.CookieStore
 	router             *mux.Router
 	resUrl             string
 	jsonRequestHeaders = []string{
@@ -61,6 +61,8 @@ func MainRouter() *mux.Router {
 	server = osin.NewServer(NewServerConfig(), backends.NewStorage())
 
 	store = sessions.NewCookieStore([]byte(Settings.Session.Name))
+	store.Options.MaxAge = Settings.Session.MaxAge
+	store.Options.Domain = Settings.Session.Domain
 
 	router = mux.NewRouter()
 

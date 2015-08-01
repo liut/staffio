@@ -29,13 +29,15 @@ type config struct {
 		Name   string
 		Domain string
 		Secret string
+		MaxAge int // cookie maxAge
 	} `ini:"sess"`
 
-	HttpListen string
-	ResUrl     string
-	Backend    struct{ DSN string }
-	Root       string
-	Debug      bool
+	HttpListen   string
+	ResUrl       string
+	Backend      struct{ DSN string }
+	Root         string
+	Debug        bool
+	UserLifetime int // secends, user online time
 }
 
 var (
@@ -66,6 +68,8 @@ func init() {
 	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
+	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*30, "session cookie life time (in seconds)")
+	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")

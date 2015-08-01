@@ -54,5 +54,6 @@ dist-tight:
 	mkdir -p dist-tight/linux/amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux/amd64/staffio ./staffio-tight
 
 docker-build-tight:
+	strip dist-tight/linux/amd64/staffio
 	docker build --rm -t lcgc/staffio:tight -f staffio-tight/Dockerfile .
 

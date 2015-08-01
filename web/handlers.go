@@ -241,7 +241,7 @@ func loginForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 
 func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 	uid, password := req.FormValue("username"), req.FormValue("password")
-	log.Printf("accept: %v (%d)", req.Header["Accept"], len(req.Header["Accept"]))
+	// log.Printf("accept: %v (%d)", req.Header["Accept"], len(req.Header["Accept"]))
 	res := make(osin.ResponseData)
 	if !backends.Authenticate(uid, password) {
 		// ctx.Session.AddFlash("Invalid Username/Password")
@@ -259,8 +259,10 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 	}
 
 	//store the user id in the values and redirect to welcome
-	ctx.Session.Values["user"] = UserFromStaff(staff)
-	ctx.Session.Values["last_uid"] = staff.Uid
+	user := UserFromStaff(staff)
+	user.Refresh()
+	ctx.Session.Values[kUserOL] = user
+	ctx.Session.Values[kLastUid] = staff.Uid
 
 	res["ok"] = true
 	res["referer"] = ctx.Referer
@@ -269,7 +271,7 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 }
 
 func logout(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	delete(ctx.Session.Values, "user")
+	delete(ctx.Session.Values, kUserOL)
 	http.Redirect(w, req, reverse("welcome"), http.StatusSeeOther)
 	return nil
 }
@@ -347,6 +349,8 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	ctx.afterHandle()
 
 	//save the session
 	if err = ctx.Session.Save(req, buf); err != nil {

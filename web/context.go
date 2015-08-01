@@ -6,25 +6,8 @@ import (
 	"log"
 	"net/http"
 	"tuluu.com/liut/staffio/backends"
-	"tuluu.com/liut/staffio/models"
 	. "tuluu.com/liut/staffio/settings"
 )
-
-type User struct {
-	Uid  string `json:"uid"`
-	Name string `json:"name"`
-}
-
-func (u *User) IsKeeper() bool {
-	if u == nil {
-		return false
-	}
-	return backends.InGroup("keeper", u.Uid)
-}
-
-func UserFromStaff(staff *models.Staff) *User {
-	return &User{staff.Uid, staff.Name()}
-}
 
 type Context struct {
 	Session   *sessions.Session
@@ -35,9 +18,22 @@ type Context struct {
 	Referer   string
 }
 
+func (c *Context) afterHandle() {
+	if c.User != nil {
+		if !c.User.IsExpired() {
+			c.User.Refresh()
+		}
+	}
+}
+
 func (c *Context) Close() {
 	backends.CloseAll()
 }
+
+const (
+	kLastUid = "lu"
+	kUserOL  = "user"
+)
 
 func NewContext(req *http.Request) (*Context, error) {
 	sess, err := store.Get(req, Settings.Session.Name)
@@ -47,10 +43,10 @@ func NewContext(req *http.Request) (*Context, error) {
 		lastUid string
 		user    *User
 	)
-	if v, ok := sess.Values["last_uid"]; ok {
+	if v, ok := sess.Values[kLastUid]; ok {
 		lastUid = v.(string)
 	}
-	if v, ok := sess.Values["user"]; ok {
+	if v, ok := sess.Values[kUserOL]; ok {
 		user = v.(*User)
 	}
 	referer := req.FormValue("referer")
