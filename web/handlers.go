@@ -353,10 +353,12 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx.afterHandle()
 
 	//save the session
-	if err = ctx.Session.Save(req, buf); err != nil {
-		log.Printf("session.save error: %s", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if len(ctx.Session.Values) > 0 { // session not empty only
+		if err = ctx.Session.Save(req, buf); err != nil {
+			log.Printf("session.save error: %s", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	//apply the buffered response to the writer
