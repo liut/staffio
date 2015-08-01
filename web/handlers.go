@@ -209,8 +209,10 @@ func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err err
 
 func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 
-	log.Printf("session Name: %s, Values: %v", ctx.Session.Name(), ctx.Session.Values)
-	log.Printf("ctx User %v", ctx.User)
+	if Settings.Debug {
+		log.Printf("session Name: %s, Values: %v", ctx.Session.Name(), ctx.Session.Values)
+		log.Printf("ctx User %v", ctx.User)
+	}
 
 	//execute the template
 	return T("welcome.html").Execute(w, map[string]interface{}{
