@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	dbError = errors.New("db error")
+	dbError = errors.New("database error")
 	dbc     *sql.DB
 )
 
@@ -24,6 +24,15 @@ func openDb() *sql.DB {
 		log.Fatalf("open db error: %s", err)
 	}
 	return db
+}
+
+func closeDb() {
+	if dbc != nil {
+		err := dbc.Close()
+		if err != nil {
+			log.Printf("closing db error: %s", err)
+		}
+	}
 }
 
 func getDb() *sql.DB {
@@ -41,7 +50,7 @@ func getDb() *sql.DB {
 
 func withDbQuery(query func(db *sql.DB) error) error {
 	db := getDb()
-	defer db.Close()
+	// defer db.Close()
 	if err := query(db); err != nil {
 		log.Printf("db query error: %s", err)
 		return dbError
@@ -52,7 +61,7 @@ func withDbQuery(query func(db *sql.DB) error) error {
 func withTxQuery(query func(tx *sql.Tx) error) error {
 
 	db := getDb()
-	defer db.Close()
+	// defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {

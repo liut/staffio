@@ -1,8 +1,10 @@
 {{ define "title" }}Clients{{ end }}
 {{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/css/bootstrap-editable.css" rel="stylesheet">
 {{ end }}
 {{ define "content" }}
 
+    <h4>All clients:</h4>
       <table class="table">
           <tr>
               <th>name</th>
@@ -12,20 +14,126 @@
               <th>grant_types</th>
               <th>response_types</th>
               <th>scopes</th>
+              <th>created</th>
           </tr>
           {{ range .clients }}
           <tr>
-              <td>{{ .Name }}</td>
+              <td><span class="editable" data-name="name" data-type="text" data-pk="{{ .Code }}" data-title="Enter name">{{ .Name }}</span></td>
               <td>{{ .Code }}</td>
-              <td>{{ .Secret }}</td>
-              <td>{{ .RedirectUri }}</td>
+              <td><span class="editable" data-name="secret" data-type="text" data-pk="{{ .Secret }}" data-title="Enter a new secret">{{ .Secret }}</span></td>
+              <td><span class="editable" data-name="redirect_uri" data-type="url" data-pk="{{ .Code }}" data-title="Enter a new url">{{ .RedirectUri }}</span></td>
               <td>{{ .AllowedGrantTypes }}</td>
               <td>{{ .AllowedResponseTypes }}</td>
               <td>{{ .AllowedScopes }}</td>
+              <td class="pretty" title="{{ .CreatedAt }}">{{ .CreatedAt }}</td>
           </tr>
           {{ end }}
       </table>
 
+<h4>Creating new client:</h4>
+<div style="width: 40%">
+    <div id="msg" class="alert" style="display:none;" role="alert"></div>
+    <table id="user" class="table table-bordered table-striped">
+        <tbody>
+            <tr>
+                <td width="40%">Name</td>
+                <td><a href="#" class="myeditable" id="new_name" data-type="text" data-name="name" data-original-title="Enter name"></a></td>
+            </tr>
+            <tr>
+                <td>Client ID (Unique)</td>
+                <td><a href="#" class="myeditable" data-type="text" data-name="code" data-original-title="Enter Client ID"></a></td>
+            </tr>
+            <tr>
+                <td>Client Secret</td>
+                <td><a href="#" class="myeditable" data-type="text" data-name="secret" data-original-title="Enter Client Secret"></a></td>
+            </tr>
+            <tr>
+                <td>Redirect URI</td>
+                <td><a href="#" class="myeditable" data-type="url" data-name="redirect_uri" data-original-title="Enter a URL for client"></a></td>
+            </tr>
+        </tbody>
+    </table>
+    <div>
+    <button id="save-btn" class="btn btn-primary">Save new!</button>
+    <button id="reset-btn" class="btn pull-right">Reset</button>
+    </div>
+</div>
 {{ end }}
 {{ define "tail" }}
+  <script src="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/js/bootstrap-editable.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
+  <script type="text/javascript">
+    var action_url = '{{ reverse "clients" }}'
+      jQuery(document).ready(function () {
+        $(".pretty").prettyDate();
+        // $.fn.editable.defaults.mode = 'inline';
+        $.fn.editable.defaults.url = action_url;
+        $('.editable').editable();
+        // TODO: add selectable allows
+
+           //init editables
+   $('.myeditable').editable({
+      url: action_url,
+      placement: 'right'
+   });
+
+   //make name required
+   $('#new_name').editable('option', 'validate', function(v) {
+       if(!v) return 'Required field!';
+   });
+
+   //automatically show next editable
+   $('.myeditable').on('save.newuser', function(){
+       var that = this;
+       setTimeout(function() {
+           $(that).closest('tr').next().find('.myeditable').editable('show');
+       }, 200);
+   });
+
+   //create new user
+   $('#save-btn').click(function() {
+       $('.myeditable').editable('submit', {
+           url: action_url + '?op=new',
+           ajaxOptions: {
+               dataType: 'json' //assuming json response
+           },
+           success: function(res, config) {console.log && console.log(res)
+               if(res && res.id) {  //record created, response like {"id": 2}
+                   //set pk
+                   $(this).editable('option', 'pk', res.id);
+                   //remove unsaved class
+                   $(this).removeClass('editable-unsaved');
+                   //show messages
+                   var msg = 'New client created! Now editables submit individually.';
+                   $('#msg').addClass('alert-success').removeClass('alert-danger').html(msg).show();
+                   $('#save-btn').hide();
+                   $(this).off('save.newuser');
+               } else if(res && res.error){
+                   //server-side validation error, response like {"error": {"username": "username already exist"} }
+                   config.error.call(this, res.error);
+               }
+           },
+           error: function(error) {
+               var msg = '';
+               if(error && error.message) { //ajax error, error = xhr object
+                   msg = error.message;
+               } else { //validation error (client-side or server-side)
+                   $.each(error, function(k, v) { msg += k+": "+v+"<br>"; });
+               }
+               $('#msg').removeClass('alert-success').addClass('alert-danger').html(msg).show();
+           }
+       });
+   });
+
+   //reset
+   $('#reset-btn').click(function() {
+       $('.myeditable').editable('setValue', null)
+                       .editable('option', 'pk', null)
+                       .removeClass('editable-unsaved');
+
+       $('#save-btn').show();
+       $('#msg').hide();
+   });
+      });
+  </script>
 {{ end }}

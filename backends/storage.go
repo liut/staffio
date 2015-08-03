@@ -129,10 +129,10 @@ func (s *DbStorage) RemoveAuthorize(code string) error {
 func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
 	s.logf("SaveAccess: '%s'\n", data.AccessToken)
 	qs := func(tx *sql.Tx) error {
-		sql := `INSERT INTO
+		str := `INSERT INTO
 		 oauth_access_token(client_id, username, access_token, refresh_token, expires_in, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7);`
-		r, err := tx.Exec(sql, data.Client.GetId(), data.UserData.(string),
+		r, err := tx.Exec(str, data.Client.GetId(), data.UserData.(string),
 			data.AccessToken, data.RefreshToken, data.ExpiresIn, data.Scope, data.CreatedAt)
 		if err != nil {
 			return err
@@ -181,8 +181,8 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 func (s *DbStorage) RemoveAccess(code string) error {
 	s.logf("RemoveAccess: %s\n", code)
 	qs := func(tx *sql.Tx) error {
-		sql := `DELETE FROM oauth_access_token WHERE access_token = $1;`
-		r, err := tx.Exec(sql, code)
+		str := `DELETE FROM oauth_access_token WHERE access_token = $1;`
+		r, err := tx.Exec(str, code)
 		if err != nil {
 			return err
 		}
@@ -212,7 +212,7 @@ func GetClientWithCode(code string) (*models.Client, error) {
 	c := new(models.Client)
 	qs := func(db *sql.DB) error {
 		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
-			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.Created)
+			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
 	}
 	if err := withDbQuery(qs); err != nil {
 		log.Printf("GetClientWithCode ERROR: %s", err)
@@ -258,7 +258,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 		defer rows.Close()
 		for rows.Next() {
 			c := new(models.Client)
-			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.Created)
+			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
 			if err != nil {
 				log.Printf("rows scan error: %s", err)
 				continue
@@ -283,9 +283,30 @@ func CountClients() (total uint) {
 	return
 }
 
-func SaveClient(id string, client *models.Client) error {
-	log.Printf("SetClient: %s\n", id)
-	return nil
+func SaveClient(client *models.Client) error {
+	log.Printf("SaveClient: id %d code %s", client.Id, client.Code)
+	qs := func(tx *sql.Tx) error {
+		var err error
+		if client.Id > 0 {
+			str := `UPDATE oauth_client SET name = $1, code = $2, secret = $3, redirect_uri = $4
+			 WHERE id = $5`
+			var r sql.Result
+			r, err = tx.Exec(str, client.Name, client.Code, client.Secret, client.RedirectUri, client.Id)
+			log.Printf("UPDATE client result: %v", r)
+		} else {
+			str := `INSERT INTO
+		 oauth_client(name, code, secret, redirect_uri, created)
+		 VALUES($1, $2, $3, $4, $5) RETURNING id;`
+			err = tx.QueryRow(str,
+				client.Name,
+				client.Code,
+				client.Secret,
+				client.RedirectUri,
+				client.CreatedAt).Scan(&client.Id)
+		}
+		return err
+	}
+	return withTxQuery(qs)
 }
 
 func LoadScopes() (scopes []*models.Scope, err error) {

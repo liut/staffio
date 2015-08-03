@@ -11,7 +11,7 @@ type Client struct {
 	Secret               string
 	RedirectUri          string
 	UserData             interface{}
-	Created              time.Time `json:"created,omitempty"`
+	CreatedAt            time.Time `json:"created,omitempty"`
 	AllowedGrantTypes    []string
 	AllowedResponseTypes []string
 	AllowedScopes        []string
@@ -31,4 +31,14 @@ func (c *Client) GetRedirectUri() string {
 
 func (c *Client) GetUserData() interface{} {
 	return c.UserData
+}
+
+func NewClient(name, code, secret, redirectUri string) *Client {
+	return &Client{
+		Name:        name,
+		Code:        code,
+		Secret:      secret,
+		RedirectUri: redirectUri,
+		CreatedAt:   time.Now(),
+	}
 }

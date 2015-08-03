@@ -26,6 +26,7 @@ func Prepare() {
 }
 
 func CloseAll() {
+	closeDb()
 	ldap.CloseAll()
 }
 

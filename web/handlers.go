@@ -191,6 +191,77 @@ func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 	})
 }
 
+func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+	res := make(osin.ResponseData)
+
+	var (
+		client *models.Client
+	)
+
+	if req.FormValue("op") == "new" {
+		// create new client
+		client = models.NewClient(
+			req.PostFormValue("name"),
+			req.PostFormValue("code"),
+			req.PostFormValue("secret"),
+			req.PostFormValue("redirect_uri"))
+		// log.Printf("new client: %v", client)
+		_, e := backends.GetClientWithCode(client.Code) // check exists
+		if e == nil {
+			res["ok"] = false
+			res["error"] = map[string]string{"message": "duplicate client_id"}
+			return outputJson(res, w)
+		}
+
+	} else {
+
+		pk, name, value := req.PostFormValue("pk"), req.PostFormValue("name"), req.PostFormValue("value")
+		log.Printf("clientsPost: pk %s, name %s, value %s", pk, name, value)
+		if pk == "" {
+			res["ok"] = false
+			res["error"] = map[string]string{"message": "pk is empty"}
+			return outputJson(res, w)
+		}
+		// id, err := strconv.ParseUint(pk, 10, 32)
+		client, err = backends.GetClientWithCode(pk)
+		if err != nil {
+			res["ok"] = false
+			res["error"] = map[string]string{"message": "pk is invalid or not found"}
+			return outputJson(res, w)
+		}
+		switch name {
+		case "name":
+			client.Name = value
+		case "secret":
+			client.Secret = value
+		case "redirect_uri":
+			client.RedirectUri = value
+		default:
+			log.Printf("invalid filed: %s", name)
+		}
+	}
+
+	if client != nil {
+		err = backends.SaveClient(client)
+		if err != nil {
+			res["ok"] = false
+			res["error"] = map[string]string{"message": err.Error()}
+			return outputJson(res, w)
+		}
+		res["ok"] = true
+		res["id"] = client.Id
+		return outputJson(res, w)
+	}
+
+	res["ok"] = false
+	res["error"] = map[string]string{"message": "invalid operation"}
+	return outputJson(res, w)
+}
+
 func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 	if ctx.User == nil || !ctx.User.IsKeeper() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
