@@ -210,7 +210,7 @@ func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err err
 func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 
 	if Settings.Debug {
-		log.Printf("session Name: %s, Values: %v", ctx.Session.Name(), ctx.Session.Values)
+		log.Printf("session Name: %s, Values: %d", ctx.Session.Name(), len(ctx.Session.Values))
 		log.Printf("ctx User %v", ctx.User)
 	}
 
@@ -317,6 +317,32 @@ func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 		"ctx":   ctx,
 		"staff": staff,
 	})
+}
+
+func profilePost(w http.ResponseWriter, req *http.Request, ctx *Context) error {
+	if ctx.User == nil {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+	res := make(osin.ResponseData)
+	// filed, value := req.PostFormValue("name"), req.PostFormValue("value")
+	values := make(map[string]string)
+	for input, field := range models.ProfileEditables {
+		value := req.PostFormValue(input)
+		if value != "" {
+			values[field] = value
+		}
+	}
+	password := req.PostFormValue("password")
+	err := backends.ProfileModify(ctx.User.Uid, password, values)
+	if err != nil {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": err.Error(), "field": "password"}
+	} else {
+		res["ok"] = true
+	}
+
+	return outputJson(res, w)
 }
 
 func outputJson(res map[string]interface{}, w http.ResponseWriter) error {

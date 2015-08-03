@@ -73,6 +73,7 @@ func MainRouter() *mux.Router {
 	router.Handle("/password", handler(passwordChange)).Methods("POST").Headers(jsonRequestHeaders...)
 
 	router.Handle("/profile", handler(profileForm)).Methods("GET").Name("profile")
+	router.Handle("/profile", handler(profilePost)).Methods("POST").Headers(jsonRequestHeaders...)
 
 	router.Handle("/contacts", handler(contactsTable)).Methods("GET")
 

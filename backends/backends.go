@@ -72,3 +72,8 @@ func InGroup(group, uid string) bool {
 	g := GetGroup(group)
 	return g.Has(uid)
 }
+
+func ProfileModify(uid, password string, values map[string]string) error {
+	// values["cn"] = fmt.Sprintf("%s%s", values["sn"], values["givenName"])
+	return ldap.Modify(uid, password, values)
+}

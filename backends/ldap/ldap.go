@@ -30,6 +30,7 @@ var (
 	defaultFilter     = "(objectclass=inetOrgPerson)"
 	AuthenSource      []*LdapSource
 	ErrLogin          = errors.New("049: Invalid Username/Password")
+	ErrNotFound       = errors.New("Not Found")
 )
 
 // Add a new source (LDAP directory) to the global pool
@@ -145,28 +146,38 @@ func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
 	return nil
 }
 
-// GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
-func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
-	err := ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err != nil {
-		return nil, err
-	}
+func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
-		ls.UDN(uid),
+		udn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		ls.Filter,
 		ls.Attributes,
 		nil)
 	sr, err := ls.c.Search(search)
 	if err != nil {
-		log.Printf("LDAP Search '%s' Error: ", uid, err)
+		log.Printf("LDAP Search '%s' Error: ", udn, err)
 		return nil, err
 	}
 
 	if len(sr.Entries) > 0 {
-		return entryToUser(sr.Entries[0]), nil
+		return sr.Entries[0], nil
 	}
-	return nil, nil
+	return nil, ErrNotFound
+}
+
+// GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
+func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
+	err := ls.Bind(ls.BindDN, ls.Passwd, false)
+	if err != nil {
+		return nil, err
+	}
+
+	entry, err := ls.getEntry(ls.UDN(uid))
+	if err != nil {
+		return nil, err
+	}
+
+	return entryToUser(entry), nil
 }
 
 func (ls *LdapSource) ListPaged(limit int) (staffs []*models.Staff) {
@@ -206,13 +217,14 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	// log.Printf("entry: %v", entry)
 	u = new(models.Staff)
 	u.Uid = entry.GetAttributeValue("uid")
-	u.SurName = entry.GetAttributeValue("sn")
+	u.Surname = entry.GetAttributeValue("sn")
 	u.GivenName = entry.GetAttributeValue("givenName")
 	u.CommonName = entry.GetAttributeValue("cn")
 	u.Email = entry.GetAttributeValue("mail")
-	u.DisplayName = entry.GetAttributeValue("displayName")
+	u.Nickname = entry.GetAttributeValue("displayName")
 	u.Mobile = entry.GetAttributeValue("mobile")
 	u.EmployeeNumber = entry.GetAttributeValue("employeeNumber")
+	u.EmployeeType = entry.GetAttributeValue("employeeType")
 	u.Description = entry.GetAttributeValue("description")
 	return
 }

@@ -9,6 +9,15 @@ var (
 	ByUid = By(func(p1, p2 *Staff) bool {
 		return p1.Uid < p2.Uid
 	})
+	ProfileEditables = map[string]string{
+		"nickname":       "displayName",
+		"commonName":     "cn",
+		"givenName":      "givenName",
+		"surname":        "sn",
+		"email":          "mail",
+		"mobile":         "mobile",
+		"employeeNumber": "employeeNumber",
+	}
 )
 
 type Staff struct {
@@ -16,8 +25,8 @@ type Staff struct {
 	Passwd         string
 	CommonName     string // 全名
 	GivenName      string // 名
-	SurName        string // 姓
-	DisplayName    string // 昵称
+	Surname        string // 姓
+	Nickname       string // 昵称
 	Email          string
 	Mobile         string
 	EmployeeNumber string
@@ -26,16 +35,16 @@ type Staff struct {
 }
 
 func (u *Staff) Name() string {
-	if u.DisplayName != "" {
-		return u.DisplayName
+	if u.Nickname != "" {
+		return u.Nickname
 	}
 
 	if u.CommonName != "" {
 		return u.CommonName
 	}
 
-	if u.SurName != "" && u.GivenName != "" {
-		return u.SurName + u.GivenName
+	if u.Surname != "" && u.GivenName != "" {
+		return u.Surname + u.GivenName
 	}
 
 	return u.Uid

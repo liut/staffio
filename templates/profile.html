@@ -1,23 +1,126 @@
 {{ define "title" }}Profile{{ end }}
 {{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+
 {{ end }}
 {{ define "content" }}
 
-      <dl class="dl-horizontal">
-        <dt>Login:</dt>
-        <dd>{{ .staff.Uid }}</dd>
-        <dt>Display name:</dt>
-        <dd>{{ .staff.Name }}</dd>
-        <dt>Fullname:</dt>
-        <dd>{{ .staff.CommonName }}</dd>
-        <dt>Email:</dt>
-        <dd>{{ .staff.Email }}</dd>
-        <dt>Mobile:</dt>
-        <dd>{{ .staff.Mobile }}</dd>
-        <dt>Is keeper:</dt>
-        <dd>{{ if .ctx.User.IsKeeper }}Yes{{else}}No{{end}}</dd>
-      </dl>
+  <form class="form-horizontal" id="form1" method="post" action="/profile">
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Login</label>
+        <div class="col-xs-5">
+            {{ .staff.Uid }} ({{ .staff.EmployeeNumber }})
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Nickname</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="nickname" value="{{ .staff.Nickname }}" placeholder="Nickname" required />
+        </div>
+    </div>
+
+      <div class="form-group">
+        <label class="col-xs-3 control-label">Full name</label>
+        <div class="col-xs-3">
+            <input type="text" class="form-control" name="surname" placeholder="Surname" value="{{ .staff.Surname }}" required />
+        </div>
+        <div class="col-xs-3">
+            <input type="text" class="form-control" name="givenName" placeholder="Given name" value="{{ .staff.GivenName }}" required />
+        </div>
+      </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Email address</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="email" value="{{ .staff.Email }}" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Mobile number</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="mobile" value="{{ .staff.Mobile }}" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Password</label>
+        <div class="col-xs-6">
+            <input id="password" name="password" type="password" class="form-control" value="" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-9 col-xs-offset-3">
+            <button type="submit" class="btn btn-primary"> Save </button>
+        </div>
+    </div>
+
+  </form>
 
 {{ end }}
 {{ define "tail" }}
+  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
+  <script type="text/javascript">
+      jQuery(document).ready(function () {
+
+        $('#form1')
+        .bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                password: {
+                    validators: {
+                        notEmpty: {
+                            message: 'The password is required and can\'t be empty'
+                        },
+                        callback: {
+                          callback: function(value, validator) {return true;}
+                        }
+                    }
+                }
+            }
+        })
+        .on('success.form.bv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the BootstrapValidator instance
+            var bv = $form.data('bootstrapValidator');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(res) {
+                // console.log(res);
+                if (!!res.ok) {
+                  Dust.alert('修改成功', 'OK', function(){
+                    // bv.resetForm(true);
+                    $("#password").val("")
+                    // $("#form1").get(0).reset();
+                  });
+                } else if (typeof res.error != "undefined") {
+                  var error = res.error
+                  if (typeof error.field === "string") {
+                    bv.updateMessage(error.field, 'callback', error.message);
+                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                    // Dust.alert(error.message);
+                  }
+                } else {
+                  alertAjaxResult(res);
+                }
+            }, 'json');
+            console.log(bv)
+        });
+
+      });
+  </script>
 {{ end }}
