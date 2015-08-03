@@ -7,6 +7,13 @@ ENV STAFFIO_HTTP_LISTEN ":80"
 ENV STAFFIO_ROOT "/app"
 ENV PGHOST "staffio-db"
 
+RUN apk --update add \
+  tzdata \
+  && cp /usr/share/zoneinfo/Hongkong /etc/localtime \
+  && echo "Hongkong" >  /etc/timezone \
+  && apk del tzdata \
+  && rm -rf /var/cache/apk/*
+
 RUN mkdir /app
 WORKDIR /app
 
