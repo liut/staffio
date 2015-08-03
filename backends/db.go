@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	dbError = errors.New("database error")
-	dbc     *sql.DB
+	dbError    = errors.New("database error")
+	valueError = errors.New("value error")
+	dbc        *sql.DB
 )
 
 const (

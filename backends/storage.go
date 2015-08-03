@@ -285,6 +285,9 @@ func CountClients() (total uint) {
 
 func SaveClient(client *models.Client) error {
 	log.Printf("SaveClient: id %d code %s", client.Id, client.Code)
+	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectUri == "" {
+		return valueError
+	}
 	qs := func(tx *sql.Tx) error {
 		var err error
 		if client.Id > 0 {

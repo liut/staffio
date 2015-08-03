@@ -41,11 +41,11 @@
             </tr>
             <tr>
                 <td>Client ID (Unique)</td>
-                <td><a href="#" class="myeditable" data-type="text" data-name="code" data-original-title="Enter Client ID"></a></td>
+                <td><a href="#" class="myeditable" id="new_code" data-type="select" data-name="code" data-original-title="Enter Client ID"></a></td>
             </tr>
             <tr>
                 <td>Client Secret</td>
-                <td><a href="#" class="myeditable" data-type="text" data-name="secret" data-original-title="Enter Client Secret"></a></td>
+                <td><a href="#" class="myeditable" id="new_secret" data-type="select" data-name="secret" data-original-title="Enter Client Secret"></a></td>
             </tr>
             <tr>
                 <td>Redirect URI</td>
@@ -62,8 +62,25 @@
 {{ define "tail" }}
   <script src="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/js/bootstrap-editable.min.js"></script>
   <script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/password.js"></script>
   <script type="text/javascript">
-    var action_url = '{{ reverse "clients" }}'
+    var action_url = '{{ reverse "clients" }}', code_cached = [], secret_cached = []
+    function regen_code () {
+      for (var i = 0; i < 10; i++) {
+        var p = Password.generate(8)
+        code_cached[i] = {value: p, text: p}
+      };
+    }
+    function regen_secret () {
+      for (var i = 0; i < 10; i++) {
+        var p = Password.generate(16)
+        secret_cached[i] = {value: p, text: p}
+      };
+    }
+
+    regen_code();
+    regen_secret();
+
       jQuery(document).ready(function () {
         $(".pretty").prettyDate();
         // $.fn.editable.defaults.mode = 'inline';
@@ -81,6 +98,9 @@
    $('#new_name').editable('option', 'validate', function(v) {
        if(!v) return 'Required field!';
    });
+
+   $('#new_code').editable('option', 'source', code_cached);
+   $('#new_secret').editable('option', 'source', secret_cached);
 
    //automatically show next editable
    $('.myeditable').on('save.newuser', function(){
@@ -108,6 +128,9 @@
                    $('#msg').addClass('alert-success').removeClass('alert-danger').html(msg).show();
                    $('#save-btn').hide();
                    $(this).off('save.newuser');
+                  regen_code();
+                  regen_secret();
+
                } else if(res && res.error){
                    //server-side validation error, response like {"error": {"username": "username already exist"} }
                    config.error.call(this, res.error);
