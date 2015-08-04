@@ -79,7 +79,7 @@ func withTxQuery(query func(tx *sql.Tx) error) error {
 	return nil
 }
 
-func inSortable(k string, fields []string) bool {
+func inArray(k string, fields []string) bool {
 	for _, sf := range fields {
 		if k == sf {
 			return true

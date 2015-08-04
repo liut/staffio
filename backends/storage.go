@@ -231,7 +231,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 
 	var orders []string
 	for k, v := range sort {
-		if inSortable(k, clients_sortable_fields) {
+		if inArray(k, clients_sortable_fields) {
 			var o string
 			if v == ASCENDING {
 				o = "ASC"
@@ -252,7 +252,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 	qs := func(db *sql.DB) error {
 		rows, err := db.Query(str)
 		if err != nil {
-			log.Fatalf("db query error: %s for sql %s", err, str)
+			log.Printf("db query error: %s for sql %s", err, str)
 			return err
 		}
 		defer rows.Close()
@@ -317,7 +317,7 @@ func LoadScopes() (scopes []*models.Scope, err error) {
 	qs := func(db *sql.DB) error {
 		rows, err := db.Query("SELECT name, label, description, is_default FROM oauth_scope")
 		if err != nil {
-			log.Fatalf("load scopes error: %s", err)
+			log.Printf("load scopes error: %s", err)
 			return err
 		}
 		defer rows.Close()
