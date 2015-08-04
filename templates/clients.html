@@ -67,13 +67,13 @@
     var action_url = '{{ reverse "clients" }}', code_cached = [], secret_cached = []
     function regen_code () {
       for (var i = 0; i < 10; i++) {
-        var p = Password.generate(8)
+        var p = Password.generate(12)
         code_cached[i] = {value: p, text: p}
       };
     }
     function regen_secret () {
       for (var i = 0; i < 10; i++) {
-        var p = Password.generate(16)
+        var p = Password.generate(20)
         secret_cached[i] = {value: p, text: p}
       };
     }
