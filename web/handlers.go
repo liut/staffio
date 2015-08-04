@@ -142,7 +142,6 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 
 	var (
 		uid   string
-		user  *User
 		topic = ctx.Vars["topic"]
 	)
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
