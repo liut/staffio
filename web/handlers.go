@@ -141,8 +141,9 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	defer resp.Close()
 
 	var (
-		uid  string
-		user *User
+		uid   string
+		user  *User
+		topic = ctx.Vars["topic"]
 	)
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
 		log.Printf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
@@ -152,7 +153,13 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 			resp.SetError("get_user_error", "staff not found")
 			resp.InternalError = err
 		} else {
-			user = UserFromStaff(staff)
+			switch topic {
+			case "me":
+				resp.Output["user"] = UserFromStaff(staff)
+			case "staff":
+				resp.Output["staff"] = staff
+			}
+
 		}
 		server.FinishInfoRequest(resp, r, ir)
 	}
@@ -161,9 +168,6 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		log.Printf("info ERROR: %s\n", resp.InternalError)
 	}
 	if !resp.IsError {
-		if user != nil {
-			resp.Output["user"] = user
-		}
 		resp.Output["uid"] = uid
 	}
 

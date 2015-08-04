@@ -314,7 +314,7 @@ func AppDemo(router *mux.Router) {
 		jr := make(map[string]interface{})
 
 		// build access code url
-		aurl := fmt.Sprintf("/info?code=%s", url.QueryEscape(code))
+		aurl := fmt.Sprintf("/info/me?code=%s", url.QueryEscape(code))
 
 		// download token
 		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),

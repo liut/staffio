@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/gob"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 )
 
 type Context struct {
+	Vars      map[string]string
 	Session   *sessions.Session
 	ResUrl    string
 	User      *User
@@ -54,6 +56,7 @@ func NewContext(req *http.Request) (*Context, error) {
 		referer = req.Referer()
 	}
 	ctx := &Context{
+		Vars:    mux.Vars(req),
 		Session: sess,
 		ResUrl:  Settings.ResUrl,
 		Referer: referer,

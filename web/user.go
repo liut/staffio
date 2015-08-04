@@ -10,7 +10,7 @@ import (
 type User struct {
 	Uid     string `json:"uid"`
 	Name    string `json:"name"`
-	LastHit int64  `json:"last_hit"`
+	LastHit int64  `json:"-"`
 }
 
 func (u *User) IsKeeper() bool {

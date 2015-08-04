@@ -79,7 +79,7 @@ func MainRouter() *mux.Router {
 
 	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
 	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")
-	router.Handle("/info", handler(oauthInfo)).Methods("GET", "POST").Name("info")
+	router.Handle("/info/{topic}", handler(oauthInfo)).Methods("GET", "POST").Name("info")
 
 	router.Handle("/dust/clients", handler(clientsForm)).Methods("GET").Name("clients")
 	router.Handle("/dust/clients", handler(clientsPost)).Methods("POST").Headers(jsonRequestHeaders...)
