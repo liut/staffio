@@ -5,16 +5,16 @@ import (
 )
 
 type Client struct {
-	Id                   uint `json:"_id,omitempty"`
-	Name                 string
-	Code                 string `json:"code,omitempty"`
-	Secret               string
-	RedirectUri          string
-	UserData             interface{}
-	CreatedAt            time.Time `json:"created,omitempty"`
-	AllowedGrantTypes    []string
-	AllowedResponseTypes []string
-	AllowedScopes        []string
+	Id                   uint        `json:"_id,omitempty"`
+	Name                 string      `json:"name"`
+	Code                 string      `json:"code,omitempty"`
+	Secret               string      `json:"-"`
+	RedirectUri          string      `json:"uri"`
+	UserData             interface{} `json:"-"`
+	CreatedAt            time.Time   `json:"created,omitempty"`
+	AllowedGrantTypes    []string    `json:"grant_types,omitempty"`
+	AllowedResponseTypes []string    `json:"response_types,omitempty"`
+	AllowedScopes        []string    `json:"scopes,omitempty"`
 }
 
 func (c *Client) GetId() string {

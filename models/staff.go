@@ -21,17 +21,17 @@ var (
 )
 
 type Staff struct {
-	Uid            string
-	Passwd         string
-	CommonName     string // 全名
-	GivenName      string // 名
-	Surname        string // 姓
-	Nickname       string // 昵称
-	Email          string
-	Mobile         string
-	EmployeeNumber string
-	EmployeeType   string
-	Description    string
+	Uid            string `json:"uid"`
+	Passwd         string `json:"-"`
+	CommonName     string `json:"cn,omitempty"`       // 全名
+	GivenName      string `json:"gn"`                 // 名
+	Surname        string `json:"sn"`                 // 姓
+	Nickname       string `json:"nickname,omitempty"` // 昵称
+	Email          string `json:"email"`
+	Mobile         string `json:"mobile"`
+	EmployeeNumber string `json:"eid,omitempty"`
+	EmployeeType   string `json:"etype,omitempty"`
+	Description    string `json:"description,omitempty"`
 }
 
 func (u *Staff) Name() string {

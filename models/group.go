@@ -1,8 +1,8 @@
 package models
 
 type Group struct {
-	Name    string
-	Members []string
+	Name    string   `json:"name"`
+	Members []string `json:"members"`
 }
 
 var (
