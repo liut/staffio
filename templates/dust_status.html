@@ -1,0 +1,56 @@
+{{ define "title" }}System Monitor{{ end }}
+{{ define "head" }}
+<style>
+.dl-horizontal dt {width: 240px;}
+.dl-horizontal dd {margin-left: 260px;}
+</style>
+{{ end }}
+{{ define "content" }}
+
+<div class="panel panel-radius">
+<div class="panel-header"><h3>System Monitor</h3></div>
+<div class="panel-body">
+<dl class="dl-horizontal admin-dl-horizontal">
+   <dt>server_uptime</dt> <dd>{{.SysStatus.Uptime}}</dd>
+   <dt>current_goroutine</dt> <dd>{{.SysStatus.NumGoroutine}}</dd>
+
+   <hr/>
+   <dt>current_memory_usage</dt> <dd>{{.SysStatus.MemAllocated}}</dd>
+   <dt>total_memory_allocated</dt> <dd>{{.SysStatus.MemTotal}}</dd>
+   <dt>memory_obtained</dt> <dd>{{.SysStatus.MemSys}}</dd>
+   <dt>pointer_lookup_times</dt> <dd>{{.SysStatus.Lookups}}</dd>
+   <dt>memory_allocate_times</dt> <dd>{{.SysStatus.MemMallocs}}</dd>
+   <dt>memory_free_times</dt> <dd>{{.SysStatus.MemFrees}}</dd>
+
+   <hr/>
+   <dt>current_heap_usage</dt> <dd>{{.SysStatus.HeapAlloc}}</dd>
+   <dt>heap_memory_obtained</dt> <dd>{{.SysStatus.HeapSys}}</dd>
+   <dt>heap_memory_idle</dt> <dd>{{.SysStatus.HeapIdle}}</dd>
+   <dt>heap_memory_in_use</dt> <dd>{{.SysStatus.HeapInuse}}</dd>
+   <dt>heap_memory_released</dt> <dd>{{.SysStatus.HeapReleased}}</dd>
+   <dt>heap_objects</dt> <dd>{{.SysStatus.HeapObjects}}</dd>
+
+   <hr/>
+   <dt>bootstrap_stack_usage</dt> <dd>{{.SysStatus.StackInuse}}</dd>
+   <dt>stack_memory_obtained</dt> <dd>{{.SysStatus.StackSys}}</dd>
+   <dt>mspan_structures_usage</dt> <dd>{{.SysStatus.MSpanInuse}}</dd>
+   <dt>mspan_structures_obtained</dt> <dd>{{.SysStatus.HeapSys}}</dd>
+   <dt>mcache_structures_usage</dt> <dd>{{.SysStatus.MCacheInuse}}</dd>
+   <dt>mcache_structures_obtained</dt> <dd>{{.SysStatus.MCacheSys}}</dd>
+   <dt>profiling_bucket_hash_table_obtained</dt> <dd>{{.SysStatus.BuckHashSys}}</dd>
+   <dt>gc_metadata_obtained</dt> <dd>{{.SysStatus.GCSys}}</dd>
+   <dt>other_system_allocation_obtained</dt> <dd>{{.SysStatus.OtherSys}}</dd>
+
+   <hr>
+   <dt>next_gc_recycle</dt> <dd>{{.SysStatus.NextGC}}</dd>
+   <dt>last_gc_time</dt> <dd>{{.SysStatus.LastGC}}</dd>
+   <dt>total_gc_pause</dt> <dd>{{.SysStatus.PauseTotalNs}}</dd>
+   <dt>last_gc_pause</dt> <dd>{{.SysStatus.PauseNs}}</dd>
+   <dt>gc_times</dt> <dd>{{.SysStatus.NumGC}}</dd>
+</dl>
+</div>
+</div>
+
+{{ end }}
+{{ define "tail" }}
+{{ end }}

@@ -17,7 +17,10 @@ func handleStatus(w http.ResponseWriter, req *http.Request, ctx *Context) (err e
 
 	switch ctx.Vars["topic"] {
 	case "monitor":
-		keeper.HandleMonitor(w, req)
+		return T("dust_status.html").Execute(w, map[string]interface{}{
+			"SysStatus": keeper.CurrentSystemStatus(),
+			"ctx":       ctx,
+		})
 	case "stacks":
 		keeper.HandleStack(w, req)
 	default:
