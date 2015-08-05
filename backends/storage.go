@@ -3,6 +3,7 @@ package backends
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/RangelReale/osin"
 	_ "github.com/lib/pq"
 	"log"
@@ -242,11 +243,15 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 		}
 	}
 
-	str := "SELECT id, name, code, secret, redirect_uri, created FROM oauth_client "
+	str := `SELECT id, name, code, secret, redirect_uri, created
+	  , allowed_grant_types, allowed_response_types, allowed_scopes
+	   FROM oauth_client `
 
 	if len(orders) > 0 {
 		str = str + " ORDER BY " + strings.Join(orders, ",")
 	}
+
+	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
 
 	clients = make([]*models.Client, 0)
 	qs := func(db *sql.DB) error {
@@ -258,11 +263,18 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 		defer rows.Close()
 		for rows.Next() {
 			c := new(models.Client)
-			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
+			var (
+				grandTypes, responseTypes, scopes string
+			)
+			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt,
+				&grandTypes, &responseTypes, &scopes)
 			if err != nil {
 				log.Printf("rows scan error: %s", err)
 				continue
 			}
+			c.AllowedGrantTypes = strings.Split(grandTypes, ",")
+			c.AllowedResponseTypes = strings.Split(responseTypes, ",")
+			c.AllowedScopes = strings.Split(scopes, ",")
 			clients = append(clients, c)
 		}
 		return rows.Err()
@@ -298,13 +310,15 @@ func SaveClient(client *models.Client) error {
 			log.Printf("UPDATE client result: %v", r)
 		} else {
 			str := `INSERT INTO
-		 oauth_client(name, code, secret, redirect_uri, created)
-		 VALUES($1, $2, $3, $4, $5) RETURNING id;`
+		 oauth_client(name, code, secret, redirect_uri, allowed_grant_types, allowed_scopes, created)
+		 VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
 			err = tx.QueryRow(str,
 				client.Name,
 				client.Code,
 				client.Secret,
 				client.RedirectUri,
+				strings.Join(client.AllowedGrantTypes, ","),
+				strings.Join(client.AllowedScopes, ","),
 				client.CreatedAt).Scan(&client.Id)
 		}
 		return err

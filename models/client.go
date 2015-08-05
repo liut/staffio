@@ -35,10 +35,12 @@ func (c *Client) GetUserData() interface{} {
 
 func NewClient(name, code, secret, redirectUri string) *Client {
 	return &Client{
-		Name:        name,
-		Code:        code,
-		Secret:      secret,
-		RedirectUri: redirectUri,
-		CreatedAt:   time.Now(),
+		Name:              name,
+		Code:              code,
+		Secret:            secret,
+		RedirectUri:       redirectUri,
+		CreatedAt:         time.Now(),
+		AllowedGrantTypes: []string{"code", "token"},
+		AllowedScopes:     []string{"basic"},
 	}
 }
