@@ -19,9 +19,8 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 	defer resp.Close()
 
 	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
-
-		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&state=%s&redirect_uri=%s",
-			ar.Type, ar.Client.GetId(), ar.State, url.QueryEscape(ar.RedirectUri))
+		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
+			ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
 		// HANDLE LOGIN PAGE HERE
 		if ctx.User == nil {
 			ctx.Referer = link
