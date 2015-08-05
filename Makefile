@@ -1,5 +1,5 @@
 .SILENT :
-.PHONY : staffio clean fmt
+.PHONY : staffio clean fmt dist-tight
 
 TAG:=`git describe --tags`
 LDFLAGS:=-X main.buildVersion $(TAG)
@@ -51,8 +51,10 @@ docker-build:
 	docker build --rm -t staffio .
 
 dist-tight:
+	echo "Building tight version"
 	rm -rf dist-tight
-	mkdir -p dist-tight/linux/amd64 && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux/amd64/staffio -a -installsuffix nocgo ./staffio-tight
+	mkdir -p dist-tight/linux/amd64
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux/amd64/staffio -a -installsuffix nocgo ./staffio-tight
 
 docker-build-tight:
 	strip dist-tight/linux/amd64/staffio
