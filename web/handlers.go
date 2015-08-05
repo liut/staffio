@@ -60,6 +60,7 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 	// 	resp.Output["uid"] = ctx.User.Uid
 	// }
 
+	debugf("oauthAuthorize resp: %v", resp)
 	osin.OutputJSON(resp, w, r)
 	return resp.InternalError
 }
