@@ -74,6 +74,7 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 		user *User
 	)
 	if ar := server.HandleAccessRequest(resp, r); ar != nil {
+		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
 			uid = ar.UserData.(string)
@@ -130,6 +131,8 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 
 	}
 
+	debugf("oauthToken resp: %v", resp)
+
 	osin.OutputJSON(resp, w, r)
 	return resp.InternalError
 }
@@ -144,7 +147,7 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		topic = ctx.Vars["topic"]
 	)
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
-		log.Printf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
+		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
 		uid = ir.AccessData.UserData.(string)
 		staff, err := backends.GetStaff(uid)
 		if err != nil {
@@ -464,4 +467,10 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	//apply the buffered response to the writer
 	buf.Apply(w)
+}
+
+func debugf(format string, args ...interface{}) {
+	if Settings.Debug {
+		log.Printf(format, args...)
+	}
 }
