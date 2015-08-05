@@ -84,6 +84,7 @@ func MainRouter() *mux.Router {
 	router.Handle("/dust/clients", handler(clientsForm)).Methods("GET").Name("clients")
 	router.Handle("/dust/clients", handler(clientsPost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/dust/scopes", handler(scopesForm)).Methods("GET", "POST").Name("scopes")
+	router.Handle("/dust/_status/{topic:[a-z]+}{ext:(.json|.html|)}", handler(handleStatus)).Methods("GET").Name("status")
 
 	router.Handle("/", handler(welcome)).Name("welcome")
 
