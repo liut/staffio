@@ -40,7 +40,7 @@ func NewClient(name, code, secret, redirectUri string) *Client {
 		Secret:            secret,
 		RedirectUri:       redirectUri,
 		CreatedAt:         time.Now(),
-		AllowedGrantTypes: []string{"code", "token"},
+		AllowedGrantTypes: []string{"authorization_code", "refresh_token"},
 		AllowedScopes:     []string{"basic"},
 	}
 }
