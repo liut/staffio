@@ -1,7 +1,6 @@
 package backends
 
 import (
-	"fmt"
 	"log"
 	"tuluu.com/liut/staffio/backends/ldap"
 	"tuluu.com/liut/staffio/models"
@@ -16,8 +15,9 @@ func Prepare() {
 	if backendReady {
 		return
 	}
-	addr := fmt.Sprintf("%s:%d", Settings.LDAP.Host, Settings.LDAP.Port)
-	ls := ldap.AddSource(addr, Settings.LDAP.Base)
+
+	ls := ldap.AddSource(Settings.LDAP.Host, Settings.LDAP.Base)
+
 	ls.BindDN = Settings.LDAP.BindDN
 	ls.Passwd = Settings.LDAP.Password
 	ls.Debug = Settings.Debug

@@ -1,10 +1,12 @@
 package ldap
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap"
 	"log"
+	"net/url"
 	"tuluu.com/liut/staffio/models"
 )
 
@@ -38,8 +40,34 @@ func AddSource(addr, base string) *LdapSource {
 	if base == "" {
 		log.Fatal("ldap base is empty")
 	}
+
+	u, err := url.Parse(addr)
+	if err != nil {
+		log.Fatalf("parse LDAP Host ERR: %s", err)
+	}
+
+	if u.Host == "" && u.Path != "" {
+		u.Host = u.Path
+		u.Path = ""
+	}
+
+	var useSSL bool
+	if u.Scheme == "ldaps" {
+		useSSL = true
+	}
+
+	pos := last(u.Host, ':')
+	if pos < 0 {
+		if useSSL {
+			u.Host = u.Host + ":636"
+		} else {
+			u.Host = u.Host + ":389"
+		}
+	}
+
 	ls := &LdapSource{
-		Addr:       addr,
+		Addr:       u.Host,
+		UseSSL:     useSSL,
 		Base:       base,
 		Filter:     defaultFilter,
 		Attributes: defaultAttributes,
@@ -63,7 +91,7 @@ func (ls *LdapSource) dial() (*ldap.Conn, error) {
 
 	var err error
 	if ls.UseSSL {
-		ls.c, err = ldap.DialTLS("tcp", ls.Addr, nil)
+		ls.c, err = ldap.DialTLS("tcp", ls.Addr, &tls.Config{InsecureSkipVerify: true})
 	} else {
 		ls.c, err = ldap.Dial("tcp", ls.Addr)
 	}
@@ -227,4 +255,15 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	u.EmployeeType = entry.GetAttributeValue("employeeType")
 	u.Description = entry.GetAttributeValue("description")
 	return
+}
+
+// Index of rightmost occurrence of b in s.
+func last(s string, b byte) int {
+	i := len(s)
+	for i--; i >= 0; i-- {
+		if s[i] == b {
+			break
+		}
+	}
+	return i
 }
