@@ -4,12 +4,13 @@
 {{ end }}
 
 {{ define "content" }}
+{{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
 <table class="table table-striped">
 	<tr>
 		<th>Uid</th>
 		<th>CN</th>
 		<th>Email</th>
-		<!-- <th>Mobile</th> -->
+		{{if $isKeeper }}<th>Mobile</th>{{ end }}
 		<th>Nickname</th>
 	</tr>
 	{{ range .staffs }}
@@ -17,7 +18,7 @@
 		<td>{{ .Uid }}</td>
 		<td>{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
-		<!-- <td>{{ .Mobile }}</td> -->
+		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
 		<td>{{ .Name }}</td>
 	</tr>
 	{{ end }}
