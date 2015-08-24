@@ -2,7 +2,7 @@
 .PHONY : staffio clean fmt dist-tight
 
 TAG:=`git describe --tags`
-LDFLAGS:=-X main.buildVersion $(TAG)
+LDFLAGS:=-X main.buildVersion=$(TAG)
 
 all: staffio
 
