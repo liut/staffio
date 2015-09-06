@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS oauth_client
 	UNIQUE (code),
 	PRIMARY KEY (id)
 );
--- INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://localhost:3000/appauth', '{}', now());
 
 CREATE TABLE IF NOT EXISTS oauth_access_token
 (
@@ -59,10 +58,6 @@ CREATE TABLE IF NOT EXISTS oauth_scope
 	PRIMARY KEY (id)
 );
 
-/*
-INSERT INTO oauth_scope(name,label,description,is_default) VALUES('basic', 'Basic', 'Read your Uid (login name)', true);
-INSERT INTO oauth_scope(name,label,description) VALUES('user_info', 'Personal Information', 'Read your GivenName, Surname, Email, etc.');
-*/
 
 
 
