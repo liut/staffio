@@ -2,7 +2,6 @@ package webfatso
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/mux"
@@ -384,7 +383,7 @@ func DownloadAccessToken(url string, auth *osin.BasicAuth, output map[string]int
 	}
 
 	if presp.StatusCode != 200 {
-		return errors.New("Invalid status code")
+		return fmt.Errorf("Invalid status code: %d", presp.StatusCode)
 	}
 
 	jdec := json.NewDecoder(presp.Body)

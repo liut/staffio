@@ -91,6 +91,7 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 			ar.Authorized = true
 		case osin.PASSWORD:
 			if Settings.HttpListen == "localhost:3000" && ar.Username == "test" && ar.Password == "test" {
+				ar.UserData = "test"
 				ar.Authorized = true
 				break
 			}
@@ -125,6 +126,7 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 	if !resp.IsError {
 		if uid != "" {
 			resp.Output["uid"] = uid
+			resp.Output["is_keeper"] = IsKeeper(uid)
 		}
 		if user != nil {
 			resp.Output["user"] = user
@@ -157,7 +159,7 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		} else {
 			switch topic {
 			case "me":
-				resp.Output["user"] = UserFromStaff(staff)
+				resp.Output["user"] = staff
 			case "staff":
 				resp.Output["staff"] = staff
 			}

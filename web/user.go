@@ -17,7 +17,7 @@ func (u *User) IsKeeper() bool {
 	if u == nil {
 		return false
 	}
-	return backends.InGroup("keeper", u.Uid)
+	return IsKeeper(u.Uid)
 }
 
 func (u *User) IsExpired() bool {
@@ -31,6 +31,10 @@ func (u *User) IsExpired() bool {
 // refresh lastHit to time Unix
 func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
+}
+
+func IsKeeper(uid string) bool {
+	return backends.InGroup("keeper", uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {

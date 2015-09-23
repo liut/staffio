@@ -56,7 +56,7 @@ func (u *Staff) String() string {
 		return name
 	}
 
-	return fmt.Sprintf("%s (%s)", u.Name(), u.Uid)
+	return fmt.Sprintf("%s (%s)", name, u.Uid)
 }
 
 // By is the type of a "less" function that defines the ordering of its Staff arguments.
