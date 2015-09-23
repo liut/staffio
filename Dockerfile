@@ -25,4 +25,4 @@ ADD templates /app/templates
 EXPOSE 80
 
 # ENTRYPOINT ["/usr/bin/staffio"]
-CMD /usr/bin/staffio
+CMD ["/usr/bin/staffio"]
