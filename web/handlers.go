@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"tuluu.com/liut/staffio/backends"
 	"tuluu.com/liut/staffio/models"
 	. "tuluu.com/liut/staffio/settings"
@@ -145,22 +146,25 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 	resp := server.NewResponse()
 	defer resp.Close()
 
-	var (
-		uid   string
-		topic = ctx.Vars["topic"]
-	)
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
 		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
+		var (
+			uid   string
+			topic = ctx.Vars["topic"]
+		)
 		uid = ir.AccessData.UserData.(string)
 		staff, err := backends.GetStaff(uid)
 		if err != nil {
 			resp.SetError("get_user_error", "staff not found")
 			resp.InternalError = err
 		} else {
-			switch topic {
-			case "me":
-				resp.Output["user"] = staff
-			case "staff":
+			resp.Output["uid"] = uid
+			if strings.HasPrefix(topic, "me") {
+				resp.Output["me"] = staff
+				if len(topic) > 2 && strings.Index(topic, "+") == 2 {
+					// TODO: search group topic[2:]
+				}
+			} else if topic == "staff" {
 				resp.Output["staff"] = staff
 			}
 
@@ -170,9 +174,6 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 
 	if resp.IsError && resp.InternalError != nil {
 		log.Printf("info ERROR: %s\n", resp.InternalError)
-	}
-	if !resp.IsError {
-		resp.Output["uid"] = uid
 	}
 
 	osin.OutputJSON(resp, w, r)

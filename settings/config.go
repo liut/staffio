@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	VERSION = "0.0.11"
-)
-
 type config struct {
 	Name    string
 	Version string
