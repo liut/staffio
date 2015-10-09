@@ -441,7 +441,10 @@ func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
 type handler func(http.ResponseWriter, *http.Request, *Context) error
 
 func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//create the context
+	w.Header().Set("Expires", "Fri, 02 Oct 1998 20:00:00 GMT")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate")
+
 	ctx, err := NewContext(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
