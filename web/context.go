@@ -18,6 +18,7 @@ type Context struct {
 	LastUid   string
 	NavSimple bool
 	Referer   string
+	Version   string
 }
 
 func (c *Context) afterHandle() {
@@ -60,6 +61,7 @@ func NewContext(req *http.Request) (*Context, error) {
 		Session: sess,
 		ResUrl:  Settings.ResUrl,
 		Referer: referer,
+		Version: VERSION,
 		LastUid: lastUid,
 		User:    user,
 	}
