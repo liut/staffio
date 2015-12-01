@@ -181,7 +181,7 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 }
 
 func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || !ctx.User.IsKeeper() {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
@@ -201,7 +201,7 @@ func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 }
 
 func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || !ctx.User.IsKeeper() {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
@@ -272,7 +272,7 @@ func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 }
 
 func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || !ctx.User.IsKeeper() {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
@@ -301,7 +301,7 @@ func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error)
 }
 
 func contactsTable(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil {
+	if ctx.User == nil || ctx.User.IsExpired() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
@@ -384,7 +384,7 @@ func passwordChange(w http.ResponseWriter, req *http.Request, ctx *Context) erro
 }
 
 func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	if ctx.User == nil {
+	if ctx.User == nil || ctx.User.IsExpired() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
@@ -400,7 +400,7 @@ func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 }
 
 func profilePost(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	if ctx.User == nil {
+	if ctx.User == nil || ctx.User.IsExpired() {
 		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
 		return nil
 	}
