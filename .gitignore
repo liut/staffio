@@ -27,3 +27,4 @@ _testmain.go
 staffio
 dist/
 *.tar.gz
+/webfatso/htdocs/static/*
