@@ -30,6 +30,7 @@ type config struct {
 	HttpListen   string
 	ResUrl       string
 	Backend      struct{ DSN string }
+	SentryDSN    string
 	Root         string
 	Debug        bool
 	UserLifetime int // secends, user online time
@@ -65,6 +66,7 @@ func init() {
 	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
+	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
 	fs.BoolVar(&Settings.Debug, "debug", false, "app in debug mode")
 	fs.BoolVar(&printVersion, "version", false, "Print the version and exit")

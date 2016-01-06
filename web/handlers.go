@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/RangelReale/osin"
+	"github.com/getsentry/raven-go"
 	"github.com/goods/httpbuf"
 	"log"
 	"net/http"
@@ -447,6 +448,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	ctx, err := NewContext(req)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -456,6 +458,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	buf := new(httpbuf.Buffer)
 	err = h(buf, req, ctx)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Printf("call handler error: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

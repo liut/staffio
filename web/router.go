@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"github.com/RangelReale/osin"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"log"
@@ -56,6 +57,11 @@ func MainRouter() *mux.Router {
 
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	Settings.Parse()
+
+	if Settings.SentryDSN != "" {
+		raven.SetDSN(Settings.SentryDSN)
+	}
+
 	resUrl = Settings.ResUrl
 	backends.Prepare()
 	server = osin.NewServer(NewServerConfig(), backends.NewStorage())
