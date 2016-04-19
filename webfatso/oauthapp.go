@@ -3,11 +3,13 @@ package webfatso
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RangelReale/osin"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/url"
-	. "tuluu.com/liut/staffio/settings"
+
+	"github.com/RangelReale/osin"
+	"github.com/gorilla/mux"
+
+	. "lcgc/platform/staffio/settings"
 )
 
 // addr = localhost:3000

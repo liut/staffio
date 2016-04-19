@@ -3,16 +3,18 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RangelReale/osin"
-	"github.com/getsentry/raven-go"
-	"github.com/goods/httpbuf"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
-	"tuluu.com/liut/staffio/backends"
-	"tuluu.com/liut/staffio/models"
-	. "tuluu.com/liut/staffio/settings"
+
+	"github.com/RangelReale/osin"
+	"github.com/getsentry/raven-go"
+	"github.com/goods/httpbuf"
+
+	"lcgc/platform/staffio/backends"
+	"lcgc/platform/staffio/models"
+	. "lcgc/platform/staffio/settings"
 )
 
 // Authorization code endpoint

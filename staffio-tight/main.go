@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
-	. "tuluu.com/liut/staffio/settings"
-	_ "tuluu.com/liut/staffio/staffio-tight/statik"
-	"tuluu.com/liut/staffio/web"
+
+	"github.com/rakyll/statik/fs"
+
+	. "lcgc/platform/staffio/settings"
+	_ "lcgc/platform/staffio/staffio-tight/statik"
+	"lcgc/platform/staffio/web"
 )
 
 func main() {

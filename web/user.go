@@ -2,9 +2,10 @@ package web
 
 import (
 	"time"
-	"tuluu.com/liut/staffio/backends"
-	"tuluu.com/liut/staffio/models"
-	. "tuluu.com/liut/staffio/settings"
+
+	"lcgc/platform/staffio/backends"
+	"lcgc/platform/staffio/models"
+	. "lcgc/platform/staffio/settings"
 )
 
 type User struct {

@@ -3,9 +3,11 @@ package backends
 import (
 	"database/sql"
 	"errors"
-	_ "github.com/lib/pq"
 	"log"
-	. "tuluu.com/liut/staffio/settings"
+
+	_ "github.com/lib/pq"
+
+	. "lcgc/platform/staffio/settings"
 )
 
 var (

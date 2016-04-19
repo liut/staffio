@@ -2,12 +2,14 @@ package web
 
 import (
 	"encoding/gob"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
-	"tuluu.com/liut/staffio/backends"
-	. "tuluu.com/liut/staffio/settings"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+
+	"lcgc/platform/staffio/backends"
+	. "lcgc/platform/staffio/settings"
 )
 
 type Context struct {
@@ -61,7 +63,7 @@ func NewContext(req *http.Request) (*Context, error) {
 		Session: sess,
 		ResUrl:  Settings.ResUrl,
 		Referer: referer,
-		Version: VERSION,
+		Version: Settings.Version,
 		LastUid: lastUid,
 		User:    user,
 	}

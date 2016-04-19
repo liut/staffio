@@ -5,7 +5,8 @@ import (
 	"html/template"
 	"path/filepath"
 	"sync"
-	. "tuluu.com/liut/staffio/settings"
+
+	. "lcgc/platform/staffio/settings"
 )
 
 var (

@@ -2,10 +2,12 @@ package ldap
 
 import (
 	"fmt"
-	"github.com/go-ldap/ldap"
 	"log"
 	"strings"
-	"tuluu.com/liut/staffio/models"
+
+	"github.com/go-ldap/ldap"
+
+	"lcgc/platform/staffio/models"
 )
 
 var (

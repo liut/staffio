@@ -1,11 +1,13 @@
 package webfatso
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/rakyll/statik/fs"
 	"log"
 	"net/http"
-	_ "tuluu.com/liut/staffio/webfatso/statik"
+
+	"github.com/gorilla/mux"
+	"github.com/rakyll/statik/fs"
+
+	_ "lcgc/platform/staffio/webfatso/statik"
 )
 
 func ServStatic(router *mux.Router) {

@@ -4,10 +4,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/go-ldap/ldap"
 	"log"
 	"net/url"
-	"tuluu.com/liut/staffio/models"
+
+	"github.com/go-ldap/ldap"
+
+	"lcgc/platform/staffio/models"
 )
 
 // Basic LDAP authentication service

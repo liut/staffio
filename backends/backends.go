@@ -2,9 +2,10 @@ package backends
 
 import (
 	"log"
-	"tuluu.com/liut/staffio/backends/ldap"
-	"tuluu.com/liut/staffio/models"
-	. "tuluu.com/liut/staffio/settings"
+
+	"lcgc/platform/staffio/backends/ldap"
+	"lcgc/platform/staffio/models"
+	. "lcgc/platform/staffio/settings"
 )
 
 var (

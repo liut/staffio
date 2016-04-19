@@ -3,8 +3,9 @@ package web
 import (
 	"fmt"
 	"net/http"
-	"tuluu.com/liut/keeper"
-	. "tuluu.com/liut/staffio/settings"
+
+	"lcgc/liut/keeper"
+	. "lcgc/platform/staffio/settings"
 )
 
 func handleStatus(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {

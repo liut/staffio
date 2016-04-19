@@ -1,13 +1,13 @@
-FROM alpine:3.2
+FROM alpine:3.3
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV VERSION v0.1.2
-ENV DOWNLOAD_URL https://github.com/liut/staffio/releases/download/$VERSION/staffio-linux-amd64-$VERSION.tar.gz
+ENV VERSION v0.1.4
+ENV DOWNLOAD_URL https://github.com/liut/staffio/releases/download/$VERSION/staffio-linux-amd64-$VERSION.tar.xz
 
 RUN apk add --virtual build-dependencies --update \
   curl \
   ca-certificates \
-  && curl -L $DOWNLOAD_URL | tar xvz -C /usr/bin \
+  && curl -L $DOWNLOAD_URL | tar Jxv -C /usr/bin \
   && apk del build-dependencies \
   && rm -rf /var/cache/apk/*
 

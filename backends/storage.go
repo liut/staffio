@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/RangelReale/osin"
-	_ "github.com/lib/pq"
 	"log"
 	"strings"
 	"time"
-	"tuluu.com/liut/staffio/models"
-	. "tuluu.com/liut/staffio/settings"
+
+	"github.com/RangelReale/osin"
+	_ "github.com/lib/pq"
+
+	"lcgc/platform/staffio/models"
+	. "lcgc/platform/staffio/settings"
 )
 
 var (

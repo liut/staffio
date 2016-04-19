@@ -2,8 +2,9 @@ package ldap
 
 import (
 	"fmt"
-	"github.com/go-ldap/ldap"
 	"log"
+
+	"github.com/go-ldap/ldap"
 )
 
 func Modify(uid, password string, values map[string]string) (err error) {

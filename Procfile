@@ -1,1 +1,1 @@
-staffio: rerun --build tuluu.com/liut/staffio
+staffio: rerun --build lcgc/platform/staffio

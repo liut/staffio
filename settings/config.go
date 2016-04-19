@@ -46,7 +46,7 @@ var (
 
 func init() {
 	Settings.Name = "staffio"
-	Settings.Version = VERSION
+	Settings.Version = buildVersion
 	// Settings.HttpListen = "localhost:3000"
 	// Settings.ResUrl = "/static/"
 	// Settings.LDAP.Host = "localhost"

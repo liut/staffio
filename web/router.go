@@ -2,14 +2,16 @@ package web
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/RangelReale/osin"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-	"log"
-	"net/http"
-	"tuluu.com/liut/staffio/backends"
-	. "tuluu.com/liut/staffio/settings"
+
+	"lcgc/platform/staffio/backends"
+	. "lcgc/platform/staffio/settings"
 )
 
 var (

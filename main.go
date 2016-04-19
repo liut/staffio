@@ -5,9 +5,10 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	. "tuluu.com/liut/staffio/settings"
-	"tuluu.com/liut/staffio/web"
-	"tuluu.com/liut/staffio/webfatso"
+
+	. "lcgc/platform/staffio/settings"
+	"lcgc/platform/staffio/web"
+	"lcgc/platform/staffio/webfatso"
 )
 
 func main() {

@@ -1,43 +1,38 @@
 .SILENT :
-.PHONY : staffio clean fmt dist-tight
+.PHONY : main clean gofmt dist-tight
+DATE := `date '+%Y%m%d'`
 
-TAG:=`git describe --tags`
-LDFLAGS:=-X main.buildVersion=$(TAG)
+NAME:=staffio
+ROOF:=lcgc/platform/$(NAME)
+TAG:=`git describe --tags --always`
+LDFLAGS:=-X $(ROOF)/settings.buildVersion=$(TAG)-$(DATE)
 
-all: staffio
-
-staffio:
-	echo "Building staffio"
+main:
+	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)"
 
-dist-clean:
+all: main dist dist-tight release
+
+clean:
 	rm -rf dist dist-tight
-	rm -f staffio-linux-*.tar.gz
-	rm -f staffio-darwin-*.tar.gz
+	rm -f $(NAME) $(NAME)-*.?z
 
-dist: dist-clean
-	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux/amd64/staffio
-	# mkdir -p dist/linux/i386  && GOOS=linux GOARCH=386 go build -ldflags "$(LDFLAGS)" -o dist/linux/i386/staffio
-	# mkdir -p dist/linux/armel  && GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "$(LDFLAGS)" -o dist/linux/armel/staffio
-	# mkdir -p dist/linux/armhf  && GOOS=linux GOARCH=arm GOARM=6 go build -ldflags "$(LDFLAGS)" -o dist/linux/armhf/staffio
-	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/staffio
-	# mkdir -p dist/darwin/i386  && GOOS=darwin GOARCH=386 go build -ldflags "$(LDFLAGS)" -o dist/darwin/i386/staffio
-
+dist: clean
+	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)
+	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)
 
 release: dist
-	# glock sync -n < GLOCKFILE
-	tar -cvzf staffio-linux-amd64-$(TAG).tar.gz -C dist/linux/amd64 staffio
-	# tar -cvzf staffio-linux-i386-$(TAG).tar.gz -C dist/linux/i386 staffio
-	# tar -cvzf staffio-linux-armel-$(TAG).tar.gz -C dist/linux/armel staffio
-	# tar -cvzf staffio-linux-armhf-$(TAG).tar.gz -C dist/linux/armhf staffio
-	tar -cvzf staffio-darwin-amd64-$(TAG).tar.gz -C dist/darwin/amd64 staffio
-	# tar -cvzf staffio-darwin-i386-$(TAG).tar.gz -C dist/darwin/i386 staffio
+	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
+	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
+
+release-clean:
+	rm -f *.tar.xz
 
 get-deps:
 	go get github.com/robfig/glock
 	glock sync -n < GLOCKFILE
 
-check-gofmt:
+gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \
 		echo 1>&2 'The following files need to be formatted:'; \
 		gofmt -l .; \
@@ -48,15 +43,15 @@ test:
 	go test
 
 docker-build:
-	docker build --rm -t staffio .
+	docker build --rm -t $(NAME) .
 
 dist-tight:
 	echo "Building tight version"
 	rm -rf dist-tight
-	mkdir -p dist-tight/linux/amd64
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux/amd64/staffio -a -installsuffix nocgo ./staffio-tight
+	mkdir -p dist-tight/linux_amd64
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux_amd64/$(NAME) -a -installsuffix nocgo ./staffio-tight
 
 docker-build-tight:
-	strip dist-tight/linux/amd64/staffio
-	docker build --rm -t lcgc/staffio:tight -f staffio-tight/Dockerfile .
+	strip dist-tight/linux/amd64/$(NAME)
+	docker build --rm -t lcgc/$(NAME):tight -f staffio-tight/Dockerfile .
 
