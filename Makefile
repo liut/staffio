@@ -52,6 +52,6 @@ dist-tight:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux_amd64/$(NAME) -a -installsuffix nocgo ./staffio-tight
 
 docker-build-tight:
-	strip dist-tight/linux/amd64/$(NAME)
+	strip dist-tight/linux_amd64/$(NAME)
 	docker build --rm -t lcgc/$(NAME):tight -f staffio-tight/Dockerfile .
 

@@ -14,10 +14,14 @@ RUN apk --update add \
   && apk del tzdata \
   && rm -rf /var/cache/apk/*
 
+RUN apk add --update \
+	ca-certificates \
+	&& rm -rf /var/cache/apk/*
+
 RUN mkdir /app
 WORKDIR /app
 
-ADD dist-tight/linux/amd64/staffio /usr/bin/
+ADD dist-tight/linux_amd64/staffio /usr/bin/
 
 ADD templates /app/templates
 
