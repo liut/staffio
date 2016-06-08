@@ -7,6 +7,7 @@
 {{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
 <table class="table table-striped">
 	<tr>
+		<th>No</th>
 		<th>Uid</th>
 		<th>CN</th>
 		<th>Email</th>
@@ -15,7 +16,10 @@
 	</tr>
 	{{ range .staffs }}
 	<tr>
-		<td>{{ .Uid }}</td>
+		<td class="text-right">{{ .EmployeeNumber }}</td>
+		<td>{{ .Uid }}{{if $isKeeper }}
+		<a href="/staff/{{ .Uid }}"><i class="glyphicon glyphicon-pencil"></i></a>
+		{{ end }}</td>
 		<td>{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
 		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
@@ -23,6 +27,10 @@
 	</tr>
 	{{ end }}
 </table>
+
+	{{if $isKeeper }}<div>
+	<a class="btn btn-default" href="/staff/new" role="button">New Staff</a>
+	</div>{{ end }}
 {{ end }}
 
 {{ define "tail" }}

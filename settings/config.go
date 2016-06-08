@@ -10,6 +10,16 @@ type config struct {
 	Name    string
 	Version string
 
+	EmailDomain string
+
+	SMTP struct {
+		Host           string
+		Port           int
+		SenderName     string
+		SenderEmail    string
+		SenderPassword string
+	}
+
 	LDAP struct {
 		Host     string
 		Base     string
@@ -60,6 +70,12 @@ func init() {
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
+	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")
+	fs.StringVar(&Settings.SMTP.Host, "smtp-host", "", "")
+	fs.IntVar(&Settings.SMTP.Port, "smtp-port", 465, "")
+	fs.StringVar(&Settings.SMTP.SenderName, "smtp-sender-name", "Notification", "")
+	fs.StringVar(&Settings.SMTP.SenderEmail, "smtp-sender-email", "", "")
+	fs.StringVar(&Settings.SMTP.SenderPassword, "smtp-sender-password", "", "")
 	fs.BoolVar(&Settings.Debug, "debug", false, "app in debug mode")
 
 }

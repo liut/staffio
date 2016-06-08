@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"path/filepath"
 	"sync"
 
@@ -26,6 +27,7 @@ func reverse(name string, things ...interface{}) string {
 	//grab the route
 	u, err := router.GetRoute(name).URL(strs...)
 	if err != nil {
+		log.Printf("GetRoute err %s", err)
 		return "/" + name
 		// panic(err)
 	}

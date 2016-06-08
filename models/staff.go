@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	// "fmt"
 	"sort"
 )
 
@@ -20,6 +20,17 @@ var (
 	}
 )
 
+func NewStaff(uid, cn, email string) *Staff {
+	sn, gn := SplitName(cn)
+	return &Staff{
+		Uid:        uid,
+		CommonName: cn,
+		Surname:    sn,
+		GivenName:  gn,
+		Email:      email,
+	}
+}
+
 type Staff struct {
 	Uid            string `json:"uid"`
 	Passwd         string `json:"-"`
@@ -27,6 +38,7 @@ type Staff struct {
 	GivenName      string `json:"gn"`                 // 名
 	Surname        string `json:"sn"`                 // 姓
 	Nickname       string `json:"nickname,omitempty"` // 昵称
+	Gender         Gender `json:"gender"`
 	Email          string `json:"email"`
 	Mobile         string `json:"mobile"`
 	EmployeeNumber string `json:"eid,omitempty"`
@@ -50,14 +62,14 @@ func (u *Staff) Name() string {
 	return u.Uid
 }
 
-func (u *Staff) String() string {
-	name := u.Name()
-	if name == u.Uid {
-		return name
-	}
+// func (u *Staff) String() string {
+// 	name := u.Name()
+// 	if name == u.Uid {
+// 		return name
+// 	}
 
-	return fmt.Sprintf("%s (%s)", name, u.Uid)
-}
+// 	return fmt.Sprintf("%s (%s)", name, u.Uid)
+// }
 
 // By is the type of a "less" function that defines the ordering of its Staff arguments.
 type By func(p1, p2 *Staff) bool

@@ -185,6 +185,9 @@ func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
 		nil)
 	sr, err := ls.c.Search(search)
 	if err != nil {
+		if le, ok := err.(*ldap.Error); ok && le.ResultCode == ldap.LDAPResultNoSuchObject {
+			return nil, ErrNotFound
+		}
 		log.Printf("LDAP Search '%s' Error: ", udn, err)
 		return nil, err
 	}

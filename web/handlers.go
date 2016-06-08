@@ -5,183 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/RangelReale/osin"
 	"github.com/getsentry/raven-go"
 	"github.com/goods/httpbuf"
 
 	"lcgc/platform/staffio/backends"
+	"lcgc/platform/staffio/backends/exmail"
 	"lcgc/platform/staffio/models"
 	. "lcgc/platform/staffio/settings"
 )
-
-// Authorization code endpoint
-func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
-	resp := server.NewResponse()
-	defer resp.Close()
-
-	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
-		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
-			ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
-		// HANDLE LOGIN PAGE HERE
-		if ctx.User == nil {
-			ctx.Referer = link
-			return loginForm(w, r, ctx)
-			// resp.SetRedirect(reverse("login") + "?referer=" + reverse("authorize"))
-		} else {
-			if r.Method == "GET" {
-				scopes, err := backends.LoadScopes()
-				if err != nil {
-					return err
-				}
-				return T("authorize.html").Execute(w, map[string]interface{}{
-					"link":          link,
-					"response_type": ar.Type,
-					"scopes":        scopes,
-					"client":        ar.Client.(*models.Client),
-					"ctx":           ctx,
-				})
-			}
-
-			if r.PostForm.Get("authorize") == "1" {
-				ar.UserData = ctx.User.Uid
-				ar.Authorized = true
-				server.FinishAuthorizeRequest(resp, r, ar)
-			} else {
-				resp.SetRedirect(reverse("welcome"))
-			}
-
-		}
-
-	}
-
-	if resp.IsError && resp.InternalError != nil {
-		log.Printf("authorize ERROR: %s\n", resp.InternalError)
-	}
-	// if !resp.IsError {
-	// 	resp.Output["uid"] = ctx.User.Uid
-	// }
-
-	debugf("oauthAuthorize resp: %v", resp)
-	osin.OutputJSON(resp, w, r)
-	return resp.InternalError
-}
-
-// Access token endpoint
-func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
-	resp := server.NewResponse()
-	defer resp.Close()
-
-	var (
-		uid  string = ""
-		user *User
-	)
-	if ar := server.HandleAccessRequest(resp, r); ar != nil {
-		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
-		switch ar.Type {
-		case osin.AUTHORIZATION_CODE:
-			uid = ar.UserData.(string)
-			staff, err := backends.GetStaff(uid)
-			if err != nil {
-				resp.SetError("get_user_error", "staff not found")
-				resp.InternalError = err
-			} else {
-				user = UserFromStaff(staff)
-			}
-			ar.Authorized = true
-		case osin.REFRESH_TOKEN:
-			ar.Authorized = true
-		case osin.PASSWORD:
-			if Settings.HttpListen == "localhost:3000" && ar.Username == "test" && ar.Password == "test" {
-				ar.UserData = "test"
-				ar.Authorized = true
-				break
-			}
-
-			if !backends.Authenticate(ar.Username, ar.Password) {
-				resp.SetError("authentication_failed", err.Error())
-				break
-			}
-			staff, err := backends.GetStaff(ar.Username)
-			if err != nil {
-				// resp.InternalError = err
-				resp.SetError("get_user_failed", err.Error())
-				break
-			}
-			ar.Authorized = true
-			ar.UserData = staff.Uid
-			user = UserFromStaff(staff)
-
-		case osin.CLIENT_CREDENTIALS:
-			ar.Authorized = true
-		case osin.ASSERTION:
-			if ar.AssertionType == "urn:osin.example.complete" && ar.Assertion == "osin.data" {
-				ar.Authorized = true
-			}
-		}
-		server.FinishAccessRequest(resp, r, ar)
-	}
-
-	if resp.IsError && resp.InternalError != nil {
-		log.Printf("token ERROR: %s\n", resp.InternalError)
-	}
-	if !resp.IsError {
-		if uid != "" {
-			resp.Output["uid"] = uid
-			resp.Output["is_keeper"] = IsKeeper(uid)
-		}
-		if user != nil {
-			resp.Output["user"] = user
-		}
-
-	}
-
-	debugf("oauthToken resp: %v", resp)
-
-	osin.OutputJSON(resp, w, r)
-	return resp.InternalError
-}
-
-// Information endpoint
-func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
-	resp := server.NewResponse()
-	defer resp.Close()
-
-	if ir := server.HandleInfoRequest(resp, r); ir != nil {
-		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
-		var (
-			uid   string
-			topic = ctx.Vars["topic"]
-		)
-		uid = ir.AccessData.UserData.(string)
-		staff, err := backends.GetStaff(uid)
-		if err != nil {
-			resp.SetError("get_user_error", "staff not found")
-			resp.InternalError = err
-		} else {
-			resp.Output["uid"] = uid
-			if strings.HasPrefix(topic, "me") {
-				resp.Output["me"] = staff
-				if len(topic) > 2 && strings.Index(topic, "+") == 2 {
-					// TODO: search group topic[2:]
-				}
-			} else if topic == "staff" {
-				resp.Output["staff"] = staff
-			}
-
-		}
-		server.FinishInfoRequest(resp, r, ir)
-	}
-
-	if resp.IsError && resp.InternalError != nil {
-		log.Printf("info ERROR: %s\n", resp.InternalError)
-	}
-
-	osin.OutputJSON(resp, w, r)
-	return resp.InternalError
-}
 
 func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
@@ -205,7 +38,7 @@ func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 
 func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
 	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		http.Redirect(w, req, reverse("login"), http.StatusFound)
 		return nil
 	}
 	res := make(osin.ResponseData)
@@ -316,6 +149,110 @@ func contactsTable(w http.ResponseWriter, req *http.Request, ctx *Context) (err 
 		"staffs": staffs,
 		"ctx":    ctx,
 	})
+}
+
+func staffForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+		return nil
+	}
+
+	var (
+		inEdit bool
+		uid    = ctx.Vars["uid"]
+		staff  *models.Staff
+		data   = map[string]interface{}{
+			"ctx": ctx,
+		}
+	)
+
+	if uid != "" && uid != "new" {
+		inEdit = true
+		staff, err = backends.GetStaff(uid)
+		if err != nil {
+			return
+		}
+		data["staff"] = staff
+	}
+	data["inEdit"] = inEdit
+	return T("staff_edit.html").Execute(w, data)
+}
+
+func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusFound)
+		return
+	}
+
+	var (
+		uid           = ctx.Vars["uid"]
+		estaff, staff *models.Staff
+		res           = make(osin.ResponseData)
+		op            = req.FormValue("op")
+	)
+	if uid == "" || uid == "new" {
+		uid = req.PostFormValue("uid")
+	}
+
+	if uid == "" || uid == "new" {
+		return fmt.Errorf("empty uid")
+	} else {
+		estaff, err = backends.GetStaff(uid)
+		if err != nil {
+			log.Printf("backends.GetStaff err %s", err)
+			estaff = nil
+		}
+	}
+
+	email := uid + "@" + Settings.EmailDomain
+	if op == "fetch-exmail" && uid != "" {
+		staff, err = exmail.GetStaff(email)
+		if err != nil {
+			log.Printf("GetStaff err %s", err)
+			return err
+		}
+		log.Print(staff)
+		if estaff != nil {
+			staff.CommonName = estaff.CommonName
+			staff.Surname = estaff.Surname
+			staff.GivenName = estaff.GivenName
+			staff.Gender = estaff.Gender
+			staff.Nickname = estaff.Nickname
+			if estaff.Mobile != "" {
+				staff.Mobile = estaff.Mobile
+			}
+			if estaff.Email != "" {
+				staff.Email = estaff.Email
+			}
+			if estaff.EmployeeNumber != "" {
+				staff.EmployeeNumber = estaff.EmployeeNumber
+			}
+			if estaff.EmployeeType != "" {
+				staff.EmployeeType = estaff.EmployeeType
+			}
+			if estaff.Description != "" {
+				staff.Description = estaff.Description
+			}
+		}
+		res["ok"] = true
+		res["staff"] = staff
+		outputJson(res, w)
+	} else if op == "store" {
+		sn, gn := req.PostFormValue("surname"), req.PostFormValue("givenName")
+		cn := sn + gn
+		staff = models.NewStaff(uid, cn, email)
+		staff.Surname = sn
+		staff.GivenName = gn
+		staff.Mobile = req.PostFormValue("mobile")
+		err = backends.StoreStaff(staff)
+		if err == nil {
+			res["ok"] = true
+			res["referer"] = reverse("contacts")
+			outputJson(res, w)
+		}
+	}
+
+	return
 }
 
 func loginForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {

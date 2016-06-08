@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM alpine:edge
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
 ENV VERSION v0.1.4

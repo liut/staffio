@@ -49,6 +49,10 @@ func GetStaff(uid string) (*models.Staff, error) {
 	return staff, nil
 }
 
+func StoreStaff(staff *models.Staff) error {
+	return ldap.StoreStaff(staff)
+}
+
 func Authenticate(uid, password string) bool {
 	err := ldap.Authenticate(uid, password)
 	if err != nil {

@@ -1,0 +1,138 @@
+{{ define "title" }}Staff{{ end }}
+{{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+
+{{ end }}
+{{ define "content" }}
+
+  <form class="form-horizontal" id="form1" method="post" action="{{ .ctx.Request.RequestURI }}">
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Login</label>
+        <div class="col-xs-5">
+            <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.Uid }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
+            {{ .staff.Uid }} (<span id="eid">{{ .staff.EmployeeNumber }}</span>)
+            <span id="CommonName">{{ .staff.CommonName }}</span>
+            <span id="EmployeeType">{{ .staff.EmployeeType }}</span>
+        </div>
+        <div class="col-xs-1">
+            <a class="btn btn-default" href="javascript:void(0);" id="btnFetch" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>
+        </div>
+    </div>
+
+      <div class="form-group">
+        <label class="col-xs-3 control-label">Full name</label>
+        <div class="col-xs-3">
+            <input type="text" class="form-control" name="surname" placeholder="Surname" value="{{ .staff.Surname }}" required />
+        </div>
+        <div class="col-xs-3">
+            <input type="text" class="form-control" name="givenName" placeholder="Given name" value="{{ .staff.GivenName }}" required />
+        </div>
+      </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Nickname</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="nickname" value="{{ .staff.Nickname }}" placeholder="Nickname"  />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Email address</label>
+        <div class="col-xs-6">
+            <input type="email" class="form-control" name="email" value="{{ .staff.Email }}" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Mobile number</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="mobile" value="{{ .staff.Mobile }}" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Description</label>
+        <div class="col-xs-6">
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-9 col-xs-offset-3">
+        <input type="hidden" name="op" value="store">
+            <button type="submit" class="btn btn-primary"> Save </button>
+        </div>
+    </div>
+
+  </form>
+
+{{ end }}
+{{ define "tail" }}
+  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
+  <script type="text/javascript">
+      jQuery(document).ready(function () {
+        $("#btnFetch").click(function(){
+            var uid = $("#uid").val()
+            console.log(uid)
+            $.post(location.pathname + '?op=fetch-exmail',{uid:uid},function(res,status,xhr){
+                console.log(res,status)
+                var staff = res.staff
+                $("#CommonName").text(staff.cn)
+                $("#EmployeeType").text(staff.etype)
+                $("input[name=email]").val(staff.email)
+                $("input[name=surname]").val(staff.sn)
+                $("input[name=givenName]").val(staff.gn)
+                $("input[name=mobile]").val(staff.mobile)
+            },'json')
+        })
+
+
+        $('#form1')
+        .bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            }
+        })
+        .on('success.form.bv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the BootstrapValidator instance
+            var bv = $form.data('bootstrapValidator');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(res) {
+                // console.log(res);
+                if (!!res.ok) {
+                  Dust.alert('Save successfully', 'OK', function(){
+                    var ref = '/';
+                    if (typeof res.referer == 'string') {
+                      ref = res.referer;
+                    }
+                    location.href = ref;
+                  });
+                } else if (typeof res.error != "undefined") {
+                  var error = res.error
+                  if (typeof error.field === "string") {
+                    bv.updateMessage(error.field, 'callback', error.message);
+                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                    // Dust.alert(error.message);
+                  }
+                } else {
+                  alertAjaxResult(res);
+                }
+            }, 'json');
+            console.log(bv)
+        });
+
+      });
+  </script>
+{{ end }}

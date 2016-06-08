@@ -13,6 +13,7 @@ import (
 )
 
 type Context struct {
+	Request   *http.Request
 	Vars      map[string]string
 	Session   *sessions.Session
 	ResUrl    string
@@ -59,6 +60,7 @@ func NewContext(req *http.Request) (*Context, error) {
 		referer = req.Referer()
 	}
 	ctx := &Context{
+		Request: req,
 		Vars:    mux.Vars(req),
 		Session: sess,
 		ResUrl:  Settings.ResUrl,

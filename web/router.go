@@ -9,6 +9,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/wealthworks/csmtp"
 
 	"lcgc/platform/staffio/backends"
 	. "lcgc/platform/staffio/settings"
@@ -60,6 +61,12 @@ func MainRouter() *mux.Router {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	Settings.Parse()
 
+	csmtp.Host = Settings.SMTP.Host
+	csmtp.Port = Settings.SMTP.Port
+	csmtp.Name = Settings.SMTP.SenderName
+	csmtp.From = Settings.SMTP.SenderEmail
+	csmtp.Auth(Settings.SMTP.SenderPassword)
+
 	if Settings.SentryDSN != "" {
 		raven.SetDSN(Settings.SentryDSN)
 	}
@@ -83,7 +90,9 @@ func MainRouter() *mux.Router {
 	router.Handle("/profile", handler(profileForm)).Methods("GET").Name("profile")
 	router.Handle("/profile", handler(profilePost)).Methods("POST").Headers(jsonRequestHeaders...)
 
-	router.Handle("/contacts", handler(contactsTable)).Methods("GET")
+	router.Handle("/contacts", handler(contactsTable)).Methods("GET").Name("contacts")
+	router.Handle("/staff/{uid:[a-z]+}", handler(staffForm)).Methods("GET").Name("staff")
+	router.Handle("/staff/{uid:[a-z]+}", handler(staffPost)).Methods("POST").Headers(jsonRequestHeaders...)
 
 	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
 	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")

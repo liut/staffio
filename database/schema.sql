@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS oauth_client
 	name varchar(120) NOT NULL,
 	secret varchar(40) NOT NULL,
 	redirect_uri varchar(255) NOT NULL DEFAULT '',
-	userdata json NOT NULL DEFAULT '{}'::json,
+	userdata jsonb NOT NULL DEFAULT '{}'::jsonb,
 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	allowed_grant_types varchar(255) DEFAULT '',
 	allowed_response_types varchar(255) DEFAULT '',
