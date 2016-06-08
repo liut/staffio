@@ -97,7 +97,11 @@ func (e *apiError) Error() string {
 }
 
 func requestUserGet(alias string) (*userResp, error) {
-	auths := "Bearer " + requestAccessToken()
+	token, err := requestAccessToken()
+	if err != nil {
+		return nil, err
+	}
+	auths := "Bearer " + token
 	resp, err := doHTTP("POST", url_user_get, auths, bytes.NewBufferString("alias="+alias))
 	if err != nil {
 		log.Printf("doHTTP err %s", err)
@@ -133,9 +137,11 @@ type tokenResp struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func requestAccessToken() (token string) {
+func requestAccessToken() (token string, err error) {
 	if api_auths == "" {
-		log.Fatal(errEmptyAuths)
+		err = errEmptyAuths
+		log.Print(err)
+		return
 	}
 	auths := "Basic " + api_auths
 	// log.Printf("auths: %s", auths)
