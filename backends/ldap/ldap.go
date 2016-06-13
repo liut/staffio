@@ -258,6 +258,8 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	u.Mobile = entry.GetAttributeValue("mobile")
 	u.EmployeeNumber = entry.GetAttributeValue("employeeNumber")
 	u.EmployeeType = entry.GetAttributeValue("employeeType")
+	u.Birthday = entry.GetAttributeValue("dateOfBirth")
+	u.AvatarPath = entry.GetAttributeValue("avatarPath")
 	u.Description = entry.GetAttributeValue("description")
 	return
 }

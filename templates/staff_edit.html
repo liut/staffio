@@ -23,10 +23,10 @@
       <div class="form-group">
         <label class="col-xs-3 control-label">Full name</label>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="surname" placeholder="Surname" value="{{ .staff.Surname }}" required />
+            <input type="text" class="form-control" name="sn" placeholder="Surname" value="{{ .staff.Surname }}" required />
         </div>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="givenName" placeholder="Given name" value="{{ .staff.GivenName }}" required />
+            <input type="text" class="form-control" name="gn" placeholder="Given name" value="{{ .staff.GivenName }}" required />
         </div>
       </div>
 
@@ -45,16 +45,52 @@
     </div>
 
     <div class="form-group">
-        <label class="col-xs-3 control-label">Mobile number</label>
+        <label class="col-xs-3 control-label">Mobile phone</label>
         <div class="col-xs-6">
             <input type="text" class="form-control" name="mobile" value="{{ .staff.Mobile }}" required />
         </div>
     </div>
 
     <div class="form-group">
+        <label class="col-xs-3 control-label">Employee Number</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="eid" value="{{ .staff.EmployeeNumber }}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Employee Title</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="etitle" value="{{ .staff.EmployeeType }}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Gender</label>
+        <div class="col-xs-6">
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderMale" value="1"> Male
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderFemale" value="2"> Female
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderUnknown" value="0"> Unknown
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Date of birth</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="birthday" value="{{ .staff.Birthday }}" placeholder="Date of birth, yyyymmdd" />
+        </div>
+    </div>
+
+    <div class="form-group">
         <label class="col-xs-3 control-label">Description</label>
         <div class="col-xs-6">
-            <textarea name="description" class="form-control"></textarea>
+            <textarea name="description" class="form-control">{{ .staff.Description }}</textarea>
         </div>
     </div>
 
@@ -73,6 +109,7 @@
   <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
       jQuery(document).ready(function () {
+        $('#gender{{.staff.Gender}}').attr('checked', true);
         $("#btnFetch").click(function(){
             var uid = $("#uid").val()
             console.log(uid)

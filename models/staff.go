@@ -10,13 +10,18 @@ var (
 		return p1.Uid < p2.Uid
 	})
 	ProfileEditables = map[string]string{
-		"nickname":       "displayName",
-		"commonName":     "cn",
-		"givenName":      "givenName",
-		"surname":        "sn",
-		"email":          "mail",
-		"mobile":         "mobile",
-		"employeeNumber": "employeeNumber",
+		"nickname":    "displayName",
+		"cn":          "cn",
+		"gn":          "givenName",
+		"sn":          "sn",
+		"email":       "mail",
+		"mobile":      "mobile",
+		"eid":         "employeeNumber",
+		"etitle":      "employeeType",
+		"birthday":    "dateOfBirth",
+		"gender":      "gender",
+		"avatarPath":  "avatarPath",
+		"description": "description",
 	}
 )
 
@@ -32,18 +37,20 @@ func NewStaff(uid, cn, email string) *Staff {
 }
 
 type Staff struct {
-	Uid            string `json:"uid"`
-	Passwd         string `json:"-"`
-	CommonName     string `json:"cn,omitempty"`       // 全名
-	GivenName      string `json:"gn"`                 // 名
-	Surname        string `json:"sn"`                 // 姓
-	Nickname       string `json:"nickname,omitempty"` // 昵称
-	Gender         Gender `json:"gender"`
-	Email          string `json:"email"`
-	Mobile         string `json:"mobile"`
-	EmployeeNumber string `json:"eid,omitempty"`
-	EmployeeType   string `json:"etype,omitempty"`
-	Description    string `json:"description,omitempty"`
+	Uid            string `json:"uid" form:"uid" binding:"required"`
+	Passwd         string `json:"-" form:"password"`
+	CommonName     string `json:"cn,omitempty"`                       // 全名
+	GivenName      string `json:"gn" form:"gn" binding:"required"`    // 名
+	Surname        string `json:"sn" form:"sn" binding:"required"`    // 姓
+	Nickname       string `json:"nickname,omitempty" form:"nickname"` // 昵称
+	Birthday       string `json:"birthday,omitempty" form:"birthday"`
+	Gender         Gender `json:"gender,omitempty" form:"gender"`
+	Email          string `json:"email" form:"email" binding:"required"`
+	Mobile         string `json:"mobile" form:"mobile" binding:"required"`
+	EmployeeNumber string `json:"eid,omitempty" form:"eid"`
+	EmployeeType   string `json:"etype,omitempty" form:"etitle"`
+	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`
+	Description    string `json:"description,omitempty" form:"description"`
 }
 
 func (u *Staff) Name() string {
@@ -60,6 +67,14 @@ func (u *Staff) Name() string {
 	}
 
 	return u.Uid
+}
+
+func (u *Staff) GetCommonName() string {
+	if u.CommonName != "" {
+		return u.CommonName
+	}
+
+	return u.Surname + u.GivenName
 }
 
 // func (u *Staff) String() string {
