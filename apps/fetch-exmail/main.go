@@ -26,4 +26,11 @@ func main() {
 		return
 	}
 	log.Printf("staff: %v", staff)
+
+	count, err := exmail.RequestMailNewCount(*alias)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	log.Printf("new mail: %d", count)
 }
