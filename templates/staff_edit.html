@@ -13,7 +13,6 @@
             <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.Uid }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
             {{ .staff.Uid }} (<span id="eid">{{ .staff.EmployeeNumber }}</span>)
             <span id="CommonName">{{ .staff.CommonName }}</span>
-            <span id="EmployeeType">{{ .staff.EmployeeType }}</span>
         </div>
         <div class="col-xs-1">
             <a class="btn btn-default" href="javascript:void(0);" id="btnFetch" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>
@@ -61,7 +60,7 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Employee Title</label>
         <div class="col-xs-6">
-            <input type="text" class="form-control" name="etitle" value="{{ .staff.EmployeeType }}" />
+            <input type="text" class="form-control" name="etype" value="{{ .staff.EmployeeType }}" />
         </div>
     </div>
 
@@ -117,11 +116,17 @@
                 console.log(res,status)
                 var staff = res.staff
                 $("#CommonName").text(staff.cn)
-                $("#EmployeeType").text(staff.etype)
                 $("input[name=email]").val(staff.email)
                 $("input[name=sn]").val(staff.sn)
                 $("input[name=gn]").val(staff.gn)
                 $("input[name=mobile]").val(staff.mobile)
+                if (typeof staff.eid === "string") {
+                    $("input[name=eid]").val(staff.eid)
+                }
+                if (typeof staff.etype === "string") {
+                    $("input[name=etype]").val(staff.etype)
+                }
+
             },'json').fail(function(res) {
                 console.log( res )
                 alertAjaxResult( res );
