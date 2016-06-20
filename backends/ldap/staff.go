@@ -97,7 +97,7 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		ar.Attribute("uid", []string{uid})
 		ar.Attribute("sn", []string{staff.Surname})
 		ar.Attribute("givenName", []string{staff.GivenName})
-		ar.Attribute("cn", []string{staff.CommonName})
+		ar.Attribute("cn", []string{staff.GetCommonName()})
 		ar.Attribute("mail", []string{staff.Email})
 		if staff.Mobile != "" {
 			ar.Attribute("mobile", []string{staff.Mobile})

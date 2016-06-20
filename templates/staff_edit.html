@@ -112,17 +112,20 @@
         $('#gender{{.staff.Gender}}').attr('checked', true);
         $("#btnFetch").click(function(){
             var uid = $("#uid").val()
-            console.log(uid)
+            console.log("searching for uid:", uid)
             $.post(location.pathname + '?op=fetch-exmail',{uid:uid},function(res,status,xhr){
                 console.log(res,status)
                 var staff = res.staff
                 $("#CommonName").text(staff.cn)
                 $("#EmployeeType").text(staff.etype)
                 $("input[name=email]").val(staff.email)
-                $("input[name=surname]").val(staff.sn)
-                $("input[name=givenName]").val(staff.gn)
+                $("input[name=sn]").val(staff.sn)
+                $("input[name=gn]").val(staff.gn)
                 $("input[name=mobile]").val(staff.mobile)
-            },'json')
+            },'json').fail(function(res) {
+                console.log( res )
+                alertAjaxResult( res );
+              })
         })
 
 
