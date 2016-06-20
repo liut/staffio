@@ -1,7 +1,7 @@
 FROM alpine:edge
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV VERSION v0.2.0
+ENV VERSION v0.2.1
 ENV DOWNLOAD_URL https://github.com/liut/staffio/releases/download/$VERSION/staffio-linux-amd64-$VERSION.tar.xz
 
 RUN apk add --virtual build-dependencies --update \
