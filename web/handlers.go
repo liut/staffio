@@ -8,6 +8,7 @@ import (
 
 	"github.com/RangelReale/osin"
 	"github.com/getsentry/raven-go"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/goods/httpbuf"
 
 	"lcgc/platform/staffio/backends"
@@ -238,12 +239,21 @@ func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 		res["staff"] = staff
 		outputJson(res, w)
 	} else if op == "store" {
-		sn, gn := req.PostFormValue("surname"), req.PostFormValue("givenName")
-		cn := sn + gn
-		staff = models.NewStaff(uid, cn, email)
-		staff.Surname = sn
-		staff.GivenName = gn
-		staff.Mobile = req.PostFormValue("mobile")
+		fb := binding.Form
+		staff = new(models.Staff)
+		err = fb.Bind(req, staff)
+		if err != nil {
+			log.Printf("bind %v: %s", staff, err)
+			return
+		}
+		log.Print(staff)
+
+		// sn, gn := req.PostFormValue("sn"), req.PostFormValue("sn")
+		// cn := sn + gn
+		// staff = models.NewStaff(uid, cn, email)
+		// staff.Surname = sn
+		// staff.GivenName = gn
+		// staff.Mobile = req.PostFormValue("mobile")
 		err = backends.StoreStaff(staff)
 		if err == nil {
 			res["ok"] = true

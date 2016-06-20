@@ -46,6 +46,35 @@
     </div>
 
     <div class="form-group">
+        <label class="col-xs-3 control-label">Gender</label>
+        <div class="col-xs-6">
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderMale" value="1"> Male
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderFemale" value="2"> Female
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="gender" id="genderUnknown" value="0"> Unknown
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Date of birth</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="birthday" value="{{ .staff.Birthday }}" placeholder="Date of birth, yyyymmdd" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Description</label>
+        <div class="col-xs-6">
+            <textarea name="description" class="form-control" rows="3">{{ .staff.Description }}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
         <label class="col-xs-3 control-label">Password</label>
         <div class="col-xs-6">
             <input id="password" name="password" type="password" class="form-control" value="" required>
@@ -66,7 +95,7 @@
   <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
       jQuery(document).ready(function () {
-
+        $('#gender{{.staff.Gender}}').attr('checked', true);
         $('#form1')
         .bootstrapValidator({
             message: 'This value is not valid',

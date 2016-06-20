@@ -32,6 +32,7 @@ func (ls *LdapSource) Modify(uid, password string, values map[string]string) err
 	}
 
 	modify := ldap.NewModifyRequest(entry.DN)
+	modify.Replace("objectClass", objectClassPeople)
 	changed := make(map[string]bool)
 	for k, v := range values {
 		if v == "" {

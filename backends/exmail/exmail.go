@@ -23,6 +23,7 @@ var (
 const (
 	url_token    = "https://exmail.qq.com/cgi-bin/token"
 	url_user_get = "http://openapi.exmail.qq.com:12211/openapi/user/get"
+	url_newcount = "http://openapi.exmail.qq.com:12211/openapi/mail/newcount"
 )
 
 func init() {
@@ -94,6 +95,39 @@ type apiError struct {
 
 func (e *apiError) Error() string {
 	return fmt.Sprintf("%s:%s %q", e.ErrCode, e.ErrMsg, e.Arg)
+}
+
+type newCount struct {
+	Alias    string
+	NewCount json.Number
+}
+
+func RequestMailNewCount(alias string) (int, error) {
+	token, err := requestAccessToken()
+	if err != nil {
+		return 0, err
+	}
+	auths := "Bearer " + token
+	resp, err := doHTTP("POST", url_newcount, auths, bytes.NewBufferString("alias="+alias))
+	if err != nil {
+		log.Printf("doHTTP err %s", err)
+		return 0, err
+	}
+
+	log.Printf("resp: %s", resp)
+
+	obj := &newCount{}
+
+	if e := json.Unmarshal(resp, obj); e != nil {
+		log.Printf("unmarshal user err %s", e)
+		return 0, e
+	}
+
+	count, err := obj.NewCount.Int64()
+	if err != nil {
+		log.Print(err)
+	}
+	return int(count), nil
 }
 
 func requestUserGet(alias string) (*userResp, error) {

@@ -64,7 +64,7 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		mr := ldap.NewModifyRequest(dn)
 		mr.Replace("sn", []string{staff.Surname})
 		mr.Replace("givenName", []string{staff.GivenName})
-		mr.Replace("cn", []string{staff.CommonName})
+		mr.Replace("cn", []string{staff.GetCommonName()})
 		mr.Replace("mail", []string{staff.Email})
 
 		if staff.Mobile != "" {
@@ -74,13 +74,19 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 			mr.Replace("employeeNumber", []string{staff.EmployeeNumber})
 		}
 
+		if staff.AvatarPath != "" {
+			mr.Replace("avatarPath", []string{staff.AvatarPath})
+		}
+		if staff.Birthday != "" {
+			mr.Replace("dateOfBirth", []string{staff.Birthday})
+		}
 		if staff.Description != "" {
 			mr.Replace("description", []string{staff.Description})
 		}
 
 		err = ls.c.Modify(mr)
 		if err != nil {
-			log.Printf("add err %s", err)
+			log.Printf("modify err %s", err)
 		}
 		return
 	}
@@ -91,7 +97,7 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		ar.Attribute("uid", []string{uid})
 		ar.Attribute("sn", []string{staff.Surname})
 		ar.Attribute("givenName", []string{staff.GivenName})
-		ar.Attribute("cn", []string{staff.CommonName})
+		ar.Attribute("cn", []string{staff.GetCommonName()})
 		ar.Attribute("mail", []string{staff.Email})
 		if staff.Mobile != "" {
 			ar.Attribute("mobile", []string{staff.Mobile})
@@ -103,8 +109,17 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		if staff.EmployeeType != "" {
 			ar.Attribute("employeeType", []string{staff.EmployeeType})
 		}
+		if staff.Gender != models.Unknown {
+			ar.Attribute("gender", []string{fmt.Sprintf("%d", staff.Gender)})
+		}
+		if staff.Birthday != "" {
+			ar.Attribute("dateOfBirth", []string{staff.Birthday})
+		}
 		if staff.Description != "" {
 			ar.Attribute("description", []string{staff.Description})
+		}
+		if staff.AvatarPath != "" {
+			ar.Attribute("avatarPath", []string{staff.AvatarPath})
 		}
 
 		ar.Attribute("userPassword", []string{staff.Passwd})
