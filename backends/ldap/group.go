@@ -21,7 +21,7 @@ func SearchGroup(name string) *models.Group {
 		if err == nil {
 			return group
 		}
-		log.Printf("search group from %s error: %s", ls.Addr, err)
+		log.Printf("search group %q from %s error: %s", name, ls.Addr, err)
 	}
 	log.Printf("group %s not found", name)
 	return models.EmptyGroup

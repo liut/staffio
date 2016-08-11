@@ -45,7 +45,7 @@ func StoreStaff(staff *models.Staff) (err error) {
 		}
 	}
 	if isNew {
-		message := fmt.Sprintf("Your new password is <strong>%s</strong>.", hash)
+		message := fmt.Sprintf("Your new password is <strong>%s</strong>.", pass)
 		csmtp.SendMail("Welcome!", message, staff.Email)
 	}
 	return

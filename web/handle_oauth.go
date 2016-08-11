@@ -163,6 +163,8 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 				resp.Output["me"] = staff
 				if len(topic) > 2 && strings.Index(topic, "+") == 2 {
 					// TODO: search group topic[2:]
+					gn := topic[3:]
+					resp.Output[gn] = InGroup(gn, uid)
 				}
 			} else if topic == "staff" {
 				resp.Output["staff"] = staff
