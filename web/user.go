@@ -34,8 +34,16 @@ func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
 }
 
+func (u *User) InGroup(gn string) bool {
+	return InGroup(gn, u.Uid)
+}
+
 func IsKeeper(uid string) bool {
-	return backends.InGroup("keeper", uid)
+	return InGroup("keeper", uid)
+}
+
+func InGroup(gn, uid string) bool {
+	return backends.InGroup(gn, uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {
