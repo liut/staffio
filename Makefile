@@ -1,5 +1,5 @@
 .SILENT :
-.PHONY : main clean gofmt dist-tight
+.PHONY : vet main clean gofmt dist-tight
 DATE := `date '+%Y%m%d'`
 
 NAME:=staffio
@@ -11,7 +11,11 @@ main:
 	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)"
 
-all: main dist dist-tight release
+all: vet main dist dist-tight release
+
+vet:
+	echo "Checking ."
+	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult .
 
 clean:
 	rm -rf dist dist-tight

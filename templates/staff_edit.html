@@ -94,10 +94,14 @@
     </div>
 
     <div class="form-group">
-        <div class="col-xs-9 col-xs-offset-3">
+        <div class="col-xs-4 col-xs-offset-3">
         <input type="hidden" name="op" value="store">
             <button type="submit" class="btn btn-primary"> Save </button>
         </div>
+        {{ if .inEdit }}
+        <div class="col-xs-2 col-xs-offset-1">
+            <button type="button" class="btn btn-danger" id="btnDelete"> Delete </button>
+        </div>{{ end }}
     </div>
 
   </form>
@@ -128,7 +132,7 @@
                 }
 
             },'json').fail(function(res) {
-                console.log( res )
+                // console.log( res )
                 alertAjaxResult( res );
               })
         })
@@ -175,9 +179,46 @@
                   alertAjaxResult(res);
                 }
             }, 'json');
-            console.log(bv)
+            // console.log(bv)
         });
 
+        function deleteUser(uid) {
+            // console.log(self.location.href)
+            var url =
+            $.ajax({
+                url: self.location.href,
+                method: 'DELETE',
+                dataType: 'json'
+            }).done(function(res) {
+               // console.log(res)
+               if (!!res.ok) {
+                  Dust.alert('Delete done', 'OK', function(){
+                    var ref = '/contacts';
+                    if (typeof res.referer == 'string') {
+                      ref = res.referer;
+                    }
+                    location.href = ref;
+                  });
+                } else {
+                    var msg = ""
+                    if (typeof res.error != "undefined") {
+                        msg += "\n错误：" + dump(res.error);
+                    }
+                    Dust.alert(msg, "Failed", function(){
+                        location.reload()
+                    })
+                }
+            });
+        }
+        $("#btnDelete").click(function(e) {
+            // e.preventDefault();
+            var cn = $("#CommonName").text()
+            Dust.confirm("Delete a user", "Are you sure to DELETE this user:\n\n<strong>"+cn+"</strong> ?", function(e) {
+                var uid = $('#uid').val()
+                // console.log(uid)
+                deleteUser(uid)
+            })
+        })
       });
   </script>
 {{ end }}

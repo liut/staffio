@@ -72,15 +72,16 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 	defer resp.Close()
 
 	var (
-		uid  string = ""
-		user *User
+		uid   string = ""
+		user  *User
+		staff *models.Staff
 	)
 	if ar := server.HandleAccessRequest(resp, r); ar != nil {
 		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
 			uid = ar.UserData.(string)
-			staff, err := backends.GetStaff(uid)
+			staff, err = backends.GetStaff(uid)
 			if err != nil {
 				resp.SetError("get_user_error", "staff not found")
 				resp.InternalError = err

@@ -53,6 +53,10 @@ func StoreStaff(staff *models.Staff) error {
 	return ldap.StoreStaff(staff)
 }
 
+func DeleteStaff(uid string) error {
+	return ldap.DeleteStaff(uid)
+}
+
 func Authenticate(uid, password string) bool {
 	err := ldap.Authenticate(uid, password)
 	if err != nil {
