@@ -121,7 +121,6 @@ func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err err
 		"ctx":    ctx,
 		"scopes": scopes,
 	})
-	return nil
 }
 
 func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
@@ -263,6 +262,44 @@ func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 	}
 
 	return
+}
+
+func staffDelete(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
+		http.Redirect(w, req, reverse("login"), http.StatusFound)
+		return
+	}
+
+	var (
+		uid = ctx.Vars["uid"]
+		res = make(osin.ResponseData)
+	)
+
+	if uid == "" || uid == "new" {
+		return fmt.Errorf("empty uid")
+	}
+
+	if uid == ctx.User.Uid {
+		res["ok"] = false
+		res["error"] = "Can not delete yourself"
+		return outputJson(res, w)
+	}
+
+	_, err = backends.GetStaff(uid)
+	if err != nil {
+		log.Printf("backends.GetStaff err %s", err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return err
+	}
+	err = backends.DeleteStaff(uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+
+	res["ok"] = true
+	return outputJson(res, w)
+
 }
 
 func loginForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
