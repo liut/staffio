@@ -2,7 +2,6 @@ package backends
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -20,24 +19,18 @@ var (
 )
 
 type DbStorage struct {
-	// clients   map[string]osin.Client
-	// authorize map[string]*osin.AuthorizeData
-	// access  map[string]*osin.AccessData
 	refresh map[string]string
 	isDebug bool
 }
 
 func NewStorage() *DbStorage {
 
-	r := &DbStorage{
-		// clients:   make(map[string]osin.Client),
-		// authorize: make(map[string]*osin.AuthorizeData),
-		// access:  make(map[string]*osin.AccessData),
+	s := &DbStorage{
 		refresh: make(map[string]string),
 		isDebug: Settings.Debug,
 	}
 
-	return r
+	return s
 }
 
 func (s *DbStorage) Clone() osin.Storage {
@@ -59,7 +52,7 @@ func (s *DbStorage) GetClient(id string) (osin.Client, error) {
 	if err == nil {
 		return c, nil
 	}
-	return nil, errors.New("Client not found")
+	return nil, fmt.Errorf("Client %q not found", id)
 }
 
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
@@ -106,7 +99,7 @@ func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 	}
 
 	s.logf("load authorize error: %s", err)
-	return nil, errors.New("Authorize not found")
+	return nil, fmt.Errorf("Authorize %q not found", code)
 }
 
 func (s *DbStorage) RemoveAuthorize(code string) error {
@@ -178,7 +171,7 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 	}
 
 	log.Printf("load access error: %s", err)
-	return nil, errors.New("Access not found")
+	return nil, fmt.Errorf("AccessToken %q not found", code)
 }
 
 func (s *DbStorage) RemoveAccess(code string) error {
@@ -202,7 +195,7 @@ func (s *DbStorage) LoadRefresh(code string) (*osin.AccessData, error) {
 	if d, ok := s.refresh[code]; ok {
 		return s.LoadAccess(d)
 	}
-	return nil, errors.New("Refresh not found")
+	return nil, fmt.Errorf("RefreshToken %q not found", code)
 }
 
 func (s *DbStorage) RemoveRefresh(code string) error {
