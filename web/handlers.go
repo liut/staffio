@@ -432,6 +432,20 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate")
 
+	origin := req.Header.Get("Origin")
+	if len(origin) > 0 {
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization, X-Requested-With")
+		w.Header().Set("Access-Control-Max-Age", "60")
+
+		if req.Method == "OPTIONS" {
+			w.Header().Set("Allow", "GET,HEAD,POST,OPTIONS")
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	}
+
 	ctx, err := NewContext(req)
 	if err != nil {
 		raven.CaptureError(err, nil)
