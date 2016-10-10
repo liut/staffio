@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/RangelReale/osin"
 	"github.com/getsentry/raven-go"
@@ -448,6 +449,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	ctx, err := NewContext(req)
 	if err != nil {
+		debug.PrintStack()
 		raven.CaptureError(err, nil)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -458,8 +460,14 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	buf := new(httpbuf.Buffer)
 	err = h(buf, req, ctx)
 	if err != nil {
-		raven.CaptureError(err, nil)
-		log.Printf("call handler error: %s", err)
+		debug.PrintStack()
+		if ctx.User != nil {
+			raven.SetUserContext(&raven.User{ID: ctx.User.Uid})
+		}
+		raven.SetHttpContext(raven.NewHttp(req))
+		logId := raven.CaptureError(err, nil)
+		raven.ClearContext()
+		log.Printf("call handler %s error: %s logId: %s", req.RequestURI, err, logId)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
