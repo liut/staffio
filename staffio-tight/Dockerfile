@@ -1,22 +1,19 @@
-FROM alpine:3.3
+FROM alpine:3.4
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV STAFFIO_LDAP_HOST "slapd"
-ENV STAFFIO_LDAP_BASE "dc=example,dc=org"
-ENV STAFFIO_HTTP_LISTEN ":80"
-ENV STAFFIO_ROOT "/app"
-ENV PGHOST "staffio-db"
+ENV PGHOST="staffio-db" \
+    STAFFIO_HTTP_LISTEN=":80" \
+    STAFFIO_LDAP_HOST="slapd" \
+    STAFFIO_LDAP_BASE="dc=example,dc=org" \
+    STAFFIO_ROOT="/app"
 
 RUN apk --update add \
+  ca-certificates \
   tzdata \
   && cp /usr/share/zoneinfo/Hongkong /etc/localtime \
   && echo "Hongkong" >  /etc/timezone \
   && apk del tzdata \
   && rm -rf /var/cache/apk/*
-
-RUN apk add --update \
-	ca-certificates \
-	&& rm -rf /var/cache/apk/*
 
 RUN mkdir /app
 WORKDIR /app
