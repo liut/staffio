@@ -18,19 +18,18 @@ vet:
 	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult .
 
 clean:
+	echo "Cleaning dist"
 	rm -rf dist dist-tight
 	rm -f $(NAME) $(NAME)-*.?z
 
 dist: clean
+	echo "Building $(NAME)"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)
 
 release: dist
 	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
 	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
-
-release-clean:
-	rm -f *.tar.xz
 
 get-deps:
 	go get github.com/robfig/glock
