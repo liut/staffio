@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS oauth_access_token
 	id serial,
 	client_id varchar(120) NOT NULL,
 	username varchar(120) NOT NULL DEFAULT '',
-	access_token varchar(40) NOT NULL,
-	refresh_token varchar(40) NOT NULL DEFAULT '',
+	access_token varchar(240) NOT NULL,
+	refresh_token varchar(240) NOT NULL DEFAULT '',
 	expires_in int NOT NULL DEFAULT 86400,
 	scopes varchar(255) NOT NULL DEFAULT '',
 	is_frozen BOOLEAN NOT NULL DEFAULT false,
@@ -32,10 +32,12 @@ CREATE TABLE IF NOT EXISTS oauth_access_token
 	PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_access_refresh ON oauth_access_token (refresh_token);
+
 CREATE TABLE IF NOT EXISTS oauth_authorization_code
 (
 	id serial,
-	code varchar(40) NOT NULL,
+	code varchar(140) NOT NULL,
 	client_id varchar(120) NOT NULL,
 	username varchar(120) NOT NULL DEFAULT '',
 	redirect_uri varchar(255) NOT NULL DEFAULT '',

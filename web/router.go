@@ -74,6 +74,11 @@ func MainRouter() *mux.Router {
 	resUrl = Settings.ResUrl
 	backends.Prepare()
 	server = osin.NewServer(NewServerConfig(), backends.NewStorage())
+	var err error
+	server.AccessTokenGen, err = getTokenGenJWT()
+	if err != nil {
+		panic(err)
+	}
 
 	store = sessions.NewCookieStore([]byte(Settings.Session.Name))
 	store.Options.MaxAge = Settings.Session.MaxAge

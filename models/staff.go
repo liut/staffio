@@ -37,7 +37,7 @@ func NewStaff(uid, cn, email string) *Staff {
 }
 
 type Staff struct {
-	Uid            string `json:"uid" form:"uid" binding:"required"`
+	Uid            string `json:"uid" form:"uid" binding:"required"` // 登录名
 	Passwd         string `json:"-" form:"password"`
 	CommonName     string `json:"cn,omitempty"`                       // 全名
 	GivenName      string `json:"gn" form:"gn" binding:"required"`    // 名
