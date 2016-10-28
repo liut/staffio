@@ -42,6 +42,11 @@ type config struct {
 	Root         string
 	Debug        bool
 	UserLifetime int // secends, user online time
+
+	TokenGen struct { // JWT config
+		Method string // disuse
+		Key    string
+	}
 }
 
 var (
@@ -70,6 +75,7 @@ func init() {
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
+	fs.StringVar(&Settings.TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
 	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")
 	fs.StringVar(&Settings.SMTP.Host, "smtp-host", "", "")
 	fs.IntVar(&Settings.SMTP.Port, "smtp-port", 465, "")
