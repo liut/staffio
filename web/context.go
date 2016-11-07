@@ -14,6 +14,7 @@ import (
 
 type Context struct {
 	Request   *http.Request
+	Writer    http.ResponseWriter
 	Vars      map[string]string
 	Session   *sessions.Session
 	ResUrl    string
@@ -39,9 +40,10 @@ func (c *Context) Close() {
 const (
 	kLastUid = "lu"
 	kUserOL  = "user"
+	kRefer   = "ref"
 )
 
-func NewContext(req *http.Request) (*Context, error) {
+func NewContext(w http.ResponseWriter, req *http.Request) (*Context, error) {
 	sess, err := store.Get(req, Settings.Session.Name)
 	sess.Options.Domain = Settings.Session.Domain
 	sess.Options.HttpOnly = true
@@ -57,10 +59,17 @@ func NewContext(req *http.Request) (*Context, error) {
 	}
 	referer := req.FormValue("referer")
 	if referer == "" {
-		referer = req.Referer()
+		if ref, ok := sess.Values[kRefer]; ok {
+			referer = ref.(string)
+		}
+		if referer == "" {
+			referer = req.Referer()
+		}
 	}
+	// log.Printf("sessions %v", sess.Values)
 	ctx := &Context{
 		Request: req,
+		Writer:  w,
 		Vars:    mux.Vars(req),
 		Session: sess,
 		ResUrl:  Settings.ResUrl,
@@ -75,6 +84,23 @@ func NewContext(req *http.Request) (*Context, error) {
 	}
 
 	return ctx, err
+}
+
+func (ctx *Context) checkLogin() bool {
+	if ctx.User == nil || ctx.User.IsExpired() {
+		ctx.toLogin()
+		return false
+	}
+	return true
+}
+
+func (ctx *Context) toLogin() {
+	ctx.Session.Values[kRefer] = ctx.Request.RequestURI
+	http.Redirect(ctx.Writer, ctx.Request, reverse("login"), http.StatusTemporaryRedirect)
+}
+
+func (ctx *Context) Render(tpl string, data interface{}) error {
+	return T(tpl).Execute(ctx.Writer, data)
 }
 
 func init() {

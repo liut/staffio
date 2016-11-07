@@ -21,9 +21,10 @@ var (
 )
 
 const (
-	url_token    = "https://exmail.qq.com/cgi-bin/token"
-	url_user_get = "http://openapi.exmail.qq.com:12211/openapi/user/get"
-	url_newcount = "http://openapi.exmail.qq.com:12211/openapi/mail/newcount"
+	urlToken     = "https://exmail.qq.com/cgi-bin/token"
+	urlUserGet   = "http://openapi.exmail.qq.com:12211/openapi/user/get"
+	urlNewCount  = "http://openapi.exmail.qq.com:12211/openapi/mail/newcount"
+	urlPartyList = "http://openapi.exmail.qq.com:12211/openapi/party/list"
 )
 
 func init() {
@@ -108,7 +109,7 @@ func RequestMailNewCount(alias string) (int, error) {
 		return 0, err
 	}
 	auths := "Bearer " + token
-	resp, err := doHTTP("POST", url_newcount, auths, bytes.NewBufferString("alias="+alias))
+	resp, err := doHTTP("POST", urlNewCount, auths, bytes.NewBufferString("alias="+alias))
 	if err != nil {
 		log.Printf("doHTTP err %s", err)
 		return 0, err
@@ -136,7 +137,7 @@ func requestUserGet(alias string) (*userResp, error) {
 		return nil, err
 	}
 	auths := "Bearer " + token
-	resp, err := doHTTP("POST", url_user_get, auths, bytes.NewBufferString("alias="+alias))
+	resp, err := doHTTP("POST", urlUserGet, auths, bytes.NewBufferString("alias="+alias))
 	if err != nil {
 		log.Printf("doHTTP err %s", err)
 		return nil, err
@@ -180,7 +181,7 @@ func requestAccessToken() (token string, err error) {
 	auths := "Basic " + api_auths
 	// log.Printf("auths: %s", auths)
 	body_str := "grant_type=client_credentials"
-	resp, err := doHTTP("POST", url_token, auths, bytes.NewBufferString(body_str))
+	resp, err := doHTTP("POST", urlToken, auths, bytes.NewBufferString(body_str))
 	if err != nil {
 		log.Printf("doHTTP err %s", err)
 		return

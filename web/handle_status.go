@@ -8,11 +8,12 @@ import (
 	. "lcgc/platform/staffio/settings"
 )
 
-func handleStatus(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func handleStatus(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
 		return nil
 	}
+	req := ctx.Request
+	w := ctx.Writer
 
 	keeper.BootstrapPrefix = fmt.Sprintf("%sbootstrap-3.3.5/", Settings.ResUrl)
 
