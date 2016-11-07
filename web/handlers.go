@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime/debug"
 
 	"github.com/RangelReale/osin"
-	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/goods/httpbuf"
 
 	"lcgc/platform/staffio/backends"
 	"lcgc/platform/staffio/backends/exmail"
@@ -18,9 +15,12 @@ import (
 	. "lcgc/platform/staffio/settings"
 )
 
-func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func clientsForm(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return nil
 	}
 	var (
@@ -32,19 +32,22 @@ func clientsForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 	if err != nil {
 		return err
 	}
-	return T("clients.html").Execute(w, map[string]interface{}{
+	return ctx.Render("clients.html", map[string]interface{}{
 		"ctx":     ctx,
 		"clients": clients,
 	})
 }
 
-func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusFound)
+func clientsPost(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return nil
 	}
 	res := make(osin.ResponseData)
-
+	req := ctx.Request
 	var (
 		client *models.Client
 	)
@@ -61,7 +64,7 @@ func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 		if e == nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "duplicate client_id"}
-			return outputJson(res, w)
+			return outputJson(res, ctx.Writer)
 		}
 
 	} else {
@@ -71,14 +74,14 @@ func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 		if pk == "" {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is empty"}
-			return outputJson(res, w)
+			return outputJson(res, ctx.Writer)
 		}
 		// id, err := strconv.ParseUint(pk, 10, 32)
 		client, err = backends.GetClientWithCode(pk)
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is invalid or not found"}
-			return outputJson(res, w)
+			return outputJson(res, ctx.Writer)
 		}
 		switch name {
 		case "name":
@@ -97,34 +100,37 @@ func clientsPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": err.Error()}
-			return outputJson(res, w)
+			return outputJson(res, ctx.Writer)
 		}
 		res["ok"] = true
 		res["id"] = client.Id
-		return outputJson(res, w)
+		return outputJson(res, ctx.Writer)
 	}
 
 	res["ok"] = false
 	res["error"] = map[string]string{"message": "invalid operation"}
-	return outputJson(res, w)
+	return outputJson(res, ctx.Writer)
 }
 
-func scopesForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func scopesForm(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return nil
 	}
 	scopes, err := backends.LoadScopes()
 	if err != nil {
 		return err
 	}
-	return T("scopes.html").Execute(w, map[string]interface{}{
+	return ctx.Render("scopes.html", map[string]interface{}{
 		"ctx":    ctx,
 		"scopes": scopes,
 	})
 }
 
-func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
+func welcome(ctx *Context) (err error) {
 
 	if Settings.Debug {
 		log.Printf("session Name: %s, Values: %d", ctx.Session.Name(), len(ctx.Session.Values))
@@ -132,29 +138,31 @@ func welcome(w http.ResponseWriter, req *http.Request, ctx *Context) (err error)
 	}
 
 	//execute the template
-	return T("welcome.html").Execute(w, map[string]interface{}{
+	return ctx.Render("welcome.html", map[string]interface{}{
 		"ctx": ctx,
 	})
 }
 
-func contactsTable(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func contactsTable(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
 		return nil
 	}
 
 	staffs := backends.LoadStaffs()
 	models.ByUid.Sort(staffs)
 
-	return T("contact.html").Execute(w, map[string]interface{}{
+	return ctx.Render("contact.html", map[string]interface{}{
 		"staffs": staffs,
 		"ctx":    ctx,
 	})
 }
 
-func staffForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func staffForm(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return nil
 	}
 
@@ -176,14 +184,18 @@ func staffForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
-	return T("staff_edit.html").Execute(w, data)
+	return ctx.Render("staff_edit.html", data)
 }
 
-func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusFound)
+func staffPost(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return
 	}
+	req := ctx.Request
 
 	var (
 		uid           = ctx.Vars["uid"]
@@ -237,7 +249,7 @@ func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 		}
 		res["ok"] = true
 		res["staff"] = staff
-		outputJson(res, w)
+		outputJson(res, ctx.Writer)
 	} else if op == "store" {
 		fb := binding.Form
 		staff = new(models.Staff)
@@ -258,16 +270,19 @@ func staffPost(w http.ResponseWriter, req *http.Request, ctx *Context) (err erro
 		if err == nil {
 			res["ok"] = true
 			res["referer"] = reverse("contacts")
-			outputJson(res, w)
+			outputJson(res, ctx.Writer)
 		}
 	}
 
 	return
 }
 
-func staffDelete(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	if ctx.User == nil || ctx.User.IsExpired() || !ctx.User.IsKeeper() {
-		http.Redirect(w, req, reverse("login"), http.StatusFound)
+func staffDelete(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
 		return
 	}
 
@@ -283,33 +298,34 @@ func staffDelete(w http.ResponseWriter, req *http.Request, ctx *Context) (err er
 	if uid == ctx.User.Uid {
 		res["ok"] = false
 		res["error"] = "Can not delete yourself"
-		return outputJson(res, w)
+		return outputJson(res, ctx.Writer)
 	}
 
 	_, err = backends.GetStaff(uid)
 	if err != nil {
 		log.Printf("backends.GetStaff err %s", err)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
 		return err
 	}
 	err = backends.DeleteStaff(uid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(ctx.Writer, err.Error(), http.StatusInternalServerError)
 		return err
 	}
 
 	res["ok"] = true
-	return outputJson(res, w)
+	return outputJson(res, ctx.Writer)
 
 }
 
-func loginForm(w http.ResponseWriter, req *http.Request, ctx *Context) (err error) {
-	return T("login.html").Execute(w, map[string]interface{}{
+func loginForm(ctx *Context) (err error) {
+	return ctx.Render("login.html", map[string]interface{}{
 		"ctx": ctx,
 	})
 }
 
-func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
+func login(ctx *Context) error {
+	req := ctx.Request
 	uid, password := req.FormValue("username"), req.FormValue("password")
 	// log.Printf("accept: %v (%d)", req.Header["Accept"], len(req.Header["Accept"]))
 	res := make(osin.ResponseData)
@@ -318,14 +334,14 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
-		return outputJson(res, w)
+		return outputJson(res, ctx.Writer)
 	}
 
 	staff, err := backends.GetStaff(uid)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Load user failed"}
-		return outputJson(res, w)
+		return outputJson(res, ctx.Writer)
 	}
 
 	//store the user id in the values and redirect to welcome
@@ -336,29 +352,30 @@ func login(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 
 	res["ok"] = true
 	res["referer"] = ctx.Referer
-	return outputJson(res, w)
-	// http.Redirect(w, req, reverse("welcome"), http.StatusSeeOther)
+	return outputJson(res, ctx.Writer)
+	// http.Redirect(ctx.Writer, req, reverse("welcome"), http.StatusSeeOther)
 }
 
-func logout(w http.ResponseWriter, req *http.Request, ctx *Context) error {
+func logout(ctx *Context) error {
 	delete(ctx.Session.Values, kUserOL)
-	http.Redirect(w, req, reverse("welcome"), http.StatusSeeOther)
+	http.Redirect(ctx.Writer, ctx.Request, reverse("welcome"), http.StatusSeeOther)
 	return nil
 }
 
-func passwordForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	return T("password.html").Execute(w, map[string]interface{}{
+func passwordForm(ctx *Context) error {
+	return ctx.Render("password.html", map[string]interface{}{
 		"ctx": ctx,
 	})
 }
 
-func passwordChange(w http.ResponseWriter, req *http.Request, ctx *Context) error {
+func passwordChange(ctx *Context) error {
+	req := ctx.Request
 	uid, pwdOld, pwdNew := req.FormValue("username"), req.FormValue("old_password"), req.FormValue("new_password")
 	res := make(osin.ResponseData)
 	if !backends.Authenticate(uid, pwdOld) {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "old_password"}
-		return outputJson(res, w)
+		return outputJson(res, ctx.Writer)
 	}
 	err := backends.PasswordChange(uid, pwdOld, pwdNew)
 	if err != nil {
@@ -368,12 +385,11 @@ func passwordChange(w http.ResponseWriter, req *http.Request, ctx *Context) erro
 		res["ok"] = true
 	}
 
-	return outputJson(res, w)
+	return outputJson(res, ctx.Writer)
 }
 
-func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	if ctx.User == nil || ctx.User.IsExpired() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func profileForm(ctx *Context) error {
+	if !ctx.checkLogin() {
 		return nil
 	}
 	staff, err := backends.GetStaff(ctx.User.Uid)
@@ -381,18 +397,18 @@ func profileForm(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 		return err
 	}
 
-	return T("profile.html").Execute(w, map[string]interface{}{
+	return ctx.Render("profile.html", map[string]interface{}{
 		"ctx":   ctx,
 		"staff": staff,
 	})
 }
 
-func profilePost(w http.ResponseWriter, req *http.Request, ctx *Context) error {
-	if ctx.User == nil || ctx.User.IsExpired() {
-		http.Redirect(w, req, reverse("login"), http.StatusTemporaryRedirect)
+func profilePost(ctx *Context) error {
+	if !ctx.checkLogin() {
 		return nil
 	}
 	res := make(osin.ResponseData)
+	req := ctx.Request
 	// filed, value := req.PostFormValue("name"), req.PostFormValue("value")
 	values := make(map[string]string)
 	for input, field := range models.ProfileEditables {
@@ -410,7 +426,7 @@ func profilePost(w http.ResponseWriter, req *http.Request, ctx *Context) error {
 		res["ok"] = true
 	}
 
-	return outputJson(res, w)
+	return outputJson(res, ctx.Writer)
 }
 
 func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
@@ -424,67 +440,6 @@ func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
 		log.Printf("json encoding error: %s", err)
 	}
 	return err
-}
-
-type handler func(http.ResponseWriter, *http.Request, *Context) error
-
-func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Expires", "Fri, 02 Oct 1998 20:00:00 GMT")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate")
-
-	origin := req.Header.Get("Origin")
-	if len(origin) > 0 {
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization, X-Requested-With")
-		w.Header().Set("Access-Control-Max-Age", "60")
-
-		if req.Method == "OPTIONS" {
-			w.Header().Set("Allow", "GET,HEAD,POST,OPTIONS")
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-	}
-
-	ctx, err := NewContext(req)
-	if err != nil {
-		debug.PrintStack()
-		raven.CaptureError(err, nil)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer ctx.Close()
-
-	//run the handler and grab the error, and report it
-	buf := new(httpbuf.Buffer)
-	err = h(buf, req, ctx)
-	if err != nil {
-		debug.PrintStack()
-		if ctx.User != nil {
-			raven.SetUserContext(&raven.User{ID: ctx.User.Uid})
-		}
-		raven.SetHttpContext(raven.NewHttp(req))
-		logId := raven.CaptureError(err, nil)
-		raven.ClearContext()
-		log.Printf("call handler %s error: %s logId: %s", req.RequestURI, err, logId)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ctx.afterHandle()
-
-	//save the session
-	if len(ctx.Session.Values) > 0 { // session not empty only
-		if err = ctx.Session.Save(req, buf); err != nil {
-			log.Printf("session.save error: %s", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	//apply the buffered response to the writer
-	buf.Apply(w)
 }
 
 func debugf(format string, args ...interface{}) {

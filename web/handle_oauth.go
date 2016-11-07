@@ -3,7 +3,6 @@ package web
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -15,9 +14,11 @@ import (
 )
 
 // Authorization code endpoint
-func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
+func oauthAuthorize(ctx *Context) (err error) {
 	resp := server.NewResponse()
 	defer resp.Close()
+
+	r := ctx.Request
 
 	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
 		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
@@ -25,7 +26,7 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 		// HANDLE LOGIN PAGE HERE
 		if ctx.User == nil {
 			ctx.Referer = link
-			return loginForm(w, r, ctx)
+			return loginForm(ctx)
 			// resp.SetRedirect(reverse("login") + "?referer=" + reverse("authorize"))
 		} else {
 			if r.Method == "GET" {
@@ -33,7 +34,7 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 				if err != nil {
 					return err
 				}
-				return T("authorize.html").Execute(w, map[string]interface{}{
+				return ctx.Render("authorize.html", map[string]interface{}{
 					"link":          link,
 					"response_type": ar.Type,
 					"scopes":        scopes,
@@ -62,14 +63,15 @@ func oauthAuthorize(w http.ResponseWriter, r *http.Request, ctx *Context) (err e
 	// }
 
 	debugf("oauthAuthorize resp: %v", resp)
-	osin.OutputJSON(resp, w, r)
+	osin.OutputJSON(resp, ctx.Writer, r)
 	return resp.InternalError
 }
 
 // Access token endpoint
-func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
+func oauthToken(ctx *Context) (err error) {
 	resp := server.NewResponse()
 	defer resp.Close()
+	r := ctx.Request
 
 	var (
 		uid   string = ""
@@ -138,14 +140,15 @@ func oauthToken(w http.ResponseWriter, r *http.Request, ctx *Context) (err error
 
 	debugf("oauthToken resp: %v", resp)
 
-	osin.OutputJSON(resp, w, r)
+	osin.OutputJSON(resp, ctx.Writer, r)
 	return resp.InternalError
 }
 
 // Information endpoint
-func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error) {
+func oauthInfo(ctx *Context) (err error) {
 	resp := server.NewResponse()
 	defer resp.Close()
+	r := ctx.Request
 
 	if ir := server.HandleInfoRequest(resp, r); ir != nil {
 		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
@@ -179,6 +182,6 @@ func oauthInfo(w http.ResponseWriter, r *http.Request, ctx *Context) (err error)
 		log.Printf("info ERROR: %s\n", resp.InternalError)
 	}
 
-	osin.OutputJSON(resp, w, r)
+	osin.OutputJSON(resp, ctx.Writer, r)
 	return resp.InternalError
 }
