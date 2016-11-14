@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/gob"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -43,10 +42,7 @@ const (
 	kRefer   = "ref"
 )
 
-func NewContext(w http.ResponseWriter, req *http.Request) (*Context, error) {
-	sess, err := store.Get(req, Settings.Session.Name)
-	sess.Options.Domain = Settings.Session.Domain
-	sess.Options.HttpOnly = true
+func NewContext(w http.ResponseWriter, req *http.Request, sess *sessions.Session) *Context {
 	var (
 		lastUid string
 		user    *User
@@ -78,12 +74,8 @@ func NewContext(w http.ResponseWriter, req *http.Request) (*Context, error) {
 		LastUid: lastUid,
 		User:    user,
 	}
-	if err != nil {
-		log.Printf("new context error: %s", err)
-		return ctx, err
-	}
 
-	return ctx, err
+	return ctx
 }
 
 func (ctx *Context) checkLogin() bool {
