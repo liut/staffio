@@ -46,7 +46,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
               {{ if .ctx.User }}
-               {{ if .ctx.User.IsKeeper }}
+                {{ if .ctx.User.IsKeeper }}
               <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="glyphicon glyphicon-wrench"></i> Admin <i class="glyphicon glyphicon-chevron-down"></i></a>
                <ul class="dropdown-menu dropdown-sys">
@@ -55,7 +55,7 @@
                     <li><a href="/dust/_status/monitor.html">Monitor</a></li>
                     <li><a href="/dust/_status/stacks.html">Stacks</a></li>
                     </ul>
-                </li>
+              </li>
                 {{ end }}
               <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">

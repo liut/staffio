@@ -4,7 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"lcgc/platform/staffio/backends/exmail"
+	"github.com/wealthworks/go-tencent-api/exmail"
+	"lcgc/platform/staffio/backends"
 	. "lcgc/platform/staffio/settings"
 )
 
@@ -20,14 +21,14 @@ func main() {
 		return
 	}
 
-	staff, err := exmail.GetStaff(*alias)
+	staff, err := backends.GetStaffFromExmail(*alias)
 	if err != nil {
 		log.Printf("get staff err: %s", err)
 		return
 	}
 	log.Printf("staff: %v", staff)
 
-	count, err := exmail.RequestMailNewCount(*alias)
+	count, err := exmail.CountNewMail(*alias)
 	if err != nil {
 		log.Print(err)
 		return

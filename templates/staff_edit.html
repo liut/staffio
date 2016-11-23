@@ -8,24 +8,30 @@
   <form class="form-horizontal" id="form1" method="post" action="{{ .ctx.Request.RequestURI }}">
 
     <div class="form-group">
-        <label class="col-xs-3 control-label">Login</label>
+        <label class="col-xs-3 control-label">Login (Unique)</label>
         <div class="col-xs-5">
             <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.Uid }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
-            {{ .staff.Uid }} (<span id="eid">{{ .staff.EmployeeNumber }}</span>)
-            <span id="CommonName">{{ .staff.CommonName }}</span>
+            {{ .staff.Uid }} (eid <span id="eid">{{ .staff.EmployeeNumber }}</span>)
         </div>
         <div class="col-xs-1">
             <a class="btn btn-default" href="javascript:void(0);" id="btnFetch" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>
         </div>
     </div>
 
+    <div class="form-group">
+        <label class="col-xs-3 control-label">Common name</label>
+        <div class="col-xs-6">
+            <input type="text" class="form-control" name="nickname" value="{{ .staff.CommonName }}" placeholder="姓名" id="CommonName" />
+        </div>
+    </div>
+
       <div class="form-group">
-        <label class="col-xs-3 control-label">Full name</label>
+        <label class="col-xs-3 control-label">English name</label>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="sn" placeholder="Surname" value="{{ .staff.Surname }}" required />
+            <input type="text" class="form-control" name="sn" placeholder="Surname" title="Surname" value="{{ .staff.Surname }}" required />
         </div>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="gn" placeholder="Given name" value="{{ .staff.GivenName }}" required />
+            <input type="text" class="form-control" name="gn" placeholder="Given name" title="Given name" value="{{ .staff.GivenName }}" required />
         </div>
       </div>
 
@@ -119,7 +125,7 @@
             $.post(location.pathname + '?op=fetch-exmail',{uid:uid},function(res,status,xhr){
                 console.log(res,status)
                 var staff = res.staff
-                $("#CommonName").text(staff.cn)
+                $("#CommonName").val(staff.cn)
                 $("input[name=email]").val(staff.email)
                 $("input[name=sn]").val(staff.sn)
                 $("input[name=gn]").val(staff.gn)
