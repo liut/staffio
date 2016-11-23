@@ -78,7 +78,7 @@ func MainRouter() *mux.Router {
 		panic(err)
 	}
 
-	sessionStart()
+	sessionInit()
 	router = mux.NewRouter()
 
 	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")

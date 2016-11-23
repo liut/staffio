@@ -15,7 +15,7 @@ var (
 	done  <-chan struct{}
 )
 
-func sessionStart() {
+func sessionInit() {
 	var err error
 	// store = sessions.NewCookieStore([]byte(Settings.Session.Name))
 	store, err = pgstore.NewPGStore(Settings.Backend.DSN, []byte(Settings.Session.Secret))
@@ -30,6 +30,6 @@ func sessionStart() {
 	quit, done = store.Cleanup(time.Minute * 5)
 }
 
-func sessionStop() {
+func sessionCleanup() {
 	store.StopCleanup(quit, done)
 }
