@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 
@@ -22,10 +23,12 @@ const (
 )
 
 func openDb() *sql.DB {
+	log.Printf("PGHOST: %s", os.Getenv("PGHOST"))
 	db, err := sql.Open("postgres", Settings.Backend.DSN)
 	if err != nil {
 		log.Fatalf("open db error: %s", err)
 	}
+
 	return db
 }
 

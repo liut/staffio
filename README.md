@@ -8,7 +8,7 @@
 
 ### database
 ````sh
-docker run -e DB_NAME=staffio -e DB_USER=staffio -e DB_PASS=mypassword -p 54322:5432 -d --name staffio-db lcgc/postgresql:9.5.4
+docker run -e DB_NAME=staffio -e DB_USER=staffio -e DB_PASS=mypassword -e TZ=Hongkong -p 54322:5432 -d --name staffio-db lcgc/postgresql:9.5.4
 cat database/schema.sql | docker exec -i staffio-db psql -Ustaffio
 cat database/init.sql | docker exec -i staffio-db psql -Ustaffio
 

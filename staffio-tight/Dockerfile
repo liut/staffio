@@ -8,7 +8,9 @@ ENV PGHOST="staffio-db" \
     STAFFIO_ROOT="/app"
 
 RUN apk --update add \
+  bash \
   ca-certificates \
+  postgresql-client \
   tzdata \
   && cp /usr/share/zoneinfo/Hongkong /etc/localtime \
   && echo "Hongkong" >  /etc/timezone \

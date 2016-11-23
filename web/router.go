@@ -8,7 +8,6 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/wealthworks/csmtp"
 
 	"lcgc/platform/staffio/backends"
@@ -16,7 +15,6 @@ import (
 )
 
 var (
-	store              *sessions.CookieStore
 	router             *mux.Router
 	resUrl             string
 	jsonRequestHeaders = []string{
@@ -80,10 +78,7 @@ func MainRouter() *mux.Router {
 		panic(err)
 	}
 
-	store = sessions.NewCookieStore([]byte(Settings.Session.Name))
-	store.Options.MaxAge = Settings.Session.MaxAge
-	store.Options.Domain = Settings.Session.Domain
-
+	sessionStart()
 	router = mux.NewRouter()
 
 	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")

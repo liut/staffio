@@ -1,7 +1,7 @@
 package web
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/RangelReale/osin"
 	"github.com/dgrijalva/jwt-go"
@@ -50,10 +50,9 @@ func getTokenGenJWT() (tokenGen osin.AccessTokenGen, err error) {
 
 	hmacKey, err = jwt.DecodeSegment(Settings.TokenGen.Key)
 	if err != nil {
-		fmt.Printf("ERROR: key %s\n", err)
+		log.Printf("ERROR: key %s\n", err)
 		return
 	}
-	fmt.Printf("%v\n", hmacKey)
 
 	tokenGen = &AccessTokenGenJWT{Key: hmacKey}
 

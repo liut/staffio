@@ -7,6 +7,8 @@ import (
 
 	"github.com/getsentry/raven-go"
 	"github.com/goods/httpbuf"
+
+	. "lcgc/platform/staffio/settings"
 )
 
 type handler func(*Context) error
@@ -31,13 +33,16 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	buf := new(httpbuf.Buffer)
-	ctx, err := NewContext(buf, req)
+
+	sess, err := store.Get(req, Settings.Session.Name)
 	if err != nil {
-		debug.PrintStack()
+		// debug.PrintStack()
 		raven.CaptureError(err, nil)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Printf("load session error: %s", err)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		// return
 	}
+	ctx := NewContext(buf, req, sess)
 	defer ctx.Close()
 
 	//run the handler and grab the error, and report it
