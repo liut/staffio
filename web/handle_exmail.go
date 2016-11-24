@@ -1,20 +1,36 @@
 package web
 
 import (
+	"encoding/binary"
+	"fmt"
 	"github.com/RangelReale/osin"
 	"github.com/wealthworks/go-tencent-api/exmail"
 
 	. "lcgc/platform/staffio/settings"
 )
 
-func countNewMail(ctx *Context) (err error) {
+func countNewMail(ctx *Context) error {
 	if !ctx.checkLogin() {
 		return nil
 	}
 	email := ctx.User.Uid + "@" + Settings.EmailDomain
-	count, err := exmail.CountNewMail(email)
 	res := make(osin.ResponseData)
 	res["email"] = email
-	res["unseen"] = count
+	key := []byte(fmt.Sprintf("mail-count-%s", ctx.User.Uid))
+
+	if bv, err := cache.Get(key); err == nil {
+		res["unseen"] = binary.LittleEndian.Uint32(bv)
+	} else {
+		count, err := exmail.CountNewMail(email)
+		if err != nil {
+			return err
+		}
+		bs := make([]byte, 4)
+		binary.LittleEndian.PutUint32(bs, uint32(count))
+		cache.Set(key, bs, int(Settings.CacheLifetime))
+		res["unseen"] = count
+		res["got"] = true
+	}
+
 	return outputJson(res, ctx.Writer)
 }
