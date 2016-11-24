@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/RangelReale/osin"
+	"github.com/coocood/freecache"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"github.com/wealthworks/csmtp"
@@ -22,6 +23,7 @@ var (
 		"X-Requested-With", "XMLHttpRequest",
 	}
 	server *osin.Server
+	cache  *freecache.Cache
 )
 
 func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
@@ -78,6 +80,7 @@ func MainRouter() *mux.Router {
 		panic(err)
 	}
 
+	cache = freecache.NewCache(Settings.CacheSize)
 	sessionInit()
 	router = mux.NewRouter()
 

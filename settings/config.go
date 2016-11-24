@@ -47,6 +47,9 @@ type config struct {
 		Method string // disuse
 		Key    string
 	}
+
+	CacheSize     int
+	CacheLifetime uint
 }
 
 var (
@@ -65,6 +68,7 @@ func init() {
 	fs.StringVar(&Settings.LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
 	fs.StringVar(&Settings.LDAP.Password, "ldap-pass", "", "ldap bind password")
 	fs.StringVar(&Settings.LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
+
 	fs.StringVar(&Settings.HttpListen, "http-listen", "localhost:5000", "bind address and port")
 	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
@@ -72,10 +76,12 @@ func init() {
 	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*30, "session cookie life time (in seconds)")
 	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
+
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
 	fs.StringVar(&Settings.TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
+
 	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")
 	fs.StringVar(&Settings.SMTP.Host, "smtp-host", "", "")
 	fs.IntVar(&Settings.SMTP.Port, "smtp-port", 465, "")
@@ -83,6 +89,9 @@ func init() {
 	fs.StringVar(&Settings.SMTP.SenderEmail, "smtp-sender-email", "", "")
 	fs.StringVar(&Settings.SMTP.SenderPassword, "smtp-sender-password", "", "")
 	fs.BoolVar(&Settings.Debug, "debug", false, "app in debug mode")
+
+	fs.IntVar(&Settings.CacheSize, "cache-size", 512*1024, "cache size")
+	fs.UintVar(&Settings.CacheLifetime, "cache-life", 60, "cache lifetime in seconds")
 
 }
 
