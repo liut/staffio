@@ -34,4 +34,11 @@ func main() {
 		return
 	}
 	log.Printf("new mail: %d", count)
+
+	url, err := exmail.GetLoginURL(*alias)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	log.Printf("open %s", url)
 }
