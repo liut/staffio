@@ -93,6 +93,7 @@ func MainRouter() *mux.Router {
 	router.Handle("/profile", handler(profileForm)).Methods("GET").Name("profile")
 	router.Handle("/profile", handler(profilePost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/email/unseen", handler(countNewMail)).Methods("GET").Name("unseen")
+	router.Handle("/email/open", handler(loginToExmail)).Methods("GET").Name("email-open")
 
 	router.Handle("/contacts", handler(contactsTable)).Methods("GET").Name("contacts")
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffForm)).Methods("GET").Name("staff")

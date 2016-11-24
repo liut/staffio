@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/RangelReale/osin"
 	"github.com/wealthworks/go-tencent-api/exmail"
+	"net/http"
 
 	. "lcgc/platform/staffio/settings"
 )
@@ -33,4 +34,17 @@ func countNewMail(ctx *Context) error {
 	}
 
 	return outputJson(res, ctx.Writer)
+}
+
+func loginToExmail(ctx *Context) error {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	email := ctx.User.Uid + "@" + Settings.EmailDomain
+	url, err := exmail.GetLoginURL(email)
+	if err != nil {
+		return err
+	}
+	http.Redirect(ctx.Writer, ctx.Request, url, http.StatusFound)
+	return nil
 }
