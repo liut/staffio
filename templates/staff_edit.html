@@ -21,17 +21,17 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Common name</label>
         <div class="col-xs-6">
-            <input type="text" class="form-control" name="nickname" value="{{ .staff.CommonName }}" placeholder="姓名" id="CommonName" />
+            <input type="text" class="form-control" name="cn" value="{{ .staff.CommonName }}" placeholder="姓名" id="CommonName" />
         </div>
     </div>
 
       <div class="form-group">
         <label class="col-xs-3 control-label">English name</label>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="sn" placeholder="Surname" title="Surname" value="{{ .staff.Surname }}" required />
+            <input type="text" class="form-control" name="gn" placeholder="Given name" title="Given name" value="{{ .staff.GivenName }}" required />
         </div>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="gn" placeholder="Given name" title="Given name" value="{{ .staff.GivenName }}" required />
+            <input type="text" class="form-control" name="sn" placeholder="Surname" title="Surname" value="{{ .staff.Surname }}" required />
         </div>
       </div>
 
@@ -74,13 +74,13 @@
         <label class="col-xs-3 control-label">Gender</label>
         <div class="col-xs-6">
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderMale" value="1"> Male
+              <input type="radio" name="gender" id="gender-male" value="1"> Male
             </label>
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderFemale" value="2"> Female
+              <input type="radio" name="gender" id="gender-female" value="2"> Female
             </label>
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderUnknown" value="0"> Unknown
+              <input type="radio" name="gender" id="gender-unknown" value="0"> Unknown
             </label>
         </div>
     </div>
@@ -118,7 +118,7 @@
   <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
       jQuery(document).ready(function () {
-        $('#gender{{.staff.Gender}}').attr('checked', true);
+        $('#gender-{{.staff.Gender}}').attr('checked', true);
         $("#btnFetch").click(function(){
             var uid = $("#uid").val()
             console.log("searching for uid:", uid)

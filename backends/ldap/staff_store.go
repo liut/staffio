@@ -18,22 +18,8 @@ var (
 )
 
 func StoreStaff(staff *models.Staff) (err error) {
-	var (
-		pass, hash string
-	)
+	pass, hash := generatePasswd()
 	if staff.Passwd == "" {
-		reqs := garbler.PasswordStrengthRequirements{MinimumTotalLength: 16, Digits: 10}
-		pass, err = garbler.NewPassword(&reqs)
-		if err != nil {
-			log.Printf("garbler.NewPassword err %s", err)
-			return
-		}
-		hash, err = ssha.Generate(pass, 4)
-		if err != nil {
-			log.Printf("ssha.Generate err %s", err)
-			return
-		}
-		log.Printf("gen new passwd %q", pass)
 		staff.Passwd = hash
 	}
 	var isNew bool
@@ -58,32 +44,17 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		return
 	}
 	dn := ls.UDN(uid)
-	_, err = ls.getEntry(ls.UDN(uid))
+	var entry *ldap.Entry
+	entry, err = ls.getEntry(ls.UDN(uid))
 	if err == nil {
-		// TODO: update
-		mr := ldap.NewModifyRequest(dn)
-		mr.Replace("sn", []string{staff.Surname})
-		mr.Replace("givenName", []string{staff.GivenName})
-		mr.Replace("cn", []string{staff.GetCommonName()})
-		mr.Replace("mail", []string{staff.Email})
-
-		if staff.Mobile != "" {
-			mr.Replace("mobile", []string{staff.Mobile})
-		}
-		if staff.EmployeeNumber != "" {
+		// :update
+		mr := makeModifyRequest(dn, entry, staff)
+		if staff.EmployeeNumber != entry.GetAttributeValue("employeeNumber") {
 			mr.Replace("employeeNumber", []string{staff.EmployeeNumber})
 		}
-
-		if staff.AvatarPath != "" {
-			mr.Replace("avatarPath", []string{staff.AvatarPath})
+		if staff.EmployeeType != entry.GetAttributeValue("employeeType") {
+			mr.Replace("employeeType", []string{staff.EmployeeType})
 		}
-		if staff.Birthday != "" {
-			mr.Replace("dateOfBirth", []string{staff.Birthday})
-		}
-		if staff.Description != "" {
-			mr.Replace("description", []string{staff.Description})
-		}
-
 		err = ls.c.Modify(mr)
 		if err != nil {
 			log.Printf("modify err %s", err)
@@ -92,38 +63,7 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 	}
 	if err == ErrNotFound {
 		isNew = true
-		ar := ldap.NewAddRequest(dn)
-		ar.Attribute("objectClass", objectClassPeople)
-		ar.Attribute("uid", []string{uid})
-		ar.Attribute("sn", []string{staff.Surname})
-		ar.Attribute("givenName", []string{staff.GivenName})
-		ar.Attribute("cn", []string{staff.GetCommonName()})
-		ar.Attribute("mail", []string{staff.Email})
-		if staff.Mobile != "" {
-			ar.Attribute("mobile", []string{staff.Mobile})
-		}
-
-		if staff.EmployeeNumber != "" {
-			ar.Attribute("employeeNumber", []string{staff.EmployeeNumber})
-		}
-		if staff.EmployeeType != "" {
-			ar.Attribute("employeeType", []string{staff.EmployeeType})
-		}
-		if staff.Gender != models.Unknown {
-			ar.Attribute("gender", []string{fmt.Sprintf("%d", staff.Gender)})
-		}
-		if staff.Birthday != "" {
-			ar.Attribute("dateOfBirth", []string{staff.Birthday})
-		}
-		if staff.Description != "" {
-			ar.Attribute("description", []string{staff.Description})
-		}
-		if staff.AvatarPath != "" {
-			ar.Attribute("avatarPath", []string{staff.AvatarPath})
-		}
-
-		ar.Attribute("userPassword", []string{staff.Passwd})
-
+		ar := makeAddRequest(dn, staff)
 		err = ls.c.Add(ar)
 		if err != nil {
 			log.Printf("add err %s", err)
@@ -133,6 +73,92 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 
 	log.Printf("getEntry err %s", err)
 
+	return
+}
+
+func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
+	ar := ldap.NewAddRequest(dn)
+	ar.Attribute("objectClass", objectClassPeople)
+	ar.Attribute("uid", []string{staff.Uid})
+	ar.Attribute("sn", []string{staff.Surname})
+	ar.Attribute("givenName", []string{staff.GivenName})
+	ar.Attribute("cn", []string{staff.GetCommonName()})
+	ar.Attribute("mail", []string{staff.Email})
+	if staff.Mobile != "" {
+		ar.Attribute("mobile", []string{staff.Mobile})
+	}
+
+	if staff.EmployeeNumber != "" {
+		ar.Attribute("employeeNumber", []string{staff.EmployeeNumber})
+	}
+	if staff.EmployeeType != "" {
+		ar.Attribute("employeeType", []string{staff.EmployeeType})
+	}
+	if staff.Gender != models.Unknown {
+		ar.Attribute("gender", []string{staff.Gender.String()})
+	}
+	if staff.Birthday != "" {
+		ar.Attribute("dateOfBirth", []string{staff.Birthday})
+	}
+	if staff.Description != "" {
+		ar.Attribute("description", []string{staff.Description})
+	}
+	if staff.AvatarPath != "" {
+		ar.Attribute("avatarPath", []string{staff.AvatarPath})
+	}
+
+	ar.Attribute("userPassword", []string{staff.Passwd})
+
+	return ar
+}
+
+func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.ModifyRequest {
+	mr := ldap.NewModifyRequest(dn)
+	mr.Replace("objectClass", objectClassPeople)
+	if staff.Surname != entry.GetAttributeValue("sn") {
+		mr.Replace("sn", []string{staff.Surname})
+	}
+	if staff.GivenName != entry.GetAttributeValue("givenName") {
+		mr.Replace("givenName", []string{staff.GivenName})
+	}
+	if staff.CommonName != entry.GetAttributeValue("cn") {
+		mr.Replace("cn", []string{staff.GetCommonName()})
+	}
+	if staff.Email != entry.GetAttributeValue("mail") {
+		mr.Replace("mail", []string{staff.Email})
+	}
+	if staff.Mobile != entry.GetAttributeValue("mobile") {
+		mr.Replace("mobile", []string{staff.Mobile})
+	}
+	if staff.AvatarPath != entry.GetAttributeValue("avatarPath") {
+		mr.Replace("avatarPath", []string{staff.AvatarPath})
+	}
+	if staff.Gender != models.Unknown {
+		mr.Replace("gender", []string{staff.Gender.String()})
+	}
+	if staff.Birthday != entry.GetAttributeValue("dateOfBirth") {
+		mr.Replace("dateOfBirth", []string{staff.Birthday})
+	}
+	if staff.Description != entry.GetAttributeValue("description") {
+		mr.Replace("description", []string{staff.Description})
+	}
+	return mr
+}
+
+func generatePasswd() (pass, hash string) {
+	var err error
+	reqs := garbler.PasswordStrengthRequirements{MinimumTotalLength: 16, Digits: 10}
+	pass, err = garbler.NewPassword(&reqs)
+	if err != nil {
+		log.Printf("garbler.NewPassword err %s", err)
+		return
+	}
+	hash, err = ssha.Generate(pass, 4)
+	if err != nil {
+		log.Printf("ssha.Generate err %s", err)
+		return
+	}
+	log.Printf("gen new passwd %q", pass)
 	return
 }
 

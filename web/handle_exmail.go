@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/RangelReale/osin"
 	"github.com/wealthworks/go-tencent-api/exmail"
+	"log"
 	"net/http"
 
 	. "lcgc/platform/staffio/settings"
@@ -24,7 +25,8 @@ func countNewMail(ctx *Context) error {
 	} else {
 		count, err := exmail.CountNewMail(email)
 		if err != nil {
-			return err
+			log.Printf("check new mail failed: %s", err)
+			return nil
 		}
 		bs := make([]byte, 4)
 		binary.LittleEndian.PutUint32(bs, uint32(count))

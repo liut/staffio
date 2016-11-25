@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"fmt"
 	"log"
 
 	"lcgc/platform/staffio/backends/ldap"
@@ -83,7 +84,9 @@ func InGroup(group, uid string) bool {
 	return g.Has(uid)
 }
 
-func ProfileModify(uid, password string, values map[string]string) error {
-	// values["cn"] = fmt.Sprintf("%s%s", values["sn"], values["givenName"])
-	return ldap.Modify(uid, password, values)
+func ProfileModify(uid, password string, staff *models.Staff) error {
+	if uid != staff.Uid {
+		return fmt.Errorf("mismatch uid %s and %s", uid, staff.Uid)
+	}
+	return ldap.Modify(uid, password, staff)
 }

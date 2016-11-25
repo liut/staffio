@@ -7,6 +7,7 @@ import (
 func TestSplitName(t *testing.T) {
 	var (
 		items = []struct{ cn, sn, gn string }{
+			{"Jennifer Chan", "Chan", "Jennifer"},
 			{"张飞", "张", "飞"},
 			{"戏志才", "戏", "志才"},
 			{"蔡迎慧 ", "蔡", "迎慧"},

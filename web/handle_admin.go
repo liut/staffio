@@ -68,7 +68,7 @@ func clientsPost(ctx *Context) (err error) {
 	} else {
 
 		pk, name, value := req.PostFormValue("pk"), req.PostFormValue("name"), req.PostFormValue("value")
-		log.Printf("clientsPost: pk %s, name %s, value %s", pk, name, value)
+		// log.Printf("clientsPost: pk %s, name %s, value %s", pk, name, value)
 		if pk == "" {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is empty"}
@@ -166,6 +166,7 @@ func staffForm(ctx *Context) (err error) {
 		if err != nil {
 			return
 		}
+		// log.Print(staff, uint8(staff.Gender))
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
@@ -209,7 +210,7 @@ func staffPost(ctx *Context) (err error) {
 			log.Printf("GetStaff err %s", err)
 			return err
 		}
-		log.Print(staff)
+		// log.Print(staff)
 		if estaff != nil {
 			staff.CommonName = estaff.CommonName
 			staff.Surname = estaff.Surname
@@ -243,14 +244,7 @@ func staffPost(ctx *Context) (err error) {
 			log.Printf("bind %v: %s", staff, err)
 			return
 		}
-		log.Print(staff)
 
-		// sn, gn := req.PostFormValue("sn"), req.PostFormValue("sn")
-		// cn := sn + gn
-		// staff = models.NewStaff(uid, cn, email)
-		// staff.Surname = sn
-		// staff.GivenName = gn
-		// staff.Mobile = req.PostFormValue("mobile")
 		err = backends.StoreStaff(staff)
 		if err == nil {
 			res["ok"] = true

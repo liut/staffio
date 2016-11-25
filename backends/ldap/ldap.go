@@ -30,7 +30,7 @@ type LdapSource struct {
 //Global LDAP directory pool
 var (
 	userDnFmt         = "uid=%s,ou=people,%s"
-	defaultAttributes = []string{"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "employeeNumber", "employeeType", "description", "title"}
+	defaultAttributes = []string{"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "description", "title"}
 	defaultFilter     = "(objectclass=inetOrgPerson)"
 	AuthenSource      []*LdapSource
 	ErrLogin          = errors.New("049: Invalid Username/Password")
@@ -259,6 +259,7 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	u.EmployeeNumber = entry.GetAttributeValue("employeeNumber")
 	u.EmployeeType = entry.GetAttributeValue("employeeType")
 	u.Birthday = entry.GetAttributeValue("dateOfBirth")
+	(&u.Gender).UnmarshalJSON([]byte(entry.GetAttributeValue("gender")))
 	u.AvatarPath = entry.GetAttributeValue("avatarPath")
 	u.Description = entry.GetAttributeValue("description")
 	return

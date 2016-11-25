@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/RangelReale/osin"
+	"github.com/gin-gonic/gin/binding"
 
 	"lcgc/platform/staffio/backends"
 	"lcgc/platform/staffio/models"
@@ -116,16 +117,15 @@ func profilePost(ctx *Context) error {
 	}
 	res := make(osin.ResponseData)
 	req := ctx.Request
-	// filed, value := req.PostFormValue("name"), req.PostFormValue("value")
-	values := make(map[string]string)
-	for input, field := range models.ProfileEditables {
-		value := req.PostFormValue(input)
-		if value != "" {
-			values[field] = value
-		}
-	}
 	password := req.PostFormValue("password")
-	err := backends.ProfileModify(ctx.User.Uid, password, values)
+
+	staff := new(models.Staff)
+	err := binding.Form.Bind(req, staff)
+	if err != nil {
+		log.Printf("bind %v: %s", staff, err)
+		return err
+	}
+	err = backends.ProfileModify(ctx.User.Uid, password, staff)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "password"}

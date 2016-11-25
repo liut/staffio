@@ -3,6 +3,7 @@ package models
 import (
 	// "fmt"
 	"sort"
+	"strings"
 )
 
 var (
@@ -23,34 +24,27 @@ var (
 		"avatarPath":  "avatarPath",
 		"description": "description",
 	}
+
+	cnFormat = "<gn> <sn>"
 )
 
-func NewStaff(uid, cn, email string) *Staff {
-	sn, gn := SplitName(cn)
-	return &Staff{
-		Uid:        uid,
-		CommonName: cn,
-		Surname:    sn,
-		GivenName:  gn,
-		Email:      email,
-	}
-}
-
+// employment for a person
 type Staff struct {
-	Uid            string `json:"uid" form:"uid" binding:"required"` // 登录名
-	Passwd         string `json:"-" form:"password"`
-	CommonName     string `json:"cn,omitempty"`                       // 全名
-	GivenName      string `json:"gn" form:"gn" binding:"required"`    // 名
-	Surname        string `json:"sn" form:"sn" binding:"required"`    // 姓
-	Nickname       string `json:"nickname,omitempty" form:"nickname"` // 昵称
-	Birthday       string `json:"birthday,omitempty" form:"birthday"`
-	Gender         Gender `json:"gender,omitempty" form:"gender"`
-	Email          string `json:"email" form:"email" binding:"required"`
-	Mobile         string `json:"mobile" form:"mobile" binding:"required"`
-	EmployeeNumber string `json:"eid,omitempty" form:"eid"`
-	EmployeeType   string `json:"etype,omitempty" form:"etitle"`
-	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`
-	Description    string `json:"description,omitempty" form:"description"`
+	Uid            string `json:"uid" form:"uid" binding:"required"`         // 登录名
+	Passwd         string `json:"-" form:"password"`                         // 密码
+	CommonName     string `json:"cn,omitempty" form:"cn" binding:"required"` // 姓名（全名）
+	GivenName      string `json:"gn" form:"gn" binding:"required"`           // 名 FirstName
+	Surname        string `json:"sn" form:"sn" binding:"required"`           // 姓 LastName
+	Nickname       string `json:"nickname,omitempty" form:"nickname"`        // 昵称
+	Birthday       string `json:"birthday,omitempty" form:"birthday"`        // 生日
+	Gender         Gender `json:"gender,omitempty" form:"gender"`            // 性别
+	Email          string `json:"email" form:"email" binding:"required"`     // 邮箱
+	Mobile         string `json:"mobile" form:"mobile" binding:"required"`   // 手机
+	Tel            string `json:"tel,omitempty" form:"tel"`                  // 座机
+	EmployeeNumber string `json:"eid,omitempty" form:"eid"`                  // 员工编号
+	EmployeeType   string `json:"etype,omitempty" form:"etitle"`             // 员工岗位
+	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`        // 头像
+	Description    string `json:"description,omitempty" form:"description"`  // 描述
 }
 
 func (u *Staff) Name() string {
@@ -63,7 +57,7 @@ func (u *Staff) Name() string {
 	}
 
 	if u.Surname != "" && u.GivenName != "" {
-		return u.Surname + u.GivenName
+		return formatCN(u.GivenName, u.Surname)
 	}
 
 	return u.Uid
@@ -74,7 +68,7 @@ func (u *Staff) GetCommonName() string {
 		return u.CommonName
 	}
 
-	return u.Surname + u.GivenName
+	return formatCN(u.GivenName, u.Surname)
 }
 
 // func (u *Staff) String() string {
@@ -85,6 +79,11 @@ func (u *Staff) GetCommonName() string {
 
 // 	return fmt.Sprintf("%s (%s)", name, u.Uid)
 // }
+
+func formatCN(gn, sn string) string {
+	r := strings.NewReplacer("<gn>", gn, "<sn>", sn)
+	return r.Replace(cnFormat)
+}
 
 // By is the type of a "less" function that defines the ordering of its Staff arguments.
 type By func(p1, p2 *Staff) bool

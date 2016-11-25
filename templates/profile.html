@@ -10,6 +10,7 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Login</label>
         <div class="col-xs-5">
+            <input type="hidden" name="uid" value="{{ .staff.Uid }}">
             {{ .staff.Uid }} ({{ .staff.EmployeeNumber }})
         </div>
     </div>
@@ -31,10 +32,10 @@
       <div class="form-group">
         <label class="col-xs-3 control-label">English name</label>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="surname" placeholder="Surname" value="{{ .staff.Surname }}" required />
+            <input type="text" class="form-control" name="gn" placeholder="Given name" value="{{ .staff.GivenName }}" required />
         </div>
         <div class="col-xs-3">
-            <input type="text" class="form-control" name="givenName" placeholder="Given name" value="{{ .staff.GivenName }}" required />
+            <input type="text" class="form-control" name="sn" placeholder="Surname" value="{{ .staff.Surname }}" required />
         </div>
       </div>
 
@@ -56,13 +57,13 @@
         <label class="col-xs-3 control-label">Gender</label>
         <div class="col-xs-6">
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderMale" value="1"> Male
+              <input type="radio" name="gender" id="gender-male" value="1"> Male
             </label>
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderFemale" value="2"> Female
+              <input type="radio" name="gender" id="gender-female" value="2"> Female
             </label>
             <label class="radio-inline">
-              <input type="radio" name="gender" id="genderUnknown" value="0"> Unknown
+              <input type="radio" name="gender" id="gender-unknown" value="0"> Unknown
             </label>
         </div>
     </div>
@@ -84,7 +85,7 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Password</label>
         <div class="col-xs-6">
-            <input id="password" name="password" type="password" class="form-control" value="" required>
+            <input id="password" name="password" type="password" class="form-control" value="" autocomplete="off" required>
         </div>
     </div>
 
@@ -102,7 +103,7 @@
   <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
       jQuery(document).ready(function () {
-        $('#gender{{.staff.Gender}}').attr('checked', true);
+        $('#gender-{{.staff.Gender}}').attr('checked', true);
         $('#form1')
         .bootstrapValidator({
             message: 'This value is not valid',
