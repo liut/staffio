@@ -1,15 +1,15 @@
 package ldap
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 
-	"github.com/go-ldap/ldap"
+	"lcgc/platform/staffio/models"
 )
 
-func Modify(uid, password string, values map[string]string) (err error) {
+func Modify(uid, password string, staff *models.Staff) (err error) {
 	for _, ls := range AuthenSource {
-		err = ls.Modify(uid, password, values)
+		err = ls.Modify(uid, password, staff)
 		if err != nil {
 			log.Printf("Modify at %s ERR: %s", ls.Addr, err)
 		}
@@ -17,9 +17,9 @@ func Modify(uid, password string, values map[string]string) (err error) {
 	return
 }
 
-func (ls *LdapSource) Modify(uid, password string, values map[string]string) error {
+func (ls *LdapSource) Modify(uid, password string, staff *models.Staff) error {
 	if ls.Debug {
-		log.Printf("change profile for %s values: %v", uid, values)
+		log.Printf("change profile for %s staff: %v", uid, staff)
 	}
 	userdn := ls.UDN(uid)
 	err := ls.Bind(userdn, password, true)
@@ -31,37 +31,7 @@ func (ls *LdapSource) Modify(uid, password string, values map[string]string) err
 		return err
 	}
 
-	modify := ldap.NewModifyRequest(entry.DN)
-	modify.Replace("objectClass", objectClassPeople)
-	changed := make(map[string]bool)
-	for k, v := range values {
-		if v == "" {
-			continue
-		}
-		vals := entry.GetAttributeValues(k)
-		if len(vals) == 0 {
-			changed[k] = true
-			modify.Add(k, []string{v})
-		} else {
-			if vals[0] != v {
-				changed[k] = true
-				modify.Replace(k, []string{v})
-			}
-		}
-	}
-
-	if len(changed) == 0 {
-		if ls.Debug {
-			log.Printf("nothing changed for %s", uid)
-		}
-		return nil
-	}
-
-	_, sok := changed["sn"]
-	_, gok := changed["givenName"]
-	if sok && gok {
-		modify.Replace("cn", []string{fmt.Sprintf("%s%s", values["sn"], values["givenName"])})
-	}
+	modify := makeModifyRequest(userdn, entry, staff)
 
 	if err := ls.c.Modify(modify); err != nil {
 		log.Printf("Modify ERROR: %s\n", err.Error())
