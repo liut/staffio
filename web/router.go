@@ -34,7 +34,7 @@ func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
 func NewServerConfig() *osin.ServerConfig {
 	return &osin.ServerConfig{
 		AuthorizationExpiration: 900,
-		AccessExpiration:        3600,
+		AccessExpiration:        3600 * 24,
 		TokenType:               "bearer",
 		AllowedAuthorizeTypes: osin.AllowedAuthorizeType{
 			osin.CODE,

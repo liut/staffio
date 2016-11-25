@@ -39,6 +39,12 @@
     <ul class="list-inline">
         <li>
             <form action="{{ .link }}" method="post">
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="remember"> <!-- Remember me --> 记住我，下次不再问
+    </label>
+  </div>
                 <input type="submit" class="btn btn-primary" value="好的，我授权此请求" />
                 <input type="hidden" name="authorize" value="1" />
             </form>

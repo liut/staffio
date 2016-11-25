@@ -15,7 +15,8 @@ import (
 )
 
 var (
-	clients_sortable_fields = []string{"id", "created"}
+	clients_sortable_fields              = []string{"id", "created"}
+	_                       osin.Storage = (*DbStorage)(nil)
 )
 
 type DbStorage struct {
@@ -346,4 +347,26 @@ func LoadScopes() (scopes []*models.Scope, err error) {
 	}
 
 	return scopes, nil
+}
+
+func IsAuthorized(client_id, username string) bool {
+	var (
+		created time.Time
+	)
+	if err := withDbQuery(func(db *sql.DB) error {
+		return db.QueryRow("SELECT created FROM oauth_client_user_authorized WHERE client_id = $1 AND username = $2",
+			client_id, username).Scan(&created)
+	}); err != nil {
+		log.Printf("load IsAuthorized ERROR: %s", err)
+		return false
+	}
+	return true
+}
+
+func SaveAuthorized(client_id, username string) error {
+	return withDbQuery(func(db *sql.DB) error {
+		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ON CONFLICT DO NOTHING",
+			client_id, username)
+		return err
+	})
 }

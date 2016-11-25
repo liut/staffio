@@ -24,6 +24,10 @@ type Context struct {
 	Version   string
 }
 
+func (c *Context) IsUserExpired() bool {
+	return c.User == nil || c.User.IsExpired()
+}
+
 func (c *Context) afterHandle() {
 	if c.User != nil {
 		if !c.User.IsExpired() {
@@ -79,7 +83,7 @@ func NewContext(w http.ResponseWriter, req *http.Request, sess *sessions.Session
 }
 
 func (ctx *Context) checkLogin() bool {
-	if ctx.User == nil || ctx.User.IsExpired() {
+	if ctx.IsUserExpired() {
 		ctx.toLogin()
 		return false
 	}

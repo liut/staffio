@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS oauth_authorization_code
 	PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_authorize_client_user ON oauth_authorization_code (client_id, username);
+
 CREATE TABLE IF NOT EXISTS oauth_scope
 (
 	id serial,
@@ -61,6 +63,15 @@ CREATE TABLE IF NOT EXISTS oauth_scope
 );
 
 
+CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
+(
+	id serial,
+	client_id varchar(120) NOT NULL,
+	username varchar(120) NOT NULL DEFAULT '',
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE (client_id, username),
+	PRIMARY KEY (id)
+);
 
 
 END;
