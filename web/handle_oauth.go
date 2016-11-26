@@ -1,9 +1,9 @@
 package web
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
-	"net/url"
+	// "net/url"
 	"strings"
 
 	"github.com/RangelReale/osin"
@@ -15,19 +15,21 @@ import (
 
 // Authorization code endpoint
 func oauthAuthorize(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
 	resp := server.NewResponse()
 	defer resp.Close()
 
 	r := ctx.Request
 
 	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
-		link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
-			ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
-		// HANDLE LOGIN PAGE HERE
-		if ctx.User == nil {
-			ctx.Referer = link
-			return loginForm(ctx)
-			// resp.SetRedirect(reverse("login") + "?referer=" + reverse("authorize"))
+		// link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
+		// 	ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
+		if backends.IsAuthorized(ar.Client.GetId(), ctx.User.Uid) {
+			ar.UserData = ctx.User.Uid
+			ar.Authorized = true
+			server.FinishAuthorizeRequest(resp, r, ar)
 		} else {
 			if r.Method == "GET" {
 				scopes, err := backends.LoadScopes()
@@ -35,7 +37,7 @@ func oauthAuthorize(ctx *Context) (err error) {
 					return err
 				}
 				return ctx.Render("authorize.html", map[string]interface{}{
-					"link":          link,
+					"link":          r.RequestURI,
 					"response_type": ar.Type,
 					"scopes":        scopes,
 					"client":        ar.Client.(*models.Client),
@@ -47,6 +49,12 @@ func oauthAuthorize(ctx *Context) (err error) {
 				ar.UserData = ctx.User.Uid
 				ar.Authorized = true
 				server.FinishAuthorizeRequest(resp, r, ar)
+				if r.PostForm.Get("remember") != "" {
+					err := backends.SaveAuthorized(ar.Client.GetId(), ctx.User.Uid)
+					if err != nil {
+						log.Printf("remember ERR %s", err)
+					}
+				}
 			} else {
 				resp.SetRedirect(reverse("welcome"))
 			}

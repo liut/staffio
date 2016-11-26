@@ -6,13 +6,16 @@ import (
 	"net/http"
 
 	"github.com/rakyll/statik/fs"
+	"github.com/wealthworks/go-utils/reaper"
 
+	"lcgc/platform/staffio/backends"
 	. "lcgc/platform/staffio/settings"
 	_ "lcgc/platform/staffio/staffio-tight/statik"
 	"lcgc/platform/staffio/web"
 )
 
 func main() {
+	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 	router := web.MainRouter()
 
 	statikFS, se := fs.New()
