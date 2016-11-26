@@ -73,7 +73,7 @@ func init() {
 	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
-	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*30, "session cookie life time (in seconds)")
+	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*7, "session cookie life time (in seconds)")
 	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
 

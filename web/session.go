@@ -2,7 +2,6 @@ package web
 
 import (
 	"log"
-	"time"
 
 	"github.com/liut/pgstore"
 
@@ -11,8 +10,6 @@ import (
 
 var (
 	store *pgstore.PGStore
-	quit  chan<- struct{}
-	done  <-chan struct{}
 )
 
 func sessionInit() {
@@ -26,10 +23,4 @@ func sessionInit() {
 	// store.Options.MaxAge = Settings.Session.MaxAge
 	store.Options.Domain = Settings.Session.Domain
 	store.Options.HttpOnly = true
-
-	quit, done = store.Cleanup(time.Minute * 5)
-}
-
-func sessionCleanup() {
-	store.StopCleanup(quit, done)
 }

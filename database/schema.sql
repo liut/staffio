@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS oauth_access_token
 	PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_access_created ON oauth_access_token (created);
 CREATE INDEX idx_access_refresh ON oauth_access_token (refresh_token);
 
 CREATE TABLE IF NOT EXISTS oauth_authorization_code
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS oauth_authorization_code
 	PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_authorize_client_user ON oauth_authorization_code (client_id, username);
+CREATE INDEX idx_authorize_created ON oauth_authorization_code (created);
 
 CREATE TABLE IF NOT EXISTS oauth_scope
 (

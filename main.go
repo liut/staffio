@@ -6,12 +6,16 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/wealthworks/go-utils/reaper"
+
+	"lcgc/platform/staffio/backends"
 	. "lcgc/platform/staffio/settings"
 	"lcgc/platform/staffio/web"
 	"lcgc/platform/staffio/webfatso"
 )
 
 func main() {
+	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 	router := web.MainRouter()
 	if strings.HasPrefix(Settings.HttpListen, "localhost") {
 		webfatso.AppDemo(router)
