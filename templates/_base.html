@@ -52,12 +52,14 @@
                 {{ if .ctx.User.IsKeeper }}
               <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="glyphicon glyphicon-wrench"></i> Admin <i class="glyphicon glyphicon-chevron-down"></i></a>
-               <ul class="dropdown-menu dropdown-sys">
+                <ul class="dropdown-menu dropdown-sys">
                     <li><a href="/dust/clients">Clients</a></li>
                     <li><a href="/dust/scopes">Scopes</a></li>
+                    <li><a href="/dust/articles">Articles</a></li>
+                    <li><a href="/dust/links">Links</a></li>
                     <li><a href="/dust/_status/monitor.html">Monitor</a></li>
                     <li><a href="/dust/_status/stacks.html">Stacks</a></li>
-                    </ul>
+                </ul>
               </li>
                 {{ end }}
               <li class="dropdown">

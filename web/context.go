@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/gob"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -97,6 +98,11 @@ func (ctx *Context) toLogin() {
 
 func (ctx *Context) Render(tpl string, data interface{}) error {
 	return T(tpl).Execute(ctx.Writer, data)
+}
+
+func (ctx *Context) IsAjax() bool {
+	accept := ctx.Request.Header.Get("Accept")
+	return strings.Index(accept, "application/json") >= 0
 }
 
 func init() {

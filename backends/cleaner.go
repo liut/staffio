@@ -1,7 +1,6 @@
 package backends
 
 import (
-	"database/sql"
 	"log"
 	"time"
 )
@@ -14,7 +13,7 @@ const (
 // 清理过期的数据
 func Cleanup() error {
 	now := time.Now()
-	return withDbQuery(func(db *sql.DB) (err error) {
+	return withDbQuery(func(db dber) (err error) {
 		_, err = db.Exec("DELETE FROM oauth_authorization_code WHERE created < $1", now.Add(-time.Second*AuthorizationExpiration))
 		if err != nil {
 			log.Printf("clean authorize ERR %s", err)

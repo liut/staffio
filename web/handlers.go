@@ -13,19 +13,6 @@ import (
 	. "lcgc/platform/staffio/settings"
 )
 
-func welcome(ctx *Context) (err error) {
-
-	if Settings.Debug {
-		log.Printf("session Name: %s, Values: %d", ctx.Session.Name(), len(ctx.Session.Values))
-		log.Printf("ctx User %v", ctx.User)
-	}
-
-	//execute the template
-	return ctx.Render("welcome.html", map[string]interface{}{
-		"ctx": ctx,
-	})
-}
-
 func loginForm(ctx *Context) (err error) {
 	return ctx.Render("login.html", map[string]interface{}{
 		"ctx": ctx,
