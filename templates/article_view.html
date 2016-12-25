@@ -1,0 +1,42 @@
+{{ define "title" }}Article{{ end }}
+{{ define "head" }}
+<style>
+
+article {
+	line-height: 1.6;
+	padding: 1em 2em;
+}
+article > .author {
+	margin-top: 1em;
+	/*padding-left: 2em;*/
+}
+
+article > header {
+	margin: 0 auto 1em;
+	font-size: 1.4em;
+}
+
+article > content {
+	font-size: 1.1em;
+}
+
+</style>
+{{ end }}
+{{ define "content" }}
+<div class="panel panel-default">
+	<div class="panel-body">
+      <article>
+      	<header>{{ .article.HtmlTitle }}</header>
+      	<content>{{ .article.HtmlContent }}</content>
+		<i class="author"> <i class="glyphicon glyphicon-hand-right"></i> {{ .article.Author }}</i> posted at <i class="pretty" title="{{ .article.Created }}">{{ .article.Created }}</i>
+      </article>
+	</div>
+</div>
+{{ end }}
+{{ define "tail" }}<script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
+  <script type="text/javascript">
+      jQuery(document).ready(function () {
+        $(".pretty").prettyDate();
+      });
+  </script>
+{{ end }}

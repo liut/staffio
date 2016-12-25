@@ -1,0 +1,119 @@
+{{ define "title" }}Links{{ end }}
+{{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/css/bootstrap-editable.css" rel="stylesheet">
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+{{ end }}
+{{ define "content" }}
+
+    <h4>All links:</h4>
+      <table class="table">
+          <tr>
+              <th>ID</th>
+              <th>title</th>
+              <th>URL</th>
+              <th>position</th>
+              <th>author</th>
+              <th>created</th>
+          </tr>
+          {{ range .links }}
+          <tr>
+              <td>{{ .Id }}</td>
+              <td><span class="editable" data-name="title" data-type="text" data-pk="{{ .Id }}" data-title="Enter name">{{ .Title }}</span></td>
+              <td><span class="editable" data-name="url" data-type="url" data-pk="{{ .Id }}" data-title="Enter a new url">{{ .Url }}</span></td>
+              <td><span class="editable" data-name="position" data-type="number" data-pk="{{ .Id }}" data-title="Enter a position number">{{ .Position }}</span></td>
+              <td>{{ .Author }}</span></td>
+              <td class="pretty" title="{{ .Created }}">{{ .Created }}</td>
+          </tr>
+          {{ end }}
+      </table>
+
+<div>
+
+<h4>Creating new:</h4>
+<form class="form-horizontal" id="form1" action="{{ reverse "links_form" }}" method="post">
+    <input type="hidden" name="op" value="new">
+    <div id="msg" class="alert" style="display:none;" role="alert"></div>
+
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Title</label>
+        <div class="col-xs-9">
+            <input id="the_title" type="text" class="form-control" name="title" value="{{ .link.Title }}" placeholder="Enter title" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Url</label>
+        <div class="col-xs-9">
+          <input id="the_url" type="url" class="form-control" name="url" value="{{ .link.Url }}" placeholder="Enter a url: https://" required >
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary" value="Save!">
+    <input type="reset" class="btn pull-right" value="Reset">
+</form>
+
+</div>
+{{ end }}
+{{ define "tail" }}
+  <script src="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/js/bootstrap-editable.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
+  <script type="text/javascript">
+    var action_url = '{{ reverse "links_form" }}'
+
+      jQuery(document).ready(function () {
+        $(".pretty").prettyDate();
+        // $.fn.editable.defaults.mode = 'inline';
+        $.fn.editable.defaults.url = action_url;
+        $('.editable').editable();
+        // TODO: add selectable allows
+
+        $('#form1')
+        .bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            }
+        })
+        .on('success.form.bv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the BootstrapValidator instance
+            var bv = $form.data('bootstrapValidator');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(res) {
+                // console.log(res);
+                if (!!res.ok) {
+                  Dust.alert('Save successfully', 'OK', function(){
+                    var ref = action_url;
+                    if (typeof res.referer == 'string') {
+                      ref = res.referer;
+                    }
+                    location.href = ref;
+                  });
+                } else if (typeof res.error != "undefined") {
+                  var error = res.error
+                  if (typeof error.field === "string") {
+                    bv.updateMessage(error.field, 'callback', error.message);
+                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                    // Dust.alert(error.message);
+                  }
+                } else {
+                  alertAjaxResult(res);
+                }
+            }, 'json');
+            // console.log(bv)
+        });
+
+      });
+
+  </script>
+{{ end }}

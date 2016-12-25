@@ -1,0 +1,130 @@
+{{ define "title" }}Article{{ end }}
+{{ define "head" }}
+    <link href="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/css/bootstrap-editable.css" rel="stylesheet">
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+{{ end }}
+{{ define "content" }}
+{{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
+    <h4>All articles:</h4>
+      <table class="table">
+          <tr>
+              <th>id</th>
+              <th>title</th>
+              <th>author</th>
+              <th>created</th>
+              <th></th>
+          </tr>
+          {{ range .articles }}
+          <tr>
+              <td class="text-right">{{ .Id }}</td>
+              <td><span class="" data-name="title" data-type="text" data-pk="{{ .Title }}" data-title="Enter name">{{ .HtmlTitle }}</span></td>
+              <td><span class="" data-name="author" data-type="text" data-pk="{{ .Author }}" data-title="">{{ .Author }}</span></td>
+              <td class="pretty" title="{{ .Created }}">{{ .Created }}</td>
+              <td>{{if $isKeeper }}
+                <a class="edit" data-aid="{{ .Id }}" href="javascript:void(0);"><i class="glyphicon glyphicon-pencil"></i></a>
+                {{ end }}
+              </td>
+          </tr>
+          {{ end }}
+      </table>
+
+
+<div>
+
+<h4>Creating new:</h4>
+<form class="form-horizontal" id="form1" action="{{ reverse "article_form" }}" method="post">
+    <input id="the_id" type="hidden" name="id" value="">
+    <div id="msg" class="alert" style="display:none;" role="alert"></div>
+
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Title</label>
+        <div class="col-xs-9">
+            <input id="the_title" type="text" class="form-control" name="title" value="{{ .article.Title }}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Content</label>
+        <div class="col-xs-9">
+            <textarea id="the_content" name="content" class="form-control" rows="9">{{ .article.Content }}</textarea>
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary" value="Save!">
+    <input type="reset" class="btn pull-right" value="Reset">
+</form>
+
+</div>
+{{ end }}
+{{ define "tail" }}
+  <script src="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/js/bootstrap-editable.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
+  <script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
+  <script type="text/javascript">
+    var action_url = '{{ reverse "article_form" }}'
+
+      jQuery(document).ready(function () {
+        $(".pretty").prettyDate();
+        // $.fn.editable.defaults.mode = 'inline';
+        // $.fn.editable.defaults.url = action_url;
+        $('.editable').editable();
+
+   $('a.edit').click(function(){
+    $.getJSON('/article/'+$(this).data('aid'), function(res){
+      console.log(res)
+      $('#the_id').val(res.data.id)
+      $('#the_title').val(res.data.title)
+      $('#the_content').val(res.data.content)
+    })
+   });
+   $(':reset', '#form1').click(function(){
+    $('#the_id').val(0)
+   });
+
+        $('#form1')
+        .bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            }
+        })
+        .on('success.form.bv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the BootstrapValidator instance
+            var bv = $form.data('bootstrapValidator');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(res) {
+                // console.log(res);
+                if (!!res.ok) {
+                  Dust.alert('Save successfully', 'OK', function(){
+                    var ref = action_url;
+                    if (typeof res.referer == 'string') {
+                      ref = res.referer;
+                    }
+                    location.href = ref;
+                  });
+                } else if (typeof res.error != "undefined") {
+                  var error = res.error
+                  if (typeof error.field === "string") {
+                    bv.updateMessage(error.field, 'callback', error.message);
+                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                    // Dust.alert(error.message);
+                  }
+                } else {
+                  alertAjaxResult(res);
+                }
+            }, 'json');
+            // console.log(bv)
+        });
+      });
+  </script>
+{{ end }}

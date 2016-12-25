@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/RangelReale/osin"
-	_ "github.com/lib/pq"
 
 	"lcgc/platform/staffio/models"
 	. "lcgc/platform/staffio/settings"
@@ -58,7 +57,7 @@ func (s *DbStorage) GetClient(id string) (osin.Client, error) {
 
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 	s.logf("SaveAuthorize: '%s'\n", data.Code)
-	qs := func(tx *sql.Tx) error {
+	qs := func(tx dbTxer) error {
 		sql := `INSERT INTO
 		 oauth_authorization_code(code, client_id, username, redirect_uri, expires_in, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7);`
@@ -83,7 +82,7 @@ func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 		err       error
 	)
 	a := &osin.AuthorizeData{Code: code}
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		return db.QueryRow(`SELECT client_id, username, redirect_uri, expires_in, scopes, created
 		 FROM oauth_authorization_code WHERE code = $1`,
 			code).Scan(&client_id, &username, &a.RedirectUri, &a.ExpiresIn, &a.Scope, &a.CreatedAt)
@@ -109,7 +108,7 @@ func (s *DbStorage) RemoveAuthorize(code string) error {
 		log.Print("authorize code is empty")
 		return nil
 	}
-	qs := func(tx *sql.Tx) error {
+	qs := func(tx dbTxer) error {
 		sql := `DELETE FROM oauth_authorization_code WHERE code = $1;`
 		r, err := tx.Exec(sql, code)
 		if err != nil {
@@ -125,7 +124,7 @@ func (s *DbStorage) RemoveAuthorize(code string) error {
 
 func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
 	s.logf("SaveAccess: '%s'\n", data.AccessToken)
-	qs := func(tx *sql.Tx) error {
+	qs := func(tx dbTxer) error {
 		str := `INSERT INTO
 		 oauth_access_token(client_id, username, access_token, refresh_token, expires_in, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7);`
@@ -155,7 +154,7 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 		id        int
 	)
 	a := &osin.AccessData{AccessToken: code}
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		return db.QueryRow(`SELECT id, client_id, username, refresh_token, expires_in, scopes, is_frozen, created
 		 FROM oauth_access_token WHERE access_token = $1`,
 			code).Scan(&id, &client_id, &username, &a.RefreshToken, &a.ExpiresIn, &a.Scope, &is_frozen, &a.CreatedAt)
@@ -177,7 +176,7 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 
 func (s *DbStorage) RemoveAccess(code string) error {
 	s.logf("RemoveAccess: %s\n", code)
-	qs := func(tx *sql.Tx) error {
+	qs := func(tx dbTxer) error {
 		str := `DELETE FROM oauth_access_token WHERE access_token = $1;`
 		r, err := tx.Exec(str, code)
 		if err != nil {
@@ -207,7 +206,7 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 
 func GetClientWithCode(code string) (*models.Client, error) {
 	c := new(models.Client)
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
 			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
 	}
@@ -250,7 +249,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
 
 	clients = make([]*models.Client, 0)
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		rows, err := db.Query(str)
 		if err != nil {
 			log.Printf("db query error: %s for sql %s", err, str)
@@ -284,7 +283,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 }
 
 func CountClients() (total uint) {
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		return db.QueryRow("SELECT COUND(id) FROM oauth_client").Scan(&total)
 	}
 	withDbQuery(qs)
@@ -296,7 +295,7 @@ func SaveClient(client *models.Client) error {
 	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectUri == "" {
 		return valueError
 	}
-	qs := func(tx *sql.Tx) error {
+	qs := func(tx dbTxer) error {
 		var err error
 		if client.Id > 0 {
 			str := `UPDATE oauth_client SET name = $1, code = $2, secret = $3, redirect_uri = $4
@@ -324,7 +323,7 @@ func SaveClient(client *models.Client) error {
 
 func LoadScopes() (scopes []*models.Scope, err error) {
 	scopes = make([]*models.Scope, 0)
-	qs := func(db *sql.DB) error {
+	qs := func(db dber) error {
 		rows, err := db.Query("SELECT name, label, description, is_default FROM oauth_scope")
 		if err != nil {
 			log.Printf("load scopes error: %s", err)
@@ -353,7 +352,7 @@ func IsAuthorized(client_id, username string) bool {
 	var (
 		created time.Time
 	)
-	if err := withDbQuery(func(db *sql.DB) error {
+	if err := withDbQuery(func(db dber) error {
 		return db.QueryRow("SELECT created FROM oauth_client_user_authorized WHERE client_id = $1 AND username = $2",
 			client_id, username).Scan(&created)
 	}); err != nil {
@@ -364,7 +363,7 @@ func IsAuthorized(client_id, username string) bool {
 }
 
 func SaveAuthorized(client_id, username string) error {
-	return withDbQuery(func(db *sql.DB) error {
+	return withDbQuery(func(db dber) error {
 		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ON CONFLICT DO NOTHING",
 			client_id, username)
 		return err

@@ -3,10 +3,11 @@ package backends
 import (
 	"database/sql"
 	"errors"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
 
 	. "lcgc/platform/staffio/settings"
 )
@@ -14,7 +15,7 @@ import (
 var (
 	dbError    = errors.New("database error")
 	valueError = errors.New("value error")
-	dbc        *sql.DB
+	dbc        *sqlx.DB
 )
 
 const (
@@ -22,9 +23,25 @@ const (
 	DESCENDING = -1
 )
 
-func openDb() *sql.DB {
+type dber interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Get(dest interface{}, query string, args ...interface{}) error
+	Select(dest interface{}, query string, args ...interface{}) error
+}
+
+type dbTxer interface {
+	dber
+	Rollback() error
+	Commit() error
+}
+
+func openDb() *sqlx.DB {
 	log.Printf("PGHOST: %s", os.Getenv("PGHOST"))
-	db, err := sql.Open("postgres", Settings.Backend.DSN)
+	db, err := sqlx.Open("postgres", Settings.Backend.DSN)
 	if err != nil {
 		log.Fatalf("open db error: %s", err)
 	}
@@ -41,7 +58,7 @@ func closeDb() {
 	}
 }
 
-func getDb() *sql.DB {
+func getDb() *sqlx.DB {
 	if dbc == nil {
 		dbc = openDb()
 		return dbc
@@ -54,7 +71,7 @@ func getDb() *sql.DB {
 	return dbc
 }
 
-func withDbQuery(query func(db *sql.DB) error) error {
+func withDbQuery(query func(db dber) error) error {
 	db := getDb()
 	// defer db.Close()
 	if err := query(db); err != nil {
@@ -64,12 +81,12 @@ func withDbQuery(query func(db *sql.DB) error) error {
 	return nil
 }
 
-func withTxQuery(query func(tx *sql.Tx) error) error {
+func withTxQuery(query func(tx dbTxer) error) error {
 
 	db := getDb()
 	// defer db.Close()
 
-	tx, err := db.Begin()
+	tx, err := db.Beginx()
 	if err != nil {
 		tx.Rollback()
 		return err

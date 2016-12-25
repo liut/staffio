@@ -75,4 +75,34 @@ CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
 );
 
 
+CREATE TABLE IF NOT EXISTS article
+(
+	id serial,
+	title varchar(64) NOT NULL,
+	content text NOT NULL,
+	author varchar(64) NOT NULL,
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated timestamptz,
+	PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_article_created ON article (created);
+
+
+CREATE TABLE IF NOT EXISTS links
+(
+	id serial,
+	title varchar(64) NOT NULL,
+	url varchar(128) NOT NULL UNIQUE,
+	author varchar(64) NOT NULL,
+	position smallint NOT NULL DEFAULT 0,
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_links_created ON links (created);
+CREATE INDEX idx_links_position ON links (position);
+
+
+
 END;
