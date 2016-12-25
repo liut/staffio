@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
 );
 
 
-CREATE TABLE IF NOT EXISTS article
+CREATE TABLE IF NOT EXISTS articles
 (
 	id serial,
 	title varchar(64) NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS article
 	PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_article_created ON article (created);
+CREATE INDEX idx_article_created ON articles (created);
 
 
 CREATE TABLE IF NOT EXISTS links
