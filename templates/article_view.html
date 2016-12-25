@@ -16,7 +16,7 @@ article > header {
 	font-size: 1.4em;
 }
 
-article > content {
+article > .content {
 	font-size: 1.1em;
 }
 
@@ -27,7 +27,7 @@ article > content {
 	<div class="panel-body">
       <article>
       	<header>{{ .article.HtmlTitle }}</header>
-      	<content>{{ .article.HtmlContent }}</content>
+      	<div class="content">{{ .article.HtmlContent }}</div>
 		<i class="author"> <i class="glyphicon glyphicon-hand-right"></i> {{ .article.Author }}</i> posted at <i class="pretty" title="{{ .article.Created }}">{{ .article.Created }}</i>
       </article>
 	</div>

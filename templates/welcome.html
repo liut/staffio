@@ -67,15 +67,19 @@ article {
 }
 article > .author {
 	margin-top: 1em;
-	padding-left: 2em;
 }
 
 article > h3 {
 	margin: 0 auto 1em;
 }
 
-article > content {
+article p {
 	font-size: 1.1em;
+}
+article > .content {
+	-moz-columns: 32em auto;
+	columns: 32em auto;
+	column-gap: 2.5em;
 }
 
 </style>
@@ -87,27 +91,32 @@ article > content {
 		{{ range .articles }}
 			  <article class="bs-callout bs-callout-{{.StyleName}}">
 				<h3><i class="glyphicon glyphicon-bullhorn small"></i> {{ .HtmlTitle }} <a href="/article/{{.Id}}" class="href"><i class="glyphicon glyphicon-paperclip small"></i></a></h3>
-		      	<content>{{ .HtmlContent }}</content>
+		      	<div class="content">{{ .HtmlContent }}</div>
 				<div class="author">
 					<i> <i class="glyphicon glyphicon-hand-right"></i> {{ .Author }}</i> posted at <i class="pretty" title="{{ .Created }}">{{ .Created }}</i>
 				</div>
 			  </article>
 		{{ end }}
-		<article>
+
+	<section class="links">
 	  <h3 title="Links">常用链接</h3>
 		<div class="list-group">
 		{{ range .links }}
 		  <a href="{{ .Url }}" class="list-group-item"><i class="glyphicon glyphicon-paperclip small"></i> {{ .HtmlTitle }} </a>
 		{{ end }}
 		</div>
+	</section>
+	<article class="third bs-callout bs-callout-default">
 		<h4>第三部分</h4>
+		<div class="content">
 		<p>　　我一直往前走，穿越眼前一望无际的沼泽地；松软的泥土在我脚下陷落，灯心草带着轻声叹息分泌出滴滴水珠；太阳斜落在天涯，远处是平原，是海；群山后面总有一个天涯，每天傍晚太阳要落下。自从我丢了指南针，自从我迷失在这块单调的土地上，不知日期，不知时间，已经过去好多年了。我忘了我的过去，而我的未来，就是这大片无边无际、直伸天空的平原。我的两脚探索着大地，期望找到几块硬土来安放我的睡铺，这时我瞥见远处有一条玫瑰色大水洼，我走近去。在灯心革与乱草之间有一条蜿蜒曲折的长河。</p>
 		<p>　　一百年前，甚至五十年前，我内心或许会激动；我会想：是我发现了一条大河，唯有我探到了这个秘密。现在，玫瑰色的天空冷冰冰的倒映在河面上；我想到的只是：夜深了，这条河我没法过了。遇到一块初寒冻硬的土地，我立刻扔下背囊，取出皮褥子；然后，我举起斧子，朝一根树桩砍去，捡了一堆木柴，点燃了火。每天晚上，我点燃一堆火，为的是在黑夜中，尽管我自身心如枯槁，还有这个劈劈啪啪的声音、这个气味、这个燃烧通红的生命，从地上升向天空。河流是那么静，连水声也听不到一点。
 
 		</p>
+		</div>
 		<p><i class="small">摘自<a href="https://book.douban.com/subject/1340498/" target="_blank">《人都是要死的》</a> <small>（法）西蒙娜·德·波伏瓦 </small></i></p>
-		</article>
-	  </div>
+	</article>
+  </div>
 
 {{ end }}
 {{ define "tail" }}<script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
