@@ -180,6 +180,12 @@ func oauthInfo(ctx *Context) (err error) {
 				}
 			} else if topic == "staff" {
 				resp.Output["staff"] = staff
+			} else if topic == "grafana" || topic == "generic" {
+				resp.Output["name"] = staff.Name()
+				resp.Output["login"] = staff.Uid
+				resp.Output["username"] = staff.Uid
+				resp.Output["email"] = staff.Email
+				resp.Output["attributes"] = map[string][]string{} // TODO: fill attributes
 			}
 
 		}
