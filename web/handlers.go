@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -80,6 +81,78 @@ func passwordChange(ctx *Context) error {
 		res["ok"] = true
 	}
 
+	return outputJson(res, ctx.Writer)
+}
+
+func passwordForgotForm(ctx *Context) error {
+	return ctx.Render("password_forgot.html", map[string]interface{}{
+		"ctx": ctx,
+	})
+}
+
+func passwordForgot(ctx *Context) error {
+	req := ctx.Request
+	uid, email, mobile := req.FormValue("username"), req.FormValue("email"), req.FormValue("mobile")
+	res := make(osin.ResponseData)
+	staff, err := backends.GetStaff(uid)
+	if err != nil || staff.Email != email || staff.Mobile != mobile {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": "Invalid Username/Email/Mobile", "field": "username"}
+		return outputJson(res, ctx.Writer)
+	}
+	err = backends.PasswordForgot(models.AtEmail, email, uid)
+	if err != nil {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": err.Error(), "field": "username"}
+	} else {
+		res["ok"] = true
+	}
+	return outputJson(res, ctx.Writer)
+}
+
+func passwordResetForm(ctx *Context) error {
+	req := ctx.Request
+
+	token := req.FormValue("rt")
+	if token == "" {
+		ctx.Halt(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		return nil
+	}
+
+	uid, err := backends.PasswordResetTokenVerify(token)
+	if err != nil {
+		ctx.Halt(http.StatusBadRequest, fmt.Sprintf("Invalid Token: %s", err))
+		return nil
+	}
+	return ctx.Render("password_reset.html", map[string]interface{}{
+		"ctx":   ctx,
+		"token": token,
+		"uid":   uid,
+	})
+}
+
+func passwordReset(ctx *Context) error {
+	req := ctx.Request
+
+	token := req.FormValue("rt")
+	if token == "" {
+		ctx.Halt(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		return nil
+	}
+	uid, passwd, passwd2 := req.FormValue("username"), req.FormValue("password"), req.FormValue("password_confirm")
+	res := make(osin.ResponseData)
+	if uid == "" || passwd != passwd2 {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
+		return outputJson(res, ctx.Writer)
+	}
+	err := backends.PasswordResetWithToken(uid, token, passwd)
+	if err != nil {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": err.Error(), "field": "password"}
+	} else {
+		res["ok"] = true
+	}
 	return outputJson(res, ctx.Writer)
 }
 

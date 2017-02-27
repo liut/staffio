@@ -75,7 +75,7 @@ func withDbQuery(query func(db dber) error) error {
 	db := getDb()
 	// defer db.Close()
 	if err := query(db); err != nil {
-		log.Printf("db query error: %s", err)
+		log.Printf("db query ERR: %s", err)
 		return dbError
 	}
 	return nil
@@ -94,7 +94,7 @@ func withTxQuery(query func(tx dbTxer) error) error {
 
 	if err := query(tx); err != nil {
 		tx.Rollback()
-		log.Printf("tx query error: %s", err)
+		log.Printf("tx query ERR: %s", err)
 		return dbError
 	}
 	tx.Commit()

@@ -31,6 +31,11 @@ func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(rw, "Not Found")
 }
 
+func BadRequestHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.WriteHeader(http.StatusBadRequest)
+	fmt.Fprintf(rw, http.StatusText(http.StatusBadRequest))
+}
+
 func NewServerConfig() *osin.ServerConfig {
 	return &osin.ServerConfig{
 		AuthorizationExpiration: 900,
@@ -87,6 +92,10 @@ func MainRouter() *mux.Router {
 	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")
 	router.Handle("/login", handler(login)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/logout", handler(logout)).Name("logout")
+	router.Handle("/password/forgot", handler(passwordForgotForm)).Methods("GET").Name("password_forgot")
+	router.Handle("/password/forgot", handler(passwordForgot)).Methods("POST").Headers(jsonRequestHeaders...)
+	router.Handle("/password/reset", handler(passwordResetForm)).Methods("GET").Name("password_reset")
+	router.Handle("/password/reset", handler(passwordReset)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/password", handler(passwordForm)).Methods("GET").Name("password")
 	router.Handle("/password", handler(passwordChange)).Methods("POST").Headers(jsonRequestHeaders...)
 

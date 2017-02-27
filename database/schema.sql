@@ -104,5 +104,33 @@ CREATE INDEX idx_links_created ON links (created);
 CREATE INDEX idx_links_position ON links (position);
 
 
+CREATE TABLE IF NOT EXISTS password_reset (
+	id serial,
+	uid name NOT NULL , -- uid
+	type_id smallint NOT NULL, -- 2=email/3=phone
+	target varchar(50) NOT NULL , -- phone_number/email_address
+	code_hash bigint NOT NULL DEFAULT 0, -- value in crc64
+	life_seconds int NOT NULL DEFAULT 3600,
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE (type_id, target),
+	PRIMARY KEY (id)
+) WITH (OIDS=FALSE);
+
+CREATE INDEX idx_password_reset_uid ON password_reset (uid, created);
+CREATE INDEX idx_password_reset_created ON password_reset (created);
+
+
+CREATE TABLE IF NOT EXISTS user_log (
+	id serial,
+	uid name NOT NULL , -- uid
+	subject name NOT NULL,
+	body text NOT NULL DEFAULT '',
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
+) WITH (OIDS=FALSE);
+
+CREATE INDEX idx_user_log_uid ON user_log (uid);
+
 
 END;

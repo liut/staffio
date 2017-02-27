@@ -1,7 +1,7 @@
 {{ define "title" }}Article{{ end }}
 {{ define "head" }}
     <link href="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/css/bootstrap-editable.css" rel="stylesheet">
-    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.css" rel="stylesheet">
+    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.min.css" rel="stylesheet">
 {{ end }}
 {{ define "content" }}
 {{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
