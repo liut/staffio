@@ -1,4 +1,4 @@
-{{ define "title" }}Index{{ end }}
+{{ define "title" }}Home{{ end }}
 {{ define "head" }}
 <style>
 .bs-callout {
@@ -88,6 +88,16 @@ article > .content {
 {{ define "content" }}
 
 	  <div>
+
+	<section class="links">
+	  <h3 title="Links">常用链接</h3>
+		<div class="list-group">
+		{{ range .links }}
+		  <a href="{{ .Url }}" class="list-group-item"><i class="glyphicon glyphicon-paperclip small"></i> {{ .HtmlTitle }} </a>
+		{{ end }}
+		</div>
+	</section>
+
 	  <h3 title="Articles">最新公告</h3>
 		{{ range .articles }}
 			  <article class="bs-callout bs-callout-{{.StyleName}}">
@@ -99,14 +109,6 @@ article > .content {
 			  </article>
 		{{ end }}
 
-	<section class="links">
-	  <h3 title="Links">常用链接</h3>
-		<div class="list-group">
-		{{ range .links }}
-		  <a href="{{ .Url }}" class="list-group-item"><i class="glyphicon glyphicon-paperclip small"></i> {{ .HtmlTitle }} </a>
-		{{ end }}
-		</div>
-	</section>
 	<article class="third bs-callout bs-callout-default">
 		<h4>第三部分</h4>
 		<div class="content">

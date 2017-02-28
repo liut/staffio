@@ -32,3 +32,33 @@ func (ls *LdapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
 	return nil
 }
+
+func PasswordReset(uid, passwd string) (err error) {
+	for _, ls := range AuthenSource {
+		err = ls.PasswordReset(uid, passwd)
+		if err != nil {
+			log.Printf("PasswordReset at %s ERR: %s", ls.Addr, err)
+		}
+	}
+	return
+}
+
+// password reset by administrator
+func (ls *LdapSource) PasswordReset(uid, newPasswd string) error {
+	err := ls.Bind(ls.BindDN, ls.Passwd, false)
+	if err != nil {
+		return err
+	}
+	dn := ls.UDN(uid)
+
+	passwordModifyRequest := ldap.NewPasswordModifyRequest(dn, "", newPasswd)
+	passwordModifyResponse, err := ls.c.PasswordModify(passwordModifyRequest)
+
+	if err != nil {
+		log.Printf("PasswordModify ERR: %s", err)
+		return err
+	}
+
+	log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
+	return nil
+}

@@ -36,7 +36,9 @@ type config struct {
 	} `ini:"sess"`
 
 	HttpListen   string
+	BaseURL      string
 	ResUrl       string
+	PwdSecret    string
 	Backend      struct{ DSN string }
 	SentryDSN    string
 	Root         string
@@ -70,6 +72,8 @@ func init() {
 	fs.StringVar(&Settings.LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 
 	fs.StringVar(&Settings.HttpListen, "http-listen", "localhost:5000", "bind address and port")
+	fs.StringVar(&Settings.BaseURL, "prefix", "http://localhost:5000", "url prefix for self")
+	fs.StringVar(&Settings.PwdSecret, "password-secret", "very secret", "the secret of password reset")
 	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")

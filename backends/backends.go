@@ -44,14 +44,23 @@ func GetGroup(name string) *models.Group {
 func GetStaff(uid string) (*models.Staff, error) {
 	staff, err := ldap.GetStaff(uid)
 	if err != nil {
-		log.Printf("call GetStaff error: %s", err)
+		log.Printf("ldap get staff with %q ERR: %s", uid, err)
 		return nil, err
 	}
 	return staff, nil
 }
 
 func StoreStaff(staff *models.Staff) error {
-	return ldap.StoreStaff(staff)
+	isNew, err := ldap.StoreStaff(staff)
+	if err == nil {
+		if isNew {
+			err = passwordForgotPrepare(staff)
+			if err != nil {
+				log.Printf("email of new user password send ERR %s", err)
+			}
+		}
+	}
+	return err
 }
 
 func DeleteStaff(uid string) error {
@@ -89,4 +98,12 @@ func ProfileModify(uid, password string, staff *models.Staff) error {
 		return fmt.Errorf("mismatch uid %s and %s", uid, staff.Uid)
 	}
 	return ldap.Modify(uid, password, staff)
+}
+
+func WriteUserLog(uid, subject, message string) error {
+	qs := func(db dber) error {
+		_, err := db.Exec("INSERT INTO user_log(uid, subject, body) VALUES($1, $2, $3)", uid, subject, message)
+		return err
+	}
+	return withDbQuery(qs)
 }

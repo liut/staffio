@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/gob"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -66,6 +67,10 @@ func NewContext(w http.ResponseWriter, req *http.Request, sess *sessions.Session
 		if referer == "" {
 			referer = req.Referer()
 		}
+
+		if strings.Contains(referer, "/login") || strings.Contains(referer, "/password") || strings.Contains(referer, "/email/u") {
+			referer = ""
+		}
 	}
 	// log.Printf("sessions %v", sess.Values)
 	ctx := &Context{
@@ -103,6 +108,11 @@ func (ctx *Context) Render(tpl string, data interface{}) error {
 func (ctx *Context) IsAjax() bool {
 	accept := ctx.Request.Header.Get("Accept")
 	return strings.Index(accept, "application/json") >= 0
+}
+
+func (ctx *Context) Halt(code int, reason string) {
+	ctx.Writer.WriteHeader(code)
+	fmt.Fprint(ctx.Writer, reason)
 }
 
 func init() {

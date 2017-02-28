@@ -1,38 +1,25 @@
 package ldap
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/go-ldap/ldap"
-	"github.com/jsimonetti/pwscheme/ssha"
-	garbler "github.com/michaelbironneau/garbler/lib"
-	"github.com/wealthworks/csmtp"
 
 	"lcgc/platform/staffio/models"
 )
 
 var (
-	// simpleSecurityObject
-	objectClassPeople = []string{"top", "simpleSecurityObject", "PersonExt", "uidObject", "inetOrgPerson"}
+	// simpleSecurityObject, "simpleSecurityObject"
+	objectClassPeople = []string{"top", "PersonExt", "uidObject", "inetOrgPerson"}
 )
 
-func StoreStaff(staff *models.Staff) (err error) {
-	pass, hash := generatePasswd()
-	if staff.Passwd == "" {
-		staff.Passwd = hash
-	}
-	var isNew bool
+func StoreStaff(staff *models.Staff) (isNew bool, err error) {
 	for _, ls := range AuthenSource {
 		isNew, err = ls.StoreStaff(staff)
 		if err != nil {
 			log.Printf("StoreStaff at %s ERR: %s", ls.Addr, err)
 			return
 		}
-	}
-	if isNew {
-		message := fmt.Sprintf("Your new password is <strong>%s</strong>.", pass)
-		csmtp.SendMail("Welcome!", message, staff.Email)
 	}
 	return
 }
@@ -107,7 +94,9 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 		ar.Attribute("avatarPath", []string{staff.AvatarPath})
 	}
 
-	ar.Attribute("userPassword", []string{staff.Passwd})
+	if staff.Passwd != "" {
+		ar.Attribute("userPassword", []string{staff.Passwd})
+	}
 
 	return ar
 }
@@ -143,23 +132,6 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 		mr.Replace("description", []string{staff.Description})
 	}
 	return mr
-}
-
-func generatePasswd() (pass, hash string) {
-	var err error
-	reqs := garbler.PasswordStrengthRequirements{MinimumTotalLength: 16, Digits: 10}
-	pass, err = garbler.NewPassword(&reqs)
-	if err != nil {
-		log.Printf("garbler.NewPassword err %s", err)
-		return
-	}
-	hash, err = ssha.Generate(pass, 4)
-	if err != nil {
-		log.Printf("ssha.Generate err %s", err)
-		return
-	}
-	log.Printf("gen new passwd %q", pass)
-	return
 }
 
 /*
