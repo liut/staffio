@@ -95,9 +95,19 @@ func passwordForgot(ctx *Context) error {
 	uid, email, mobile := req.FormValue("username"), req.FormValue("email"), req.FormValue("mobile")
 	res := make(osin.ResponseData)
 	staff, err := backends.GetStaff(uid)
-	if err != nil || staff.Email != email || staff.Mobile != mobile {
+	if err != nil {
 		res["ok"] = false
-		res["error"] = map[string]string{"message": "Invalid Username/Email/Mobile", "field": "username"}
+		res["error"] = map[string]string{"message": "Invalid Username", "field": "username"}
+		return outputJson(res, ctx.Writer)
+	}
+	if staff.Email != email {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": "No such email address", "field": "email"}
+		return outputJson(res, ctx.Writer)
+	}
+	if staff.Mobile != mobile {
+		res["ok"] = false
+		res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
 		return outputJson(res, ctx.Writer)
 	}
 	err = backends.PasswordForgot(models.AtEmail, email, uid)
@@ -143,7 +153,7 @@ func passwordReset(ctx *Context) error {
 	res := make(osin.ResponseData)
 	if uid == "" || passwd != passwd2 {
 		res["ok"] = false
-		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
+		res["error"] = map[string]string{"message": "Invalid Username or Password", "field": "password"}
 		return outputJson(res, ctx.Writer)
 	}
 	err := backends.PasswordResetWithToken(uid, token, passwd)
