@@ -60,7 +60,13 @@ func passwordForgotPrepare(staff *models.Staff) (err error) {
 	// Generate reset token that expires in 2 hours
 	secret := []byte(Settings.PwdSecret)
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
-	return sendResetEmail(staff, token)
+	err = sendResetEmail(staff, token)
+	if err == nil {
+		log.Printf("send reset email of %q OK", staff.Email)
+	} else {
+		log.Printf("send reset email ERR %s", err)
+	}
+	return
 }
 
 func PasswordResetTokenVerify(token string) (uid string, err error) {
@@ -118,7 +124,7 @@ func SaveVerify(uv *models.Verify) error {
 		var id int
 		err = db.Get(&id, str, uv.Type, uv.Target, uv.Uid, uv.CodeHash, uv.LifeSeconds)
 		if err == nil {
-			log.Printf("new id: %d", id)
+			log.Printf("new password_reset id: %d of %s", id, uv.Uid)
 			if id > 0 {
 				uv.Id = id
 			}

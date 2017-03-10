@@ -50,21 +50,33 @@ func GetStaff(uid string) (*models.Staff, error) {
 	return staff, nil
 }
 
+// save staff
 func StoreStaff(staff *models.Staff) error {
 	isNew, err := ldap.StoreStaff(staff)
 	if err == nil {
 		if isNew {
+			log.Printf("new staff %v", staff)
 			err = passwordForgotPrepare(staff)
 			if err != nil {
 				log.Printf("email of new user password send ERR %s", err)
+			} else {
+				log.Print("send email OK")
 			}
 		}
+	} else {
+		log.Printf("StoreStaff %s ERR %s", staff.Uid, err)
 	}
 	return err
 }
 
 func DeleteStaff(uid string) error {
-	return ldap.DeleteStaff(uid)
+	err := ldap.DeleteStaff(uid)
+	if err == nil {
+		log.Printf("deleted uid %s", uid)
+	} else {
+		log.Printf("deleted uid %s ERR %s", uid, err)
+	}
+	return err
 }
 
 func Authenticate(uid, password string) bool {
