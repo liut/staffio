@@ -55,9 +55,13 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		raven.SetHttpContext(raven.NewHttp(req))
 		logId := raven.CaptureError(err, nil)
 		raven.ClearContext()
-		log.Printf("call handler %s error: %s logId: %s", req.RequestURI, err, logId)
+		log.Printf("call handler %s %s error: %s logId: %s", req.Method, req.RequestURI, err, logId)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	} else {
+		if req.Method != http.MethodGet {
+			log.Printf("%s %s OK", req.Method, req.RequestURI)
+		}
 	}
 
 	ctx.afterHandle()
