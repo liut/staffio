@@ -1,11 +1,13 @@
 {{ define "title" }}Contact list{{ end }}
 
 {{ define "head" }}
+	<link rel="stylesheet" type="text/css" href="{{ .ctx.ResUrl }}js/DataTables-1.10.13/css/dataTables.bootstrap.min.css"/>
 {{ end }}
 
 {{ define "content" }}
 {{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
-<table class="table table-striped">
+<table id="contacts" class="table table-striped" data-order='[[ 1, "asc" ]]' data-page-length='25'>
+<thead>
 	<tr>
 		<th>No</th>
 		<th>Uid</th>
@@ -14,7 +16,8 @@
 		{{if $isKeeper }}<th>Mobile</th>{{ end }}
 		<th>Nickname</th>
 	</tr>
-	{{ range .staffs }}
+</thead>
+<tbody>{{ range .staffs }}
 	<tr>
 		<td class="text-right">{{ .EmployeeNumber }}</td>
 		<td>{{ .Uid }}{{if $isKeeper }}
@@ -25,14 +28,21 @@
 		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
 		<td>{{ .Name }}</td>
 	</tr>
-	{{ end }}
+	{{ end }}</tbody>
 </table>
 
 	{{if $isKeeper }}<div>
 	<a class="btn btn-default" href="/staff/new" role="button">New Staff</a>
-	<span class="label label-success">Total: {{ len .staffs }}</span>
+	<!-- <span class="label label-success">Total: {{ len .staffs }}</span> -->
 	</div>{{ end }}
 {{ end }}
 
 {{ define "tail" }}
+	<script type="text/javascript" src="{{ .ctx.ResUrl }}js/DataTables-1.10.13/js/jquery.dataTables.js"></script>
+	<script type="text/javascript" src="{{ .ctx.ResUrl }}js/DataTables-1.10.13/js/dataTables.bootstrap.min.js"></script>
+	<script>
+		$(document).ready(function() {
+	    $('#contacts').DataTable();
+		});
+	</script>
 {{ end }}
