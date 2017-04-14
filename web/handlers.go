@@ -11,18 +11,33 @@ import (
 
 	"lcgc/platform/staffio/backends"
 	"lcgc/platform/staffio/models"
+	"lcgc/platform/staffio/models/cas"
+	"lcgc/platform/staffio/models/common"
 	. "lcgc/platform/staffio/settings"
 )
 
 func loginForm(ctx *Context) (err error) {
+	service := ctx.Request.FormValue("service")
+	tgc := GetTGC(ctx.Session)
+	if service != "" && tgc != nil {
+		st := cas.NewTicket("ST", service, tgc.Uid, false)
+		err = backends.SaveTicket(st)
+		if err != nil {
+			return
+		}
+		ctx.Redirect(service + "?ticket=" + st.Value)
+		return nil
+	}
 	return ctx.Render("login.html", map[string]interface{}{
-		"ctx": ctx,
+		"ctx":     ctx,
+		"service": service,
 	})
 }
 
 func login(ctx *Context) error {
 	req := ctx.Request
-	uid, password := req.FormValue("username"), req.FormValue("password")
+	uid, password := req.PostFormValue("username"), req.PostFormValue("password")
+	service := req.FormValue("service")
 	// log.Printf("accept: %v (%d)", req.Header["Accept"], len(req.Header["Accept"]))
 	res := make(osin.ResponseData)
 	if !backends.Authenticate(uid, password) {
@@ -45,15 +60,26 @@ func login(ctx *Context) error {
 	user.Refresh()
 	ctx.Session.Values[kUserOL] = user
 	ctx.Session.Values[kLastUid] = staff.Uid
-
 	res["ok"] = true
-	res["referer"] = ctx.Referer
+	if service != "" {
+		st := cas.NewTicket("ST", service, user.Uid, true)
+		err = backends.SaveTicket(st)
+		if err != nil {
+			return err
+		}
+		NewTGC(ctx.Session, st)
+		res["referer"] = service + "?ticket=" + st.Value
+		log.Printf("ref: %q", res["referer"])
+	} else {
+		res["referer"] = ctx.Referer
+	}
 	return outputJson(res, ctx.Writer)
 	// http.Redirect(ctx.Writer, req, reverse("welcome"), http.StatusSeeOther)
 }
 
 func logout(ctx *Context) error {
 	delete(ctx.Session.Values, kUserOL)
+	DeleteTGC(ctx.Session)
 	http.Redirect(ctx.Writer, ctx.Request, reverse("welcome"), http.StatusSeeOther)
 	return nil
 }
@@ -110,7 +136,7 @@ func passwordForgot(ctx *Context) error {
 		res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
 		return outputJson(res, ctx.Writer)
 	}
-	err = backends.PasswordForgot(models.AtEmail, email, uid)
+	err = backends.PasswordForgot(common.AtEmail, email, uid)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "username"}

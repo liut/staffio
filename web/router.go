@@ -116,7 +116,7 @@ func MainRouter() *mux.Router {
 	router.Handle("/dust/clients", handler(clientsForm)).Methods("GET").Name("clients")
 	router.Handle("/dust/clients", handler(clientsPost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/dust/scopes", handler(scopesForm)).Methods("GET", "POST").Name("scopes")
-	router.Handle("/dust/_status/{topic:[a-z]+}{ext:(.json|.html|)}", handler(handleStatus)).Methods("GET").Name("status")
+	router.Handle("/dust/status/{topic}", handler(handleStatus)).Methods("GET").Name("status")
 
 	router.Handle("/article/{id}", handler(articleView)).Methods("GET").Name("article")
 	router.Handle("/dust/articles", handler(articleForm)).Methods("GET").Name("article_form")
@@ -124,6 +124,10 @@ func MainRouter() *mux.Router {
 
 	router.Handle("/dust/links", handler(linksForm)).Methods("GET").Name("links_form")
 	router.Handle("/dust/links", handler(linksPost)).Methods("POST").Headers(jsonRequestHeaders...)
+
+	router.Handle("/cas/logout", handler(casLogout))
+	router.Handle("/validate", handler(casValidateV1))
+	router.Handle("/serviceValidate", handler(casValidateV2))
 
 	router.Handle("/", handler(welcome)).Name("welcome")
 

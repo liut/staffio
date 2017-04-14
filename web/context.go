@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 
 	"lcgc/platform/staffio/backends"
+	"lcgc/platform/staffio/models/cas"
 	. "lcgc/platform/staffio/settings"
 )
 
@@ -98,7 +99,11 @@ func (ctx *Context) checkLogin() bool {
 
 func (ctx *Context) toLogin() {
 	ctx.Session.Values[kRefer] = ctx.Request.RequestURI
-	http.Redirect(ctx.Writer, ctx.Request, reverse("login"), http.StatusTemporaryRedirect)
+	ctx.Redirect(reverse("login"))
+}
+
+func (ctx *Context) Redirect(path string) {
+	http.Redirect(ctx.Writer, ctx.Request, path, http.StatusTemporaryRedirect)
 }
 
 func (ctx *Context) Render(tpl string, data interface{}) error {
@@ -117,4 +122,5 @@ func (ctx *Context) Halt(code int, reason string) {
 
 func init() {
 	gob.Register(&User{})
+	gob.Register(&cas.Ticket{})
 }
