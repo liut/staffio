@@ -11,6 +11,7 @@ import (
 
 	"lcgc/platform/staffio/backends/ldap"
 	"lcgc/platform/staffio/models"
+	"lcgc/platform/staffio/models/common"
 	. "lcgc/platform/staffio/settings"
 )
 
@@ -30,17 +31,17 @@ func getResetHash(uid string) ([]byte, error) {
 	return uv.CodeHashBytes(), nil
 }
 
-func PasswordForgot(at models.AliasType, target, uid string) (err error) {
+func PasswordForgot(at common.AliasType, target, uid string) (err error) {
 	var staff *models.Staff
 	staff, err = GetStaff(uid)
 	if err != nil {
 		return
 	}
-	if at != models.AtEmail {
-		err = fmt.Errorf("invalid alias type %s", at)
+	if at != common.AtEmail {
+		err = fmt.Errorf("invalid alias type %s", at.String())
 		return
 	}
-	if at != models.AtEmail && target != staff.Email {
+	if at != common.AtEmail && target != staff.Email {
 		err = fmt.Errorf("incorrect email %s", target)
 		return
 	}
@@ -48,7 +49,7 @@ func PasswordForgot(at models.AliasType, target, uid string) (err error) {
 }
 
 func passwordForgotPrepare(staff *models.Staff) (err error) {
-	uv := models.NewVerify(models.AtEmail, staff.Email, staff.Uid)
+	uv := models.NewVerify(common.AtEmail, staff.Email, staff.Uid)
 	err = SaveVerify(uv)
 	if err != nil {
 		return
@@ -92,12 +93,12 @@ func PasswordResetWithToken(login, token, passwd string) (err error) {
 	err = ldap.PasswordReset(uid, passwd)
 	if err == nil {
 		qs := func(db dbTxer) error {
-			rs, err := db.Exec("DELETE FROM password_reset WHERE uid = $1", uid)
-			if err == nil {
+			rs, de := db.Exec("DELETE FROM password_reset WHERE uid = $1", uid)
+			if de == nil {
 				ra, _ := rs.RowsAffected()
 				log.Printf("deleted %d", ra)
 			}
-			return err
+			return de
 		}
 		err = withTxQuery(qs)
 	}
@@ -110,7 +111,7 @@ func SaveVerify(uv *models.Verify) error {
 		euv, err := LoadVerify(uv.Uid)
 		if err == nil {
 			str := `DELETE FROM password_reset WHERE id = $1`
-			_, err := db.Exec(str, euv.Id)
+			_, err = db.Exec(str, euv.Id)
 			if err == nil {
 				return nil
 			}

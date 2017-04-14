@@ -6,7 +6,7 @@
 
 {{ define "content" }}
 
-    <form class="form-horizontal" id="form1" method="post" action="/login">
+    <form class="form-horizontal" id="form1" method="post" action="{{ .ctx.Request.RequestURI }}">
       <div class="form-group">
         <label for="username" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10 col-md-8">
