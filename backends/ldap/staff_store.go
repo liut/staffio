@@ -14,7 +14,7 @@ var (
 )
 
 func StoreStaff(staff *models.Staff) (isNew bool, err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		isNew, err = ls.StoreStaff(staff)
 		if err != nil {
 			log.Printf("StoreStaff at %s ERR: %s", ls.Addr, err)

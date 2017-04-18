@@ -3,6 +3,7 @@ package backends
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"lcgc/platform/staffio/backends/ldap"
 	"lcgc/platform/staffio/models"
@@ -18,11 +19,14 @@ func Prepare() {
 		return
 	}
 
-	ls := ldap.AddSource(Settings.LDAP.Host, Settings.LDAP.Base)
+	hosts := strings.Split(Settings.LDAP.Hosts, ",")
+	for _, dsn := range hosts {
+		ls := ldap.AddSource(dsn, Settings.LDAP.Base)
 
-	ls.BindDN = Settings.LDAP.BindDN
-	ls.Passwd = Settings.LDAP.Password
-	ls.Debug = Settings.Debug
+		ls.BindDN = Settings.LDAP.BindDN
+		ls.Passwd = Settings.LDAP.Password
+		ls.Debug = Settings.Debug
+	}
 
 	backendReady = true
 }

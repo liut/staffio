@@ -16,7 +16,7 @@ var (
 
 func SearchGroup(name string) *models.Group {
 	// log.Printf("Search group %s", name)
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		group, err := ls.SearchGroup(name)
 		if err == nil {
 			return group

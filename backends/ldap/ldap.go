@@ -29,12 +29,14 @@ type LdapSource struct {
 
 //Global LDAP directory pool
 var (
-	userDnFmt         = "uid=%s,ou=people,%s"
-	defaultAttributes = []string{"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "description", "title"}
-	defaultFilter     = "(objectclass=inetOrgPerson)"
-	AuthenSource      []*LdapSource
+	ldapSources       []*LdapSource
 	ErrLogin          = errors.New("049: Invalid Username/Password")
 	ErrNotFound       = errors.New("Not Found")
+	userDnFmt         = "uid=%s,ou=people,%s"
+	defaultFilter     = "(objectclass=inetOrgPerson)"
+	defaultAttributes = []string{
+		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
+		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title"}
 )
 
 // Add a new source (LDAP directory) to the global pool
@@ -42,6 +44,8 @@ func AddSource(addr, base string) *LdapSource {
 	if base == "" {
 		log.Fatal("ldap base is empty")
 	}
+
+	log.Printf("add source %s", addr)
 
 	u, err := url.Parse(addr)
 	if err != nil {
@@ -76,14 +80,18 @@ func AddSource(addr, base string) *LdapSource {
 		Enabled:    true,
 	}
 
-	AuthenSource = append(AuthenSource, ls)
+	ldapSources = append(ldapSources, ls)
 	return ls
 }
 
 func CloseAll() {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		ls.Close()
 	}
+}
+
+func (ls *LdapSource) String() string {
+	return ls.Addr
 }
 
 func (ls *LdapSource) dial() (*ldap.Conn, error) {
@@ -118,7 +126,7 @@ func (ls *LdapSource) Close() {
 }
 
 func Authenticate(uid, passwd string) (err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		dn := ls.UDN(uid)
 		err = ls.Bind(dn, passwd, true)
 		if err == nil {
@@ -129,17 +137,22 @@ func Authenticate(uid, passwd string) (err error) {
 }
 
 func GetStaff(uid string) (staff *models.Staff, err error) {
-	for _, ls := range AuthenSource {
+	// log.Printf("sources %s", ldapSources)
+	for _, ls := range ldapSources {
 		staff, err = ls.GetStaff(uid)
 		if err == nil {
 			return
+		} else {
+			log.Printf("GetStaff %s ERR %s", uid, err)
 		}
 	}
+	err = ErrNotFound
+	log.Printf("staff %v Err %v", staff, err)
 	return
 }
 
 func ListPaged(limit int) (staffs []*models.Staff) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		staffs = ls.ListPaged(limit)
 		if len(staffs) > 0 {
 			return
@@ -184,6 +197,7 @@ func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
 		ls.Attributes,
 		nil)
 	sr, err := ls.c.Search(search)
+
 	if err != nil {
 		if le, ok := err.(*ldap.Error); ok && le.ResultCode == ldap.LDAPResultNoSuchObject {
 			return nil, ErrNotFound
@@ -202,11 +216,13 @@ func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
 func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
 	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
+		log.Printf("bind faild %s", err)
 		return nil, err
 	}
 
 	entry, err := ls.getEntry(ls.UDN(uid))
 	if err != nil {
+		log.Printf("getEntry() ERR %s", uid, err)
 		return nil, err
 	}
 

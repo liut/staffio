@@ -8,7 +8,7 @@ import (
 )
 
 func Modify(uid, password string, staff *models.Staff) (err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		err = ls.Modify(uid, password, staff)
 		if err != nil {
 			log.Printf("Modify at %s ERR: %s", ls.Addr, err)
