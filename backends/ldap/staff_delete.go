@@ -7,7 +7,7 @@ import (
 )
 
 func DeleteStaff(uid string) (err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		err = ls.DeleteStaff(uid)
 		if err != nil {
 			return

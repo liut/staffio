@@ -21,7 +21,7 @@ type config struct {
 	}
 
 	LDAP struct {
-		Host     string
+		Hosts    string
 		Base     string
 		BindDN   string
 		Password string `ini:"pass"`
@@ -65,7 +65,7 @@ func init() {
 
 	fs = envcfg.New(Settings.Name, Settings.Version)
 
-	fs.StringVar(&Settings.LDAP.Host, "ldap-host", "ldap://localhost:389", "ldap hostname")
+	fs.StringVar(&Settings.LDAP.Hosts, "ldap-hosts", "ldap://localhost:389", "ldap hostname")
 	fs.StringVar(&Settings.LDAP.Base, "ldap-base", "", "ldap base")
 	fs.StringVar(&Settings.LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
 	fs.StringVar(&Settings.LDAP.Password, "ldap-pass", "", "ldap bind password")

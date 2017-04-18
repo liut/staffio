@@ -6,7 +6,7 @@ import (
 )
 
 func PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		err = ls.PasswordChange(uid, oldPasswd, newPasswd)
 		if err != nil {
 			log.Printf("PasswordChange at %s ERR: %s", ls.Addr, err)
@@ -34,7 +34,7 @@ func (ls *LdapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 }
 
 func PasswordReset(uid, passwd string) (err error) {
-	for _, ls := range AuthenSource {
+	for _, ls := range ldapSources {
 		err = ls.PasswordReset(uid, passwd)
 		if err != nil {
 			log.Printf("PasswordReset at %s ERR: %s", ls.Addr, err)

@@ -4,6 +4,18 @@
     An OAuth2 server with management for enterprise employees
 
 
+## Features
+
+* All employees in LDAP
+* Login and general member settings
+* Reset password with email
+* Create, Edit and Remove employees with special manager
+* Client ID and Secret of all clients maintenance
+* Simplified content management of aritcles and links
+* A general OAuth2 authentication and authorization Provider
+* Directly CAS implement for v1 and V2
+
+
 ## prepare
 
 ### database
