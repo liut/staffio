@@ -20,7 +20,7 @@ vet:
 clean:
 	echo "Cleaning dist"
 	rm -rf dist fe/build
-	rm -f $(NAME) $(NAME)-*.?z
+	rm -f $(NAME) $(NAME)-*
 
 dist: clean
 	echo "Building $(NAME)"
