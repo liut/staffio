@@ -1,7 +1,5 @@
 {{ define "title" }}Profile{{ end }}
 {{ define "head" }}
-    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.min.css" rel="stylesheet">
-
 {{ end }}
 {{ define "content" }}
 
@@ -99,8 +97,6 @@
 
 {{ end }}
 {{ define "tail" }}
-  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
-  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
       jQuery(document).ready(function () {
         $('#gender-{{.staff.Gender}}').attr('checked', true);

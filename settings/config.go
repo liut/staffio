@@ -42,6 +42,7 @@ type config struct {
 	Backend      struct{ DSN string }
 	SentryDSN    string
 	Root         string
+	FS           string
 	Debug        bool
 	UserLifetime int // secends, user online time
 
@@ -84,6 +85,7 @@ func init() {
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
+	fs.StringVar(&Settings.FS, "fs", "bind", "file system [bind | local]")
 	fs.StringVar(&Settings.TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
 
 	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")

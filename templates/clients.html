@@ -1,6 +1,5 @@
 {{ define "title" }}Clients{{ end }}
 {{ define "head" }}
-    <link href="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/css/bootstrap-editable.css" rel="stylesheet">
 {{ end }}
 {{ define "content" }}
 
@@ -60,9 +59,6 @@
 </div>
 {{ end }}
 {{ define "tail" }}
-  <script src="{{ .ctx.ResUrl }}bootstrap3-editable-1.5.1/js/bootstrap-editable.min.js"></script>
-  <script src="{{ .ctx.ResUrl }}js/jquery.prettydate.js"></script>
-  <script src="{{ .ctx.ResUrl }}js/password.js"></script>
   <script type="text/javascript">
     var action_url = '{{ reverse "clients" }}', code_cached = [], secret_cached = []
     function regen_code () {

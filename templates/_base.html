@@ -8,7 +8,7 @@
     <title>{{ template "title" . }} - Staff panel</title>
     <meta name="appver" content="{{ .ctx.Version }}" >
     <!-- Bootstrap -->
-    <link href="{{ .ctx.ResUrl }}bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -93,10 +93,7 @@
     {{ template "content" . }}
     </div> <!-- /container -->
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script src="{{ .ctx.ResUrl }}js/jquery-1.12.4.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{{ .ctx.ResUrl }}bootstrap-3.3.7/js/bootstrap.min.js"></script>
+  <script src="/static/scripts/common.js"></script>
     {{ if .ctx.User }}
       <script>$.getJSON('/email/unseen', function(res){
         if (res.unseen > 0) {
