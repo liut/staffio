@@ -1,0 +1,65 @@
+{
+  "name": "staffio",
+  "version": "0.1.0",
+  "description": "An OAuth2 server with management for enterprise employees",
+  "scripts": {
+    "dev": "echo dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "staffio",
+    "oauth2"
+  ],
+  "repository": {
+    "type": "git"
+  },
+  "author": "liut",
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "bootstrap-select": "^1.12.2",
+    "bootstrap-validator": "^0.11.9",
+    "datatables.net": "^1.10.15",
+    "datatables.net-bs": "^1.10.15",
+    "font-awesome": "^4.7.0",
+    "i18next": "^7.2.3",
+    "jquery": "^3.2.1",
+    "moment": "^2.18.1",
+    "bootstrapValidator": "liut/bootstrapvalidator",
+    "pwstrength-bootstrap": "liut/jquery.pwstrength.bootstrap",
+    "x-editable": "^1.5.1"
+  },
+  "devDependencies": {
+    "del": "^2.2.2",
+    "glob": "^7.1.1",
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-cached": "^1.1.1",
+    "gulp-clean-css": "^3.0.4",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.12.0",
+    "gulp-stylus": "^1.3.7",
+    "gulp-uglify": "^1.5.4",
+    "gulp-util": "^3.0.8",
+    "gulp-watch": "^4.3.11",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "browserify": {
+    "transform": [
+      "coffeeify"
+    ],
+    "extensions": [
+      ".js",
+      ".coffee"
+    ],
+    "paths": [
+      "./node_modules",
+      "./fe/scripts"
+    ]
+  },
+  "browserify-shim": {}
+}

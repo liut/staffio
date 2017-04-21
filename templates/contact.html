@@ -1,7 +1,6 @@
 {{ define "title" }}Contact list{{ end }}
 
 {{ define "head" }}
-	<link rel="stylesheet" type="text/css" href="{{ .ctx.ResUrl }}js/DataTables-1.10.13/css/dataTables.bootstrap.min.css"/>
 {{ end }}
 
 {{ define "content" }}
@@ -38,8 +37,6 @@
 {{ end }}
 
 {{ define "tail" }}
-	<script type="text/javascript" src="{{ .ctx.ResUrl }}js/DataTables-1.10.13/js/jquery.dataTables.js"></script>
-	<script type="text/javascript" src="{{ .ctx.ResUrl }}js/DataTables-1.10.13/js/dataTables.bootstrap.min.js"></script>
 	<script>
 		$(document).ready(function() {
 	    $('#contacts').DataTable();

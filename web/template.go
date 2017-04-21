@@ -25,7 +25,7 @@ func reverse(name string, things ...interface{}) string {
 		strs[i] = fmt.Sprint(th)
 	}
 	//grab the route
-	u, err := router.GetRoute(name).URL(strs...)
+	u, err := ws.GetRoute(name).URL(strs...)
 	if err != nil {
 		log.Printf("GetRoute err %s", err)
 		return "/" + name

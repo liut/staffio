@@ -6,6 +6,7 @@ ENV VERSION=v0.2.5 \
     STAFFIO_HTTP_LISTEN=":80" \
     STAFFIO_LDAP_HOST="slapd" \
     STAFFIO_LDAP_BASE="dc=example,dc=org" \
+    STAFFIO_PASSWORD_SECRET=vajanuyogohusopekujabagaliquha \
     STAFFIO_ROOT="/app"
 ENV DOWNLOAD_URL https://github.com/liut/staffio/releases/download/$VERSION/staffio-linux-amd64-$VERSION.tar.xz
 

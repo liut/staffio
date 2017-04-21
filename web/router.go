@@ -16,15 +16,20 @@ import (
 )
 
 var (
-	router             *mux.Router
 	resUrl             string
 	jsonRequestHeaders = []string{
 		// "Accept", "application/json",
 		"X-Requested-With", "XMLHttpRequest",
 	}
-	server *osin.Server
-	cache  *freecache.Cache
+	ws    *webImpl
+	cache *freecache.Cache
 )
+
+type webImpl struct {
+	*mux.Router
+	osvr *osin.Server
+	fs   http.FileSystem
+}
 
 func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNotFound)
@@ -58,10 +63,8 @@ func NewServerConfig() *osin.ServerConfig {
 	}
 }
 
-func MainRouter() *mux.Router {
-	if router != nil {
-		return router
-	}
+func New() *webImpl {
+	ws = &webImpl{}
 
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	Settings.Parse()
@@ -78,16 +81,17 @@ func MainRouter() *mux.Router {
 
 	resUrl = Settings.ResUrl
 	backends.Prepare()
-	server = osin.NewServer(NewServerConfig(), backends.NewStorage())
+	ws.osvr = osin.NewServer(NewServerConfig(), backends.NewStorage())
 	var err error
-	server.AccessTokenGen, err = getTokenGenJWT()
+	ws.osvr.AccessTokenGen, err = getTokenGenJWT()
 	if err != nil {
 		panic(err)
 	}
 
 	cache = freecache.NewCache(Settings.CacheSize)
 	sessionInit()
-	router = mux.NewRouter()
+	router := mux.NewRouter()
+	ws.Router = router
 
 	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")
 	router.Handle("/login", handler(login)).Methods("POST").Headers(jsonRequestHeaders...)
@@ -131,5 +135,14 @@ func MainRouter() *mux.Router {
 
 	router.Handle("/", handler(welcome)).Name("welcome")
 
-	return router
+	ws.ServStatic(Settings.Root, Settings.FS)
+	return ws
+}
+
+func (ws *webImpl) Run(addr string) error {
+	return http.ListenAndServe(addr, ws.Router)
+}
+
+func (ws *webImpl) HandleFunc(path string, f http.HandlerFunc) {
+	ws.Router.HandleFunc(path, f)
 }
