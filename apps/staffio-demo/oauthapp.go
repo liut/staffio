@@ -1,4 +1,4 @@
-package webfatso
+package main
 
 import (
 	"encoding/json"
@@ -7,13 +7,16 @@ import (
 	"net/url"
 
 	"github.com/RangelReale/osin"
-	"github.com/gorilla/mux"
 
 	. "lcgc/platform/staffio/settings"
 )
 
+type serverMux interface {
+	HandleFunc(string, http.HandlerFunc)
+}
+
 // addr = localhost:3000
-func AppDemo(router *mux.Router) {
+func AppDemo(router serverMux) {
 
 	const (
 		demoId     = "1234"

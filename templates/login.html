@@ -1,27 +1,28 @@
 {{ define "title" }}Login{{ end }}
 {{ define "head" }}
-    <link href="{{ .ctx.ResUrl }}css/bootstrapValidator.min.css" rel="stylesheet">
-    <link href="{{ .ctx.ResUrl }}css/font-awesome.min.css" rel="stylesheet">
 {{ end }}
 
 {{ define "content" }}
 
-    <form class="form-horizontal" id="form1" method="post" action="{{ .ctx.Request.RequestURI }}">
-      <div class="form-group">
+    <form class="form-horizontal" id="form1" method="post" action="{{ .ctx.Request.RequestURI }}" data-toggle="validator" role="form">
+      <div class="form-group has-feedback">
         <label for="username" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10 col-md-8">
-          <input type="text" class="form-control" name="username" id="username" placeholder="Username" required autofocus>
+          <input type="text" class="form-control" name="username" id="username" placeholder="Username" pattern="^[a-z]{4,}$" minlength="4" maxlength="24" data-bv-trigger="keyup" data-bv-notempty-message="用户名不能为空" data-bv-regexp-message="用户名只能使用英文" data-remote-error="用户名或密码错误" required autofocus>
+          <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+          <div class="help-block with-errors"></div>
         </div>
       </div>
       <div class="form-group">
         <label for="password" class="col-sm-2 control-label">Password</label>
         <div class="col-sm-10 col-md-8">
-          <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+          <input type="password" class="form-control" name="password" id="password" placeholder="Password" data-bv-notempty-message="密码不能为空" data-remote-error="用户名或密码错误" required>
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group has-feedback">
         <div class="col-sm-offset-2 col-sm-10 col-md-8">
           <label><input type="checkbox" name="remember" value="remember-me"> Remember me </label>
+          <div class="help-block with-errors"></div>
         </div>
       </div>
       <div class="form-group">
@@ -37,8 +38,6 @@
 
 {{ define "tail" }}
 
-  <script src="{{ .ctx.ResUrl }}js/bootstrapValidator.min.js"></script>
-  <script src="{{ .ctx.ResUrl }}js/bootstrap-dust-func.js"></script>
   <script type="text/javascript">
   var lastUid = "{{if .ctx.LastUid}}{{.ctx.LastUid}}{{end}}"
       jQuery(document).ready(function () {
@@ -53,24 +52,22 @@
             },
             fields: {
                 username: {
-                    message: 'The username is not valid',
+                    // message: 'The username is not valid',
                     validators: {
-                        notEmpty: {
-                            message: 'The username is required and can\'t be empty'
-                        },
+                        notEmpty: true,
                         stringLength: {
                             min: 4,
                             max: 30,
-                            message: 'The username must be more than 4 and less than 30 characters long'
+                            // message: 'The username must be more than 4 and less than 30 characters long'
                         },
                         /*remote: {
                             url: 'remote.php',
                             message: 'The username is not available'
                         },*/
-                        regexp: {
-                            regexp: /^[a-zA-Z0-9_\.]+$/,
-                            message: 'The username can only consist of alphabetical, number, dot and underscore'
-                        },
+                        // regexp: {
+                        //     regexp: /^[a-zA-Z0-9_\.]+$/,
+                        //     message: '用户名只能使用英文字母'
+                        // },
                         callback: {
                           callback: function(value, validator) {return true;}
                         }
@@ -78,9 +75,7 @@
                 },
                 password: {
                     validators: {
-                        notEmpty: {
-                            message: 'The old password is required and can\'t be empty'
-                        },
+                        notEmpty: true,
                         callback: {
                           callback: function(value, validator) {return true;}
                         }
@@ -122,7 +117,7 @@
                   alertAjaxResult(res);
                 }
             }, 'json');
-            console.log(bv)
+            // console.log(bv)
         });
 
       });

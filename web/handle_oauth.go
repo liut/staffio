@@ -18,18 +18,18 @@ func oauthAuthorize(ctx *Context) (err error) {
 	if !ctx.checkLogin() {
 		return nil
 	}
-	resp := server.NewResponse()
+	resp := ws.osvr.NewResponse()
 	defer resp.Close()
 
 	r := ctx.Request
 
-	if ar := server.HandleAuthorizeRequest(resp, r); ar != nil {
+	if ar := ws.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
 		// link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
 		// 	ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
 		if backends.IsAuthorized(ar.Client.GetId(), ctx.User.Uid) {
 			ar.UserData = ctx.User.Uid
 			ar.Authorized = true
-			server.FinishAuthorizeRequest(resp, r, ar)
+			ws.osvr.FinishAuthorizeRequest(resp, r, ar)
 		} else {
 			if r.Method == "GET" {
 				scopes, err := backends.LoadScopes()
@@ -48,7 +48,7 @@ func oauthAuthorize(ctx *Context) (err error) {
 			if r.PostForm.Get("authorize") == "1" {
 				ar.UserData = ctx.User.Uid
 				ar.Authorized = true
-				server.FinishAuthorizeRequest(resp, r, ar)
+				ws.osvr.FinishAuthorizeRequest(resp, r, ar)
 				if r.PostForm.Get("remember") != "" {
 					err := backends.SaveAuthorized(ar.Client.GetId(), ctx.User.Uid)
 					if err != nil {
@@ -77,7 +77,7 @@ func oauthAuthorize(ctx *Context) (err error) {
 
 // Access token endpoint
 func oauthToken(ctx *Context) (err error) {
-	resp := server.NewResponse()
+	resp := ws.osvr.NewResponse()
 	defer resp.Close()
 	r := ctx.Request
 
@@ -86,7 +86,7 @@ func oauthToken(ctx *Context) (err error) {
 		user  *User
 		staff *models.Staff
 	)
-	if ar := server.HandleAccessRequest(resp, r); ar != nil {
+	if ar := ws.osvr.HandleAccessRequest(resp, r); ar != nil {
 		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
@@ -129,7 +129,7 @@ func oauthToken(ctx *Context) (err error) {
 				ar.Authorized = true
 			}
 		}
-		server.FinishAccessRequest(resp, r, ar)
+		ws.osvr.FinishAccessRequest(resp, r, ar)
 	}
 
 	if resp.IsError && resp.InternalError != nil {
@@ -154,11 +154,11 @@ func oauthToken(ctx *Context) (err error) {
 
 // Information endpoint
 func oauthInfo(ctx *Context) (err error) {
-	resp := server.NewResponse()
+	resp := ws.osvr.NewResponse()
 	defer resp.Close()
 	r := ctx.Request
 
-	if ir := server.HandleInfoRequest(resp, r); ir != nil {
+	if ir := ws.osvr.HandleInfoRequest(resp, r); ir != nil {
 		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
 		var (
 			uid   string
@@ -189,7 +189,7 @@ func oauthInfo(ctx *Context) (err error) {
 			}
 
 		}
-		server.FinishInfoRequest(resp, r, ir)
+		ws.osvr.FinishInfoRequest(resp, r, ir)
 	}
 
 	if resp.IsError && resp.InternalError != nil {

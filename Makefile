@@ -1,5 +1,5 @@
 .SILENT :
-.PHONY : vet main clean gofmt dist-tight
+.PHONY : vet main clean dist release
 DATE := `date '+%Y%m%d'`
 
 NAME:=staffio
@@ -11,7 +11,7 @@ main:
 	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)"
 
-all: vet main dist dist-tight release
+all: vet main dist release
 
 vet:
 	echo "Checking ."
@@ -19,7 +19,7 @@ vet:
 
 clean:
 	echo "Cleaning dist"
-	rm -rf dist dist-tight
+	rm -rf dist fe/build
 	rm -f $(NAME) $(NAME)-*.?z
 
 dist: clean
@@ -43,9 +43,17 @@ gen-key:
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/apps/gen-key
 .PHONY: gen-key
 
-get-deps:
-	go get github.com/robfig/glock
-	glock sync -n < GLOCKFILE
+js-deps:
+	npm install
+.PHONY: js-deps
+
+js-build:
+	gulp clean build
+.PHONY: js-build
+
+statik:
+	statik -src htdocs -dest web
+.PHONY: statik
 
 gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \
@@ -59,14 +67,4 @@ test:
 
 docker-build:
 	docker build --rm -t $(NAME) .
-
-dist-tight:
-	echo "Building tight version"
-	rm -rf dist-tight
-	mkdir -p dist-tight/linux_amd64
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o dist-tight/linux_amd64/$(NAME) -a -installsuffix nocgo ./staffio-tight
-
-docker-build-tight:
-	strip dist-tight/linux_amd64/$(NAME)
-	docker build --rm -t lcgc/$(NAME):tight -f staffio-tight/Dockerfile .
 
