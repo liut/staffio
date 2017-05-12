@@ -222,7 +222,7 @@ func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
 
 	entry, err := ls.getEntry(ls.UDN(uid))
 	if err != nil {
-		log.Printf("getEntry() ERR %s", uid, err)
+		log.Printf("getEntry(%s) ERR %s", uid, err)
 		return nil, err
 	}
 

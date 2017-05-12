@@ -43,6 +43,7 @@ type config struct {
 	SentryDSN    string
 	Root         string
 	FS           string
+	CommonFormat string
 	Debug        bool
 	UserLifetime int // secends, user online time
 
@@ -86,6 +87,7 @@ func init() {
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
 	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
 	fs.StringVar(&Settings.FS, "fs", "bind", "file system [bind | local]")
+	fs.StringVar(&Settings.CommonFormat, "cn-fmt", "{sn}{gn}", "common name format, sn=surname, gn=given name")
 	fs.StringVar(&Settings.TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
 
 	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")

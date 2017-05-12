@@ -43,14 +43,16 @@ func main() {
 	}
 	log.Printf("WxWork User: %v", user)
 
-	count, err := exmail.CountNewMail(*uid)
+	alias := backends.GetEmailAddress(*uid)
+
+	count, err := exmail.CountNewMail(alias)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 	log.Printf("new mail: %d", count)
 
-	url, err := exmail.GetLoginURL(*uid)
+	url, err := exmail.GetLoginURL(alias)
 	if err != nil {
 		log.Print(err)
 		return

@@ -78,3 +78,5 @@ forego start
 * Peoples and groups sync with WxWork
 * Signin with WxWork
 * Notification system
+* Export for backup
+* Batch import or restore from backup

@@ -40,7 +40,7 @@ type dbTxer interface {
 }
 
 func openDb() *sqlx.DB {
-	log.Printf("PGHOST:PGPORT %s:%s", os.Getenv("PGHOST"), os.Getenv("PGPORT"))
+	log.Printf("using PG %s:%s", os.Getenv("PGHOST"), os.Getenv("PGPORT"))
 	db, err := sqlx.Open("postgres", Settings.Backend.DSN)
 	if err != nil {
 		log.Fatalf("open db error: %s", err)

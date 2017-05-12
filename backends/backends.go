@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 
+	. "github.com/tj/go-debug"
+
 	"lcgc/platform/staffio/backends/ldap"
 	"lcgc/platform/staffio/models"
 	. "lcgc/platform/staffio/settings"
@@ -12,6 +14,7 @@ import (
 
 var (
 	backendReady bool
+	debug        = Debug("staffio:backends")
 )
 
 func Prepare() {
@@ -32,7 +35,7 @@ func Prepare() {
 }
 
 func CloseAll() {
-	closeDb()
+	// closeDb()
 	ldap.CloseAll()
 }
 
@@ -89,6 +92,7 @@ func Authenticate(uid, password string) bool {
 		log.Printf("Authen failed for %s, reason: %s", uid, err)
 		return false
 	}
+	debug("%s authenticate OK", uid)
 	return true
 }
 

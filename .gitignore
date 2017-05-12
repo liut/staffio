@@ -33,3 +33,4 @@ dist-*/
 node_modules/
 htdocs/static/
 fe/build/static/
+output.*
