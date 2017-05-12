@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"lcgc/platform/staffio/backends"
 	. "lcgc/platform/staffio/settings"
 )
 
@@ -15,7 +16,7 @@ func countNewMail(ctx *Context) error {
 	if !ctx.checkLogin() {
 		return nil
 	}
-	email := ctx.User.Uid + "@" + Settings.EmailDomain
+	email := backends.GetEmailAddress(ctx.User.Uid)
 	res := make(osin.ResponseData)
 	res["email"] = email
 	key := []byte(fmt.Sprintf("mail-count-%s", ctx.User.Uid))

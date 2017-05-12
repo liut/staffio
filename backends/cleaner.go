@@ -30,7 +30,7 @@ func Cleanup() error {
 			log.Printf("clean sessions ERR %s", err)
 			return
 		}
-		// log.Printf("Cleanup done at %s", now)
+		debug("Cleanup done at %s", now)
 		return
 	})
 }
