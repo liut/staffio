@@ -3,7 +3,7 @@
 {{ end }}
 {{ define "content" }}
 
-  <form class="form-horizontal" id="form1" method="post" action="/profile">
+  <form class="form-horizontal" id="form1" method="post" action="/profile" autocomplete="off">
 
     <div class="form-group">
         <label class="col-xs-3 control-label">Login</label>
@@ -40,7 +40,7 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Email address</label>
         <div class="col-xs-6">
-            <input type="text" class="form-control" name="email" value="{{ .staff.Email }}" required />
+            <input type="text" class="form-control" name="email" value="{{ .staff.Email }}" required autocomplete="off" />
         </div>
     </div>
 
@@ -83,7 +83,7 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Password</label>
         <div class="col-xs-6">
-            <input id="password" name="password" type="password" class="form-control" value="" autocomplete="off" required>
+            <input id="password" name="password" type="password" class="form-control" value="" required autocomplete="off" >
         </div>
     </div>
 

@@ -1,19 +1,19 @@
-# staffio
-## define
+# Staffio
+## define:
 
-    An OAuth2 server with management for enterprise employees
+    An OAuth2 server with management for enterprise employees.
 
 
-## features
+## features:
 
-* All employees in LDAP
-* Login and general member settings
-* Reset password with email
-* Create, Edit and Remove employees with special manager
-* Client ID and Secret of all clients maintenance
-* Simplified content management of aritcles and links
-* A general OAuth2 authentication and authorization provider
-* Directly CAS implement for v1 and V2
+* All employees in LDAP.
+* Login and general member settings.
+* Reset password with email.
+* Create, Edit and Remove employees with special manager.
+* Client ID and Secret of all clients maintenance.
+* Simplified content management for aritcles and links.
+* A general OAuth2 authentication and authorization provider.
+* Directly CAS implement for v1 and V2.
 
 
 ### checkout
@@ -28,6 +28,12 @@ git clone https://github.com/liut/staffio.git
 ## prepare
 
 ### LDAP
+
+#### append schema first time only
+
+```sh
+cat database/ldap_schema/staffio.schema | sudo slapd-config schema write staffio
+```
 
 *TODO*
 
