@@ -42,7 +42,7 @@ attributetype ( 2.26.1325376000.1.6
     SINGLE-VALUE )
 
 objectClass   ( 2.26.1325376000.1.17
-    NAME 'personExt'
-    DESC 'Person Extention'
+    NAME 'staffioPerson'
+    DESC 'Person Extention of Staffio'
     AUXILIARY
     MAY  ( dateOfBirth $ gender $ avatarPath $ createdTime $ modifiedTime ) )

@@ -10,7 +10,7 @@ import (
 
 var (
 	// simpleSecurityObject, "simpleSecurityObject"
-	objectClassPeople = []string{"top", "PersonExt", "uidObject", "inetOrgPerson"}
+	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
 )
 
 func StoreStaff(staff *models.Staff) (isNew bool, err error) {
@@ -44,7 +44,7 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		}
 		err = ls.c.Modify(mr)
 		if err != nil {
-			log.Printf("modify err %s", err)
+			log.Printf("modify %v ERR %s", mr, err)
 		}
 		return
 	}
@@ -53,12 +53,12 @@ func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 		ar := makeAddRequest(dn, staff)
 		err = ls.c.Add(ar)
 		if err != nil {
-			log.Printf("add err %s", err)
+			log.Printf("add %v ERR %s", ar, err)
 		}
 		return
 	}
 
-	log.Printf("getEntry err %s", err)
+	log.Printf("getEntry %s ERR %s", uid, err)
 
 	return
 }
@@ -82,7 +82,7 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 		ar.Attribute("employeeType", []string{staff.EmployeeType})
 	}
 	if staff.Gender != models.Unknown {
-		ar.Attribute("gender", []string{staff.Gender.String()})
+		ar.Attribute("gender", []string{staff.Gender.String()[0:1]})
 	}
 	if staff.Birthday != "" {
 		ar.Attribute("dateOfBirth", []string{staff.Birthday})
@@ -123,7 +123,7 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 		mr.Replace("avatarPath", []string{staff.AvatarPath})
 	}
 	if staff.Gender != models.Unknown {
-		mr.Replace("gender", []string{staff.Gender.String()})
+		mr.Replace("gender", []string{staff.Gender.String()[0:1]})
 	}
 	if staff.Birthday != entry.GetAttributeValue("dateOfBirth") {
 		mr.Replace("dateOfBirth", []string{staff.Birthday})
