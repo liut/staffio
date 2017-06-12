@@ -34,4 +34,7 @@ VALUES('周四分享预告：一小时学会使用`Charles`抓网络数据包', 
 分享人：郭亚伦<br>
 分享地点：陆家嘴会议室<br>
 时间：22号周四下午4:00', 'shenshanshan');
+
+-- drop table oauth_client, oauth_access_token, oauth_authorization_code, oauth_scope, oauth_client_user_authorized, articles, links, password_reset, user_log cascade;
+-- drop table cas_ticket, http_sessions;
 */

@@ -60,7 +60,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	} else {
 		if req.Method != http.MethodGet {
-			log.Printf("[%s] %s %s OK", req.RemoteAddr, req.Method, req.RequestURI)
+			log.Printf("[%s] %s %s OK", GetClientIP(req), req.Method, req.RequestURI)
 		}
 	}
 
@@ -77,4 +77,16 @@ func (h handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	//apply the buffered response to the writer
 	buf.Apply(w)
+}
+
+func GetClientIP(req *http.Request) (ip string) {
+	ip = req.Header.Get("X-Real-Ip")
+	if ip == "" {
+		ip = req.Header.Get("X-Forwarded-For")
+		if ip == "" {
+			ip = req.Header.Get("RemoteAddr")
+		}
+	}
+
+	return
 }
