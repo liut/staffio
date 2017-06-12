@@ -1,0 +1,3 @@
+package staffio
+
+// Staffio
