@@ -24,8 +24,8 @@ _testmain.go
 *.prof
 
 .env
-staffio
-staffio-*
+/staffio
+/staffio-*
 dist/
 dist-*/
 *.tar.?z
