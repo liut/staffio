@@ -13,8 +13,8 @@ var (
 	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
 )
 
-func StoreStaff(staff *models.Staff) (isNew bool, err error) {
-	for _, ls := range ldapSources {
+func (s *storeImpl) Save(staff *models.Staff) (isNew bool, err error) {
+	for _, ls := range s.sources {
 		isNew, err = ls.StoreStaff(staff)
 		if err != nil {
 			log.Printf("StoreStaff at %s ERR: %s", ls.Addr, err)
@@ -24,7 +24,7 @@ func StoreStaff(staff *models.Staff) (isNew bool, err error) {
 	return
 }
 
-func (ls *LdapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
+func (ls *ldapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 	uid := staff.Uid
 	err = ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {

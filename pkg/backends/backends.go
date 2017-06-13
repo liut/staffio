@@ -3,7 +3,6 @@ package backends
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	. "github.com/tj/go-debug"
 
@@ -12,44 +11,70 @@ import (
 	. "lcgc/platform/staffio/pkg/settings"
 )
 
+type Service struct {
+	Authenticator models.Authenticator
+	StaffStore    models.StaffStore
+	PasswordStore models.PasswordStore
+	GroupStore    models.GroupStore
+	Close         func()
+}
+
 var (
 	backendReady bool
 	debug        = Debug("staffio:backends")
+
+	service *Service
 )
 
 func Prepare() {
 	if backendReady {
 		return
 	}
-
-	hosts := strings.Split(Settings.LDAP.Hosts, ",")
-	for _, dsn := range hosts {
-		ls := ldap.AddSource(dsn, Settings.LDAP.Base)
-
-		ls.BindDN = Settings.LDAP.BindDN
-		ls.Passwd = Settings.LDAP.Password
-		ls.Debug = Settings.Debug
-	}
+	service = newService()
 
 	backendReady = true
 }
 
+func newService() *Service {
+
+	cfg := &ldap.Config{
+		Addr:   Settings.LDAP.Hosts,
+		Base:   Settings.LDAP.Base,
+		Bind:   Settings.LDAP.BindDN,
+		Passwd: Settings.LDAP.Password,
+	}
+	store, err := ldap.NewStore(cfg)
+	if err != nil {
+		panic(err)
+	}
+	// LDAP is a special store
+	return &Service{
+		Authenticator: store,
+		StaffStore:    store,
+		PasswordStore: store,
+		GroupStore:    store,
+		Close: func() {
+			store.Close()
+		},
+	}
+
+}
+
 func CloseAll() {
 	// closeDb()
-	ldap.CloseAll()
+	service.Close()
 }
 
 func LoadStaffs() []*models.Staff {
-	limit := 20
-	return ldap.ListPaged(limit)
+	return service.StaffStore.All()
 }
 
-func GetGroup(name string) *models.Group {
-	return ldap.SearchGroup(name)
+func GetGroup(name string) (*models.Group, error) {
+	return service.GroupStore.GetGroup(name)
 }
 
 func GetStaff(uid string) (*models.Staff, error) {
-	staff, err := ldap.GetStaff(uid)
+	staff, err := service.StaffStore.Get(uid)
 	if err != nil {
 		log.Printf("ldap get staff with %q ERR: %s", uid, err)
 		return nil, err
@@ -59,7 +84,7 @@ func GetStaff(uid string) (*models.Staff, error) {
 
 // save staff
 func StoreStaff(staff *models.Staff) error {
-	isNew, err := ldap.StoreStaff(staff)
+	isNew, err := service.StaffStore.Save(staff)
 	if err == nil {
 		if isNew {
 			log.Printf("new staff %v", staff)
@@ -77,7 +102,7 @@ func StoreStaff(staff *models.Staff) error {
 }
 
 func DeleteStaff(uid string) error {
-	err := ldap.DeleteStaff(uid)
+	err := service.StaffStore.Delete(uid)
 	if err == nil {
 		log.Printf("deleted uid %s", uid)
 	} else {
@@ -87,7 +112,7 @@ func DeleteStaff(uid string) error {
 }
 
 func Authenticate(uid, password string) bool {
-	err := ldap.Authenticate(uid, password)
+	err := service.Authenticator.Authenticate(uid, password)
 	if err != nil {
 		log.Printf("Authen failed for %s, reason: %s", uid, err)
 		return false
@@ -97,7 +122,7 @@ func Authenticate(uid, password string) bool {
 }
 
 func PasswordChange(uid, passwordOld, passwordNew string) error {
-	err := ldap.PasswordChange(uid, passwordOld, passwordNew)
+	err := service.PasswordStore.PasswordChange(uid, passwordOld, passwordNew)
 	if err != nil {
 		if err == ldap.ErrLogin {
 			return err
@@ -109,7 +134,11 @@ func PasswordChange(uid, passwordOld, passwordNew string) error {
 }
 
 func InGroup(group, uid string) bool {
-	g := GetGroup(group)
+	g, err := GetGroup(group)
+	if err != nil {
+		log.Printf("GetGroup %s ERR %s", group, err)
+		return false
+	}
 	return g.Has(uid)
 }
 
@@ -117,7 +146,7 @@ func ProfileModify(uid, password string, staff *models.Staff) error {
 	if uid != staff.Uid {
 		return fmt.Errorf("mismatch uid %s and %s", uid, staff.Uid)
 	}
-	return ldap.Modify(uid, password, staff)
+	return service.StaffStore.ModifyBySelf(uid, password, staff)
 }
 
 func WriteUserLog(uid, subject, message string) error {
