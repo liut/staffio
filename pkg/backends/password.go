@@ -9,7 +9,6 @@ import (
 	"github.com/dchest/passwordreset"
 	"github.com/wealthworks/csmtp"
 
-	"lcgc/platform/staffio/pkg/backends/ldap"
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/models/common"
 	. "lcgc/platform/staffio/pkg/settings"
@@ -90,7 +89,7 @@ func PasswordResetWithToken(login, token, passwd string) (err error) {
 		return fmt.Errorf("invalid login %s", login)
 	}
 	// OK, reset password for uid (e.g. allow to change it)
-	err = ldap.PasswordReset(uid, passwd)
+	err = service.PasswordStore.PasswordReset(uid, passwd)
 	if err == nil {
 		qs := func(db dbTxer) error {
 			rs, de := db.Exec("DELETE FROM password_reset WHERE uid = $1", uid)

@@ -5,8 +5,8 @@ import (
 	"log"
 )
 
-func PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
-	for _, ls := range ldapSources {
+func (s *storeImpl) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
+	for _, ls := range s.sources {
 		err = ls.PasswordChange(uid, oldPasswd, newPasswd)
 		if err != nil {
 			log.Printf("PasswordChange at %s ERR: %s", ls.Addr, err)
@@ -15,7 +15,7 @@ func PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
 	return
 }
 
-func (ls *LdapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
+func (ls *ldapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	userdn := ls.UDN(uid)
 	err := ls.Bind(userdn, oldPasswd, true)
 	if err != nil {
@@ -33,8 +33,8 @@ func (ls *LdapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	return nil
 }
 
-func PasswordReset(uid, passwd string) (err error) {
-	for _, ls := range ldapSources {
+func (s *storeImpl) PasswordReset(uid, passwd string) (err error) {
+	for _, ls := range s.sources {
 		err = ls.PasswordReset(uid, passwd)
 		if err != nil {
 			log.Printf("PasswordReset at %s ERR: %s", ls.Addr, err)
@@ -44,7 +44,7 @@ func PasswordReset(uid, passwd string) (err error) {
 }
 
 // password reset by administrator
-func (ls *LdapSource) PasswordReset(uid, newPasswd string) error {
+func (ls *ldapSource) PasswordReset(uid, newPasswd string) error {
 	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
 		return err

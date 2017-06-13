@@ -6,14 +6,56 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/go-ldap/ldap"
 
 	"lcgc/platform/staffio/pkg/models"
 )
 
+var (
+	_ models.Authenticator = (*storeImpl)(nil)
+	_ models.StaffStore    = (*storeImpl)(nil)
+	_ models.PasswordStore = (*storeImpl)(nil)
+	_ models.GroupStore    = (*storeImpl)(nil)
+)
+
+// LDAP config
+type Config struct {
+	Addr, Base   string
+	Bind, Passwd string
+	Filter       string
+	Attributes   []string
+}
+
+type storeImpl struct {
+	sources  []*ldapSource
+	pageSize int
+}
+
+func NewStore(cfg *Config) (*storeImpl, error) {
+	store := &storeImpl{
+		pageSize: 100,
+	}
+	for _, addr := range strings.Split(cfg.Addr, ",") {
+		c := &Config{
+			Addr:   addr,
+			Base:   cfg.Base,
+			Bind:   cfg.Bind,
+			Passwd: cfg.Passwd,
+		}
+		ls, err := NewSource(c)
+		if err != nil {
+			return nil, err
+		}
+		store.sources = append(store.sources, ls)
+	}
+
+	return store, nil
+}
+
 // Basic LDAP authentication service
-type LdapSource struct {
+type ldapSource struct {
 	Addr       string     // LDAP address with host and port
 	UseSSL     bool       // Use SSL
 	Base       string     // Base DN
@@ -27,9 +69,9 @@ type LdapSource struct {
 	Debug      bool
 }
 
-//Global LDAP directory pool
 var (
-	ldapSources       []*LdapSource
+	ErrEmptyAddr      = errors.New("ldap addr is empty")
+	ErrEmptyBase      = errors.New("ldap base is empty")
 	ErrLogin          = errors.New("049: Invalid Username/Password")
 	ErrNotFound       = errors.New("Not Found")
 	userDnFmt         = "uid=%s,ou=people,%s"
@@ -40,16 +82,16 @@ var (
 )
 
 // Add a new source (LDAP directory) to the global pool
-func AddSource(addr, base string) *LdapSource {
-	if base == "" {
-		log.Fatal("ldap base is empty")
+func NewSource(cfg *Config) (*ldapSource, error) {
+	if cfg.Base == "" {
+		return nil, ErrEmptyBase
 	}
 
-	log.Printf("add source %s", addr)
+	log.Printf("new source %s", cfg.Addr)
 
-	u, err := url.Parse(addr)
+	u, err := url.Parse(cfg.Addr)
 	if err != nil {
-		log.Fatalf("parse LDAP Host ERR: %s", err)
+		return nil, fmt.Errorf("parse LDAP addr ERR: %s", err)
 	}
 
 	if u.Host == "" && u.Path != "" {
@@ -71,30 +113,36 @@ func AddSource(addr, base string) *LdapSource {
 		}
 	}
 
-	ls := &LdapSource{
+	filter := defaultFilter
+	if cfg.Filter != "" {
+		filter = cfg.Filter
+	}
+
+	ls := &ldapSource{
 		Addr:       u.Host,
 		UseSSL:     useSSL,
-		Base:       base,
-		Filter:     defaultFilter,
+		Base:       cfg.Base,
+		BindDN:     cfg.Bind,
+		Passwd:     cfg.Passwd,
+		Filter:     filter,
 		Attributes: defaultAttributes,
 		Enabled:    true,
 	}
 
-	ldapSources = append(ldapSources, ls)
-	return ls
+	return ls, nil
 }
 
-func CloseAll() {
-	for _, ls := range ldapSources {
+func (s *storeImpl) Close() {
+	for _, ls := range s.sources {
 		ls.Close()
 	}
 }
 
-func (ls *LdapSource) String() string {
+func (ls *ldapSource) String() string {
 	return ls.Addr
 }
 
-func (ls *LdapSource) dial() (*ldap.Conn, error) {
+func (ls *ldapSource) dial() (*ldap.Conn, error) {
 	if ls.c != nil {
 		return ls.c, nil
 	}
@@ -117,7 +165,7 @@ func (ls *LdapSource) dial() (*ldap.Conn, error) {
 	return ls.c, nil
 }
 
-func (ls *LdapSource) Close() {
+func (ls *ldapSource) Close() {
 	ls.bound = false
 	if ls.c != nil {
 		ls.c.Close()
@@ -125,8 +173,8 @@ func (ls *LdapSource) Close() {
 	}
 }
 
-func Authenticate(uid, passwd string) (err error) {
-	for _, ls := range ldapSources {
+func (s *storeImpl) Authenticate(uid, passwd string) (err error) {
+	for _, ls := range s.sources {
 		dn := ls.UDN(uid)
 		err = ls.Bind(dn, passwd, true)
 		if err == nil {
@@ -136,9 +184,9 @@ func Authenticate(uid, passwd string) (err error) {
 	return err
 }
 
-func GetStaff(uid string) (staff *models.Staff, err error) {
+func (s *storeImpl) Get(uid string) (staff *models.Staff, err error) {
 	// log.Printf("sources %s", ldapSources)
-	for _, ls := range ldapSources {
+	for _, ls := range s.sources {
 		staff, err = ls.GetStaff(uid)
 		if err == nil {
 			return
@@ -147,13 +195,12 @@ func GetStaff(uid string) (staff *models.Staff, err error) {
 		}
 	}
 	err = ErrNotFound
-	log.Printf("staff %v Err %v", staff, err)
 	return
 }
 
-func ListPaged(limit int) (staffs []*models.Staff) {
-	for _, ls := range ldapSources {
-		staffs = ls.ListPaged(limit)
+func (s *storeImpl) All() (staffs []*models.Staff) {
+	for _, ls := range s.sources {
+		staffs = ls.ListPaged(s.pageSize)
 		if len(staffs) > 0 {
 			return
 		}
@@ -161,11 +208,11 @@ func ListPaged(limit int) (staffs []*models.Staff) {
 	return
 }
 
-func (ls *LdapSource) UDN(uid string) string {
+func (ls *ldapSource) UDN(uid string) string {
 	return fmt.Sprintf(userDnFmt, uid, ls.Base)
 }
 
-func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
+func (ls *ldapSource) Bind(dn, passwd string, force bool) error {
 	if !force && ls.bound {
 		return nil
 	}
@@ -189,7 +236,7 @@ func (ls *LdapSource) Bind(dn, passwd string, force bool) error {
 	return nil
 }
 
-func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
+func (ls *ldapSource) getEntry(udn string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
 		udn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -213,7 +260,7 @@ func (ls *LdapSource) getEntry(udn string) (*ldap.Entry, error) {
 }
 
 // GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
-func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
+func (ls *ldapSource) GetStaff(uid string) (*models.Staff, error) {
 	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
 		log.Printf("bind faild %s", err)
@@ -229,7 +276,7 @@ func (ls *LdapSource) GetStaff(uid string) (*models.Staff, error) {
 	return entryToUser(entry), nil
 }
 
-func (ls *LdapSource) ListPaged(limit int) (staffs []*models.Staff) {
+func (ls *ldapSource) ListPaged(limit int) (staffs []*models.Staff) {
 	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
 		// log.Printf("ERROR: Cannot bind: %s\n", err.Error())

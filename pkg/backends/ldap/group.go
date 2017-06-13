@@ -14,20 +14,28 @@ var (
 	groupDnFmt = "cn=%s,ou=groups,%s"
 )
 
-func SearchGroup(name string) *models.Group {
+func (s *storeImpl) AllGroup() []models.Group {
+	// TODO:
+	return nil
+}
+
+func (s *storeImpl) GetGroup(name string) (group *models.Group, err error) {
 	// log.Printf("Search group %s", name)
-	for _, ls := range ldapSources {
-		group, err := ls.SearchGroup(name)
+	for _, ls := range s.sources {
+		group, err = ls.SearchGroup(name)
 		if err == nil {
-			return group
+			return
 		}
 		log.Printf("search group %q from %s error: %s", name, ls.Addr, err)
 	}
 	log.Printf("group %s not found", name)
-	return models.EmptyGroup
+	if err == nil {
+		err = ErrNotFound
+	}
+	return
 }
 
-func (ls *LdapSource) SearchGroup(name string) (*models.Group, error) {
+func (ls *ldapSource) SearchGroup(name string) (*models.Group, error) {
 	l, err := ls.dial()
 	if err != nil {
 		return nil, err
@@ -59,4 +67,9 @@ func (ls *LdapSource) SearchGroup(name string) (*models.Group, error) {
 	}
 
 	return &models.Group{name, members}, nil
+}
+
+func (s *storeImpl) SaveGroup(group *models.Group) error {
+	// TODO:
+	return nil
 }

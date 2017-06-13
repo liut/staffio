@@ -7,8 +7,8 @@ import (
 	"lcgc/platform/staffio/pkg/models"
 )
 
-func Modify(uid, password string, staff *models.Staff) (err error) {
-	for _, ls := range ldapSources {
+func (s *storeImpl) ModifyBySelf(uid, password string, staff *models.Staff) (err error) {
+	for _, ls := range s.sources {
 		err = ls.Modify(uid, password, staff)
 		if err != nil {
 			log.Printf("Modify at %s ERR: %s", ls.Addr, err)
@@ -17,7 +17,7 @@ func Modify(uid, password string, staff *models.Staff) (err error) {
 	return
 }
 
-func (ls *LdapSource) Modify(uid, password string, staff *models.Staff) error {
+func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
 	if ls.Debug {
 		log.Printf("change profile for %s staff: %v", uid, staff)
 	}
