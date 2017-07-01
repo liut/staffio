@@ -18,3 +18,4 @@ require('./plugin/jquery.prettydate')
 
 global.Dust = require('./plugin/dust')
 require( 'datatables.net' )( global, jQuery );
+require( 'datatables.net-bs' )( global, jQuery );
