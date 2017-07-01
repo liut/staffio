@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	dbError    = errors.New("database error")
-	valueError = errors.New("value error")
-	dbc        *sqlx.DB
+	dbError     = errors.New("database error")
+	ErrNotFound = errors.New("Not Found")
+	valueError  = errors.New("value error")
+	dbc         *sqlx.DB
 )
 
 const (
@@ -76,6 +77,9 @@ func withDbQuery(query func(db dber) error) error {
 	// defer db.Close()
 	if err := query(db); err != nil {
 		log.Printf("db query ERR: %s", err)
+		if err == sql.ErrNoRows {
+			return ErrNotFound
+		}
 		return dbError
 	}
 	return nil

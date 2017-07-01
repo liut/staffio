@@ -30,6 +30,7 @@ dist/
 dist-*/
 *.tar.?z
 
+npm-debug.log
 node_modules/
 htdocs/static/
 fe/build/static/

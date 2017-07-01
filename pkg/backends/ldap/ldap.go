@@ -311,20 +311,21 @@ func (ls *ldapSource) ListPaged(limit int) (staffs []*models.Staff) {
 
 func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	// log.Printf("entry: %v", entry)
-	u = new(models.Staff)
-	u.Uid = entry.GetAttributeValue("uid")
-	u.Surname = entry.GetAttributeValue("sn")
-	u.GivenName = entry.GetAttributeValue("givenName")
-	u.CommonName = entry.GetAttributeValue("cn")
-	u.Email = entry.GetAttributeValue("mail")
-	u.Nickname = entry.GetAttributeValue("displayName")
-	u.Mobile = entry.GetAttributeValue("mobile")
-	u.EmployeeNumber = entry.GetAttributeValue("employeeNumber")
-	u.EmployeeType = entry.GetAttributeValue("employeeType")
-	u.Birthday = entry.GetAttributeValue("dateOfBirth")
-	(&u.Gender).UnmarshalJSON([]byte(entry.GetAttributeValue("gender")))
-	u.AvatarPath = entry.GetAttributeValue("avatarPath")
-	u.Description = entry.GetAttributeValue("description")
+	u = &models.Staff{
+		Uid:            entry.GetAttributeValue("uid"),
+		Surname:        entry.GetAttributeValue("sn"),
+		GivenName:      entry.GetAttributeValue("givenName"),
+		CommonName:     entry.GetAttributeValue("cn"),
+		Email:          entry.GetAttributeValue("mail"),
+		Nickname:       entry.GetAttributeValue("displayName"),
+		Mobile:         entry.GetAttributeValue("mobile"),
+		EmployeeNumber: entry.GetAttributeValue("employeeNumber"),
+		EmployeeType:   entry.GetAttributeValue("employeeType"),
+		Birthday:       entry.GetAttributeValue("dateOfBirth"),
+		AvatarPath:     entry.GetAttributeValue("avatarPath"),
+		Description:    entry.GetAttributeValue("description"),
+	}
+	(&u.Gender).UnmarshalJSON(entry.GetRawAttributeValue("gender"))
 	return
 }
 
