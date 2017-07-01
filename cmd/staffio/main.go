@@ -1,3 +1,6 @@
+//
+// Main process for run web server
+//
 package main
 
 import (
@@ -12,8 +15,8 @@ import (
 )
 
 func main() {
-	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 	ws := web.New()
+	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
 	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", Settings.Version, Settings.HttpListen, Settings.Root)
 	err := ws.Run(Settings.HttpListen) // Start the server!
