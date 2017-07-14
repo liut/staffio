@@ -296,3 +296,19 @@ func staffDelete(ctx *Context) (err error) {
 	return outputJson(res, ctx.Writer)
 
 }
+
+func groupList(ctx *Context) (err error) {
+	if !ctx.checkLogin() {
+		return nil
+	}
+	if !ctx.User.IsKeeper() {
+		ctx.toLogin()
+		return
+	}
+
+	data := backends.AllGroup()
+	return ctx.Render("group.html", map[string]interface{}{
+		"groups": data,
+		"ctx":    ctx,
+	})
+}

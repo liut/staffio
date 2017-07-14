@@ -11,19 +11,32 @@ import (
 )
 
 var (
-	groupDnFmt = "cn=%s,ou=groups,%s"
+	groupSuffix = "ou=groups"
+	groupDnFmt  = "cn=%s,%s,%s"
+	groupLimit  = 20
 )
 
-func (s *storeImpl) AllGroup() []models.Group {
-	// TODO:
-	return nil
+func (s *storeImpl) AllGroup() (data []models.Group) {
+	var err error
+	for _, ls := range s.sources {
+		data, err = ls.SearchGroup("")
+		if err == nil {
+			return
+		}
+	}
+	if err == nil {
+		err = ErrNotFound
+	}
+	return
 }
 
 func (s *storeImpl) GetGroup(name string) (group *models.Group, err error) {
 	// log.Printf("Search group %s", name)
 	for _, ls := range s.sources {
-		group, err = ls.SearchGroup(name)
+		var data []models.Group
+		data, err = ls.SearchGroup(name)
 		if err == nil {
+			group = &data[0]
 			return
 		}
 		log.Printf("search group %q from %s error: %s", name, ls.Addr, err)
@@ -35,7 +48,7 @@ func (s *storeImpl) GetGroup(name string) (group *models.Group, err error) {
 	return
 }
 
-func (ls *ldapSource) SearchGroup(name string) (*models.Group, error) {
+func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
 	l, err := ls.dial()
 	if err != nil {
 		return nil, err
@@ -47,26 +60,46 @@ func (ls *ldapSource) SearchGroup(name string) (*models.Group, error) {
 		return nil, err
 	}
 
+	var (
+		dn string
+	)
+	if name == "" { // all
+		dn = fmt.Sprintf("%s,%s", groupSuffix, ls.Base)
+	} else {
+		dn = fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
+	}
+
 	search := ldap.NewSearchRequest(
-		fmt.Sprintf(groupDnFmt, name, ls.Base),
+		dn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		"(objectclass=groupOfNames)",
-		[]string{"member"},
+		[]string{"cn", "member"},
 		nil)
-	sr, err := l.Search(search)
+	sr, err := ls.c.SearchWithPaging(search, uint32(groupLimit))
 	if err != nil {
-		// log.Printf("LDAP search error: %s", err)
+		log.Printf("LDAP search group error: %s", err)
 		return nil, err
 	}
 
-	vals := sr.Entries[0].GetAttributeValues("member")
-
-	members := make([]string, len(vals))
-	for i, dn := range vals {
-		members[i] = dn[strings.Index(dn, "=")+1 : strings.Index(dn, ",")]
+	if len(sr.Entries) > 0 {
+		data = make([]models.Group, len(sr.Entries))
+		for i, entry := range sr.Entries {
+			group := models.Group{}
+			for _, attr := range entry.Attributes {
+				if attr.Name == "cn" {
+					group.Name = attr.Values[0]
+				} else if attr.Name == "member" {
+					group.Members = make([]string, len(attr.Values))
+					for j, _dn := range attr.Values {
+						group.Members[j] = _dn[strings.Index(_dn, "=")+1 : strings.Index(_dn, ",")]
+					}
+				}
+			}
+			data[i] = group
+		}
 	}
 
-	return &models.Group{name, members}, nil
+	return
 }
 
 func (s *storeImpl) SaveGroup(group *models.Group) error {

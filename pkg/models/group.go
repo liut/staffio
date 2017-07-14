@@ -1,12 +1,13 @@
 package models
 
 type Group struct {
-	Name    string   `json:"name"`
-	Members []string `json:"members"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Members     []string `json:"members"`
 }
 
 var (
-	EmptyGroup = &Group{"", make([]string, 0)}
+	EmptyGroup = &Group{"", "", make([]string, 0)}
 )
 
 func (g *Group) Has(member string) bool {

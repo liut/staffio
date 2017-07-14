@@ -1,7 +1,6 @@
 # Staffio
-## define:
 
-    An OAuth2 server with management for enterprise employees.
+An OAuth2 server with management for enterprise employees.
 
 
 ## features:
@@ -15,6 +14,33 @@
 * A general OAuth2 authentication and authorization provider.
 * Directly CAS implement for v1 and V2.
 
+## APIs of oauth2
+
+### Authorize (browse page)
+> GET | POST /authorize
+
+### Retrieve Token
+> GET | POST /token
+
+### Get Info
+> GET | POST /info/{topic}
+
+
+### APIs of <abbr title="Central Authentication Service">CAS</abbr>
+
+| URI | Description |
+| -------- | -------- |
+| `/login` | credential requestor / acceptor |
+| `/logout` | destroy CAS session (logout) |
+| `/validate` | service ticket validation |
+| `/serviceValidate` | service ticket validation [CAS 2.0] |
+| `/proxyValidate` **TODO** | service/proxy ticket validation [CAS 2.0] |
+| `/proxy` **TODO** | proxy ticket service [CAS 2.0] |
+| `/p3/serviceValidate` **TODO** | service ticket validation [CAS 3.0] |
+| `/p3/proxyValidate` **TODO** | service/proxy ticket validation [CAS 3.0] |
+
+
+## prepare development
 
 ### checkout
 
@@ -25,11 +51,11 @@ git clone https://github.com/liut/keeper.git
 git clone https://github.com/liut/staffio.git
 ````
 
-## prepare
-
 ### LDAP
 
 #### append schema first time only
+
+- Special schema: [ldif](database/ldap_schema/staffio.ldif) or [schema](database/ldap_schema/staffio.schema)
 
 ```sh
 cat database/ldap_schema/staffio.schema | sudo slapd-config schema write staffio
@@ -79,7 +105,15 @@ npm install
 forego start
 ````
 
-## TODO
+## deployment
+
+```sh
+make dist package
+scp *-linux-amd64-*.tar.xz remote:/path/of/app/bin/
+rsync -rpt --delete templates htdocs remote:/path/of/app/
+```
+
+## Plan
 
 * Peoples and groups sync with WxWork
 * Signin with WxWork
