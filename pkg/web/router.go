@@ -112,7 +112,6 @@ func New() *webImpl {
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffForm)).Methods("GET").Name("staff")
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffPost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffDelete)).Methods("DELETE").Headers(jsonRequestHeaders...)
-	router.Handle("/groups", handler(groupList))
 
 	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
 	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")
@@ -122,6 +121,7 @@ func New() *webImpl {
 	router.Handle("/dust/clients", handler(clientsPost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/dust/scopes", handler(scopesForm)).Methods("GET", "POST").Name("scopes")
 	router.Handle("/dust/status/{topic}", handler(handleStatus)).Methods("GET").Name("status")
+	router.Handle("/dust/groups", handler(groupList))
 
 	router.Handle("/article/{id}", handler(articleView)).Methods("GET").Name("article")
 	router.Handle("/dust/articles", handler(articleForm)).Methods("GET").Name("article_form")
