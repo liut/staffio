@@ -8,56 +8,23 @@ import (
 
 	"lcgc/platform/staffio/pkg/backends/ldap"
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
 )
-
-type Service struct {
-	Authenticator models.Authenticator
-	StaffStore    models.StaffStore
-	PasswordStore models.PasswordStore
-	GroupStore    models.GroupStore
-	Close         func()
-}
 
 var (
 	backendReady bool
 	debug        = Debug("staffio:backends")
 
-	service *Service
+	service *Service // deprecated
 )
 
+// Prepare Deprecated
 func Prepare() {
 	if backendReady {
 		return
 	}
-	service = newService()
+	service = NewService()
 
 	backendReady = true
-}
-
-func newService() *Service {
-
-	cfg := &ldap.Config{
-		Addr:   Settings.LDAP.Hosts,
-		Base:   Settings.LDAP.Base,
-		Bind:   Settings.LDAP.BindDN,
-		Passwd: Settings.LDAP.Password,
-	}
-	store, err := ldap.NewStore(cfg)
-	if err != nil {
-		panic(err)
-	}
-	// LDAP is a special store
-	return &Service{
-		Authenticator: store,
-		StaffStore:    store,
-		PasswordStore: store,
-		GroupStore:    store,
-		Close: func() {
-			store.Close()
-		},
-	}
-
 }
 
 func CloseAll() {
@@ -67,6 +34,10 @@ func CloseAll() {
 
 func LoadStaffs() []*models.Staff {
 	return service.StaffStore.All()
+}
+
+func AllGroup() []models.Group {
+	return service.GroupStore.AllGroup()
 }
 
 func GetGroup(name string) (*models.Group, error) {

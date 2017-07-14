@@ -112,6 +112,7 @@ func New() *webImpl {
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffForm)).Methods("GET").Name("staff")
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffPost)).Methods("POST").Headers(jsonRequestHeaders...)
 	router.Handle("/staff/{uid:[a-z]+}", handler(staffDelete)).Methods("DELETE").Headers(jsonRequestHeaders...)
+	router.Handle("/groups", handler(groupList))
 
 	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
 	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")

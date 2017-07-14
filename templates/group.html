@@ -1,0 +1,21 @@
+{{ define "title" }}Links{{ end }}
+{{ define "head" }}
+{{ end }}
+{{ define "content" }}
+<div class="panel panel-default">
+  <div class="panel-heading">All groups</div>
+  <div class="panel-body">
+    <p>Working in progress</p>
+  </div>
+
+	<ul class="list-group">
+		{{ range .groups }}
+		<li class="list-group-item"><b>{{ .Name }}</b>:
+		{{ range .Members }} <button class="btn btn-default">{{ . }}</button> {{ end }}
+		</li>
+		{{ end }}
+	</ul>
+</div>
+{{ end }}
+{{ define "tail" }}
+{{ end }}

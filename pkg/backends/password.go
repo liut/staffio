@@ -114,7 +114,7 @@ func SaveVerify(uv *models.Verify) error {
 			if err == nil {
 				return nil
 			}
-			log.Printf("UPDATE password_reset ERR %s", err)
+			log.Printf("UPDATE password_reset %s ERR %s", uv.Uid, err)
 			return err
 		} else {
 			log.Printf("DB ERR %s", err)
@@ -131,7 +131,7 @@ func SaveVerify(uv *models.Verify) error {
 
 			return nil
 		}
-		log.Printf("INSERT password_reset ERR %s", err)
+		log.Printf("INSERT password_reset %s ERR %s", uv.Uid, err)
 		return err
 	}
 	return withTxQuery(qs)
