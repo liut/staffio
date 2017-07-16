@@ -8,19 +8,19 @@ import (
 )
 
 var (
-	_ models.Authenticator = (*storeImpl)(nil)
-	_ models.StaffStore    = (*storeImpl)(nil)
-	_ models.PasswordStore = (*storeImpl)(nil)
-	_ models.GroupStore    = (*storeImpl)(nil)
+	_ models.Authenticator = (*LDAPStore)(nil)
+	_ models.StaffStore    = (*LDAPStore)(nil)
+	_ models.PasswordStore = (*LDAPStore)(nil)
+	_ models.GroupStore    = (*LDAPStore)(nil)
 )
 
-type storeImpl struct {
+type LDAPStore struct {
 	sources  []*ldapSource
 	pageSize int
 }
 
-func NewStore(cfg *Config) (*storeImpl, error) {
-	store := &storeImpl{
+func NewStore(cfg *Config) (*LDAPStore, error) {
+	store := &LDAPStore{
 		pageSize: 100,
 	}
 	for _, addr := range strings.Split(cfg.Addr, ",") {
@@ -40,7 +40,7 @@ func NewStore(cfg *Config) (*storeImpl, error) {
 	return store, nil
 }
 
-func (s *storeImpl) Authenticate(uid, passwd string) (err error) {
+func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
 		dn := ls.UDN(uid)
 		err = ls.Bind(dn, passwd, true)
@@ -48,10 +48,11 @@ func (s *storeImpl) Authenticate(uid, passwd string) (err error) {
 			return nil
 		}
 	}
+	log.Printf("Authen failed for %s, reason: %s", uid, err)
 	return err
 }
 
-func (s *storeImpl) Get(uid string) (staff *models.Staff, err error) {
+func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 	// log.Printf("sources %s", ldapSources)
 	for _, ls := range s.sources {
 		staff, err = ls.GetStaff(uid)
@@ -65,7 +66,7 @@ func (s *storeImpl) Get(uid string) (staff *models.Staff, err error) {
 	return
 }
 
-func (s *storeImpl) All() (staffs []*models.Staff) {
+func (s *LDAPStore) All() (staffs []*models.Staff) {
 	for _, ls := range s.sources {
 		staffs = ls.ListPaged(s.pageSize)
 		if len(staffs) > 0 {
@@ -75,7 +76,7 @@ func (s *storeImpl) All() (staffs []*models.Staff) {
 	return
 }
 
-func (s *storeImpl) Save(staff *models.Staff) (isNew bool, err error) {
+func (s *LDAPStore) Save(staff *models.Staff) (isNew bool, err error) {
 	for _, ls := range s.sources {
 		isNew, err = ls.StoreStaff(staff)
 		if err != nil {

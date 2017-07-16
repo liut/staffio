@@ -28,9 +28,9 @@
           </tr>
           {{ end }}
       </table>
-
 <h4>Creating new client:</h4>
-<div style="width: 40%">
+<div class="row">
+<div class="col-xs-10 col-md-6">
     <div id="msg" class="alert" style="display:none;" role="alert"></div>
     <table id="user" class="table table-bordered table-striped">
         <tbody>
@@ -57,10 +57,11 @@
     <button id="reset-btn" class="btn pull-right">Reset</button>
     </div>
 </div>
+</div>
 {{ end }}
 {{ define "tail" }}
   <script type="text/javascript">
-    var action_url = '{{ reverse "clients" }}', code_cached = [], secret_cached = []
+    var action_url = '{{ .ctx.Request.RequestURI }}', code_cached = [], secret_cached = []
     function regen_code () {
       for (var i = 0; i < 10; i++) {
         var p = Password.generate(12)

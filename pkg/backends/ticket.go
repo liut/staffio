@@ -6,7 +6,7 @@ import (
 	"lcgc/platform/staffio/pkg/models/cas"
 )
 
-func GetTicket(value string) (*cas.Ticket, error) {
+func (s *serviceImpl) GetTicket(value string) (*cas.Ticket, error) {
 	a := new(cas.Ticket)
 
 	qs := func(db dber) error {
@@ -15,7 +15,7 @@ func GetTicket(value string) (*cas.Ticket, error) {
 	return a, withDbQuery(qs)
 }
 
-func DeleteTicket(value string) error {
+func (s *serviceImpl) DeleteTicket(value string) error {
 	if value != "" {
 		return withTxQuery(func(db dbTxer) error {
 			_, err := db.Exec("DELETE from cas_ticket WHERE value = $1", value)
@@ -29,7 +29,7 @@ func DeleteTicket(value string) error {
 	return cas.NewCasError("empty ticket value", cas.ERROR_CODE_INVALID_TICKET_SPEC)
 }
 
-func SaveTicket(t *cas.Ticket) error {
+func (s *serviceImpl) SaveTicket(t *cas.Ticket) error {
 	if err := t.Check(); err != nil {
 		return err
 	}

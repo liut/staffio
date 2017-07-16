@@ -27,7 +27,7 @@
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <input type="hidden" name="referer" value="{{ .ctx.Referer }}">
+          <input type="hidden" name="referer" value="{{ .referer }}">
           <button type="submit" class="btn btn-default">Submit</button>
           <span class=""><a class="btn btn-link" href="/password/forgot">forgot password?</a></span>
         </div>
@@ -39,7 +39,7 @@
 {{ define "tail" }}
 
   <script type="text/javascript">
-  var lastUid = "{{if .ctx.LastUid}}{{.ctx.LastUid}}{{end}}"
+  var lastUid = localStorage['lastUid'];
       jQuery(document).ready(function () {
         $("#username").val(lastUid);
         $('#form1')
@@ -97,6 +97,7 @@
             $.post($form.attr('action'), $form.serialize(), function(res) {
                 // console.log(res);
                 if (!!res.ok) {
+                  localStorage['lastUid'] = $("#username").val()
                   Dust.alert('成功', 'OK', function(){
                     bv.resetForm(true);
                     // $("#form1").get(0).reset();

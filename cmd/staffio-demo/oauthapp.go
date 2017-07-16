@@ -7,30 +7,29 @@ import (
 	"net/url"
 
 	"github.com/RangelReale/osin"
-
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
 type serverMux interface {
 	HandleFunc(string, http.HandlerFunc)
 }
 
-// addr = localhost:3000
-func AppDemo(router serverMux) {
+type demo struct {
+	prefix string
+}
 
-	const (
-		demoId     = "1234"
-		demoSecret = "aabbccdd"
-	)
+const (
+	demoId     = "1234"
+	demoSecret = "aabbccdda"
+)
 
-	addr := Settings.HttpListen
+func (d *demo) strap(router serverMux) {
 
 	// Application home endpoint
 	router.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("<html><body>"))
 
-		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=code&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Code</a><br/>", url.QueryEscape("http://"+addr+"/appauth/code"))))
-		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=token&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Implict</a><br/>", url.QueryEscape("http://"+addr+"/appauth/token"))))
+		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=code&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Code</a><br/>", url.QueryEscape(d.prefix+"/appauth/code"))))
+		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=token&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Implict</a><br/>", url.QueryEscape(d.prefix+"/appauth/token"))))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/password\">Password</a><br/>")))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/client_credentials\">Client Credentials</a><br/>")))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/assertion\">Assertion</a><br/>")))
@@ -57,11 +56,11 @@ func AppDemo(router serverMux) {
 
 		// build access code url
 		aurl := fmt.Sprintf("/token?grant_type=authorization_code&client_id=1234&state=xyz&redirect_uri=%s&code=%s",
-			url.QueryEscape("http://"+addr+"/appauth/code"), url.QueryEscape(code))
+			url.QueryEscape(d.prefix+"/appauth/code"), url.QueryEscape(code))
 
 		// if parse, download and parse json
 		if r.Form.Get("doparse") == "1" {
-			err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+			err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 				&osin.BasicAuth{demoId, demoSecret}, jr)
 			if err != nil {
 				w.Write([]byte(err.Error()))
@@ -127,7 +126,7 @@ func AppDemo(router serverMux) {
 			"test", "test")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -172,7 +171,7 @@ func AppDemo(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=client_credentials")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -217,7 +216,7 @@ func AppDemo(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=assertion&assertion_type=urn:osin.example.complete&assertion=osin.data")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -270,7 +269,7 @@ func AppDemo(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=refresh_token&refresh_token=%s", url.QueryEscape(code))
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -318,10 +317,10 @@ func AppDemo(router serverMux) {
 		jr := make(map[string]interface{})
 
 		// build access code url
-		aurl := fmt.Sprintf("/info/me+manager?code=%s", url.QueryEscape(code))
+		aurl := fmt.Sprintf("/info/me?code=%s", url.QueryEscape(code))
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("http://"+addr+"%s", aurl),
+		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))

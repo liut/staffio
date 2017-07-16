@@ -1,62 +1,59 @@
 package web
 
 import (
-	// "fmt"
 	"log"
-	// "net/url"
 	"strings"
 
 	"github.com/RangelReale/osin"
+	"github.com/gin-gonic/gin"
 
-	"lcgc/platform/staffio/pkg/backends"
 	"lcgc/platform/staffio/pkg/models"
 	. "lcgc/platform/staffio/pkg/settings"
 )
 
 // Authorization code endpoint
-func oauthAuthorize(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	resp := ws.osvr.NewResponse()
+func (s *server) oauth2Authorize(c *gin.Context) {
+	resp := s.osvr.NewResponse()
 	defer resp.Close()
 
-	r := ctx.Request
+	r := c.Request
+	user := UserWithContext(c)
+	store := s.service.OSIN()
 
-	if ar := ws.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
-		// link := fmt.Sprintf("/authorize?response_type=%s&client_id=%s&redirect_uri=%s&state=%s&scope=%s",
-		// 	ar.Type, ar.Client.GetId(), url.QueryEscape(ar.RedirectUri), ar.State, ar.Scope)
-		if backends.IsAuthorized(ar.Client.GetId(), ctx.User.Uid) {
-			ar.UserData = ctx.User.Uid
+	if ar := s.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
+		log.Printf("client: %v", ar.Client)
+		if store.IsAuthorized(ar.Client.GetId(), user.Uid) {
+			ar.UserData = user.Uid
 			ar.Authorized = true
-			ws.osvr.FinishAuthorizeRequest(resp, r, ar)
+			s.osvr.FinishAuthorizeRequest(resp, r, ar)
 		} else {
 			if r.Method == "GET" {
-				scopes, err := backends.LoadScopes()
+				scopes, err := store.LoadScopes()
 				if err != nil {
-					return err
+					c.AbortWithError(404, err)
+					return
 				}
-				return ctx.Render("authorize.html", map[string]interface{}{
+				Render(c, "authorize.html", map[string]interface{}{
 					"link":          r.RequestURI,
 					"response_type": ar.Type,
 					"scopes":        scopes,
 					"client":        ar.Client.(*models.Client),
-					"ctx":           ctx,
+					"ctx":           c,
 				})
 			}
 
 			if r.PostForm.Get("authorize") == "1" {
-				ar.UserData = ctx.User.Uid
+				ar.UserData = user.Uid
 				ar.Authorized = true
-				ws.osvr.FinishAuthorizeRequest(resp, r, ar)
+				s.osvr.FinishAuthorizeRequest(resp, r, ar)
 				if r.PostForm.Get("remember") != "" {
-					err := backends.SaveAuthorized(ar.Client.GetId(), ctx.User.Uid)
+					err := store.SaveAuthorized(ar.Client.GetId(), user.Uid)
 					if err != nil {
 						log.Printf("remember ERR %s", err)
 					}
 				}
 			} else {
-				resp.SetRedirect(reverse("welcome"))
+				resp.SetRedirect("/")
 			}
 
 		}
@@ -67,31 +64,31 @@ func oauthAuthorize(ctx *Context) (err error) {
 		log.Printf("authorize ERROR: %s\n", resp.InternalError)
 	}
 	// if !resp.IsError {
-	// 	resp.Output["uid"] = ctx.User.Uid
+	// 	resp.Output["uid"] = c.User.Uid
 	// }
 
 	debugf("oauthAuthorize resp: %v", resp)
-	osin.OutputJSON(resp, ctx.Writer, r)
-	return resp.InternalError
+	osin.OutputJSON(resp, c.Writer, r)
 }
 
 // Access token endpoint
-func oauthToken(ctx *Context) (err error) {
-	resp := ws.osvr.NewResponse()
+func (s *server) oauth2Token(c *gin.Context) {
+	resp := s.osvr.NewResponse()
 	defer resp.Close()
-	r := ctx.Request
+	r := c.Request
 
 	var (
 		uid   string = ""
 		user  *User
 		staff *models.Staff
+		err   error
 	)
-	if ar := ws.osvr.HandleAccessRequest(resp, r); ar != nil {
+	if ar := s.osvr.HandleAccessRequest(resp, r); ar != nil {
 		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
 			uid = ar.UserData.(string)
-			staff, err = backends.GetStaff(uid)
+			staff, err = s.service.Get(uid)
 			if err != nil {
 				resp.SetError("get_user_error", "staff not found")
 				resp.InternalError = err
@@ -100,6 +97,7 @@ func oauthToken(ctx *Context) (err error) {
 			}
 			ar.Authorized = true
 		case osin.REFRESH_TOKEN:
+			// TODO: load refresh
 			ar.Authorized = true
 		case osin.PASSWORD:
 			if Settings.HttpListen == "localhost:3000" && ar.Username == "test" && ar.Password == "test" {
@@ -108,11 +106,11 @@ func oauthToken(ctx *Context) (err error) {
 				break
 			}
 
-			if !backends.Authenticate(ar.Username, ar.Password) {
+			if err = s.service.Authenticate(ar.Username, ar.Password); err != nil {
 				resp.SetError("authentication_failed", err.Error())
 				break
 			}
-			staff, err := backends.GetStaff(ar.Username)
+			staff, err := s.service.Get(ar.Username)
 			if err != nil {
 				// resp.InternalError = err
 				resp.SetError("get_user_failed", err.Error())
@@ -129,7 +127,7 @@ func oauthToken(ctx *Context) (err error) {
 				ar.Authorized = true
 			}
 		}
-		ws.osvr.FinishAccessRequest(resp, r, ar)
+		s.osvr.FinishAccessRequest(resp, r, ar)
 	}
 
 	if resp.IsError && resp.InternalError != nil {
@@ -138,7 +136,7 @@ func oauthToken(ctx *Context) (err error) {
 	if !resp.IsError {
 		if uid != "" {
 			resp.Output["uid"] = uid
-			resp.Output["is_keeper"] = IsKeeper(uid)
+			resp.Output["is_keeper"] = s.IsKeeper(uid)
 		}
 		if user != nil {
 			resp.Output["user"] = user
@@ -148,24 +146,24 @@ func oauthToken(ctx *Context) (err error) {
 
 	debugf("oauthToken resp: %v", resp)
 
-	osin.OutputJSON(resp, ctx.Writer, r)
-	return resp.InternalError
+	osin.OutputJSON(resp, c.Writer, r)
 }
 
 // Information endpoint
-func oauthInfo(ctx *Context) (err error) {
-	resp := ws.osvr.NewResponse()
+func (s *server) oauth2Info(c *gin.Context) {
+	resp := s.osvr.NewResponse()
 	defer resp.Close()
-	r := ctx.Request
+	r := c.Request
 
-	if ir := ws.osvr.HandleInfoRequest(resp, r); ir != nil {
+	if ir := s.osvr.HandleInfoRequest(resp, r); ir != nil {
 		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
 		var (
 			uid   string
-			topic = ctx.Vars["topic"]
+			topic = c.Param("topic")
 		)
+		log.Printf("topic %s", topic)
 		uid = ir.AccessData.UserData.(string)
-		staff, err := backends.GetStaff(uid)
+		staff, err := s.service.Get(uid)
 		if err != nil {
 			resp.SetError("get_user_error", "staff not found")
 			resp.InternalError = err
@@ -176,7 +174,7 @@ func oauthInfo(ctx *Context) (err error) {
 				if len(topic) > 2 && strings.Index(topic, "+") == 2 {
 					// TODO: search group topic[2:]
 					gn := topic[3:]
-					resp.Output[gn] = InGroup(gn, uid)
+					resp.Output[gn] = s.InGroup(gn, uid)
 				}
 			} else if topic == "staff" {
 				resp.Output["staff"] = staff
@@ -189,13 +187,12 @@ func oauthInfo(ctx *Context) (err error) {
 			}
 
 		}
-		ws.osvr.FinishInfoRequest(resp, r, ir)
+		s.osvr.FinishInfoRequest(resp, r, ir)
 	}
 
 	if resp.IsError && resp.InternalError != nil {
 		log.Printf("info ERROR: %s\n", resp.InternalError)
 	}
 
-	osin.OutputJSON(resp, ctx.Writer, r)
-	return resp.InternalError
+	osin.OutputJSON(resp, c.Writer, r)
 }

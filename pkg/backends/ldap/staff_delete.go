@@ -6,7 +6,7 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-func (s *storeImpl) Delete(uid string) (err error) {
+func (s *LDAPStore) Delete(uid string) (err error) {
 	for _, ls := range s.sources {
 		err = ls.DeleteStaff(uid)
 		if err != nil {

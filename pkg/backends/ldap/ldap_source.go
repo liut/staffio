@@ -90,7 +90,7 @@ func NewSource(cfg *Config) (*ldapSource, error) {
 	return ls, nil
 }
 
-func (s *storeImpl) Close() {
+func (s *LDAPStore) Close() {
 	for _, ls := range s.sources {
 		ls.Close()
 	}

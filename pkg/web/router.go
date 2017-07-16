@@ -1,149 +1,69 @@
 package web
 
 import (
-	"fmt"
-	"log"
 	"net/http"
+	"strings"
 
-	"github.com/RangelReale/osin"
-	"github.com/coocood/freecache"
-	"github.com/getsentry/raven-go"
-	"github.com/gorilla/mux"
-	"github.com/wealthworks/csmtp"
+	"github.com/gin-gonic/gin"
 
-	"lcgc/platform/staffio/pkg/backends"
 	. "lcgc/platform/staffio/pkg/settings"
 )
 
-var (
-	resUrl             string
-	jsonRequestHeaders = []string{
-		// "Accept", "application/json",
-		"X-Requested-With", "XMLHttpRequest",
-	}
-	ws    *webImpl
-	cache *freecache.Cache
-)
+func (s *server) strapRouter(r gin.IRouter) {
 
-type webImpl struct {
-	*mux.Router
-	osvr *osin.Server
-	fs   http.FileSystem
+	r.GET("/login", s.loginForm).POST("/login", s.login)
+	r.GET("/logout", s.logout)
+	r.GET("/password/forgot", s.passwordForgotForm)
+	r.POST("/password/forgot", s.passwordForgot)
+	r.GET("/password/reset", s.passwordResetForm)
+	r.POST("/password/reset", s.passwordReset)
+
+	authed := r.Group("/", AuthUserMiddleware())
+	authed.GET("/password", s.passwordForm)
+	authed.POST("/password", s.passwordChange)
+
+	authed.GET("/profile", s.profileForm)
+	authed.POST("/profile", s.profilePost)
+	authed.GET("/email/unseen", s.countNewMail)
+	authed.GET("/email/open", s.loginToExmail)
+
+	authed.GET("/contacts", s.contactsTable)
+	authed.GET("/staff/:uid", s.staffForm)
+	authed.POST("/staff/:uid", s.staffPost)
+	authed.DELETE("/staff/:uid", s.staffDelete)
+
+	authed.GET("/authorize", s.oauth2Authorize)
+	authed.POST("/authorize", s.oauth2Authorize)
+	r.GET("/token", s.oauth2Token)
+	r.POST("/token", s.oauth2Token)
+	r.GET("/info/:topic", s.oauth2Info)
+	r.POST("/info/:topic", s.oauth2Info)
+
+	keeper := authed.Group("/dust", s.AuthAdminMiddleware())
+	keeper.GET("/clients", s.clientsForm)
+	keeper.POST("/clients", s.clientsPost)
+	keeper.GET("/scopes", s.scopesForm)
+	keeper.GET("/status/:topic", s.handleStatus)
+	keeper.GET("/groups", s.groupList)
+
+	r.GET("/article/:id", articleView)
+	keeper.GET("/articles", articleForm)
+	keeper.POST("/articles", articlePost)
+
+	keeper.GET("/links", linksForm)
+	keeper.POST("/links", linksPost)
+
+	r.GET("/cas/logout", casLogout)
+	r.GET("/validate", s.casValidateV1)
+	r.GET("/serviceValidate", s.casValidateV2)
+
+	r.GET("/", welcome)
+
+	assets := newAssets(Settings.Root, Settings.FS)
+	assets.stripRouter(r)
 }
 
-func NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(rw, "Not Found")
-}
-
-func BadRequestHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(http.StatusBadRequest)
-	fmt.Fprintf(rw, http.StatusText(http.StatusBadRequest))
-}
-
-func NewServerConfig() *osin.ServerConfig {
-	return &osin.ServerConfig{
-		AuthorizationExpiration: 900,
-		AccessExpiration:        3600 * 24,
-		TokenType:               "bearer",
-		AllowedAuthorizeTypes: osin.AllowedAuthorizeType{
-			osin.CODE,
-			osin.TOKEN,
-		},
-		AllowedAccessTypes: osin.AllowedAccessType{
-			osin.AUTHORIZATION_CODE,
-			osin.IMPLICIT,
-			osin.REFRESH_TOKEN,
-			osin.PASSWORD,
-			osin.CLIENT_CREDENTIALS,
-		},
-		ErrorStatusCode:           200,
-		AllowClientSecretInParams: true,
-		AllowGetAccessRequest:     false,
-	}
-}
-
-func New() *webImpl {
-	ws = &webImpl{}
-
-	log.SetFlags(log.Ltime | log.Lshortfile)
-	Settings.Parse()
-
-	csmtp.Host = Settings.SMTP.Host
-	csmtp.Port = Settings.SMTP.Port
-	csmtp.Name = Settings.SMTP.SenderName
-	csmtp.From = Settings.SMTP.SenderEmail
-	csmtp.Auth(Settings.SMTP.SenderPassword)
-
-	if Settings.SentryDSN != "" {
-		raven.SetDSN(Settings.SentryDSN)
-	}
-
-	resUrl = Settings.ResUrl
-	backends.Prepare()
-	ws.osvr = osin.NewServer(NewServerConfig(), backends.NewStorage())
-	var err error
-	ws.osvr.AccessTokenGen, err = getTokenGenJWT()
-	if err != nil {
-		panic(err)
-	}
-
-	cache = freecache.NewCache(Settings.CacheSize)
-	sessionInit()
-	router := mux.NewRouter()
-	ws.Router = router
-
-	router.Handle("/login", handler(loginForm)).Methods("GET").Name("login")
-	router.Handle("/login", handler(login)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/logout", handler(logout)).Name("logout")
-	router.Handle("/password/forgot", handler(passwordForgotForm)).Methods("GET").Name("password_forgot")
-	router.Handle("/password/forgot", handler(passwordForgot)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/password/reset", handler(passwordResetForm)).Methods("GET").Name("password_reset")
-	router.Handle("/password/reset", handler(passwordReset)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/password", handler(passwordForm)).Methods("GET").Name("password")
-	router.Handle("/password", handler(passwordChange)).Methods("POST").Headers(jsonRequestHeaders...)
-
-	router.Handle("/profile", handler(profileForm)).Methods("GET").Name("profile")
-	router.Handle("/profile", handler(profilePost)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/email/unseen", handler(countNewMail)).Methods("GET").Name("unseen")
-	router.Handle("/email/open", handler(loginToExmail)).Methods("GET").Name("email-open")
-
-	router.Handle("/contacts", handler(contactsTable)).Methods("GET").Name("contacts")
-	router.Handle("/staff/{uid:[a-z]+}", handler(staffForm)).Methods("GET").Name("staff")
-	router.Handle("/staff/{uid:[a-z]+}", handler(staffPost)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/staff/{uid:[a-z]+}", handler(staffDelete)).Methods("DELETE").Headers(jsonRequestHeaders...)
-
-	router.Handle("/authorize", handler(oauthAuthorize)).Methods("GET", "POST").Name("authorize")
-	router.Handle("/token", handler(oauthToken)).Methods("GET", "POST").Name("token")
-	router.Handle("/info/{topic}", handler(oauthInfo)).Methods("GET", "POST", "OPTIONS").Name("info")
-
-	router.Handle("/dust/clients", handler(clientsForm)).Methods("GET").Name("clients")
-	router.Handle("/dust/clients", handler(clientsPost)).Methods("POST").Headers(jsonRequestHeaders...)
-	router.Handle("/dust/scopes", handler(scopesForm)).Methods("GET", "POST").Name("scopes")
-	router.Handle("/dust/status/{topic}", handler(handleStatus)).Methods("GET").Name("status")
-	router.Handle("/dust/groups", handler(groupList))
-
-	router.Handle("/article/{id}", handler(articleView)).Methods("GET").Name("article")
-	router.Handle("/dust/articles", handler(articleForm)).Methods("GET").Name("article_form")
-	router.Handle("/dust/articles", handler(articlePost)).Methods("POST").Headers(jsonRequestHeaders...)
-
-	router.Handle("/dust/links", handler(linksForm)).Methods("GET").Name("links_form")
-	router.Handle("/dust/links", handler(linksPost)).Methods("POST").Headers(jsonRequestHeaders...)
-
-	router.Handle("/cas/logout", handler(casLogout))
-	router.Handle("/validate", handler(casValidateV1))
-	router.Handle("/serviceValidate", handler(casValidateV2))
-
-	router.Handle("/", handler(welcome)).Name("welcome")
-
-	ws.ServStatic(Settings.Root, Settings.FS)
-	return ws
-}
-
-func (ws *webImpl) Run(addr string) error {
-	return http.ListenAndServe(addr, ws.Router)
-}
-
-func (ws *webImpl) HandleFunc(path string, f http.HandlerFunc) {
-	ws.Router.HandleFunc(path, f)
+func IsAjax(r *http.Request) bool {
+	accept := r.Header.Get("Accept")
+	return strings.Index(accept, "application/json") >= 0
 }

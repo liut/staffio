@@ -16,7 +16,7 @@ var (
 	groupLimit  = 20
 )
 
-func (s *storeImpl) AllGroup() (data []models.Group) {
+func (s *LDAPStore) AllGroup() (data []models.Group) {
 	var err error
 	for _, ls := range s.sources {
 		data, err = ls.SearchGroup("")
@@ -30,7 +30,7 @@ func (s *storeImpl) AllGroup() (data []models.Group) {
 	return
 }
 
-func (s *storeImpl) GetGroup(name string) (group *models.Group, err error) {
+func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 	// log.Printf("Search group %s", name)
 	for _, ls := range s.sources {
 		var data []models.Group
@@ -84,25 +84,28 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 	if len(sr.Entries) > 0 {
 		data = make([]models.Group, len(sr.Entries))
 		for i, entry := range sr.Entries {
-			group := models.Group{}
-			for _, attr := range entry.Attributes {
-				if attr.Name == "cn" {
-					group.Name = attr.Values[0]
-				} else if attr.Name == "member" {
-					group.Members = make([]string, len(attr.Values))
-					for j, _dn := range attr.Values {
-						group.Members[j] = _dn[strings.Index(_dn, "=")+1 : strings.Index(_dn, ",")]
-					}
-				}
-			}
-			data[i] = group
+			data[i] = entryToGroup(entry)
 		}
 	}
 
 	return
 }
 
-func (s *storeImpl) SaveGroup(group *models.Group) error {
+func entryToGroup(entry *ldap.Entry) (g models.Group) {
+	for _, attr := range entry.Attributes {
+		if attr.Name == "cn" {
+			g.Name = attr.Values[0]
+		} else if attr.Name == "member" {
+			g.Members = make([]string, len(attr.Values))
+			for j, _dn := range attr.Values {
+				g.Members[j] = _dn[strings.Index(_dn, "=")+1 : strings.Index(_dn, ",")]
+			}
+		}
+	}
+	return
+}
+
+func (s *LDAPStore) SaveGroup(group *models.Group) error {
 	// TODO:
 	return nil
 }

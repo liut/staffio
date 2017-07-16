@@ -14,6 +14,12 @@ const (
 	MinValueLength = 32
 )
 
+type TicketStore interface {
+	GetTicket(value string) (*Ticket, error)
+	DeleteTicket(value string) error
+	SaveTicket(t *Ticket) error
+}
+
 type Ticket struct {
 	Id        int       `db:"id,pk" json:"id" form:"id"` // seriel in database
 	Class     string    `db:"type" json:"type"`          // ticket type: ST, PGT, PT, ...
