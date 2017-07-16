@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>{{ template "title" . }} - Staff panel</title>
-    <meta name="appver" content="{{ .ctx.Version }}" >
+    <meta name="appver" content="{{ .appVersion }}" >
     <!-- Bootstrap -->
     <link href="/static/css/main.css" rel="stylesheet">
 
@@ -31,19 +31,19 @@
             <a class="navbar-brand" href="/">[🌱]</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
-            {{ if ne .ctx.NavSimple true }}
+            {{ if ne .navSimple true }}
             <ul class="nav navbar-nav">
               <li class="active"><a href="/">Home</a></li>
               <!-- <li><a href="/about">About</a></li> -->
               <li><a href="/contacts">Contacts</a></li>
-            {{ if .ctx.User }}
+            {{ if .currUser }}
               <li><a href="/email/open"><span class="glyphicon glyphicon-envelope"></span> <span id="mail-unseen" class="badge hide">0</span></a>
               </li>
             {{ end }}
             </ul>
             <ul class="nav navbar-nav navbar-right">
-              {{ if .ctx.User }}
-                {{ if .ctx.User.IsKeeper }}
+              {{ if .currUser }}
+                {{ if .currUser.IsKeeper }}
               <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="glyphicon glyphicon-wrench"></i> Admin <i class="glyphicon glyphicon-chevron-down"></i></a>
                 <ul class="dropdown-menu dropdown-sys">
@@ -59,7 +59,7 @@
                 {{ end }}
               <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                  <i class="glyphicon glyphicon-user"></i> {{ .ctx.User.Name }} <i class="glyphicon glyphicon-chevron-down"></i>
+                  <i class="glyphicon glyphicon-user"></i> {{ .currUser.Name }} <i class="glyphicon glyphicon-chevron-down"></i>
 
                 </a>
                 <ul class="dropdown-menu dropdown-user">
@@ -78,7 +78,7 @@
       </nav>
 
 
-    {{ range .ctx.Session.Flashes }}
+    {{ range .session.Flashes }}
         <div class="alert alert-warning">
           {{ . }}
         </div>
@@ -89,7 +89,7 @@
     </div> <!-- /container -->
 
   <script src="/static/scripts/common.js"></script>
-    {{ if .ctx.User }}
+    {{ if .currUser }}
       <script>$.getJSON('/email/unseen', function(res){
         if (res.unseen > 0) {
           $('#mail-unseen').text(res.unseen).removeClass('hide').show();

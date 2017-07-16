@@ -14,9 +14,20 @@ import (
 )
 
 var (
-	clients_sortable_fields              = []string{"id", "created"}
-	_                       osin.Storage = (*DbStorage)(nil)
+	clients_sortable_fields           = []string{"id", "created"}
+	_                       OSINStore = (*DbStorage)(nil)
 )
+
+type OSINStore interface {
+	osin.Storage
+	LoadClients(limit, offset int, sort map[string]int) ([]*models.Client, error)
+	CountClients() uint
+	GetClientWithCode(code string) (*models.Client, error)
+	SaveClient(client *models.Client) error
+	LoadScopes() (scopes []*models.Scope, err error)
+	IsAuthorized(client_id, username string) bool
+	SaveAuthorized(client_id, username string) error
+}
 
 type DbStorage struct {
 	refresh map[string]string
@@ -48,7 +59,7 @@ func (s *DbStorage) logf(format string, args ...interface{}) {
 
 func (s *DbStorage) GetClient(id string) (osin.Client, error) {
 	s.logf("GetClient: '%s'", id)
-	c, err := GetClientWithCode(id)
+	c, err := s.GetClientWithCode(id)
 	if err == nil {
 		return c, nil
 	}
@@ -90,7 +101,7 @@ func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 	err = withDbQuery(qs)
 	if err == nil {
 		a.UserData = username
-		a.Client, err = GetClientWithCode(client_id)
+		a.Client, err = s.GetClientWithCode(client_id)
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +173,7 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 	err = withDbQuery(qs)
 	if err == nil {
 		a.UserData = username
-		a.Client, err = GetClientWithCode(client_id)
+		a.Client, err = s.GetClientWithCode(client_id)
 		if err != nil {
 			return nil, err
 		}
@@ -204,7 +215,7 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 	return nil
 }
 
-func GetClientWithCode(code string) (*models.Client, error) {
+func (s *DbStorage) GetClientWithCode(code string) (*models.Client, error) {
 	c := new(models.Client)
 	qs := func(db dber) error {
 		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
@@ -217,7 +228,7 @@ func GetClientWithCode(code string) (*models.Client, error) {
 	return c, nil
 }
 
-func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Client, err error) {
+func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients []*models.Client, err error) {
 	if limit < 1 {
 		limit = 1
 	}
@@ -282,7 +293,7 @@ func LoadClients(limit, offset int, sort map[string]int) (clients []*models.Clie
 	return clients, nil
 }
 
-func CountClients() (total uint) {
+func (s *DbStorage) CountClients() (total uint) {
 	qs := func(db dber) error {
 		return db.QueryRow("SELECT COUND(id) FROM oauth_client").Scan(&total)
 	}
@@ -290,7 +301,7 @@ func CountClients() (total uint) {
 	return
 }
 
-func SaveClient(client *models.Client) error {
+func (s *DbStorage) SaveClient(client *models.Client) error {
 	log.Printf("SaveClient: id %d code %s", client.Id, client.Code)
 	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectUri == "" {
 		return valueError
@@ -321,7 +332,7 @@ func SaveClient(client *models.Client) error {
 	return withTxQuery(qs)
 }
 
-func LoadScopes() (scopes []*models.Scope, err error) {
+func (s *DbStorage) LoadScopes() (scopes []*models.Scope, err error) {
 	scopes = make([]*models.Scope, 0)
 	qs := func(db dber) error {
 		rows, err := db.Query("SELECT name, label, description, is_default FROM oauth_scope")
@@ -348,7 +359,7 @@ func LoadScopes() (scopes []*models.Scope, err error) {
 	return scopes, nil
 }
 
-func IsAuthorized(client_id, username string) bool {
+func (s *DbStorage) IsAuthorized(client_id, username string) bool {
 	var (
 		created time.Time
 	)
@@ -362,7 +373,7 @@ func IsAuthorized(client_id, username string) bool {
 	return true
 }
 
-func SaveAuthorized(client_id, username string) error {
+func (s *DbStorage) SaveAuthorized(client_id, username string) error {
 	return withDbQuery(func(db dber) error {
 		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ON CONFLICT DO NOTHING",
 			client_id, username)

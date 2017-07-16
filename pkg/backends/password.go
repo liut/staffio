@@ -18,21 +18,21 @@ var (
 	ErrInvalidResetToken = errors.New("invalid reset token or not found")
 )
 
-func getResetHash(uid string) ([]byte, error) {
-	_, err := GetStaff(uid)
+func (s *serviceImpl) getResetHash(uid string) ([]byte, error) {
+	_, err := s.Get(uid)
 	if err != nil {
 		return nil, fmt.Errorf("no such user %s", uid)
 	}
-	uv, err := LoadVerify(uid)
+	uv, err := s.LoadVerify(uid)
 	if err != nil {
 		return nil, ErrInvalidResetToken
 	}
 	return uv.CodeHashBytes(), nil
 }
 
-func PasswordForgot(at common.AliasType, target, uid string) (err error) {
+func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (err error) {
 	var staff *models.Staff
-	staff, err = GetStaff(uid)
+	staff, err = s.Get(uid)
 	if err != nil {
 		return
 	}
@@ -44,12 +44,12 @@ func PasswordForgot(at common.AliasType, target, uid string) (err error) {
 		err = fmt.Errorf("incorrect email %s", target)
 		return
 	}
-	return passwordForgotPrepare(staff)
+	return s.passwordForgotPrepare(staff)
 }
 
-func passwordForgotPrepare(staff *models.Staff) (err error) {
+func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	uv := models.NewVerify(common.AtEmail, staff.Email, staff.Uid)
-	err = SaveVerify(uv)
+	err = s.SaveVerify(uv)
 	if err != nil {
 		return
 	}
@@ -69,18 +69,18 @@ func passwordForgotPrepare(staff *models.Staff) (err error) {
 	return
 }
 
-func PasswordResetTokenVerify(token string) (uid string, err error) {
+func (s *serviceImpl) PasswordResetTokenVerify(token string) (uid string, err error) {
 	secret := []byte(Settings.PwdSecret)
-	uid, err = passwordreset.VerifyToken(token, getResetHash, secret)
+	uid, err = passwordreset.VerifyToken(token, s.getResetHash, secret)
 	if err != nil {
 		log.Printf("passwordreset.VerifyToken %q ERR %s", token, err)
 	}
 	return
 }
 
-func PasswordResetWithToken(login, token, passwd string) (err error) {
+func (s *serviceImpl) PasswordResetWithToken(login, token, passwd string) (err error) {
 	var uid string
-	uid, err = PasswordResetTokenVerify(token)
+	uid, err = s.PasswordResetTokenVerify(token)
 	if err != nil {
 		// verification failed, don't allow password reset
 		return
@@ -89,7 +89,7 @@ func PasswordResetWithToken(login, token, passwd string) (err error) {
 		return fmt.Errorf("invalid login %s", login)
 	}
 	// OK, reset password for uid (e.g. allow to change it)
-	err = service.PasswordStore.PasswordReset(uid, passwd)
+	err = s.PasswordReset(uid, passwd)
 	if err == nil {
 		qs := func(db dbTxer) error {
 			rs, de := db.Exec("DELETE FROM password_reset WHERE uid = $1", uid)
@@ -104,10 +104,10 @@ func PasswordResetWithToken(login, token, passwd string) (err error) {
 	return
 }
 
-func SaveVerify(uv *models.Verify) error {
+func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 	qs := func(db dbTxer) error {
 		log.Printf("save %v", uv)
-		euv, err := LoadVerify(uv.Uid)
+		euv, err := s.LoadVerify(uv.Uid)
 		if err == nil {
 			str := `DELETE FROM password_reset WHERE id = $1`
 			_, err = db.Exec(str, euv.Id)
@@ -137,7 +137,7 @@ func SaveVerify(uv *models.Verify) error {
 	return withTxQuery(qs)
 }
 
-func LoadVerify(uid string) (*models.Verify, error) {
+func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 	var uv models.Verify
 	qs := func(db dber) error {
 		return db.Get(&uv, `SELECT id, uid, type_id, target, code_hash, life_seconds, created, updated FROM password_reset

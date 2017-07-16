@@ -3,14 +3,15 @@ package web
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/RangelReale/osin"
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
 	"lcgc/platform/staffio/pkg/backends"
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
 const (
@@ -18,91 +19,82 @@ const (
 	LimitLinks   = 10
 )
 
-func welcome(ctx *Context) (err error) {
+func welcome(c *gin.Context) {
 
-	if Settings.Debug {
-		log.Printf("session Name: %s, Values: %d", ctx.Session.Name(), len(ctx.Session.Values))
-		log.Printf("ctx User %v", ctx.User)
-	}
 	articles, err := backends.LoadArticles(LimitArticle, 0)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 	links, err := backends.LoadLinks(LimitLinks, 0)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
 	//execute the template
-	return ctx.Render("welcome.html", map[string]interface{}{
-		"ctx":      ctx,
+	Render(c, "welcome.html", map[string]interface{}{
+		"ctx":      c,
 		"articles": articles,
 		"links":    links,
 	})
 }
 
-func articleView(ctx *Context) error {
-	id, err := strconv.Atoi(ctx.Vars["id"])
+func articleView(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 	if id < 1 {
-		return fmt.Errorf("invalid id %d", id)
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 	article, err := backends.LoadArticle(id)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
 	fmt.Printf("%s\n%s\n", article.HtmlTitle(), article.HtmlContent())
 
-	if ctx.IsAjax() {
+	if IsAjax(c.Request) {
 		res := make(osin.ResponseData)
 		res["data"] = article
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 
-	return ctx.Render("article_view.html", map[string]interface{}{
-		"ctx":     ctx,
+	Render(c, "article_view.html", map[string]interface{}{
+		"ctx":     c,
 		"article": article,
 	})
 }
 
-func articleForm(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func articleForm(c *gin.Context) {
 	articles, err := backends.LoadArticles(9, 0)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
-	return ctx.Render("article_edit.html", map[string]interface{}{
-		"ctx":      ctx,
+	Render(c, "article_edit.html", map[string]interface{}{
+		"ctx":      c,
 		"articles": articles,
 	})
 }
 
-func articlePost(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
-	req := ctx.Request
+func articlePost(c *gin.Context) {
+	req := c.Request
 	obj := new(models.Article)
 	err := binding.FormPost.Bind(req, obj)
 	if err != nil {
 		log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
-	obj.Author = ctx.User.Uid
+	user := UserWithContext(c)
+	obj.Author = user.Uid
 	res := make(osin.ResponseData)
 	err = backends.SaveArticle(obj)
 	if err == nil {
@@ -111,38 +103,25 @@ func articlePost(ctx *Context) error {
 		res["ok"] = false
 		log.Printf("save article ERR %s", err)
 	}
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func linksForm(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func linksForm(c *gin.Context) {
 	links, err := backends.LoadLinks(9, 0)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
-	return ctx.Render("links.html", map[string]interface{}{
-		"ctx":   ctx,
+	Render(c, "links.html", map[string]interface{}{
+		"ctx":   c,
 		"links": links,
 	})
 }
 
-func linksPost(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func linksPost(c *gin.Context) {
 
-	req := ctx.Request
+	req := c.Request
 	res := make(osin.ResponseData)
 	if req.FormValue("op") == "new" {
 		obj := new(models.Link)
@@ -152,7 +131,8 @@ func linksPost(ctx *Context) error {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": err.Error()}
 		}
-		obj.Author = ctx.User.Uid
+		user := UserWithContext(c)
+		obj.Author = user.Uid
 		err = backends.SaveLink(obj)
 		if err != nil {
 			res["ok"] = false
@@ -166,17 +146,20 @@ func linksPost(ctx *Context) error {
 		if pk == "" {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is empty"}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
+			return
 		}
 		id, err := strconv.Atoi(pk)
 		if err != nil {
-			return err
+			c.AbortWithError(http.StatusNotFound, err)
+			return
 		}
 		link, err := backends.LoadLink(id)
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is invalid or not found"}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
+			return
 		}
 		switch name {
 		case "title":
@@ -196,5 +179,5 @@ func linksPost(ctx *Context) error {
 		}
 	}
 
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }

@@ -1,105 +1,108 @@
 package web
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/RangelReale/osin"
+	// "github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"lcgc/platform/staffio/pkg/backends"
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/models/cas"
 	"lcgc/platform/staffio/pkg/models/common"
 	. "lcgc/platform/staffio/pkg/settings"
 )
 
-func loginForm(ctx *Context) (err error) {
-	service := ctx.Request.FormValue("service")
-	tgc := GetTGC(ctx.Session)
+func (s *server) loginForm(c *gin.Context) {
+	service := c.Request.FormValue("service")
+	tgc := GetTGC(c)
 	if service != "" && tgc != nil {
 		st := cas.NewTicket("ST", service, tgc.Uid, false)
-		err = backends.SaveTicket(st)
+		err := s.service.SaveTicket(st)
 		if err != nil {
 			return
 		}
-		ctx.Redirect(service + "?ticket=" + st.Value)
-		return nil
+		c.Redirect(302, service+"?ticket="+st.Value)
+		return
 	}
-	return ctx.Render("login.html", map[string]interface{}{
-		"ctx":     ctx,
+	Render(c, "login.html", map[string]interface{}{
+		"ctx":     c,
 		"service": service,
 	})
 }
 
-func login(ctx *Context) error {
-	req := ctx.Request
+func (s *server) login(c *gin.Context) {
+	req := c.Request
+	// session := sessions.Default(c)
 	uid, password := req.PostFormValue("username"), req.PostFormValue("password")
 	service := req.FormValue("service")
-	// log.Printf("accept: %v (%d)", req.Header["Accept"], len(req.Header["Accept"]))
+	referer := req.PostFormValue("referer")
 	res := make(osin.ResponseData)
-	if !backends.Authenticate(uid, password) {
-		// ctx.Session.AddFlash("Invalid Username/Password")
+	if err := s.service.Authenticate(uid, password); err != nil {
 
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 
-	staff, err := backends.GetStaff(uid)
+	staff, err := s.service.Get(uid)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Load user failed"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 
 	//store the user id in the values and redirect to welcome
 	user := UserFromStaff(staff)
 	user.Refresh()
-	ctx.Session.Values[kUserOL] = user
-	ctx.Session.Values[kLastUid] = staff.Uid
+	user.toResponse(c.Writer)
+	// session.Set(kUserOL, user)
+	// session.Values[kUserOL] = user
+	// session.Values[kLastUid] = staff.Uid
 	res["ok"] = true
 	if service != "" {
 		st := cas.NewTicket("ST", service, user.Uid, true)
-		err = backends.SaveTicket(st)
+		err = s.service.SaveTicket(st)
 		if err != nil {
-			return err
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
-		NewTGC(ctx.Session, st)
+		NewTGC(c, st)
 		res["referer"] = service + "?ticket=" + st.Value
 		log.Printf("ref: %q", res["referer"])
 	} else {
-		res["referer"] = ctx.Referer
+		res["referer"] = referer
 	}
-	return outputJson(res, ctx.Writer)
-	// http.Redirect(ctx.Writer, req, reverse("welcome"), http.StatusSeeOther)
+	c.JSON(http.StatusOK, res)
+	// http.Redirect(c.Writer, req, reverse("welcome"), http.StatusSeeOther)
 }
 
-func logout(ctx *Context) error {
-	delete(ctx.Session.Values, kUserOL)
-	DeleteTGC(ctx.Session)
-	http.Redirect(ctx.Writer, ctx.Request, reverse("welcome"), http.StatusSeeOther)
-	return nil
+func (s *server) logout(c *gin.Context) {
+	DeleteTGC(c)
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
-func passwordForm(ctx *Context) error {
-	return ctx.Render("password.html", map[string]interface{}{
-		"ctx": ctx,
+func (s *server) passwordForm(c *gin.Context) {
+	Render(c, "password.html", map[string]interface{}{
+		"ctx": c,
 	})
 }
 
-func passwordChange(ctx *Context) error {
-	req := ctx.Request
+func (s *server) passwordChange(c *gin.Context) {
+	req := c.Request
 	uid, pwdOld, pwdNew := req.FormValue("username"), req.FormValue("old_password"), req.FormValue("new_password")
 	res := make(osin.ResponseData)
-	if !backends.Authenticate(uid, pwdOld) {
+	if err := s.service.Authenticate(uid, pwdOld); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "old_password"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
-	err := backends.PasswordChange(uid, pwdOld, pwdNew)
+	err := s.service.PasswordChange(uid, pwdOld, pwdNew)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "old_password"}
@@ -107,121 +110,124 @@ func passwordChange(ctx *Context) error {
 		res["ok"] = true
 	}
 
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func passwordForgotForm(ctx *Context) error {
-	return ctx.Render("password_forgot.html", map[string]interface{}{
-		"ctx": ctx,
+func (s *server) passwordForgotForm(c *gin.Context) {
+	Render(c, "password_forgot.html", map[string]interface{}{
+		"ctx": c,
 	})
 }
 
-func passwordForgot(ctx *Context) error {
-	req := ctx.Request
+func (s *server) passwordForgot(c *gin.Context) {
+	req := c.Request
 	uid, email, mobile := req.FormValue("username"), req.FormValue("email"), req.FormValue("mobile")
 	res := make(osin.ResponseData)
-	staff, err := backends.GetStaff(uid)
+	staff, err := s.service.Get(uid)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username", "field": "username"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 	if staff.Email != email {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "No such email address", "field": "email"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 	if staff.Mobile != mobile {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
-	err = backends.PasswordForgot(common.AtEmail, email, uid)
+	err = s.service.PasswordForgot(common.AtEmail, email, uid)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "username"}
 	} else {
 		res["ok"] = true
 	}
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func passwordResetForm(ctx *Context) error {
-	req := ctx.Request
+func (s *server) passwordResetForm(c *gin.Context) {
+	req := c.Request
 
 	token := req.FormValue("rt")
 	if token == "" {
-		ctx.Halt(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
-		return nil
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
-	uid, err := backends.PasswordResetTokenVerify(token)
+	uid, err := s.service.PasswordResetTokenVerify(token)
 	if err != nil {
-		ctx.Halt(http.StatusBadRequest, fmt.Sprintf("Invalid Token: %s", err))
-		return nil
+		c.AbortWithStatus(http.StatusBadRequest)
+		// c.Halt(http.StatusBadRequest, fmt.Sprintf("Invalid Token: %s", err))
+		return
 	}
-	return ctx.Render("password_reset.html", map[string]interface{}{
-		"ctx":   ctx,
+	Render(c, "password_reset.html", map[string]interface{}{
+		"ctx":   c,
 		"token": token,
 		"uid":   uid,
 	})
 }
 
-func passwordReset(ctx *Context) error {
-	req := ctx.Request
+func (s *server) passwordReset(c *gin.Context) {
+	req := c.Request
 
 	token := req.FormValue("rt")
 	if token == "" {
-		ctx.Halt(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
-		return nil
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 	uid, passwd, passwd2 := req.FormValue("username"), req.FormValue("password"), req.FormValue("password_confirm")
 	res := make(osin.ResponseData)
 	if uid == "" || passwd != passwd2 {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username or Password", "field": "password"}
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
-	err := backends.PasswordResetWithToken(uid, token, passwd)
+	err := s.service.PasswordResetWithToken(uid, token, passwd)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "password"}
 	} else {
 		res["ok"] = true
 	}
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func profileForm(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	staff, err := backends.GetStaff(ctx.User.Uid)
+func (s *server) profileForm(c *gin.Context) {
+	user := UserWithContext(c)
+	staff, err := s.service.Get(user.Uid)
 	if err != nil {
-		return err
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 
-	return ctx.Render("profile.html", map[string]interface{}{
-		"ctx":   ctx,
+	Render(c, "profile.html", map[string]interface{}{
+		"ctx":   c,
 		"staff": staff,
 	})
 }
 
-func profilePost(ctx *Context) error {
-	if !ctx.checkLogin() {
-		return nil
-	}
+func (s *server) profilePost(c *gin.Context) {
+	user := UserWithContext(c)
 	res := make(osin.ResponseData)
-	req := ctx.Request
+	req := c.Request
 	password := req.PostFormValue("password")
 
 	staff := new(models.Staff)
 	err := binding.Form.Bind(req, staff)
 	if err != nil {
 		log.Printf("bind %v: %s", staff, err)
-		return err
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
-	err = backends.ProfileModify(ctx.User.Uid, password, staff)
+	err = s.service.ProfileModify(user.Uid, password, staff)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "password"}
@@ -229,21 +235,21 @@ func profilePost(ctx *Context) error {
 		res["ok"] = true
 	}
 
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
-	if w.Header().Get("Content-Type") == "" {
-		w.Header().Set("Content-Type", "application/json")
-	}
+// func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
+// 	if w.Header().Get("Content-Type") == "" {
+// 		w.Header().Set("Content-Type", "application/json")
+// 	}
 
-	encoder := json.NewEncoder(w)
-	err := encoder.Encode(res)
-	if err != nil {
-		log.Printf("json encoding error: %s", err)
-	}
-	return err
-}
+// 	encoder := json.NewEncoder(w)
+// 	err := encoder.Encode(res)
+// 	if err != nil {
+// 		log.Printf("json encoding error: %s", err)
+// 	}
+// 	return err
+// }
 
 func debugf(format string, args ...interface{}) {
 	if Settings.Debug {

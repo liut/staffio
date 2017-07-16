@@ -2,7 +2,7 @@
 {{ define "head" }}
 {{ end }}
 {{ define "content" }}
-{{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
+{{ $isKeeper := and ( .currUser ) ( .currUser.IsKeeper ) }}
     <h4>All articles:</h4>
       <table class="table">
           <tr>
@@ -30,7 +30,7 @@
 <div>
 
 <h4>Creating new:</h4>
-<form class="form-horizontal" id="form1" action="{{ reverse "article_form" }}" method="post">
+<form class="form-horizontal" id="form1" action="{{ .ctx.Request.RequestURI }}" method="post">
     <input id="the_id" type="hidden" name="id" value="">
     <div id="msg" class="alert" style="display:none;" role="alert"></div>
 
@@ -56,12 +56,10 @@
 {{ end }}
 {{ define "tail" }}
   <script type="text/javascript">
-    var action_url = '{{ reverse "article_form" }}'
 
       jQuery(document).ready(function () {
         $(".pretty").prettyDate();
         // $.fn.editable.defaults.mode = 'inline';
-        // $.fn.editable.defaults.url = action_url;
         $('.editable').editable();
 
    $('a.edit').click(function(){

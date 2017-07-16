@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (s *storeImpl) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
+func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
 	for _, ls := range s.sources {
 		err = ls.PasswordChange(uid, oldPasswd, newPasswd)
 		if err != nil {
@@ -33,7 +33,7 @@ func (ls *ldapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	return nil
 }
 
-func (s *storeImpl) PasswordReset(uid, passwd string) (err error) {
+func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
 		err = ls.PasswordReset(uid, passwd)
 		if err != nil {

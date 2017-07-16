@@ -5,15 +5,35 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	statikFs "github.com/rakyll/statik/fs"
 
 	_ "lcgc/platform/staffio/pkg/web/statik"
 )
 
-func (ws *webImpl) ServStatic(root, name string) {
+type assetsImpl struct {
+	fs http.FileSystem
+}
+
+func newAssets(root, name string) *assetsImpl {
+	fs := buildStaticFS(root, name)
+	return &assetsImpl{fs}
+}
+
+func (a *assetsImpl) stripRouter(r gin.IRouter) {
+	s := http.FileServer(a.fs)
+	h := func(c *gin.Context) {
+		s.ServeHTTP(c.Writer, c.Request)
+	}
+
+	r.GET("/static/*filepath", h)
+	r.GET("/favicon.ico", h)
+	r.GET("/robots.txt", h)
+}
+
+func buildStaticFS(root, name string) (fs http.FileSystem) {
 
 	var (
-		fs  http.FileSystem
 		err error
 	)
 	log.Printf("using fs %s", name)
@@ -26,9 +46,5 @@ func (ws *webImpl) ServStatic(root, name string) {
 		fs = http.Dir(filepath.Join(root, "htdocs"))
 	}
 
-	h := http.FileServer(fs)
-	ws.PathPrefix("/static/").Handler(h).Methods("GET", "HEAD")
-	ws.Path("/favicon.ico").Handler(h).Methods("GET", "HEAD")
-	ws.Path("/robots.txt").Handler(h).Methods("GET", "HEAD")
-
+	return
 }

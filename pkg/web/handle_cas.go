@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gorilla/sessions"
+	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-gonic/gin"
 
-	"lcgc/platform/staffio/pkg/backends"
 	"lcgc/platform/staffio/pkg/models/cas"
 )
 
@@ -14,41 +14,44 @@ const (
 	ticketCKey = "cTGT"
 )
 
-func NewTGC(sess *sessions.Session, ticket *cas.Ticket) {
+func NewTGC(c *gin.Context, ticket *cas.Ticket) {
 	tgt := cas.NewTicket("TGT", ticket.Service, ticket.Uid, false)
-	sess.Values[ticketCKey] = tgt
+	session := sessions.Default(c)
+	session.Set(ticketCKey, tgt)
 }
 
-func GetTGC(sess *sessions.Session) *cas.Ticket {
-	if v, ok := sess.Values[ticketCKey]; ok {
-		return v.(*cas.Ticket)
+func GetTGC(c *gin.Context) *cas.Ticket {
+	session := sessions.Default(c)
+	v := session.Get(ticketCKey)
+	if t, ok := v.(*cas.Ticket); ok {
+		return t
 	}
 	return nil
 }
 
-func DeleteTGC(sess *sessions.Session) {
-	delete(sess.Values, ticketCKey)
+func DeleteTGC(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Delete(ticketCKey)
 }
 
-func casLogout(c *Context) error {
-	tgc := GetTGC(c.Session)
+func casLogout(c *gin.Context) {
+	tgc := GetTGC(c)
 	if tgc != nil {
-		DeleteTGC(c.Session)
+		DeleteTGC(c)
 		fmt.Fprint(c.Writer, "User has been logged out")
 	} else {
 		fmt.Fprint(c.Writer, "User is not logged in")
 	}
-	return nil
 }
 
-func casValidateV1(c *Context) error {
+func (s *server) casValidateV1(c *gin.Context) {
 	service := c.Request.FormValue("service")
 	ticket := c.Request.FormValue("ticket")
 
 	if ticket == "" {
 		fmt.Fprint(c.Writer, "no\n")
 	} else {
-		t, err := backends.GetTicket(ticket)
+		t, err := s.service.GetTicket(ticket)
 		if err != nil {
 			log.Printf("load ticket %s ERR: %s", ticket, err)
 			fmt.Fprint(c.Writer, "no\n")
@@ -56,15 +59,14 @@ func casValidateV1(c *Context) error {
 			if t.Service != service {
 				fmt.Fprint(c.Writer, "no\n")
 			} else {
-				backends.DeleteTicket(ticket)
+				s.service.DeleteTicket(ticket)
 				fmt.Fprint(c.Writer, "yes\n"+t.Uid)
 			}
 		}
 	}
-	return nil
 }
 
-func casValidateV2(c *Context) error {
+func (s *server) casValidateV2(c *gin.Context) {
 	service := c.Request.FormValue("service")
 	ticket := c.Request.FormValue("ticket")
 	format := c.Request.FormValue("format")
@@ -77,12 +79,12 @@ func casValidateV2(c *Context) error {
 	} else {
 		c.Writer.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	}
-	st, err := backends.GetTicket(ticket)
+	st, err := s.service.GetTicket(ticket)
 	if err != nil {
 		fmt.Fprintf(c.Writer, v2ResponseFailure(cas.NewCasError(
 			"ticket is invalid or expired", cas.ERROR_CODE_INVALID_TICKET), format))
 		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, err)
-		return nil
+		return
 	}
 
 	casErr := st.Check()
@@ -98,11 +100,10 @@ func casValidateV2(c *Context) error {
 	if casErr != nil {
 		fmt.Fprintf(c.Writer, v2ResponseFailure(casErr, format))
 		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, casErr)
-		return nil
+		return
 	}
 
 	fmt.Fprintf(c.Writer, v2ResponseSuccess(st, format))
-	return nil
 }
 
 // v2ResponseFailure produces XML string for failure

@@ -4,7 +4,7 @@
 {{ end }}
 
 {{ define "content" }}
-{{ $isKeeper := and ( .ctx.User ) ( .ctx.User.IsKeeper ) }}
+{{ $isKeeper := and ( .currUser ) ( .currUser.IsKeeper ) }}
 <table id="contacts" class="table table-striped" data-order='[[ 1, "asc" ]]' data-page-length='25'>
 <thead>
 	<tr>

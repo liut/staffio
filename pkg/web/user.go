@@ -3,7 +3,8 @@ package web
 import (
 	"time"
 
-	"lcgc/platform/staffio/pkg/backends"
+	"gopkg.in/vmihailenco/msgpack.v2"
+
 	"lcgc/platform/staffio/pkg/models"
 	. "lcgc/platform/staffio/pkg/settings"
 )
@@ -12,13 +13,32 @@ type User struct {
 	Uid     string `json:"uid"`
 	Name    string `json:"name"`
 	LastHit int64  `json:"-"`
+	ver     uint8
 }
 
-func (u *User) IsKeeper() bool {
-	if u == nil {
-		return false
-	}
-	return IsKeeper(u.Uid)
+const ver uint8 = 0
+
+var (
+	_ msgpack.CustomEncoder = (*User)(nil)
+	_ msgpack.CustomDecoder = (*User)(nil)
+)
+
+func (u *User) EncodeMsgpack(enc *msgpack.Encoder) error {
+	return enc.Encode(ver, u.Uid, u.Name, u.LastHit)
+}
+
+func (u *User) DecodeMsgpack(dec *msgpack.Decoder) error {
+	return dec.Decode(&u.ver, &u.Uid, &u.Name, &u.LastHit)
+}
+
+func (u User) Encode() (b []byte, err error) {
+	b, err = msgpack.Marshal(&u)
+	return
+}
+
+func (u *User) Decode(b []byte) (err error) {
+	err = msgpack.Unmarshal(b, u)
+	return
 }
 
 func (u *User) IsExpired() bool {
@@ -34,16 +54,21 @@ func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
 }
 
-func (u *User) InGroup(gn string) bool {
-	return InGroup(gn, u.Uid)
+func (u *User) IsKeeper() bool {
+	for _, n := range keepers {
+		if n == u.Uid {
+			return true
+		}
+	}
+	return false
 }
 
-func IsKeeper(uid string) bool {
-	return InGroup("keeper", uid)
+func (s *server) IsKeeper(uid string) bool {
+	return s.InGroup("keeper", uid)
 }
 
-func InGroup(gn, uid string) bool {
-	return backends.InGroup(gn, uid)
+func (s *server) InGroup(gn, uid string) bool {
+	return s.service.InGroup(gn, uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {

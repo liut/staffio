@@ -1,11 +1,11 @@
 package web
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/RangelReale/osin"
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
 	"lcgc/platform/staffio/pkg/backends"
@@ -13,41 +13,29 @@ import (
 	. "lcgc/platform/staffio/pkg/settings"
 )
 
-func clientsForm(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func (s *server) clientsForm(c *gin.Context) {
 	var (
 		limit  = 20
 		offset = 0
 		sort   = map[string]int{"id": backends.ASCENDING}
 	)
-	clients, err := backends.LoadClients(limit, offset, sort)
+	clients, err := s.service.OSIN().LoadClients(limit, offset, sort)
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
-	return ctx.Render("clients.html", map[string]interface{}{
-		"ctx":     ctx,
+	Render(c, "clients.html", map[string]interface{}{
+		"ctx":     c,
 		"clients": clients,
 	})
 }
 
-func clientsPost(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func (s *server) clientsPost(c *gin.Context) {
 	res := make(osin.ResponseData)
-	req := ctx.Request
+	req := c.Request
 	var (
 		client *models.Client
+		err    error
 	)
 
 	if req.FormValue("op") == "new" {
@@ -58,11 +46,12 @@ func clientsPost(ctx *Context) (err error) {
 			req.PostFormValue("secret"),
 			req.PostFormValue("redirect_uri"))
 		// log.Printf("new client: %v", client)
-		_, e := backends.GetClientWithCode(client.Code) // check exists
+		_, e := s.service.OSIN().GetClientWithCode(client.Code) // check exists
 		if e == nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "duplicate client_id"}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
+			return
 		}
 
 	} else {
@@ -72,14 +61,15 @@ func clientsPost(ctx *Context) (err error) {
 		if pk == "" {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is empty"}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
 		}
 		// id, err := strconv.ParseUint(pk, 10, 32)
-		client, err = backends.GetClientWithCode(pk)
+		client, err = s.service.OSIN().GetClientWithCode(pk)
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is invalid or not found"}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
+			return
 		}
 		switch name {
 		case "name":
@@ -94,75 +84,61 @@ func clientsPost(ctx *Context) (err error) {
 	}
 
 	if client != nil {
-		err = backends.SaveClient(client)
+		err = s.service.OSIN().SaveClient(client)
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": err.Error()}
-			return outputJson(res, ctx.Writer)
+			c.JSON(http.StatusOK, res)
 		}
 		res["ok"] = true
 		res["id"] = client.Id
-		return outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
+		return
 	}
 
 	res["ok"] = false
 	res["error"] = map[string]string{"message": "invalid operation"}
-	return outputJson(res, ctx.Writer)
+	c.JSON(http.StatusOK, res)
 }
 
-func scopesForm(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
-	scopes, err := backends.LoadScopes()
+func (s *server) scopesForm(c *gin.Context) {
+	scopes, err := s.service.OSIN().LoadScopes()
 	if err != nil {
-		return err
+		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
-	return ctx.Render("scopes.html", map[string]interface{}{
-		"ctx":    ctx,
+	Render(c, "scopes.html", map[string]interface{}{
+		"ctx":    c,
 		"scopes": scopes,
 	})
 }
 
-func contactsTable(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
+func (s *server) contactsTable(c *gin.Context) {
 
-	staffs := backends.LoadStaffs()
+	staffs := s.service.All()
 	models.ByUid.Sort(staffs)
 
-	return ctx.Render("contact.html", map[string]interface{}{
+	Render(c, "contact.html", map[string]interface{}{
 		"staffs": staffs,
-		"ctx":    ctx,
+		"ctx":    c,
 	})
 }
 
-func staffForm(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return nil
-	}
+func (s *server) staffForm(c *gin.Context) {
 
 	var (
 		inEdit bool
-		uid    = ctx.Vars["uid"]
+		uid    = c.Param("uid")
 		staff  *models.Staff
 		data   = map[string]interface{}{
-			"ctx": ctx,
+			"ctx": c,
 		}
+		err error
 	)
 
 	if uid != "" && uid != "new" {
 		inEdit = true
-		staff, err = backends.GetStaff(uid)
+		staff, err = s.service.Get(uid)
 		if err != nil {
 			return
 		}
@@ -170,35 +146,30 @@ func staffForm(ctx *Context) (err error) {
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
-	return ctx.Render("staff_edit.html", data)
+	Render(c, "staff_edit.html", data)
 }
 
-func staffPost(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return
-	}
-	req := ctx.Request
+func (s *server) staffPost(c *gin.Context) {
+	req := c.Request
 
 	var (
-		uid           = ctx.Vars["uid"]
+		uid           = c.Param("uid")
 		estaff, staff *models.Staff
 		res           = make(osin.ResponseData)
 		op            = req.FormValue("op")
+		err           error
 	)
 	if uid == "" || uid == "new" {
 		uid = req.PostFormValue("uid")
 	}
 
 	if uid == "" || uid == "new" {
-		return fmt.Errorf("empty uid")
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	} else {
-		estaff, err = backends.GetStaff(uid)
+		estaff, err = s.service.Get(uid)
 		if err != nil {
-			log.Printf("backends.GetStaff err %s", err)
+			log.Printf("GetStaff err %s", err)
 			estaff = nil
 		}
 	}
@@ -207,8 +178,9 @@ func staffPost(ctx *Context) (err error) {
 	if op == "fetch-exmail" && uid != "" {
 		staff, err = backends.GetStaffFromExmail(email)
 		if err != nil {
+			c.AbortWithError(http.StatusNotFound, err)
 			log.Printf("GetStaff err %s", err)
-			return err
+			return
 		}
 		// log.Print(staff)
 		if estaff != nil {
@@ -235,7 +207,7 @@ func staffPost(ctx *Context) (err error) {
 		}
 		res["ok"] = true
 		res["staff"] = staff
-		outputJson(res, ctx.Writer)
+		c.JSON(http.StatusOK, res)
 	} else if op == "store" {
 		fb := binding.Form
 		staff = new(models.Staff)
@@ -245,70 +217,60 @@ func staffPost(ctx *Context) (err error) {
 			return
 		}
 
-		err = backends.StoreStaff(staff)
+		err = s.service.StoreStaff(staff)
 		if err == nil {
 			res["ok"] = true
-			res["referer"] = reverse("contacts")
-			outputJson(res, ctx.Writer)
+			res["referer"] = "/contacts"
+			c.JSON(http.StatusOK, res)
 		}
 	}
 
 	return
 }
 
-func staffDelete(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
-		return
-	}
+func (s *server) staffDelete(c *gin.Context) {
 
 	var (
-		uid = ctx.Vars["uid"]
+		uid = c.Param("uid")
 		res = make(osin.ResponseData)
 	)
 
 	if uid == "" || uid == "new" {
-		return fmt.Errorf("empty uid")
-	}
-
-	if uid == ctx.User.Uid {
-		res["ok"] = false
-		res["error"] = "Can not delete yourself"
-		return outputJson(res, ctx.Writer)
-	}
-
-	_, err = backends.GetStaff(uid)
-	if err != nil {
-		log.Printf("backends.GetStaff err %s", err)
-		http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
-		return err
-	}
-	err = backends.DeleteStaff(uid)
-	if err != nil {
-		http.Error(ctx.Writer, err.Error(), http.StatusInternalServerError)
-		return err
-	}
-
-	res["ok"] = true
-	return outputJson(res, ctx.Writer)
-
-}
-
-func groupList(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	if !ctx.User.IsKeeper() {
-		ctx.toLogin()
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	data := backends.AllGroup()
-	return ctx.Render("group.html", map[string]interface{}{
+	user := UserWithContext(c)
+
+	if uid == user.Uid {
+		res["ok"] = false
+		res["error"] = "Can not delete yourself"
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	_, err := s.service.Get(uid)
+	if err != nil {
+		log.Printf("GetStaff err %s", err)
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	err = s.service.Delete(uid)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	res["ok"] = true
+	c.JSON(http.StatusOK, res)
+
+}
+
+func (s *server) groupList(c *gin.Context) {
+
+	data := s.service.AllGroup()
+	Render(c, "group.html", map[string]interface{}{
 		"groups": data,
-		"ctx":    ctx,
+		"ctx":    c,
 	})
 }

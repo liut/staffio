@@ -1,32 +1,26 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"lcgc/liut/keeper"
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
-func handleStatus(ctx *Context) (err error) {
-	if !ctx.checkLogin() {
-		return nil
-	}
-	req := ctx.Request
-	w := ctx.Writer
+func (s *server) handleStatus(c *gin.Context) {
+	req := c.Request
+	w := c.Writer
 
-	keeper.BootstrapPrefix = fmt.Sprintf("%sbootstrap-3.3.5/", Settings.ResUrl)
-
-	switch ctx.Vars["topic"] {
+	switch c.Param("topic") {
 	case "monitor":
-		return T("dust_status.html").Execute(w, map[string]interface{}{
+		Render(c, "dust_status.html", map[string]interface{}{
 			"SysStatus": keeper.CurrentSystemStatus(),
-			"ctx":       ctx,
+			"ctx":       c,
 		})
 	case "stacks":
 		keeper.HandleStack(w, req)
 	default:
 		http.NotFound(w, req)
 	}
-	return nil
 }

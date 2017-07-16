@@ -37,6 +37,11 @@ fetch-exmail:
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/fetch-exmail
 .PHONY: fetch-exmail
 
+demo:
+	echo "Building $@"
+	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
+.PHONY: demo
+
 gen-key:
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/gen-key

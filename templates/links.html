@@ -28,7 +28,7 @@
 <div>
 
 <h4>Creating new:</h4>
-<form class="form-horizontal" id="form1" action="{{ reverse "links_form" }}" method="post">
+<form class="form-horizontal" id="form1" action="{{ .ctx.Request.RequestURI }}" method="post">
     <input type="hidden" name="op" value="new">
     <div id="msg" class="alert" style="display:none;" role="alert"></div>
 
@@ -54,7 +54,7 @@
 {{ end }}
 {{ define "tail" }}
   <script type="text/javascript">
-    var action_url = '{{ reverse "links_form" }}'
+    var action_url = '{{ .ctx.Request.RequestURI }}'
 
       jQuery(document).ready(function () {
         $(".pretty").prettyDate();
