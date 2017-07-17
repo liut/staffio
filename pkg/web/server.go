@@ -43,17 +43,21 @@ func New() *server {
 		osvr:    osvr,
 	}
 
-	fmt.Println("gin in mode: ", gin.Mode())
-	if settings.Debug {
+	if settings.IsDevelop() {
+		fmt.Println("In Developing(Debug) mode")
 		svr.Use(gin.Logger())
 		svr.Use(gin.Recovery())
 	} else {
+		fmt.Println("In Release mode")
+		gin.SetMode(gin.ReleaseMode)
 		if settings.SentryDSN != "" {
 			raven.SetDSN(settings.SentryDSN)
 			onlyCrashes := false
 			svr.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
 		}
 	}
+	fmt.Println("gin in mode: ", gin.Mode())
+
 	store := sessionStore()
 	svr.Use(sessions.Sessions("session", store))
 	svr.strapRouter(svr.Engine)

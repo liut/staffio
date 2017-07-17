@@ -20,7 +20,7 @@ func main() {
 		d.strap(ws)
 	}
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version, settings.HttpListen, settings.Root)
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)
 	err := ws.Run(settings.HttpListen) // Start the server!
 	if err != nil {
 		log.Fatal("Run ERR: ", err)

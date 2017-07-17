@@ -7,8 +7,6 @@ import (
 )
 
 var (
-	Version string
-
 	EmailDomain string
 
 	SMTP struct {
@@ -59,9 +57,7 @@ var (
 )
 
 func init() {
-	Version = buildVersion
-
-	fs = envcfg.New(NAME, Version)
+	fs = envcfg.New(NAME, buildVersion)
 
 	fs.StringVar(&LDAP.Hosts, "ldap-hosts", "ldap://localhost:389", "ldap hostname")
 	fs.StringVar(&LDAP.Base, "ldap-base", "", "ldap base")

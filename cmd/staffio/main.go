@@ -33,7 +33,7 @@ func main() {
 	ws := web.New()
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version, settings.HttpListen, settings.Root)
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)
 
 	srv := &http.Server{
 		Addr:    settings.HttpListen,

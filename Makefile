@@ -5,7 +5,7 @@ DATE := `date '+%Y%m%d'`
 NAME:=staffio
 ROOF:=lcgc/platform/$(NAME)
 TAG:=`git describe --tags --always`
-LDFLAGS:=-X $(ROOF)/settings.buildVersion=$(TAG)-$(DATE)
+LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
 main:
 	echo "Building $(NAME)"

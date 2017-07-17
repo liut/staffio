@@ -53,7 +53,7 @@ func markReferer(c *gin.Context) {
 func Render(c *gin.Context, name string, data interface{}) (err error) {
 	instance := T(name)
 	if m, ok := data.(map[string]interface{}); ok {
-		m["appVersion"] = settings.Version
+		m["appVersion"] = settings.Version()
 		m["navSimple"] = false
 		session := ginSession(c)
 		m["session"] = session
