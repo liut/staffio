@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-osin/osin"
+	"github.com/RangelReale/osin"
 
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/settings"

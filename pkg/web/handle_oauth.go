@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/RangelReale/osin"
 	"github.com/gin-gonic/gin"
-	"github.com/go-osin/osin"
 
 	"lcgc/platform/staffio/pkg/models"
 )

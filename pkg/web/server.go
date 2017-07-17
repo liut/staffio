@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/RangelReale/osin"
 	"github.com/coocood/freecache"
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/go-osin/osin"
 	. "github.com/tj/go-debug"
 
 	"lcgc/platform/staffio/pkg/backends"
