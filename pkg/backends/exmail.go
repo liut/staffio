@@ -8,7 +8,7 @@ import (
 	"github.com/wealthworks/go-tencent-api/exmail"
 
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 func GetStaffFromExmail(email string) (*models.Staff, error) {
@@ -36,7 +36,7 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 }
 
 func GetEmailAddress(uid string) string {
-	return fmt.Sprintf("%s@%s", uid, Settings.EmailDomain)
+	return fmt.Sprintf("%s@%s", uid, settings.EmailDomain)
 }
 
 func CheckMailUnseen(uid string) int {

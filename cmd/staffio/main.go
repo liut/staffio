@@ -16,27 +16,27 @@ import (
 	"github.com/wealthworks/go-utils/reaper"
 
 	"lcgc/platform/staffio/pkg/backends"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 	"lcgc/platform/staffio/pkg/web"
 )
 
 func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
-	Settings.Parse()
+	settings.Parse()
 
-	csmtp.Host = Settings.SMTP.Host
-	csmtp.Port = Settings.SMTP.Port
-	csmtp.Name = Settings.SMTP.SenderName
-	csmtp.From = Settings.SMTP.SenderEmail
-	csmtp.Auth(Settings.SMTP.SenderPassword)
+	csmtp.Host = settings.SMTP.Host
+	csmtp.Port = settings.SMTP.Port
+	csmtp.Name = settings.SMTP.SenderName
+	csmtp.From = settings.SMTP.SenderEmail
+	csmtp.Auth(settings.SMTP.SenderPassword)
 
 	ws := web.New()
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", Settings.Version, Settings.HttpListen, Settings.Root)
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version, settings.HttpListen, settings.Root)
 
 	srv := &http.Server{
-		Addr:    Settings.HttpListen,
+		Addr:    settings.HttpListen,
 		Handler: ws,
 	}
 

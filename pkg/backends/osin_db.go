@@ -10,7 +10,7 @@ import (
 	"github.com/RangelReale/osin"
 
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -38,7 +38,7 @@ func NewStorage() *DbStorage {
 
 	s := &DbStorage{
 		refresh: make(map[string]string),
-		isDebug: Settings.Debug,
+		isDebug: settings.Debug,
 	}
 
 	return s

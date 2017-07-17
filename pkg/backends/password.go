@@ -11,7 +11,7 @@ import (
 
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/models/common"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -58,7 +58,7 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 		log.Printf("userLog ERR %s", err)
 	}
 	// Generate reset token that expires in 2 hours
-	secret := []byte(Settings.PwdSecret)
+	secret := []byte(settings.PwdSecret)
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(staff, token)
 	if err == nil {
@@ -70,7 +70,7 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 }
 
 func (s *serviceImpl) PasswordResetTokenVerify(token string) (uid string, err error) {
-	secret := []byte(Settings.PwdSecret)
+	secret := []byte(settings.PwdSecret)
 	uid, err = passwordreset.VerifyToken(token, s.getResetHash, secret)
 	if err != nil {
 		log.Printf("passwordreset.VerifyToken %q ERR %s", token, err)
@@ -151,7 +151,7 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 }
 
 func sendResetEmail(staff *models.Staff, token string) error {
-	message := fmt.Sprintf(tplPasswordReset, staff.Name(), Settings.BaseURL, token)
+	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
 	return csmtp.SendMail("Password reset request", message, staff.Email)
 }
 

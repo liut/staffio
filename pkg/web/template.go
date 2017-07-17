@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -53,7 +53,7 @@ func markReferer(c *gin.Context) {
 func Render(c *gin.Context, name string, data interface{}) (err error) {
 	instance := T(name)
 	if m, ok := data.(map[string]interface{}); ok {
-		m["appVersion"] = Settings.Version
+		m["appVersion"] = settings.Version
 		m["navSimple"] = false
 		session := ginSession(c)
 		m["session"] = session
@@ -83,8 +83,8 @@ func T(name string) *template.Template {
 
 	t := template.New("_base.html")
 	t = template.Must(t.ParseFiles(
-		filepath.Join(Settings.Root, "templates/_base.html"),
-		filepath.Join(Settings.Root, "templates", name),
+		filepath.Join(settings.Root, "templates/_base.html"),
+		filepath.Join(settings.Root, "templates", name),
 	))
 	cachedTemplates[name] = t
 

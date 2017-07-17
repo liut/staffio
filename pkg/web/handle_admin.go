@@ -10,7 +10,7 @@ import (
 
 	"lcgc/platform/staffio/pkg/backends"
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 func (s *server) clientsForm(c *gin.Context) {
@@ -174,7 +174,7 @@ func (s *server) staffPost(c *gin.Context) {
 		}
 	}
 
-	email := uid + "@" + Settings.EmailDomain
+	email := uid + "@" + settings.EmailDomain
 	if op == "fetch-exmail" && uid != "" {
 		staff, err = backends.GetStaffFromExmail(email)
 		if err != nil {

@@ -15,7 +15,7 @@ all: vet main dist release
 
 vet:
 	echo "Checking ."
-	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult .
+	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult ./pkg ./cmd
 
 clean:
 	echo "Cleaning dist"

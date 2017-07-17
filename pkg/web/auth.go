@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -84,7 +84,7 @@ func UserFromRequest(r *http.Request) (user *User, err error) {
 	if err != nil {
 		log.Printf("decode msgpack ERR %s", err)
 	}
-	if user.IsExpired(Settings.UserLifetime) {
+	if user.IsExpired(settings.UserLifetime) {
 		err = fmt.Errorf("user %s is expired", user.Uid)
 	}
 	// log.Printf("got user %v", user)
@@ -101,7 +101,7 @@ func (user *User) toResponse(w http.ResponseWriter) error {
 	http.SetCookie(w, &http.Cookie{
 		Name:     CookieName,
 		Value:    value,
-		MaxAge:   Settings.UserLifetime,
+		MaxAge:   settings.UserLifetime,
 		Path:     "/",
 		HttpOnly: true,
 	})

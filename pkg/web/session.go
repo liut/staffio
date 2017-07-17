@@ -8,7 +8,7 @@ import (
 	gsess "github.com/gorilla/sessions"
 	"github.com/liut/pgstore"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 type pgStore struct {
@@ -27,14 +27,14 @@ func (c *pgStore) Options(options sessions.Options) {
 
 func sessionStore() sessions.Store {
 	var err error
-	// store = sessions.NewCookieStore([]byte(Settings.Session.Name))
-	store, err := pgstore.NewPGStore(Settings.Backend.DSN, []byte(Settings.Session.Secret))
+	// store = sessions.NewCookieStore([]byte(settings.Session.Name))
+	store, err := pgstore.NewPGStore(settings.Backend.DSN, []byte(settings.Session.Secret))
 	if err != nil {
 		log.Fatal(err)
 	}
-	store.MaxAge(Settings.Session.MaxAge)
-	// store.Options.MaxAge = Settings.Session.MaxAge
-	store.Options.Domain = Settings.Session.Domain
+	store.MaxAge(settings.Session.MaxAge)
+	// store.Options.MaxAge = settings.Session.MaxAge
+	store.Options.Domain = settings.Session.Domain
 	store.Options.HttpOnly = true
 
 	return &pgStore{store}

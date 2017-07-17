@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 func (s *server) strapRouter(r gin.IRouter) {
@@ -59,7 +59,7 @@ func (s *server) strapRouter(r gin.IRouter) {
 
 	r.GET("/", welcome)
 
-	assets := newAssets(Settings.Root, Settings.FS)
+	assets := newAssets(settings.Root, settings.FS)
 	assets.stripRouter(r)
 }
 

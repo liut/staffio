@@ -1,4 +1,4 @@
-package config
+package settings
 
 import (
 	"flag"
@@ -6,8 +6,7 @@ import (
 	envcfg "github.com/wealthworks/envflagset"
 )
 
-type config struct {
-	Name    string
+var (
 	Version string
 
 	EmailDomain string
@@ -24,16 +23,16 @@ type config struct {
 		Hosts    string
 		Base     string
 		BindDN   string
-		Password string `ini:"pass"`
+		Password string
 		Filter   string
-	} `ini:"ldap"`
+	}
 
 	Session struct {
 		Name   string
 		Domain string
 		Secret string
 		MaxAge int // cookie maxAge
-	} `ini:"sess"`
+	}
 
 	HttpListen   string
 	BaseURL      string
@@ -53,54 +52,52 @@ type config struct {
 
 	CacheSize     int
 	CacheLifetime uint
-}
+)
 
 var (
-	fs       *flag.FlagSet
-	Settings *config = &config{}
+	fs *flag.FlagSet
 )
 
 func init() {
-	Settings.Name = "staffio"
-	Settings.Version = buildVersion
+	Version = buildVersion
 
-	fs = envcfg.New(Settings.Name, Settings.Version)
+	fs = envcfg.New(NAME, Version)
 
-	fs.StringVar(&Settings.LDAP.Hosts, "ldap-hosts", "ldap://localhost:389", "ldap hostname")
-	fs.StringVar(&Settings.LDAP.Base, "ldap-base", "", "ldap base")
-	fs.StringVar(&Settings.LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
-	fs.StringVar(&Settings.LDAP.Password, "ldap-pass", "", "ldap bind password")
-	fs.StringVar(&Settings.LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
+	fs.StringVar(&LDAP.Hosts, "ldap-hosts", "ldap://localhost:389", "ldap hostname")
+	fs.StringVar(&LDAP.Base, "ldap-base", "", "ldap base")
+	fs.StringVar(&LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
+	fs.StringVar(&LDAP.Password, "ldap-pass", "", "ldap bind password")
+	fs.StringVar(&LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 
-	fs.StringVar(&Settings.HttpListen, "http-listen", "localhost:5000", "bind address and port")
-	fs.StringVar(&Settings.BaseURL, "prefix", "http://localhost:5000", "url prefix for self")
-	fs.StringVar(&Settings.PwdSecret, "password-secret", "very secret", "the secret of password reset")
-	fs.StringVar(&Settings.Session.Name, "sess-name", "staff_sess", "session name")
-	fs.StringVar(&Settings.Session.Domain, "sess-domain", "", "session domain")
-	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
-	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*7, "session cookie life time (in seconds)")
-	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
+	fs.StringVar(&HttpListen, "http-listen", "localhost:5000", "bind address and port")
+	fs.StringVar(&BaseURL, "prefix", "http://localhost:5000", "url prefix for self")
+	fs.StringVar(&PwdSecret, "password-secret", "very secret", "the secret of password reset")
+	fs.StringVar(&Session.Name, "sess-name", "staff_sess", "session name")
+	fs.StringVar(&Session.Domain, "sess-domain", "", "session domain")
+	fs.StringVar(&Session.Secret, "sess-secret", "very-secret", "session secret")
+	fs.IntVar(&Session.MaxAge, "sess-maxage", 86400*7, "session cookie life time (in seconds)")
+	fs.IntVar(&UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 
-	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
-	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
-	fs.StringVar(&Settings.Root, "root", "./", "app root directory")
-	fs.StringVar(&Settings.FS, "fs", "bind", "file system [bind | local]")
-	fs.StringVar(&Settings.CommonFormat, "cn-fmt", "{sn}{gn}", "common name format, sn=surname, gn=given name")
-	fs.StringVar(&Settings.TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
+	fs.StringVar(&Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
+	fs.StringVar(&SentryDSN, "sentry-dsn", "", "SENTRY_DSN")
+	fs.StringVar(&Root, "root", "./", "app root directory")
+	fs.StringVar(&FS, "fs", "bind", "file system [bind | local]")
+	fs.StringVar(&CommonFormat, "cn-fmt", "{sn}{gn}", "common name format, sn=surname, gn=given name")
+	fs.StringVar(&TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
 
-	fs.StringVar(&Settings.EmailDomain, "email-domain", "example.net", "default email domain")
-	fs.StringVar(&Settings.SMTP.Host, "smtp-host", "", "")
-	fs.IntVar(&Settings.SMTP.Port, "smtp-port", 465, "")
-	fs.StringVar(&Settings.SMTP.SenderName, "smtp-sender-name", "Notification", "")
-	fs.StringVar(&Settings.SMTP.SenderEmail, "smtp-sender-email", "", "")
-	fs.StringVar(&Settings.SMTP.SenderPassword, "smtp-sender-password", "", "")
-	fs.BoolVar(&Settings.Debug, "debug", false, "app in debug mode")
+	fs.StringVar(&EmailDomain, "email-domain", "example.net", "default email domain")
+	fs.StringVar(&SMTP.Host, "smtp-host", "", "")
+	fs.IntVar(&SMTP.Port, "smtp-port", 465, "")
+	fs.StringVar(&SMTP.SenderName, "smtp-sender-name", "Notification", "")
+	fs.StringVar(&SMTP.SenderEmail, "smtp-sender-email", "", "")
+	fs.StringVar(&SMTP.SenderPassword, "smtp-sender-password", "", "")
+	fs.BoolVar(&Debug, "debug", false, "app in debug mode")
 
-	fs.IntVar(&Settings.CacheSize, "cache-size", 512*1024, "cache size")
-	fs.UintVar(&Settings.CacheLifetime, "cache-life", 60, "cache lifetime in seconds")
+	fs.IntVar(&CacheSize, "cache-size", 512*1024, "cache size")
+	fs.UintVar(&CacheLifetime, "cache-life", 60, "cache lifetime in seconds")
 
 }
 
-func (c *config) Parse() {
+func Parse() {
 	envcfg.Parse()
 }

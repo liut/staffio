@@ -13,7 +13,7 @@ import (
 	. "github.com/tj/go-debug"
 
 	"lcgc/platform/staffio/pkg/backends"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -43,13 +43,13 @@ func New() *server {
 		osvr:    osvr,
 	}
 
-	if Settings.Debug {
-		fmt.Println("DEBUG gin", gin.Mode())
+	fmt.Println("gin in mode: ", gin.Mode())
+	if settings.Debug {
 		svr.Use(gin.Logger())
 		svr.Use(gin.Recovery())
 	} else {
-		if Settings.SentryDSN != "" {
-			raven.SetDSN(Settings.SentryDSN)
+		if settings.SentryDSN != "" {
+			raven.SetDSN(settings.SentryDSN)
 			onlyCrashes := false
 			svr.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
 		}
@@ -58,7 +58,7 @@ func New() *server {
 	svr.Use(sessions.Sessions("session", store))
 	svr.strapRouter(svr.Engine)
 
-	cache = freecache.NewCache(Settings.CacheSize)
+	cache = freecache.NewCache(settings.CacheSize)
 	group, err := svr.service.GetGroup("keeper")
 	if err != nil {
 		panic(err)

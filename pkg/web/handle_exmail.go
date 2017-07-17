@@ -11,7 +11,7 @@ import (
 	"github.com/wealthworks/go-tencent-api/exmail"
 
 	"lcgc/platform/staffio/pkg/backends"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 func (s *server) countNewMail(c *gin.Context) {
@@ -33,7 +33,7 @@ func (s *server) countNewMail(c *gin.Context) {
 		}
 		bs := make([]byte, 4)
 		binary.LittleEndian.PutUint32(bs, uint32(count))
-		cache.Set(key, bs, int(Settings.CacheLifetime))
+		cache.Set(key, bs, int(settings.CacheLifetime))
 		res["unseen"] = count
 		res["got"] = true
 	}
@@ -43,7 +43,7 @@ func (s *server) countNewMail(c *gin.Context) {
 
 func (s *server) loginToExmail(c *gin.Context) {
 	user := UserWithContext(c)
-	email := user.Uid + "@" + Settings.EmailDomain
+	email := user.Uid + "@" + settings.EmailDomain
 	url, err := exmail.GetLoginURL(email)
 	if err != nil {
 		c.AbortWithError(http.StatusForbidden, err)

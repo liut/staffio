@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/wealthworks/csmtp"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -17,17 +17,17 @@ func init() {
 }
 
 func main() {
-	Settings.Parse()
+	settings.Parse()
 	if toEmail == "" {
 		flag.PrintDefaults()
 		return
 	}
 
-	csmtp.Host = Settings.SMTP.Host
-	csmtp.Port = Settings.SMTP.Port
-	csmtp.Name = Settings.SMTP.SenderName
-	csmtp.From = Settings.SMTP.SenderEmail
-	csmtp.Auth(Settings.SMTP.SenderPassword)
+	csmtp.Host = settings.SMTP.Host
+	csmtp.Port = settings.SMTP.Port
+	csmtp.Name = settings.SMTP.SenderName
+	csmtp.From = settings.SMTP.SenderEmail
+	csmtp.Auth(settings.SMTP.SenderPassword)
 
 	subject := "测试主题"
 	body := "我是一封电子邮件!golang发出."

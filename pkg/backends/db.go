@@ -9,7 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -42,7 +42,7 @@ type dbTxer interface {
 
 func openDb() *sqlx.DB {
 	log.Printf("using PG %s:%s", os.Getenv("PGHOST"), os.Getenv("PGPORT"))
-	db, err := sqlx.Open("postgres", Settings.Backend.DSN)
+	db, err := sqlx.Open("postgres", settings.Backend.DSN)
 	if err != nil {
 		log.Fatalf("open db error: %s", err)
 	}

@@ -7,7 +7,7 @@ import (
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/models/cas"
 	"lcgc/platform/staffio/pkg/models/common"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 type Servicer interface {
@@ -36,10 +36,10 @@ var _ Servicer = (*serviceImpl)(nil)
 func NewService() Servicer {
 
 	cfg := &ldap.Config{
-		Addr:   Settings.LDAP.Hosts,
-		Base:   Settings.LDAP.Base,
-		Bind:   Settings.LDAP.BindDN,
-		Passwd: Settings.LDAP.Password,
+		Addr:   settings.LDAP.Hosts,
+		Base:   settings.LDAP.Base,
+		Bind:   settings.LDAP.BindDN,
+		Passwd: settings.LDAP.Password,
 	}
 	store, err := ldap.NewStore(cfg)
 	if err != nil {

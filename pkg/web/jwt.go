@@ -6,7 +6,7 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/dgrijalva/jwt-go"
 
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 // JWT access token generator
@@ -48,7 +48,7 @@ func getTokenGenJWT() (tokenGen osin.AccessTokenGen, err error) {
 		hmacKey []byte
 	)
 
-	hmacKey, err = jwt.DecodeSegment(Settings.TokenGen.Key)
+	hmacKey, err = jwt.DecodeSegment(settings.TokenGen.Key)
 	if err != nil {
 		log.Printf("ERROR: key %s\n", err)
 		return

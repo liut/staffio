@@ -7,7 +7,7 @@ import (
 	"github.com/wealthworks/go-tencent-api/exmail"
 	"github.com/wealthworks/go-tencent-api/exwechat"
 	"lcgc/platform/staffio/pkg/backends"
-	. "lcgc/platform/staffio/pkg/settings"
+	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	Settings.Parse()
+	settings.Parse()
 	backends.Prepare()
 	if *uid == "" {
 		flag.PrintDefaults()
