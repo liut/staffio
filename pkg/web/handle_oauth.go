@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/RangelReale/osin"
 	"github.com/gin-gonic/gin"
+	"github.com/go-osin/osin"
 
 	"lcgc/platform/staffio/pkg/models"
 )
@@ -39,6 +39,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 					"client":        ar.Client.(*models.Client),
 					"ctx":           c,
 				})
+				return
 			}
 
 			if r.PostForm.Get("authorize") == "1" {
@@ -96,6 +97,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 			}
 			ar.Authorized = true
 		case osin.REFRESH_TOKEN:
+			ar.UserData = ""
 			// TODO: load refresh
 			ar.Authorized = true
 		case osin.PASSWORD:
@@ -114,8 +116,10 @@ func (s *server) oauth2Token(c *gin.Context) {
 			user = UserFromStaff(staff)
 
 		case osin.CLIENT_CREDENTIALS:
+			ar.UserData = ""
 			ar.Authorized = true
 		case osin.ASSERTION:
+			ar.UserData = ""
 			if ar.AssertionType == "urn:osin.example.complete" && ar.Assertion == "osin.data" {
 				ar.Authorized = true
 			}

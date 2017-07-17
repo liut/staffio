@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RangelReale/osin"
+	"github.com/go-osin/osin"
 
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/settings"
@@ -367,7 +367,7 @@ func (s *DbStorage) IsAuthorized(client_id, username string) bool {
 		return db.QueryRow("SELECT created FROM oauth_client_user_authorized WHERE client_id = $1 AND username = $2",
 			client_id, username).Scan(&created)
 	}); err != nil {
-		log.Printf("load IsAuthorized ERROR: %s", err)
+		log.Printf("load IsAuthorized(%s, %s) ERROR: %s", client_id, username, err)
 		return false
 	}
 	return true

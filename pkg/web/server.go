@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/RangelReale/osin"
 	"github.com/coocood/freecache"
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-osin/osin"
 	. "github.com/tj/go-debug"
 
 	"lcgc/platform/staffio/pkg/backends"
@@ -48,7 +48,7 @@ func New() *server {
 		svr.Use(gin.Logger())
 		svr.Use(gin.Recovery())
 	} else {
-		fmt.Println("In Release mode, gin: %s\n", gin.Mode())
+		fmt.Printf("In Release mode, gin: %s\n", gin.Mode())
 		if settings.SentryDSN != "" {
 			raven.SetDSN(settings.SentryDSN)
 			onlyCrashes := false
@@ -94,9 +94,9 @@ func newOsinConfig() *osin.ServerConfig {
 		AllowedAccessTypes: osin.AllowedAccessType{
 			osin.AUTHORIZATION_CODE,
 			osin.IMPLICIT,
-			osin.REFRESH_TOKEN,
+			// osin.REFRESH_TOKEN,
 			osin.PASSWORD,
-			osin.CLIENT_CREDENTIALS,
+			// osin.CLIENT_CREDENTIALS,
 		},
 		ErrorStatusCode:           200,
 		AllowClientSecretInParams: true,
