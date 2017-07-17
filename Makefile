@@ -11,10 +11,10 @@ main:
 	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)
 
-all: vet main dist release
+all: vet dist release
 
 vet:
-	echo "Checking ."
+	echo "Checking ./pkg ./cmd"
 	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult ./pkg ./cmd
 
 clean:
