@@ -12,7 +12,6 @@ import (
 	"lcgc/platform/staffio/pkg/models"
 	"lcgc/platform/staffio/pkg/models/cas"
 	"lcgc/platform/staffio/pkg/models/common"
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
 func (s *server) loginForm(c *gin.Context) {
@@ -33,12 +32,12 @@ func (s *server) loginForm(c *gin.Context) {
 	})
 }
 
-func (s *server) login(c *gin.Context) {
+func (s *server) loginPost(c *gin.Context) {
 	req := c.Request
 	// session := sessions.Default(c)
 	uid, password := req.PostFormValue("username"), req.PostFormValue("password")
 	service := req.FormValue("service")
-	referer := req.PostFormValue("referer")
+	referer := req.FormValue("referer")
 	res := make(osin.ResponseData)
 	if err := s.service.Authenticate(uid, password); err != nil {
 
@@ -75,6 +74,9 @@ func (s *server) login(c *gin.Context) {
 		res["referer"] = service + "?ticket=" + st.Value
 		log.Printf("ref: %q", res["referer"])
 	} else {
+		if referer == "" {
+			referer = "/"
+		}
 		res["referer"] = referer
 	}
 	c.JSON(http.StatusOK, res)
@@ -82,6 +84,7 @@ func (s *server) login(c *gin.Context) {
 }
 
 func (s *server) logout(c *gin.Context) {
+	signout(c.Writer)
 	DeleteTGC(c)
 	c.Redirect(http.StatusSeeOther, "/")
 }
@@ -236,23 +239,4 @@ func (s *server) profilePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, res)
-}
-
-// func outputJson(res map[string]interface{}, w http.ResponseWriter) error {
-// 	if w.Header().Get("Content-Type") == "" {
-// 		w.Header().Set("Content-Type", "application/json")
-// 	}
-
-// 	encoder := json.NewEncoder(w)
-// 	err := encoder.Encode(res)
-// 	if err != nil {
-// 		log.Printf("json encoding error: %s", err)
-// 	}
-// 	return err
-// }
-
-func debugf(format string, args ...interface{}) {
-	if Settings.Debug {
-		log.Printf(format, args...)
-	}
 }

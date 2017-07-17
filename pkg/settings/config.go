@@ -37,7 +37,6 @@ type config struct {
 
 	HttpListen   string
 	BaseURL      string
-	ResUrl       string
 	PwdSecret    string
 	Backend      struct{ DSN string }
 	SentryDSN    string
@@ -81,7 +80,6 @@ func init() {
 	fs.StringVar(&Settings.Session.Secret, "sess-secret", "very-secret", "session secret")
 	fs.IntVar(&Settings.Session.MaxAge, "sess-maxage", 86400*7, "session cookie life time (in seconds)")
 	fs.IntVar(&Settings.UserLifetime, "user-life", 2500, "user online life time (in seconds)")
-	fs.StringVar(&Settings.ResUrl, "res-url", "/static/", "static resource url")
 
 	fs.StringVar(&Settings.Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
 	fs.StringVar(&Settings.SentryDSN, "sentry-dsn", "", "SENTRY_DSN")

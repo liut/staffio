@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	. "github.com/tj/go-debug"
 
 	"lcgc/platform/staffio/pkg/backends"
 	. "lcgc/platform/staffio/pkg/settings"
@@ -18,6 +19,7 @@ import (
 var (
 	cache   *freecache.Cache
 	keepers []string
+	debug   = Debug("staffio:web")
 )
 
 type server struct {

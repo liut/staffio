@@ -18,9 +18,9 @@ func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err
 }
 
 func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
-	if ls.Debug {
-		log.Printf("change profile for %s staff: %v", uid, staff)
-	}
+
+	debug("change profile for %s staff: %v", uid, staff)
+
 	userdn := ls.UDN(uid)
 	err := ls.Bind(userdn, password, true)
 	if err != nil {

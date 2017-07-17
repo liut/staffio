@@ -6,7 +6,6 @@ import (
 	"gopkg.in/vmihailenco/msgpack.v2"
 
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
 type User struct {
@@ -41,8 +40,7 @@ func (u *User) Decode(b []byte) (err error) {
 	return
 }
 
-func (u *User) IsExpired() bool {
-	lifetime := Settings.UserLifetime
+func (u *User) IsExpired(lifetime int) bool {
 	if lifetime == 0 {
 		return false
 	}

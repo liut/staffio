@@ -11,7 +11,7 @@ import (
 
 func (s *server) strapRouter(r gin.IRouter) {
 
-	r.GET("/login", s.loginForm).POST("/login", s.login)
+	r.GET("/login", s.loginForm).POST("/login", s.loginPost)
 	r.GET("/logout", s.logout)
 	r.GET("/password/forgot", s.passwordForgotForm)
 	r.POST("/password/forgot", s.passwordForgot)
@@ -39,7 +39,7 @@ func (s *server) strapRouter(r gin.IRouter) {
 	r.GET("/info/:topic", s.oauth2Info)
 	r.POST("/info/:topic", s.oauth2Info)
 
-	keeper := authed.Group("/dust", s.AuthAdminMiddleware())
+	keeper := authed.Group("/dust", AuthAdminMiddleware())
 	keeper.GET("/clients", s.clientsForm)
 	keeper.POST("/clients", s.clientsPost)
 	keeper.GET("/scopes", s.scopesForm)

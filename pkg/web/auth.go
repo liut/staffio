@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -23,6 +24,7 @@ func AuthUserMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := UserFromRequest(c.Request)
 		if err != nil {
+			log.Printf("user from request ERR %s", err)
 			markReferer(c)
 			c.Redirect(302, LoginPath)
 			c.Abort()
@@ -30,10 +32,13 @@ func AuthUserMiddleware() gin.HandlerFunc {
 		}
 		// log.Printf("got user %q", user.Uid)
 		c.Set(kAuthUser, user)
+		c.Next()
+		user.Refresh()
+		user.toResponse(c.Writer)
 	}
 }
 
-func (s *server) AuthAdminMiddleware() gin.HandlerFunc {
+func AuthAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, exist := c.Get(kAuthUser)
 		if !exist {
@@ -42,7 +47,7 @@ func (s *server) AuthAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 		user := v.(*User)
-		if !s.IsKeeper(user.Uid) {
+		if !user.IsKeeper() {
 			c.AbortWithStatus(http.StatusForbidden)
 			c.Abort()
 		}
@@ -79,6 +84,9 @@ func UserFromRequest(r *http.Request) (user *User, err error) {
 	if err != nil {
 		log.Printf("decode msgpack ERR %s", err)
 	}
+	if user.IsExpired(Settings.UserLifetime) {
+		err = fmt.Errorf("user %s is expired", user.Uid)
+	}
 	// log.Printf("got user %v", user)
 	return
 }
@@ -91,13 +99,21 @@ func (user *User) toResponse(w http.ResponseWriter) error {
 	}
 	value := base64.URLEncoding.EncodeToString(b)
 	http.SetCookie(w, &http.Cookie{
-		Name:   CookieName,
-		Value:  value,
-		MaxAge: Settings.UserLifetime,
-		Path:   "/",
-		// Domain:   "",
-		// Secure:   false,
+		Name:     CookieName,
+		Value:    value,
+		MaxAge:   Settings.UserLifetime,
+		Path:     "/",
 		HttpOnly: true,
 	})
 	return nil
+}
+
+func signout(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     CookieName,
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		HttpOnly: true,
+	})
 }

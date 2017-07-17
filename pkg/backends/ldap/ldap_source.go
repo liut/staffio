@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/go-ldap/ldap"
+	. "github.com/tj/go-debug"
 
 	"lcgc/platform/staffio/pkg/models"
 )
@@ -24,7 +25,6 @@ type ldapSource struct {
 	Enabled    bool       // if this source is disabled
 	c          *ldap.Conn // conn
 	bound      bool
-	Debug      bool
 }
 
 var (
@@ -37,6 +37,8 @@ var (
 	defaultAttributes = []string{
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title"}
+
+	debug = Debug("staffio:ldap")
 )
 
 // Add a new source (LDAP directory) to the global pool
@@ -118,8 +120,7 @@ func (ls *ldapSource) dial() (*ldap.Conn, error) {
 		return nil, err
 	}
 
-	// ls.c.Debug = ls.Debug
-
+	debug("connect to %s ok", ls.Addr)
 	return ls.c, nil
 }
 
@@ -155,6 +156,8 @@ func (ls *ldapSource) Bind(dn, passwd string, force bool) error {
 		}
 		return err
 	}
+
+	debug("bind(%s, ***) ok", dn)
 	ls.bound = true
 	return nil
 }

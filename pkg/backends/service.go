@@ -33,7 +33,7 @@ type serviceImpl struct {
 
 var _ Servicer = (*serviceImpl)(nil)
 
-func NewService() *serviceImpl {
+func NewService() Servicer {
 
 	cfg := &ldap.Config{
 		Addr:   Settings.LDAP.Hosts,
@@ -58,5 +58,6 @@ func (s *serviceImpl) OSIN() OSINStore {
 }
 
 func (s *serviceImpl) CloseAll() {
-
+	s.LDAPStore.Close()
+	s.osinStore.Clone()
 }

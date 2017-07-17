@@ -45,11 +45,12 @@ func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 		dn := ls.UDN(uid)
 		err = ls.Bind(dn, passwd, true)
 		if err == nil {
-			return nil
+			debug("authenticate(%s,****) ok", uid)
+			return
 		}
 	}
 	log.Printf("Authen failed for %s, reason: %s", uid, err)
-	return err
+	return
 }
 
 func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {

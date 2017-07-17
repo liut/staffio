@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"lcgc/platform/staffio/pkg/models"
-	. "lcgc/platform/staffio/pkg/settings"
 )
 
 // Authorization code endpoint
@@ -67,7 +66,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	// 	resp.Output["uid"] = c.User.Uid
 	// }
 
-	debugf("oauthAuthorize resp: %v", resp)
+	debug("oauthAuthorize resp: %v", resp)
 	osin.OutputJSON(resp, c.Writer, r)
 }
 
@@ -84,7 +83,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 		err   error
 	)
 	if ar := s.osvr.HandleAccessRequest(resp, r); ar != nil {
-		debugf("ar Code %s Scope %s", ar.Code, ar.Scope)
+		debug("ar Code %s Scope %s", ar.Code, ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
 			uid = ar.UserData.(string)
@@ -100,12 +99,6 @@ func (s *server) oauth2Token(c *gin.Context) {
 			// TODO: load refresh
 			ar.Authorized = true
 		case osin.PASSWORD:
-			if Settings.HttpListen == "localhost:3000" && ar.Username == "test" && ar.Password == "test" {
-				ar.UserData = "test"
-				ar.Authorized = true
-				break
-			}
-
 			if err = s.service.Authenticate(ar.Username, ar.Password); err != nil {
 				resp.SetError("authentication_failed", err.Error())
 				break
@@ -144,7 +137,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 
 	}
 
-	debugf("oauthToken resp: %v", resp)
+	debug("oauthToken resp: %v", resp)
 
 	osin.OutputJSON(resp, c.Writer, r)
 }
@@ -156,7 +149,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 	r := c.Request
 
 	if ir := s.osvr.HandleInfoRequest(resp, r); ir != nil {
-		debugf("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
+		debug("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
 		var (
 			uid   string
 			topic = c.Param("topic")

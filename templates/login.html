@@ -105,6 +105,7 @@
                     if (typeof res.referer == 'string') {
                       ref = res.referer;
                     }
+                    if (ref == "") ref = "/";
                     location.href = ref;
                   });
                 } else if (typeof res.error != "undefined") {
