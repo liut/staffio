@@ -375,7 +375,7 @@ func (s *DbStorage) IsAuthorized(client_id, username string) bool {
 
 func (s *DbStorage) SaveAuthorized(client_id, username string) error {
 	return withDbQuery(func(db dber) error {
-		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ON CONFLICT DO NOTHING",
+		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ",
 			client_id, username)
 		return err
 	})
