@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"lcgc/liut/keeper"
+	"github.com/liut/keeper"
 )
 
 func (s *server) handleStatus(c *gin.Context) {

@@ -1,5 +1,5 @@
 .SILENT :
-.PHONY : vet main clean dist release
+.PHONY : dep vet main clean dist release
 DATE := `date '+%Y%m%d'`
 
 NAME:=staffio
@@ -12,6 +12,10 @@ main:
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)
 
 all: vet dist release
+
+dep: vet
+	go get github.com/golang/dep/cmd/dep
+	dep ensure
 
 vet:
 	echo "Checking ./pkg ./cmd"

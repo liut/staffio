@@ -45,10 +45,11 @@ An OAuth2 server with management for enterprise employees.
 ### checkout
 
 ````sh
-mkdir -p $GOPATH/src/lcgc/platform
-cd $GOPATH/src/lcgc/platform
-git clone https://github.com/liut/keeper.git
+mkdir -p $GOPATH/src/github.com/liut
+cd $GOPATH/src/github.com/liut
 git clone https://github.com/liut/staffio.git
+cd $GOPATH/src/liut/staffio
+make dep
 ````
 
 ### LDAP

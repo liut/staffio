@@ -112,6 +112,10 @@
 
 [[constraint]]
   branch = "master"
+  name = "github.com/liut/keeper"
+
+[[constraint]]
+  branch = "master"
   name = "github.com/liut/pgstore"
 
 [[constraint]]
