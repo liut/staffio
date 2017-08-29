@@ -9,7 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 var (

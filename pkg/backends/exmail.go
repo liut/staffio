@@ -7,8 +7,8 @@ import (
 
 	"github.com/wealthworks/go-tencent-api/exmail"
 
-	"lcgc/platform/staffio/pkg/models"
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 func GetStaffFromExmail(email string) (*models.Staff, error) {

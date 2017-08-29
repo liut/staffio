@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
+	"github.com/liut/staffio/pkg/settings"
 	"github.com/wealthworks/csmtp"
-	"lcgc/platform/staffio/pkg/settings"
 )
 
 var (

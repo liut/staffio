@@ -15,9 +15,9 @@ import (
 	"github.com/wealthworks/csmtp"
 	"github.com/wealthworks/go-utils/reaper"
 
-	"lcgc/platform/staffio/pkg/backends"
-	"lcgc/platform/staffio/pkg/settings"
-	"lcgc/platform/staffio/pkg/web"
+	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/web"
 )
 
 func main() {

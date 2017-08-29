@@ -6,7 +6,7 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/dgrijalva/jwt-go"
 
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 // JWT access token generator

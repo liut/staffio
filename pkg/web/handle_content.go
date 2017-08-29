@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"lcgc/platform/staffio/pkg/backends"
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/models"
 )
 
 const (

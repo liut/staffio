@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-ldap/ldap"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 var (

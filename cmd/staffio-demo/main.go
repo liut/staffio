@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"lcgc/platform/staffio/pkg/settings"
-	"lcgc/platform/staffio/pkg/web"
+	"github.com/liut/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/web"
 )
 
 func main() {

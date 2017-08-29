@@ -5,7 +5,7 @@ import (
 
 	"gopkg.in/vmihailenco/msgpack.v2"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 type User struct {

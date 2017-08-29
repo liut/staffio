@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	"lcgc/platform/staffio/pkg/models/random"
+	"github.com/liut/staffio/pkg/models/random"
 )
 
 const (

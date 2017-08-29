@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 var (

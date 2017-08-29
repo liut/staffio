@@ -6,7 +6,7 @@ import (
 
 	. "github.com/tj/go-debug"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 var (

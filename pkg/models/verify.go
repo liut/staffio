@@ -5,8 +5,8 @@ import (
 	"hash/crc32"
 	"time"
 
-	"lcgc/platform/staffio/pkg/models/common"
-	"lcgc/platform/staffio/pkg/models/random"
+	"github.com/liut/staffio/pkg/models/common"
+	"github.com/liut/staffio/pkg/models/random"
 )
 
 var (

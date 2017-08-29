@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wealthworks/go-tencent-api/exmail"
 
-	"lcgc/platform/staffio/pkg/backends"
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 func (s *server) countNewMail(c *gin.Context) {

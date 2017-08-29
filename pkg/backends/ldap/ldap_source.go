@@ -10,7 +10,7 @@ import (
 	"github.com/go-ldap/ldap"
 	. "github.com/tj/go-debug"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 // Basic LDAP authentication service

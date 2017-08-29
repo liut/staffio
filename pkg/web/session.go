@@ -8,7 +8,7 @@ import (
 	gsess "github.com/gorilla/sessions"
 	"github.com/liut/pgstore"
 
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 type pgStore struct {

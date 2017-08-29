@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"lcgc/platform/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/cas"
 )
 
 func TestTicket(t *testing.T) {

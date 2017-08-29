@@ -3,11 +3,11 @@ package backends
 import (
 	"log"
 
-	"lcgc/platform/staffio/pkg/backends/ldap"
-	"lcgc/platform/staffio/pkg/models"
-	"lcgc/platform/staffio/pkg/models/cas"
-	"lcgc/platform/staffio/pkg/models/common"
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/backends/ldap"
+	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/common"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 type Servicer interface {

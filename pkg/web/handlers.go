@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
-	"lcgc/platform/staffio/pkg/models"
-	"lcgc/platform/staffio/pkg/models/cas"
-	"lcgc/platform/staffio/pkg/models/common"
+	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/common"
 )
 
 func (s *server) loginForm(c *gin.Context) {

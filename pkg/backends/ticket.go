@@ -3,7 +3,7 @@ package backends
 import (
 	"log"
 
-	"lcgc/platform/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/cas"
 )
 
 func (s *serviceImpl) GetTicket(value string) (*cas.Ticket, error) {

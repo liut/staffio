@@ -9,8 +9,8 @@ import (
 
 	"github.com/RangelReale/osin"
 
-	"lcgc/platform/staffio/pkg/models"
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 var (

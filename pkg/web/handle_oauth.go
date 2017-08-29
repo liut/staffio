@@ -7,7 +7,7 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/gin-gonic/gin"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 // Authorization code endpoint

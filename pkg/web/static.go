@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	statikFs "github.com/rakyll/statik/fs"
 
-	_ "lcgc/platform/staffio/pkg/web/statik"
+	_ "github.com/liut/staffio/pkg/web/statik"
 )
 
 type assetsImpl struct {

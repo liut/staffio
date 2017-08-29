@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	"log"
 
-	"lcgc/platform/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models"
 )
 
 func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err error) {

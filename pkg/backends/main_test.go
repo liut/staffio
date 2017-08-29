@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"lcgc/platform/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 func TestMain(m *testing.M) {

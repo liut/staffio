@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 
-	"lcgc/platform/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/cas"
 )
 
 const (

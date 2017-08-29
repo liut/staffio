@@ -3,7 +3,7 @@
 DATE := `date '+%Y%m%d'`
 
 NAME:=staffio
-ROOF:=lcgc/platform/$(NAME)
+ROOF:=github.com/liut/$(NAME)
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
