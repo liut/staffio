@@ -17,7 +17,6 @@ var (
 
 const (
 	kAuthUser = "user"
-	LoginPath = "/login"
 )
 
 func AuthUserMiddleware() gin.HandlerFunc {
@@ -26,7 +25,7 @@ func AuthUserMiddleware() gin.HandlerFunc {
 		if err != nil {
 			log.Printf("user from request ERR %s", err)
 			markReferer(c)
-			c.Redirect(302, LoginPath)
+			c.Redirect(302, UrlFor("login"))
 			c.Abort()
 			return
 		}

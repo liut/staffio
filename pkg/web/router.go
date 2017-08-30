@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,15 +11,15 @@ import (
 )
 
 func (s *server) StrapRouter(r gin.IRouter) {
+	gr := r.Group(Base)
+	gr.GET("/login", s.loginForm).POST("/login", s.loginPost)
+	gr.GET("/logout", s.logout)
+	gr.GET("/password/forgot", s.passwordForgotForm)
+	gr.POST("/password/forgot", s.passwordForgot)
+	gr.GET("/password/reset", s.passwordResetForm)
+	gr.POST("/password/reset", s.passwordReset)
 
-	r.GET("/login", s.loginForm).POST("/login", s.loginPost)
-	r.GET("/logout", s.logout)
-	r.GET("/password/forgot", s.passwordForgotForm)
-	r.POST("/password/forgot", s.passwordForgot)
-	r.GET("/password/reset", s.passwordResetForm)
-	r.POST("/password/reset", s.passwordReset)
-
-	authed := r.Group("/", AuthUserMiddleware())
+	authed := gr.Group("/", AuthUserMiddleware())
 	authed.GET("/password", s.passwordForm)
 	authed.POST("/password", s.passwordChange)
 
@@ -34,10 +35,10 @@ func (s *server) StrapRouter(r gin.IRouter) {
 
 	authed.GET("/authorize", s.oauth2Authorize)
 	authed.POST("/authorize", s.oauth2Authorize)
-	r.GET("/token", s.oauth2Token)
-	r.POST("/token", s.oauth2Token)
-	r.GET("/info/:topic", s.oauth2Info)
-	r.POST("/info/:topic", s.oauth2Info)
+	gr.GET("/token", s.oauth2Token)
+	gr.POST("/token", s.oauth2Token)
+	gr.GET("/info/:topic", s.oauth2Info)
+	gr.POST("/info/:topic", s.oauth2Info)
 
 	keeper := authed.Group("/dust", AuthAdminMiddleware())
 	keeper.GET("/clients", s.clientsForm)
@@ -53,11 +54,11 @@ func (s *server) StrapRouter(r gin.IRouter) {
 	keeper.GET("/links", linksForm)
 	keeper.POST("/links", linksPost)
 
-	r.GET("/cas/logout", casLogout)
-	r.GET("/validate", s.casValidateV1)
-	r.GET("/serviceValidate", s.casValidateV2)
+	gr.GET("/cas/logout", casLogout)
+	gr.GET("/validate", s.casValidateV1)
+	gr.GET("/serviceValidate", s.casValidateV2)
 
-	r.GET("/", welcome)
+	gr.GET("/", welcome)
 
 	assets := newAssets(settings.Root, settings.FS)
 	assets.stripRouter(r)
@@ -66,4 +67,12 @@ func (s *server) StrapRouter(r gin.IRouter) {
 func IsAjax(r *http.Request) bool {
 	accept := r.Header.Get("Accept")
 	return strings.Index(accept, "application/json") >= 0
+}
+
+var (
+	Base = "/"
+)
+
+func UrlFor(path string) string {
+	return fmt.Sprintf("%s/%s", strings.TrimRight(Base, "/"), strings.TrimLeft(path, "/"))
 }
