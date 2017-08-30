@@ -150,6 +150,14 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 	return &uv, err
 }
 
+func InitSMTP() {
+	csmtp.Host = settings.SMTP.Host
+	csmtp.Port = settings.SMTP.Port
+	csmtp.Name = settings.SMTP.SenderName
+	csmtp.From = settings.SMTP.SenderEmail
+	csmtp.Auth(settings.SMTP.SenderPassword)
+}
+
 func sendResetEmail(staff *models.Staff, token string) error {
 	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
 	return csmtp.SendMail("Password reset request", message, staff.Email)

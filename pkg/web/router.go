@@ -9,7 +9,7 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-func (s *server) strapRouter(r gin.IRouter) {
+func (s *server) StrapRouter(r gin.IRouter) {
 
 	r.GET("/login", s.loginForm).POST("/login", s.loginPost)
 	r.GET("/logout", s.logout)

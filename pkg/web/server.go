@@ -17,10 +17,14 @@ import (
 )
 
 var (
-	cache   *freecache.Cache
-	keepers []string
-	debug   = Debug("staffio:web")
+	cache *freecache.Cache
+	svr   *server
+	debug = Debug("staffio:web")
 )
+
+func IsKeeper(uid string) bool {
+	return Default().service.InGroup("keeper", uid)
+}
 
 type server struct {
 	*gin.Engine
@@ -28,7 +32,19 @@ type server struct {
 	osvr    *osin.Server
 }
 
-func New() *server {
+func (s *server) IsKeeper(uid string) bool {
+	return s.InGroup("keeper", uid)
+}
+
+func (s *server) InGroup(gn, uid string) bool {
+	return s.service.InGroup(gn, uid)
+}
+
+// Default returns current server instance
+func Default() *server {
+	if svr != nil {
+		return svr
+	}
 	service := backends.NewService()
 	osvr := osin.NewServer(newOsinConfig(), service.OSIN())
 	var err error
@@ -37,7 +53,7 @@ func New() *server {
 		panic(err)
 	}
 
-	svr := &server{
+	svr = &server{
 		Engine:  gin.New(),
 		service: service,
 		osvr:    osvr,
@@ -58,14 +74,9 @@ func New() *server {
 
 	store := sessionStore()
 	svr.Use(sessions.Sessions("session", store))
-	svr.strapRouter(svr.Engine)
+	svr.StrapRouter(svr.Engine)
 
 	cache = freecache.NewCache(settings.CacheSize)
-	group, err := svr.service.GetGroup("keeper")
-	if err != nil {
-		panic(err)
-	}
-	keepers = group.Members
 
 	return svr
 }

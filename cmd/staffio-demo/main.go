@@ -12,7 +12,7 @@ import (
 func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	settings.Parse()
-	ws := web.New()
+	ws := web.Default()
 	if strings.HasPrefix(settings.HttpListen, "localhost") {
 		d := &demo{
 			prefix: "http://" + settings.HttpListen,

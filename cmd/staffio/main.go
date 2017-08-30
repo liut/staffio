@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/wealthworks/csmtp"
 	"github.com/wealthworks/go-utils/reaper"
 
 	"github.com/liut/staffio/pkg/backends"
@@ -24,13 +23,9 @@ func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	settings.Parse()
 
-	csmtp.Host = settings.SMTP.Host
-	csmtp.Port = settings.SMTP.Port
-	csmtp.Name = settings.SMTP.SenderName
-	csmtp.From = settings.SMTP.SenderEmail
-	csmtp.Auth(settings.SMTP.SenderPassword)
+	backends.InitSMTP()
 
-	ws := web.New()
+	ws := web.Default()
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
 	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)

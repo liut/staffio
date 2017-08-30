@@ -53,20 +53,7 @@ func (u *User) Refresh() {
 }
 
 func (u *User) IsKeeper() bool {
-	for _, n := range keepers {
-		if n == u.Uid {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *server) IsKeeper(uid string) bool {
-	return s.InGroup("keeper", uid)
-}
-
-func (s *server) InGroup(gn, uid string) bool {
-	return s.service.InGroup(gn, uid)
+	return IsKeeper(u.Uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {
