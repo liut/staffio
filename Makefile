@@ -1,5 +1,5 @@
 .SILENT :
-.PHONY : dep vet main clean dist release
+.PHONY : dep vet main clean dist package
 DATE := `date '+%Y%m%d'`
 
 NAME:=staffio
@@ -11,7 +11,7 @@ main:
 	echo "Building $(NAME)"
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)
 
-all: vet dist release
+all: vet dist package
 
 dep: vet
 	go get github.com/golang/dep/cmd/dep
@@ -31,9 +31,11 @@ dist: clean
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME) $(ROOF)/cmd/$(NAME)
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME) $(ROOF)/cmd/$(NAME)
 
-release: dist
-	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
-	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
+package: dist
+	cp -rf templates dist/linux_amd64/
+	cp -rf templates dist/darwin_amd64/
+	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME) templates
+	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME) templates
 
 fetch-exmail:
 	echo "Building $@"
