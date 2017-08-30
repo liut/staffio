@@ -9,7 +9,7 @@
     <meta name="appver" content="{{ .appVersion }}" >
     <!-- Bootstrap -->
     <link href="/static/css/main.css" rel="stylesheet">
-
+    <base href="{{ .base }}" >
     {{ template "head" . }}
   </head>
   <body>
@@ -28,16 +28,16 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">[🌱]</a>
+            <a class="navbar-brand" href="{{.base}}">[🌱]</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             {{ if ne .navSimple true }}
             <ul class="nav navbar-nav">
-              <li class="active"><a href="/">Home</a></li>
-              <!-- <li><a href="/about">About</a></li> -->
-              <li><a href="/contacts">Contacts</a></li>
+              <li class="active"><a href="{{.base}}">Home</a></li>
+              <!-- <li><a href="{{.base}}about">About</a></li> -->
+              <li><a href="{{.base}}contacts">Contacts</a></li>
             {{ if .currUser }}
-              <li><a href="/email/open"><span class="glyphicon glyphicon-envelope"></span> <span id="mail-unseen" class="badge hide">0</span></a>
+              <li><a href="{{.base}}email/open"><span class="glyphicon glyphicon-envelope"></span> <span id="mail-unseen" class="badge hide">0</span></a>
               </li>
             {{ end }}
             </ul>
@@ -47,13 +47,13 @@
               <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="glyphicon glyphicon-wrench"></i> Admin <i class="glyphicon glyphicon-chevron-down"></i></a>
                 <ul class="dropdown-menu dropdown-sys">
-                    <li><a href="/dust/clients">Clients</a></li>
-                    <li><a href="/dust/groups">Groups</a></li>
-                    <li><a href="/dust/scopes">Scopes</a></li>
-                    <li><a href="/dust/articles">Articles</a></li>
-                    <li><a href="/dust/links">Links</a></li>
-                    <li><a href="/dust/status/monitor">Monitor</a></li>
-                    <li><a href="/dust/status/stacks">Stacks</a></li>
+                    <li><a href="{{.base}}dust/clients">Clients</a></li>
+                    <li><a href="{{.base}}dust/groups">Groups</a></li>
+                    <li><a href="{{.base}}dust/scopes">Scopes</a></li>
+                    <li><a href="{{.base}}dust/articles">Articles</a></li>
+                    <li><a href="{{.base}}dust/links">Links</a></li>
+                    <li><a href="{{.base}}dust/status/monitor">Monitor</a></li>
+                    <li><a href="{{.base}}dust/status/stacks">Stacks</a></li>
                 </ul>
               </li>
                 {{ end }}
@@ -63,13 +63,13 @@
 
                 </a>
                 <ul class="dropdown-menu dropdown-user">
-                  <li><a href="/password"><i class="glyphicon glyphicon-lock"></i> Change Password</a></li>
-                  <li><a href="/profile"><i class="glyphicon glyphicon-cog"></i> Profile</a></li>
-                  <li><a href="/logout"><i class="glyphicon glyphicon-log-out"></i> Sign out</a></li>
+                  <li><a href="{{.base}}password"><i class="glyphicon glyphicon-lock"></i> Change Password</a></li>
+                  <li><a href="{{.base}}profile"><i class="glyphicon glyphicon-cog"></i> Profile</a></li>
+                  <li><a href="{{.base}}logout"><i class="glyphicon glyphicon-log-out"></i> Sign out</a></li>
                 </ul>
               </li>
               {{ else }}
-              <li><a href="/login">Sign in</a></li>
+              <li><a href="{{.base}}login">Sign in</a></li>
               {{ end }}
             </ul>
               {{ end }}
@@ -90,7 +90,7 @@
 
   <script src="/static/scripts/common.js"></script>
     {{ if .currUser }}
-      <script>$.getJSON('/email/unseen', function(res){
+      <script>$.getJSON('{{.base}}email/unseen', function(res){
         if (res.unseen > 0) {
           $('#mail-unseen').text(res.unseen).removeClass('hide').show();
         } else {

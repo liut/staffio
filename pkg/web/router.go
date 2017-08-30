@@ -11,7 +11,7 @@ import (
 )
 
 func (s *server) StrapRouter(r gin.IRouter) {
-	gr := r.Group(Base)
+	gr := r.Group(base)
 	gr.GET("/login", s.loginForm).POST("/login", s.loginPost)
 	gr.GET("/logout", s.logout)
 	gr.GET("/password/forgot", s.passwordForgotForm)
@@ -47,7 +47,7 @@ func (s *server) StrapRouter(r gin.IRouter) {
 	keeper.GET("/status/:topic", s.handleStatus)
 	keeper.GET("/groups", s.groupList)
 
-	r.GET("/article/:id", articleView)
+	gr.GET("/article/:id", articleView)
 	keeper.GET("/articles", articleForm)
 	keeper.POST("/articles", articlePost)
 
@@ -70,9 +70,13 @@ func IsAjax(r *http.Request) bool {
 }
 
 var (
-	Base = "/"
+	base = "/"
 )
 
+func SetBase(s string) {
+	base = fmt.Sprintf("%s/", strings.TrimRight(s, "/"))
+}
+
 func UrlFor(path string) string {
-	return fmt.Sprintf("%s/%s", strings.TrimRight(Base, "/"), strings.TrimLeft(path, "/"))
+	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
 }

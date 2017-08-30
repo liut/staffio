@@ -5,6 +5,7 @@
 
 {{ define "content" }}
 {{ $isKeeper := and ( .currUser ) ( .currUser.IsKeeper ) }}
+{{ $base := .base }}
 <table id="contacts" class="table table-striped" data-order='[[ 1, "asc" ]]' data-page-length='25'>
 <thead>
 	<tr>
@@ -20,7 +21,7 @@
 	<tr>
 		<td class="text-right">{{ .EmployeeNumber }}</td>
 		<td>{{ .Uid }}{{if $isKeeper }}
-		<a href="/staff/{{ .Uid }}"><i class="glyphicon glyphicon-pencil"></i></a>
+		<a href="{{$base}}staff/{{ .Uid }}"><i class="glyphicon glyphicon-pencil"></i></a>
 		{{ end }}</td>
 		<td>{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
@@ -31,7 +32,7 @@
 </table>
 
 	{{if $isKeeper }}<div>
-	<a class="btn btn-default" href="/staff/new" role="button">New Staff</a>
+	<a class="btn btn-default" href="{{.base}}staff/new" role="button">New Staff</a>
 	<!-- <span class="label label-success">Total: {{ len .staffs }}</span> -->
 	</div>{{ end }}
 {{ end }}

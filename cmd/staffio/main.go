@@ -25,6 +25,7 @@ func main() {
 
 	backends.InitSMTP()
 
+	// web.SetBase("/v1/")
 	ws := web.Default()
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 

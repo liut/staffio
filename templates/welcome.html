@@ -86,6 +86,7 @@ article > .content {
 </style>
 {{ end }}
 {{ define "content" }}
+{{ $base := .base }}
 
 	  <div>
 
@@ -101,7 +102,7 @@ article > .content {
 	  <h3 title="Articles">最新公告</h3>
 		{{ range .articles }}
 			  <article class="bs-callout bs-callout-{{.StyleName}}">
-				<h3><i class="glyphicon glyphicon-bullhorn small"></i> {{ .HtmlTitle }} <a href="/article/{{.Id}}" class="href"><i class="glyphicon glyphicon-paperclip small"></i></a></h3>
+				<h3><i class="glyphicon glyphicon-bullhorn small"></i> {{ .HtmlTitle }} <a href="{{$base}}article/{{.Id}}" class="href"><i class="glyphicon glyphicon-paperclip small"></i></a></h3>
 		      	<div class="content">{{ .HtmlContent }}</div>
 				<div class="author">
 					<i> <i class="glyphicon glyphicon-hand-right"></i> {{ .Author }}</i> posted at <i class="pretty" title="{{ .Created }}">{{ .Created }}</i>

@@ -13,26 +13,10 @@ import (
 var (
 	cachedTemplates = map[string]*template.Template{}
 	cachedMutex     sync.Mutex
-	// funcs           = template.FuncMap{
-	// 	"reverse": reverse,
-	// }
+	funcs           = template.FuncMap{
+		"urlFor": UrlFor,
+	}
 )
-
-// func reverse(name string, things ...interface{}) string {
-// 	//convert the things to strings
-// 	strs := make([]string, len(things))
-// 	for i, th := range things {
-// 		strs[i] = fmt.Sprint(th)
-// 	}
-// 	//grab the route
-// 	u, err := ws.GetRoute(name).URL(strs...)
-// 	if err != nil {
-// 		log.Printf("GetRoute err %s", err)
-// 		return "/" + name
-// 		// panic(err)
-// 	}
-// 	return u.Path
-// }
 
 const (
 	kReferer = "_ref"
@@ -53,6 +37,7 @@ func markReferer(c *gin.Context) {
 func Render(c *gin.Context, name string, data interface{}) (err error) {
 	instance := T(name)
 	if m, ok := data.(map[string]interface{}); ok {
+		m["base"] = base
 		m["appVersion"] = settings.Version()
 		m["navSimple"] = false
 		session := ginSession(c)
@@ -81,7 +66,7 @@ func T(name string) *template.Template {
 		return t
 	}
 
-	t := template.New("_base.html")
+	t := template.New("_base.html").Funcs(funcs)
 	t = template.Must(t.ParseFiles(
 		filepath.Join(settings.Root, "templates/_base.html"),
 		filepath.Join(settings.Root, "templates", name),
