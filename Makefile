@@ -27,15 +27,17 @@ clean:
 	rm -f $(NAME) $(NAME)-*
 
 dist: clean
-	echo "Building $(NAME)"
-	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME) $(ROOF)/cmd/$(NAME)
-	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME) $(ROOF)/cmd/$(NAME)
+	echo "Building $(NAME) for linux"
+	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)/cmd/$(NAME)
+	echo "Building $(NAME) for darwin"
+	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS) -w" $(ROOF)/cmd/$(NAME)
+	echo "Building $(NAME) for windows"
+	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)/cmd/$(NAME)
 
 package: dist
-	cp -rf templates dist/linux_amd64/
-	cp -rf templates dist/darwin_amd64/
-	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME) templates
-	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME) templates
+	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
+	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
+	tar -cvJf $(NAME)-templates-$(TAG).tar.xz templates
 
 fetch-exmail:
 	echo "Building $@"
