@@ -1,0 +1,26 @@
+
+version: 1
+
+dn: dc=example,dc=net
+dc: example
+o: Example Inc.
+objectclass: top
+objectclass: dcObject
+objectclass: organization
+
+dn: ou=people,dc=example,dc=net
+objectclass: organizationalUnit
+objectclass: top
+ou: people
+
+dn: ou=groups,dc=example,dc=net
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+dn: uid=reader,dc=example,dc=net
+objectclass: account
+objectclass: simpleSecurityObject
+objectclass: top
+uid: reader
+userpassword: {MD5}W/QiMbGMXuvvUO7xb202Tw==
