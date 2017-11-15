@@ -28,15 +28,11 @@ type ldapSource struct {
 }
 
 var (
-	ErrEmptyAddr      = errors.New("ldap addr is empty")
-	ErrEmptyBase      = errors.New("ldap base is empty")
-	ErrLogin          = errors.New("049: Invalid Username/Password")
-	ErrNotFound       = errors.New("Not Found")
-	userDnFmt         = "uid=%s,ou=people,%s"
-	defaultFilter     = "(objectclass=inetOrgPerson)"
-	defaultAttributes = []string{
-		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
-		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title"}
+	ErrEmptyAddr = errors.New("ldap addr is empty")
+	ErrEmptyBase = errors.New("ldap base is empty")
+	ErrLogin     = errors.New("049: Invalid Username/Password")
+	ErrNotFound  = errors.New("Not Found")
+	userDnFmt    = "uid=%s,ou=people,%s"
 
 	debug = Debug("staffio:ldap")
 )
@@ -73,7 +69,7 @@ func NewSource(cfg *Config) (*ldapSource, error) {
 		}
 	}
 
-	filter := defaultFilter
+	filter := etPeople.Filter
 	if cfg.Filter != "" {
 		filter = cfg.Filter
 	}
@@ -85,7 +81,7 @@ func NewSource(cfg *Config) (*ldapSource, error) {
 		BindDN:     cfg.Bind,
 		Passwd:     cfg.Passwd,
 		Filter:     filter,
-		Attributes: defaultAttributes,
+		Attributes: etPeople.Attributes,
 		Enabled:    true,
 	}
 
@@ -133,7 +129,56 @@ func (ls *ldapSource) Close() {
 }
 
 func (ls *ldapSource) UDN(uid string) string {
-	return fmt.Sprintf(userDnFmt, uid, ls.Base)
+	return etPeople.DN(uid)
+}
+
+func (ls *ldapSource) Ready() (err error) {
+	err = ls.Bind(ls.BindDN, ls.Passwd, false)
+	if err == nil {
+		if err = ls.readyBase(); err != nil {
+			return
+		}
+		err = ls.readyParent("groups")
+		if err == nil {
+			err = ls.readyParent("people")
+		}
+	}
+	return
+}
+
+func (ls *ldapSource) readyBase() (err error) {
+	dn := Base
+	_, err = ls.Entry(dn, etBase.Filter, etBase.Attributes...)
+	if err == ErrNotFound {
+		ar := ldap.NewAddRequest(dn)
+		ar.Attribute("objectClass", []string{etBase.OC, "organization", "top"})
+		ar.Attribute("o", []string{Domain})
+		ar.Attribute(etBase.PK, []string{splitDC(Base)})
+		debug("add %v", ar)
+		err = ls.c.Add(ar)
+		if err != nil {
+			debug("add %q, ERR: %s", dn, err)
+		} else {
+			debug("add %q OK", dn)
+		}
+	}
+	return
+}
+
+func (ls *ldapSource) readyParent(name string) (err error) {
+	dn := etParent.DN(name)
+	_, err = ls.Entry(dn, etParent.Filter, etParent.Attributes...)
+	if err == ErrNotFound {
+		debug("ready parent %s, ERR %s", name, err)
+		ar := ldap.NewAddRequest(dn)
+		ar.Attribute("objectClass", []string{etParent.OC, "top"})
+		ar.Attribute(etParent.PK, []string{name})
+		err = ls.c.Add(ar)
+		if err != nil {
+			debug("add %q, ERR: %s", dn, err)
+		}
+	}
+	return
 }
 
 func (ls *ldapSource) Bind(dn, passwd string, force bool) error {
@@ -162,27 +207,48 @@ func (ls *ldapSource) Bind(dn, passwd string, force bool) error {
 	return nil
 }
 
+// deprecated with Entry(dn, filter string, attrs ...string)
 func (ls *ldapSource) getEntry(udn string) (*ldap.Entry, error) {
+	return ls.Entry(udn, ls.Filter, ls.Attributes...)
+}
+
+func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
+	return ls.Entry(ls.GDN(cn), etGroup.Filter, etGroup.Attributes...)
+}
+
+func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
+	return ls.Entry(ls.UDN(uid), ls.Filter, ls.Attributes...)
+}
+
+// Entry return a special entry with dn and filter
+func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, error) {
+	if !ls.bound {
+		err := ls.Bind(ls.BindDN, ls.Passwd, false)
+		if err != nil {
+			return nil, err
+		}
+	}
 	search := ldap.NewSearchRequest(
-		udn,
+		dn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		ls.Filter,
-		ls.Attributes,
+		filter,
+		attrs,
 		nil)
 	sr, err := ls.c.Search(search)
-
-	if err != nil {
-		if le, ok := err.(*ldap.Error); ok && le.ResultCode == ldap.LDAPResultNoSuchObject {
-			return nil, ErrNotFound
+	if err == nil {
+		if len(sr.Entries) > 0 {
+			return sr.Entries[0], nil
 		}
-		log.Printf("LDAP Search '%s' Error: %s", udn, err)
-		return nil, err
+		return nil, ErrNotFound
 	}
 
-	if len(sr.Entries) > 0 {
-		return sr.Entries[0], nil
+	debug("ldap search %q, ERR: %s", dn, err)
+	if le, ok := err.(*ldap.Error); ok && le.ResultCode == ldap.LDAPResultNoSuchObject {
+		return nil, ErrNotFound
 	}
-	return nil, ErrNotFound
+	log.Printf("LDAP Search '%s' Error: %s", dn, err)
+	return nil, err
+
 }
 
 // GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter

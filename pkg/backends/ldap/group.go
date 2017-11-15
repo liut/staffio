@@ -48,6 +48,10 @@ func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 	return
 }
 
+func (ls *ldapSource) GDN(name string) string {
+	return fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
+}
+
 func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
 	l, err := ls.dial()
 	if err != nil {
@@ -66,14 +70,14 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 	if name == "" { // all
 		dn = fmt.Sprintf("%s,%s", groupSuffix, ls.Base)
 	} else {
-		dn = fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
+		dn = ls.GDN(name)
 	}
 
 	search := ldap.NewSearchRequest(
 		dn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(objectclass=groupOfNames)",
-		[]string{"cn", "member"},
+		etGroup.Filter,
+		etGroup.Attributes,
 		nil)
 	sr, err := ls.c.SearchWithPaging(search, uint32(groupLimit))
 	if err != nil {

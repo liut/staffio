@@ -4,9 +4,9 @@ version: 1
 dn: dc=example,dc=net
 dc: example
 o: Example Inc.
-objectclass: top
 objectclass: dcObject
 objectclass: organization
+objectclass: top
 
 dn: ou=people,dc=example,dc=net
 objectclass: organizationalUnit

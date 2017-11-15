@@ -46,6 +46,12 @@ func Default() *server {
 		return svr
 	}
 	service := backends.NewService()
+
+	// check ready
+	if err := service.Ready(); err != nil {
+		panic(err)
+	}
+
 	osvr := osin.NewServer(newOsinConfig(), service.OSIN())
 	var err error
 	osvr.AccessTokenGen, err = getTokenGenJWT()

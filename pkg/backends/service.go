@@ -17,6 +17,7 @@ type Servicer interface {
 	models.GroupStore
 	cas.TicketStore
 	OSIN() OSINStore
+	Ready() error
 	CloseAll()
 	StoreStaff(*models.Staff) error
 	InGroup(gn, uid string) bool
@@ -34,7 +35,8 @@ type serviceImpl struct {
 var _ Servicer = (*serviceImpl)(nil)
 
 func NewService() Servicer {
-
+	ldap.Base = settings.LDAP.Base
+	ldap.Domain = settings.EmailDomain
 	cfg := &ldap.Config{
 		Addr:   settings.LDAP.Hosts,
 		Base:   settings.LDAP.Base,
@@ -51,6 +53,10 @@ func NewService() Servicer {
 		osinStore: NewStorage(),
 	}
 
+}
+
+func (s *serviceImpl) Ready() error {
+	return s.LDAPStore.Ready()
 }
 
 func (s *serviceImpl) OSIN() OSINStore {

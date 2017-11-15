@@ -87,3 +87,20 @@ func (s *LDAPStore) Save(staff *models.Staff) (isNew bool, err error) {
 	}
 	return
 }
+
+func (s *LDAPStore) Ready() error {
+	for _, ls := range s.sources {
+		err := ls.Ready()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func splitDC(base string) string {
+	pos1 := strings.Index(base, "=")
+	pos2 := strings.Index(base, ",")
+	// TODO:more condition
+	return base[pos1+1 : pos2]
+}
