@@ -111,14 +111,12 @@ func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 		if err == nil {
 			str := `DELETE FROM password_reset WHERE id = $1`
 			_, err = db.Exec(str, euv.Id)
-			if err == nil {
-				return nil
+			if err != nil {
+				log.Printf("DELETE password_reset %s ERR %s", uv.Uid, err)
+				return err
 			}
-			log.Printf("UPDATE password_reset %s ERR %s", uv.Uid, err)
-			return err
-		} else {
-			log.Printf("DB ERR %s", err)
 		}
+
 		str := `INSERT INTO password_reset(type_id, target, uid, code_hash, life_seconds)
 		 VALUES($1, $2, $3, $4, $5) RETURNING id`
 		var id int

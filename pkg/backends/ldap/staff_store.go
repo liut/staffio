@@ -60,6 +60,9 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 	ar.Attribute("givenName", []string{staff.GivenName})
 	ar.Attribute("cn", []string{staff.GetCommonName()})
 	ar.Attribute("mail", []string{staff.Email})
+	if staff.Nickname != "" {
+		ar.Attribute("displayName", []string{staff.Nickname})
+	}
 	if staff.Mobile != "" {
 		ar.Attribute("mobile", []string{staff.Mobile})
 	}
@@ -83,9 +86,9 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 		ar.Attribute("avatarPath", []string{staff.AvatarPath})
 	}
 
-	if staff.Passwd != "" {
-		ar.Attribute("userPassword", []string{staff.Passwd})
-	}
+	// if staff.Passwd != "" {
+	// 	ar.Attribute("userPassword", []string{staff.Passwd})
+	// }
 
 	return ar
 }
@@ -101,6 +104,9 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 	}
 	if staff.CommonName != entry.GetAttributeValue("cn") {
 		mr.Replace("cn", []string{staff.GetCommonName()})
+	}
+	if staff.Nickname != "" && staff.Nickname != entry.GetAttributeValue("displayName") {
+		mr.Replace("displayName", []string{staff.Nickname})
 	}
 	if staff.Email != entry.GetAttributeValue("mail") {
 		mr.Replace("mail", []string{staff.Email})

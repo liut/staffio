@@ -29,21 +29,20 @@ func SetNameFormat(s string) {
 
 // employment for a person
 type Staff struct {
-	Uid            string `json:"uid" form:"uid" binding:"required"`         // 登录名
-	Passwd         string `json:"-" form:"password"`                         // 密码
-	CommonName     string `json:"cn,omitempty" form:"cn" binding:"required"` // 姓名（全名）
-	GivenName      string `json:"gn" form:"gn" binding:"required"`           // 名 FirstName
-	Surname        string `json:"sn" form:"sn" binding:"required"`           // 姓 LastName
-	Nickname       string `json:"nickname,omitempty" form:"nickname"`        // 昵称
-	Birthday       string `json:"birthday,omitempty" form:"birthday"`        // 生日
-	Gender         Gender `json:"gender,omitempty" form:"gender"`            // 性别
-	Email          string `json:"email" form:"email" binding:"required"`     // 邮箱
-	Mobile         string `json:"mobile" form:"mobile" binding:"required"`   // 手机
-	Tel            string `json:"tel,omitempty" form:"tel"`                  // 座机
-	EmployeeNumber string `json:"eid,omitempty" form:"eid"`                  // 员工编号
-	EmployeeType   string `json:"etype,omitempty" form:"etitle"`             // 员工岗位
-	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`        // 头像
-	Description    string `json:"description,omitempty" form:"description"`  // 描述
+	Uid            string `json:"uid" form:"uid" binding:"required"`        // 登录名
+	CommonName     string `json:"cn,omitempty" form:"cn"`                   // 姓名（全名）
+	GivenName      string `json:"gn" form:"gn" binding:"required"`          // 名 FirstName
+	Surname        string `json:"sn" form:"sn" binding:"required"`          // 姓 LastName
+	Nickname       string `json:"nickname,omitempty" form:"nickname"`       // 昵称
+	Birthday       string `json:"birthday,omitempty" form:"birthday"`       // 生日
+	Gender         Gender `json:"gender,omitempty" form:"gender"`           // 性别
+	Email          string `json:"email" form:"email" binding:"required"`    // 邮箱
+	Mobile         string `json:"mobile" form:"mobile" binding:"required"`  // 手机
+	Tel            string `json:"tel,omitempty" form:"tel"`                 // 座机
+	EmployeeNumber string `json:"eid,omitempty" form:"eid"`                 // 员工编号
+	EmployeeType   string `json:"etype,omitempty" form:"etitle"`            // 员工岗位
+	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`       // 头像
+	Description    string `json:"description,omitempty" form:"description"` // 描述
 }
 
 func (u *Staff) Name() string {
