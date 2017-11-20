@@ -89,7 +89,7 @@
     </div> <!-- /container -->
 
   <script src="/static/scripts/common.js"></script>
-    {{ if .currUser }}
+    {{ if .currUser }}{{ if .checkEmail }}
       <script>$.getJSON('{{.base}}email/unseen', function(res){
         if (res.unseen > 0) {
           $('#mail-unseen').text(res.unseen).removeClass('hide').show();
@@ -97,7 +97,7 @@
           $('#mail-unseen').hide()
         }
       })</script>
-    {{ end }}
+    {{ end }}{{ end }}
     {{ template "tail" . }}
 
   </body>

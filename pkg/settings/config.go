@@ -8,6 +8,7 @@ import (
 
 var (
 	EmailDomain string
+	EmailCheck  bool
 
 	SMTP struct {
 		Host           string
@@ -82,6 +83,7 @@ func init() {
 	fs.StringVar(&TokenGen.Key, "tokengen-key", "", "HMAC key for token generater")
 
 	fs.StringVar(&EmailDomain, "email-domain", "example.net", "default email domain")
+	fs.BoolVar(&EmailCheck, "email-check", false, "check email unseen")
 	fs.StringVar(&SMTP.Host, "smtp-host", "", "")
 	fs.IntVar(&SMTP.Port, "smtp-port", 465, "")
 	fs.StringVar(&SMTP.SenderName, "smtp-sender-name", "Notification", "")

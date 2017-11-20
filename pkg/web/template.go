@@ -51,6 +51,7 @@ func Render(c *gin.Context, name string, data interface{}) (err error) {
 			user, err = UserFromRequest(c.Request)
 		}
 		m["currUser"] = user
+		m["checkEmail"] = settings.EmailCheck
 		err = instance.Execute(c.Writer, m)
 	} else {
 		err = instance.Execute(c.Writer, data)
