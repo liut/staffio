@@ -19,6 +19,11 @@ import (
 	"github.com/liut/staffio/pkg/web"
 )
 
+const (
+	readTimeout  time.Duration = 10 * time.Second
+	writeTimeout               = 15 * time.Second
+)
+
 func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	settings.Parse()
@@ -32,8 +37,10 @@ func main() {
 	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)
 
 	srv := &http.Server{
-		Addr:    settings.HttpListen,
-		Handler: ws,
+		Addr:         settings.HttpListen,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		Handler:      ws,
 	}
 
 	go func() {

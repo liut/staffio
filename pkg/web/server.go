@@ -27,7 +27,7 @@ func IsKeeper(uid string) bool {
 }
 
 type server struct {
-	*gin.Engine
+	router  *gin.Engine
 	service backends.Servicer
 	osvr    *osin.Server
 }
@@ -60,43 +60,50 @@ func Default() *server {
 	}
 
 	svr = &server{
-		Engine:  gin.New(),
+		router:  gin.New(),
 		service: service,
 		osvr:    osvr,
 	}
 
 	if settings.IsDevelop() {
 		fmt.Printf("In Developing(Debug) mode, gin: %s\n", gin.Mode())
-		svr.Use(gin.Logger())
-		svr.Use(gin.Recovery())
+		svr.router.Use(gin.Logger())
+		svr.router.Use(gin.Recovery())
 	} else {
 		fmt.Printf("In Release mode, gin: %s\n", gin.Mode())
 		if settings.SentryDSN != "" {
 			raven.SetDSN(settings.SentryDSN)
 			onlyCrashes := false
-			svr.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
+			svr.router.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
 		}
 	}
 
 	store := sessionStore()
-	svr.Use(sessions.Sessions("session", store))
-	svr.StrapRouter(svr.Engine)
+	svr.router.Use(sessions.Sessions("session", store))
+	svr.StrapRouter(svr.router)
 
 	cache = freecache.NewCache(settings.CacheSize)
 
 	return svr
 }
 
+func (s *server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// TODO: refactory
+	s.router.ServeHTTP(w, req)
+}
+
+// obsoleted
 func (s *server) HandleFunc(path string, hf http.HandlerFunc) {
 	h := func(c *gin.Context) {
 		hf(c.Writer, c.Request)
 	}
-	s.GET(path, h)
-	s.POST(path, h)
+	s.router.GET(path, h)
+	s.router.POST(path, h)
 }
 
+// deprecated
 func (s *server) Run(addr string) error {
-	return http.ListenAndServe(addr, s.Engine)
+	return http.ListenAndServe(addr, s.router)
 }
 
 func newOsinConfig() *osin.ServerConfig {
