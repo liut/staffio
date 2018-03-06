@@ -65,5 +65,5 @@ func (s *serviceImpl) OSIN() OSINStore {
 
 func (s *serviceImpl) CloseAll() {
 	s.LDAPStore.Close()
-	s.osinStore.Clone()
+	s.osinStore.Close()
 }
