@@ -41,7 +41,7 @@ func Render(c *gin.Context, name string, data interface{}) (err error) {
 		m["appVersion"] = settings.Version()
 		m["navSimple"] = false
 		session := ginSession(c)
-		m["session"] = session
+		m["session"] = session.Values()
 		m["referer"] = refererWithContext(c)
 		var user *User
 		v, exist := c.Get(kAuthUser)

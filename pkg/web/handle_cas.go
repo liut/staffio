@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 
 	"github.com/liut/staffio/pkg/models/cas"
@@ -16,12 +15,12 @@ const (
 
 func NewTGC(c *gin.Context, ticket *cas.Ticket) {
 	tgt := cas.NewTicket("TGT", ticket.Service, ticket.Uid, false)
-	session := sessions.Default(c)
+	session := ginSession(c)
 	session.Set(ticketCKey, tgt)
 }
 
 func GetTGC(c *gin.Context) *cas.Ticket {
-	session := sessions.Default(c)
+	session := ginSession(c)
 	v := session.Get(ticketCKey)
 	if t, ok := v.(*cas.Ticket); ok {
 		return t
@@ -30,8 +29,8 @@ func GetTGC(c *gin.Context) *cas.Ticket {
 }
 
 func DeleteTGC(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Delete(ticketCKey)
+	session := ginSession(c)
+	session.Set(ticketCKey, nil)
 }
 
 func casLogout(c *gin.Context) {

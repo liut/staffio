@@ -140,7 +140,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/tj/go-debug"
+  name = "github.com/wealthworks/go-debug"
 
 [[constraint]]
   branch = "master"

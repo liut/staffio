@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	. "github.com/tj/go-debug"
+	. "github.com/wealthworks/go-debug"
 
 	"github.com/liut/staffio/pkg/models"
 )

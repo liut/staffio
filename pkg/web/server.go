@@ -8,9 +8,8 @@ import (
 	"github.com/coocood/freecache"
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/contrib/sentry"
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	. "github.com/tj/go-debug"
+	. "github.com/wealthworks/go-debug"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/settings"
@@ -78,8 +77,7 @@ func Default() *server {
 		}
 	}
 
-	store := sessionStore()
-	svr.router.Use(sessions.Sessions("session", store))
+	svr.router.Use(svr.sessionsMiddleware())
 	svr.StrapRouter(svr.router)
 
 	cache = freecache.NewCache(settings.CacheSize)
@@ -90,20 +88,6 @@ func Default() *server {
 func (s *server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// TODO: refactory
 	s.router.ServeHTTP(w, req)
-}
-
-// obsoleted
-func (s *server) HandleFunc(path string, hf http.HandlerFunc) {
-	h := func(c *gin.Context) {
-		hf(c.Writer, c.Request)
-	}
-	s.router.GET(path, h)
-	s.router.POST(path, h)
-}
-
-// deprecated
-func (s *server) Run(addr string) error {
-	return http.ListenAndServe(addr, s.router)
 }
 
 func newOsinConfig() *osin.ServerConfig {

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/RangelReale/osin"
-	// "github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
@@ -34,7 +33,6 @@ func (s *server) loginForm(c *gin.Context) {
 
 func (s *server) loginPost(c *gin.Context) {
 	req := c.Request
-	// session := sessions.Default(c)
 	uid, password := req.PostFormValue("username"), req.PostFormValue("password")
 	service := req.FormValue("service")
 	referer := req.FormValue("referer")

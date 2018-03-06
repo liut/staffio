@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/go-ldap/ldap"
-	. "github.com/tj/go-debug"
+	. "github.com/wealthworks/go-debug"
 
 	"github.com/liut/staffio/pkg/models"
 )
