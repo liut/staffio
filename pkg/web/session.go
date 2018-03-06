@@ -31,15 +31,16 @@ func ginSession(c *gin.Context) session.Session {
 	if sess, ok := c.Get(sessionKey); ok {
 		return sess.(session.Session)
 	}
-	return svr.loadSession(c.Request)
+	sess := svr.loadSession(c.Request)
+	c.Set(sessionKey, sess)
+	return sess
 }
 
 func (s *server) sessionsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sess := s.loadSession(c.Request)
-		c.Set(sessionKey, sess)
+		sess := ginSession(c)
 		defer func() {
-			if !sess.New() {
+			if sess.Changed() {
 				smgr.Save(sess, c.Writer)
 			}
 		}()

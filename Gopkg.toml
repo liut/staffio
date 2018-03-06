@@ -115,8 +115,8 @@
   name = "github.com/liut/keeper"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/liut/pgstore"
+  branch = "develop"
+  name = "github.com/go-osin/session"
 
 [[constraint]]
   branch = "master"

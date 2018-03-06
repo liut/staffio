@@ -56,6 +56,8 @@ func (s *server) loginPost(c *gin.Context) {
 	//store the user id in the values and redirect to welcome
 	user := UserFromStaff(staff)
 	user.Refresh()
+	sess := ginSession(c)
+	sess.Set(kAuthUser, user)
 	user.toResponse(c.Writer)
 	// session.Set(kUserOL, user)
 	// session.Values[kUserOL] = user
