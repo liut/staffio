@@ -317,7 +317,7 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 		AvatarPath:     entry.GetAttributeValue("avatarPath"),
 		Description:    entry.GetAttributeValue("description"),
 	}
-	(&u.Gender).UnmarshalJSON(entry.GetRawAttributeValue("gender"))
+	(&u.Gender).UnmarshalText(entry.GetRawAttributeValue("gender"))
 	return
 }
 

@@ -21,15 +21,22 @@ func (this Gender) String() string {
 	return "unknown"
 }
 
-func (this *Gender) UnmarshalJSON(b []byte) (err error) {
+func (this Gender) MarshalText() ([]byte, error) {
+	switch this {
+	case Male:
+		return []byte{'m'}, nil
+	case Female:
+		return []byte{'f'}, nil
+	}
+	return []byte{'u'}, nil
+}
+
+func (this *Gender) UnmarshalText(b []byte) (err error) {
 	if len(b) == 0 {
 		*this = Unknown
 		return
 	}
-	r := bytes.Runes(b)
-	if r[0] == '"' && r[len(r)-1] == '"' {
-		r = r[1 : len(r)-1]
-	}
+	r := bytes.Runes(bytes.Trim(b, "\""))
 	switch c := r[0]; c {
 	case 'm', 'M', '1', '男':
 		*this = Male
