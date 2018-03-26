@@ -5,30 +5,27 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/gin-gonic/gin"
 	statikFs "github.com/rakyll/statik/fs"
 
 	_ "github.com/liut/staffio/pkg/web/statik"
 )
 
 type assetsImpl struct {
-	fs http.FileSystem
+	fs   http.FileSystem
+	Base string // url prefix
 }
 
 func newAssets(root, name string) *assetsImpl {
 	fs := buildStaticFS(root, name)
-	return &assetsImpl{fs}
+	return &assetsImpl{fs: fs}
 }
 
-func (a *assetsImpl) stripRouter(r gin.IRouter) {
-	s := http.FileServer(a.fs)
-	h := func(c *gin.Context) {
-		s.ServeHTTP(c.Writer, c.Request)
+func (a *assetsImpl) GetHandler() http.Handler {
+	h := http.FileServer(a.fs)
+	if a.Base != "" && a.Base != "/" {
+		return http.StripPrefix(a.Base, h)
 	}
-
-	r.GET("/static/*filepath", h)
-	r.GET("/favicon.ico", h)
-	r.GET("/robots.txt", h)
+	return h
 }
 
 func buildStaticFS(root, name string) (fs http.FileSystem) {

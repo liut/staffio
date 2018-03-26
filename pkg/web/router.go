@@ -10,8 +10,16 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-func (s *server) StrapRouter(r gin.IRouter) {
-	gr := r.Group(base)
+var (
+	base = "/"
+)
+
+func SetBase(s string) {
+	base = fmt.Sprintf("%s/", strings.TrimRight(s, "/"))
+}
+
+func (s *server) StrapRouter() {
+	gr := s.router.Group(base)
 	gr.GET("/login", s.loginForm).POST("/login", s.loginPost)
 	gr.GET("/logout", s.logout)
 	gr.GET("/password/forgot", s.passwordForgotForm)
@@ -61,20 +69,17 @@ func (s *server) StrapRouter(r gin.IRouter) {
 	gr.GET("/", welcome)
 
 	assets := newAssets(settings.Root, settings.FS)
-	assets.stripRouter(r)
+	assets.Base = base
+	ah := gin.WrapH(assets.GetHandler())
+	s.router.GET("/static/*filepath", ah)
+	s.router.GET("/favicon.ico", ah)
+	s.router.GET("/robots.txt", ah)
+
 }
 
 func IsAjax(r *http.Request) bool {
 	accept := r.Header.Get("Accept")
 	return strings.Index(accept, "application/json") >= 0
-}
-
-var (
-	base = "/"
-)
-
-func SetBase(s string) {
-	base = fmt.Sprintf("%s/", strings.TrimRight(s, "/"))
 }
 
 func UrlFor(path string) string {

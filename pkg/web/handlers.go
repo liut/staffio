@@ -59,9 +59,7 @@ func (s *server) loginPost(c *gin.Context) {
 	sess := ginSession(c)
 	sess.Set(kAuthUser, user)
 	user.toResponse(c.Writer)
-	// session.Set(kUserOL, user)
-	// session.Values[kUserOL] = user
-	// session.Values[kLastUid] = staff.Uid
+	smgr.Save(sess, c.Writer)
 	res["ok"] = true
 	if service != "" {
 		st := cas.NewTicket("ST", service, user.Uid, true)

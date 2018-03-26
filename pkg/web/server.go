@@ -78,7 +78,7 @@ func Default() *server {
 	}
 
 	svr.router.Use(svr.sessionsMiddleware())
-	svr.StrapRouter(svr.router)
+	svr.StrapRouter()
 
 	cache = freecache.NewCache(settings.CacheSize)
 
