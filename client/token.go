@@ -41,10 +41,9 @@ func requestInfoToken(tok *oauth2.Token) (*InfoToken, error) {
 	defer info.Body.Close()
 	data, err := ioutil.ReadAll(info.Body)
 	if err != nil {
-		log.Printf("read err %s", err)
+		log.Printf("read infoUrl err %s", err)
 		return nil, err
 	}
-	log.Print(string(data))
 
 	infoErr := &infoError{}
 	if e := json.Unmarshal(data, infoErr); e != nil {
@@ -58,6 +57,7 @@ func requestInfoToken(tok *oauth2.Token) (*InfoToken, error) {
 	var token = &InfoToken{}
 	err = json.Unmarshal(data, token)
 	if err != nil {
+		log.Printf("unmarshal to infoToken err %s", err)
 		return nil, err
 	}
 	return token, nil

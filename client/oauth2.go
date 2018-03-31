@@ -22,9 +22,6 @@ var (
 	conf           *oauth2.Config
 	oAuth2Endpoint oauth2.Endpoint
 	infoUrl        string
-
-	RememberToken bool
-	RememberUser  bool
 )
 
 func init() {

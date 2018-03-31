@@ -14,6 +14,12 @@ const (
 	TokenKey ctxKey = 0
 )
 
+var (
+	CookieName    = "staffio_token"
+	RememberToken bool
+	RememberUser  bool
+)
+
 func setCookie(w http.ResponseWriter, name, value string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     name,
@@ -33,8 +39,8 @@ func deleteCookie(w http.ResponseWriter, name string) {
 	})
 }
 
-// AuthCodeCallback is a middleware that injects a InfoToken into the context of each request
-func AuthCodeCallback(next http.Handler) http.Handler {
+// AuthCodeCallbackWrap is a middleware that injects a InfoToken into the context of each request
+func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// verify state value.
 		stateCookie, err := r.Cookie(cKeyState)
@@ -53,7 +59,7 @@ func AuthCodeCallback(next http.Handler) http.Handler {
 		}
 		deleteCookie(w, cKeyState)
 		if RememberToken {
-			setCookie(w, cKeyToken, tok.AccessToken)
+			setCookie(w, CookieName, tok.AccessToken)
 		}
 		if RememberUser {
 			if uid, ok := tok.Extra("uid").(string); ok {
