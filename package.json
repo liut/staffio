@@ -4,6 +4,7 @@
   "description": "An OAuth2 server with management for enterprise employees",
   "scripts": {
     "dev": "echo dev",
+    "build": "gulp clean build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

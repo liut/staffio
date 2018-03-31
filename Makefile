@@ -61,7 +61,7 @@ js-deps:
 .PHONY: js-deps
 
 js-build:
-	gulp clean build
+	npm run gulp clean build
 .PHONY: js-build
 
 statik:
