@@ -1,7 +1,7 @@
 package client
 
-// User is a retrieved and authenticated user.
-type User struct {
+// Staff is a retrieved employee struct.
+type Staff struct {
 	Uid            string `json:"uid" form:"uid"`                     // 登录名
 	CommonName     string `json:"cn,omitempty" form:"cn"`             // 全名
 	GivenName      string `json:"gn" form:"gn"`                       // 名
@@ -14,5 +14,5 @@ type User struct {
 	EmployeeNumber string `json:"eid,omitempty" form:"eid"`
 	EmployeeType   string `json:"etype,omitempty" form:"etitle"`
 	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`
-	Provider       string `json:"provider"`
+	Provider       string `json:"provider,omitempty"`
 }

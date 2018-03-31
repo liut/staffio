@@ -16,7 +16,7 @@ type InfoToken struct {
 	RefreshToken string    `json:"refresh_token,omitempty"`
 	ExpiresIn    int64     `json:"expires_in,omitempty"`
 	Expiry       time.Time `json:"expiry,omitempty"`
-	Me           User      `json:"me,omitempty"`
+	Me           Staff     `json:"me,omitempty"`
 }
 
 func (tok *InfoToken) GetExpiry() time.Time {
