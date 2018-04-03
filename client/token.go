@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -17,6 +18,7 @@ type InfoToken struct {
 	ExpiresIn    int64     `json:"expires_in,omitempty"`
 	Expiry       time.Time `json:"expiry,omitempty"`
 	Me           Staff     `json:"me,omitempty"`
+	Roles        RoleMe    `json:"group,omitempty"`
 }
 
 func (tok *InfoToken) GetExpiry() time.Time {
@@ -32,9 +34,13 @@ func (e *infoError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-func requestInfoToken(tok *oauth2.Token) (*InfoToken, error) {
+func RequestInfoToken(tok *oauth2.Token, roles ...string) (*InfoToken, error) {
 	client := conf.Client(oauth2.NoContext, tok)
-	info, err := client.Get(infoUrl)
+	uri := infoUrl
+	if len(roles) > 0 {
+		uri = infoUrl + "+" + strings.Join(roles, "+")
+	}
+	info, err := client.Get(uri)
 	if err != nil {
 		return nil, err
 	}

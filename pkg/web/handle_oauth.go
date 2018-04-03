@@ -168,11 +168,17 @@ func (s *server) oauth2Info(c *gin.Context) {
 			resp.Output["uid"] = uid
 			if strings.HasPrefix(topic, "me") {
 				resp.Output["me"] = staff
-				if len(topic) > 2 && strings.Index(topic, "+") == 2 {
-					// TODO: search group topic[2:]
-					gn := topic[3:]
-					resp.Output[gn] = s.InGroup(gn, uid)
+				if len(topic) > 2 {
+					arr := strings.Split(topic[2:], "+")
+					if len(arr) > 0 {
+						gm := make(map[string]interface{})
+						for _, gn := range arr {
+							gm[gn] = s.InGroup(gn, uid)
+						}
+						resp.Output["group"] = gm
+					}
 				}
+
 			} else if topic == "staff" {
 				resp.Output["staff"] = staff
 			} else if topic == "grafana" || topic == "generic" {

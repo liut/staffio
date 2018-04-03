@@ -16,3 +16,14 @@ type Staff struct {
 	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`
 	Provider       string `json:"provider,omitempty"`
 }
+
+type RoleMe map[string]interface{}
+
+func (r RoleMe) Has(name string) bool {
+	if v, exist := r[name]; exist {
+		if g, ok := v.(bool); ok {
+			return g
+		}
+	}
+	return false
+}
