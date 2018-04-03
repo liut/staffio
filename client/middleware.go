@@ -2,10 +2,16 @@ package client
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 
 	"golang.org/x/oauth2"
+)
+
+var (
+	ErrNoToken = errors.New("oauth2 token not found")
+	ErrNoRole  = errors.New("the user not in special roles")
 )
 
 type ctxKey int
@@ -65,4 +71,21 @@ func TokenFromContext(ctx context.Context) *oauth2.Token {
 		return tok
 	}
 	return nil
+}
+
+// AuthRequestWithRole called in AuthCallback
+func AuthRequestWithRole(r *http.Request, role string) (it *InfoToken, err error) {
+	tok := TokenFromContext(r.Context())
+	if tok == nil {
+		err = ErrNoToken
+		return
+	}
+	it, err = RequestInfoToken(tok, role)
+	if err != nil {
+		return
+	}
+	if !it.Roles.Has(role) {
+		err = ErrNoRole
+	}
+	return
 }
