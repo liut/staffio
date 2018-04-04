@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/liut/staffio/pkg/backends/ldap"
+	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
-	"github.com/liut/staffio/pkg/models/common"
 	"github.com/liut/staffio/pkg/settings"
 )
 

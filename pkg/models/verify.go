@@ -5,7 +5,7 @@ import (
 	"hash/crc32"
 	"time"
 
-	"github.com/liut/staffio/pkg/models/common"
+	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models/random"
 )
 

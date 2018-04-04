@@ -9,8 +9,8 @@ import (
 	"github.com/dchest/passwordreset"
 	"github.com/wealthworks/csmtp"
 
+	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/models/common"
 	"github.com/liut/staffio/pkg/settings"
 )
 

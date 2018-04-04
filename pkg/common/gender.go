@@ -1,7 +1,12 @@
-package models
+package common
 
 import (
 	"bytes"
+	"errors"
+)
+
+var (
+	ErrInvalidGender = errors.New("Invalid Gender value")
 )
 
 type Gender uint8

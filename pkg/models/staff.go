@@ -2,6 +2,14 @@ package models
 
 import (
 	"strings"
+
+	"github.com/liut/staffio/pkg/common"
+)
+
+type Gender = common.Gender
+
+const (
+	Unknown = common.Unknown
 )
 
 var (
