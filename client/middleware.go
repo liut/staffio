@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,13 +13,84 @@ import (
 var (
 	ErrNoToken = errors.New("oauth2 token not found")
 	ErrNoRole  = errors.New("the user not in special roles")
+
+	AdminPath = "/admin/"
+	LoginPath = "/auth/login"
 )
 
 type ctxKey int
 
 const (
-	TokenKey ctxKey = 0
+	TokenKey ctxKey = iota
+	UserKey
 )
+
+// AuthMiddleware
+func AuthMiddleware(redirect bool) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		hf := func(w http.ResponseWriter, r *http.Request) {
+			sess := SessionFromRequest(r)
+			if user, ok := sess.Get(SessKeyUser).(*User); ok {
+				if !user.IsExpired() {
+					if user.NeedRefresh() {
+						user.Refresh()
+						sess.Set(SessKeyUser, user)
+						SessionSave(sess, w)
+					}
+					ctx := r.Context()
+					ctx = context.WithValue(ctx, UserKey, user)
+					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
+			}
+
+			if redirect {
+				http.Redirect(w, r, LoginPath, http.StatusFound)
+				return
+			}
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		}
+		return http.HandlerFunc(hf)
+	}
+}
+
+// UserFromContext
+func UserFromContext(ctx context.Context) *User {
+	if ctx == nil {
+		return nil
+	}
+	if tok, ok := ctx.Value(UserKey).(*User); ok {
+		return tok
+	}
+	return nil
+}
+
+// AuthCodeCallback Handler for Check auth with role[s] when auth-code callback
+func AuthCodeCallback(roleName ...string) http.Handler {
+	hf := func(w http.ResponseWriter, r *http.Request) {
+		it, err := AuthRequestWithRole(r, roleName...)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			log.Printf("auth with role %v ERR %s", roleName, err)
+			return
+		}
+
+		sess := SessionFromRequest(r)
+		user := &User{
+			Uid:  it.Me.Uid,
+			Name: it.Me.Nickname,
+		}
+		user.Refresh()
+		sess.Set(SessKeyUser, user)
+		SessionSave(sess, w)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Refresh", fmt.Sprintf("0; %s", AdminPath))
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("Login OK. Please waiting, ok click <a href=" + AdminPath + ">here</a> to go back"))
+		return
+	}
+	return AuthCodeCallbackWrap(http.HandlerFunc(hf))
+}
 
 // AuthCodeCallbackWrap is a middleware that injects a InfoToken with roles into the context of each request
 func AuthCodeCallbackWrap(next http.Handler) http.Handler {

@@ -15,10 +15,10 @@ import (
 	staffiogin "github.com/liut/staffio/client/gin"
 )
 
-main() {
+func main() {
 
-	router = gin.Default()
-	loginPath = "/auth/login"
+	router := gin.Default()
+	loginPath := "/auth/login"
 	staffiogin.LoginPath = loginPath
 	staffiogin.AdminPath = "/admin"
 

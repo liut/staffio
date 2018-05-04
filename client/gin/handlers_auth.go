@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -16,10 +15,8 @@ const (
 type User = staffio.User
 
 var (
-	AdminPath = "/admin/"
-	LoginPath = "/auth/login"
-
 	LoginHandler = gin.WrapF(staffio.LoginHandler)
+	LoginPath    = staffio.LoginPath
 )
 
 func AuthMiddleware(redirect bool) gin.HandlerFunc {
@@ -30,7 +27,7 @@ func AuthMiddleware(redirect bool) gin.HandlerFunc {
 				if user.NeedRefresh() {
 					user.Refresh()
 					sess.Set(sKeyUser, user)
-					smgr.Save(sess, c.Writer)
+					staffio.SessionSave(sess, c.Writer)
 				}
 				c.Set(sKeyUser, user)
 				c.Next()
@@ -62,29 +59,7 @@ func UserWithContext(c *gin.Context) (user *User, ok bool) {
 
 // AuthCodeCallback Handler for Check auth with role[s] when auth-code callback
 func AuthCodeCallback(roleName ...string) gin.HandlerFunc {
-	hf := func(w http.ResponseWriter, r *http.Request) {
-		it, err := staffio.AuthRequestWithRole(r, roleName...)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			log.Printf("auth with role %v ERR %s", roleName, err)
-			return
-		}
-
-		sess := loadSession(r)
-		user := &User{
-			Uid:  it.Me.Uid,
-			Name: it.Me.Nickname,
-		}
-		user.Refresh()
-		sess.Set(sKeyUser, user)
-		smgr.Save(sess, w)
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Refresh", fmt.Sprintf("0; %s", AdminPath))
-		w.WriteHeader(http.StatusAccepted)
-		w.Write([]byte("Login OK. Please waiting, ok click <a href=" + AdminPath + ">here</a> to go back"))
-		return
-	}
-	return gin.WrapH(staffio.AuthCodeCallbackWrap(http.HandlerFunc(hf)))
+	return gin.WrapH(staffio.AuthCodeCallback(roleName...))
 }
 
 func HandlerShowMe(c *gin.Context) {
