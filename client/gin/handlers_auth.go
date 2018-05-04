@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	staffio "github.com/liut/staffio/client"
@@ -14,43 +13,21 @@ const (
 	sKeyUser = "user"
 )
 
-var (
-	UserLifetime int64 = 3600
-	Guest              = &User{}
+type User = staffio.User
 
+var (
 	AdminPath = "/admin/"
 	LoginPath = "/auth/login"
 
 	LoginHandler = gin.WrapF(staffio.LoginHandler)
 )
 
-type User struct {
-	Uid     string `json:"uid"`
-	Name    string `json:"name"`
-	LastHit int64  `json:"-"`
-}
-
-func (u *User) IsExpired() bool {
-	if UserLifetime == 0 {
-		return false
-	}
-	return u.LastHit+UserLifetime < time.Now().Unix()
-}
-
-func (u *User) needRefresh() bool {
-	return time.Now().Unix()-u.LastHit < UserLifetime/2
-}
-
-func (u *User) Refresh() {
-	u.LastHit = time.Now().Unix()
-}
-
 func AuthMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sess := ginSession(c)
 		if user, ok := sess.Get(sKeyUser).(*User); ok {
 			if !user.IsExpired() {
-				if user.needRefresh() {
+				if user.NeedRefresh() {
 					user.Refresh()
 					sess.Set(sKeyUser, user)
 					smgr.Save(sess, c.Writer)
