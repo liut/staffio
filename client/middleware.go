@@ -44,7 +44,7 @@ func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 			return
 		}
 
-		log.Printf("exchanged token: %s", tok)
+		// log.Printf("exchanged token: %s", tok)
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, TokenKey, tok)
@@ -74,18 +74,22 @@ func TokenFromContext(ctx context.Context) *oauth2.Token {
 }
 
 // AuthRequestWithRole called in AuthCallback
-func AuthRequestWithRole(r *http.Request, role string) (it *InfoToken, err error) {
+func AuthRequestWithRole(r *http.Request, role ...string) (it *InfoToken, err error) {
 	tok := TokenFromContext(r.Context())
 	if tok == nil {
 		err = ErrNoToken
 		return
 	}
-	it, err = RequestInfoToken(tok, role)
+	it, err = RequestInfoToken(tok, role...)
 	if err != nil {
 		return
 	}
-	if !it.Roles.Has(role) {
-		err = ErrNoRole
+	for _, rn := range role {
+		if !it.Roles.Has(rn) {
+			err = ErrNoRole
+			break
+		}
 	}
+
 	return
 }

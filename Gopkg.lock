@@ -44,33 +44,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/garyburd/redigo"
-  packages = ["internal","redis"]
-  revision = "9f3a0116c9f72c5a56f958206a43dc881b502c37"
-
-[[projects]]
-  branch = "master"
   name = "github.com/getsentry/raven-go"
   packages = ["."]
   revision = "97c72035b621c19143a3485ff9cd2e588ddeb376"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/gin-contrib/sse"
-  packages = ["."]
-  revision = "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/gin-gonic/contrib"
-  packages = ["sentry","sessions"]
-  revision = "d4fc5a96cc0d29cb0e862bb1312dd6f4fedfcaee"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/gin-gonic/gin"
-  packages = [".","binding","render"]
-  revision = "65a6dd46a50bd435597b5bcababd1b2a811c9073"
 
 [[projects]]
   branch = "master"
