@@ -16,7 +16,8 @@ type User = staffio.User
 
 var (
 	LoginHandler = gin.WrapF(staffio.LoginHandler)
-	LoginPath    = staffio.LoginPath
+	SetLoginPath = staffio.SetLoginPath
+	SetAdminPath = staffio.SetAdminPath
 )
 
 func AuthMiddleware(redirect bool) gin.HandlerFunc {
@@ -36,7 +37,7 @@ func AuthMiddleware(redirect bool) gin.HandlerFunc {
 		}
 
 		if redirect {
-			c.Redirect(http.StatusFound, LoginPath)
+			c.Redirect(http.StatusFound, staffio.LoginPath)
 			c.Abort()
 			return
 		}

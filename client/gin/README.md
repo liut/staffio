@@ -19,8 +19,8 @@ func main() {
 
 	router := gin.Default()
 	loginPath := "/auth/login"
-	staffiogin.LoginPath = loginPath
-	staffiogin.AdminPath = "/admin"
+	staffiogin.SetLoginPath(loginPath)
+	staffiogin.SetAdminPath("/admin")
 
 	router.GET(loginPath, staffiogin.LoginHandler)
 	router.GET("/auth/callback", staffiogin.AuthCodeCallback("admin"))

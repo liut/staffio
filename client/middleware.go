@@ -25,6 +25,14 @@ const (
 	UserKey
 )
 
+func SetLoginPath(path string) {
+	LoginPath = path
+}
+
+func SetAdminPath(path string) {
+	AdminPath = path
+}
+
 // AuthMiddleware
 func AuthMiddleware(redirect bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

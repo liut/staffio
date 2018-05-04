@@ -18,8 +18,8 @@ import (
 func main() {
 
 	loginPath := "/auth/login"
-	staffio.LoginPath = loginPath
-	staffio.AdminPath = "/admin"
+	staffio.SetLoginPath(loginPath)
+	staffio.SetAdminPath("/admin")
 
 	http.HandleFunc(loginPath, staffio.LoginHandler)
 	http.Handle("/auth/callback", staffio.AuthCodeCallback("admin"))
