@@ -15,7 +15,7 @@ func ginSession(c *gin.Context) session.Session {
 	if sess, ok := c.Get(sessionKey); ok {
 		return sess.(session.Session)
 	}
-	sess := staffio.SessionFromRequest(c.Request)
+	sess := staffio.SessionLoad(c.Request)
 	c.Set(sessionKey, sess)
 	return sess
 }

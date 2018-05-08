@@ -37,7 +37,7 @@ func SetAdminPath(path string) {
 func AuthMiddleware(redirect bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hf := func(w http.ResponseWriter, r *http.Request) {
-			sess := SessionFromRequest(r)
+			sess := SessionLoad(r)
 			if user, ok := sess.Get(SessKeyUser).(*User); ok {
 				if !user.IsExpired() {
 					if user.NeedRefresh() {
@@ -83,7 +83,7 @@ func AuthCodeCallback(roleName ...string) http.Handler {
 			return
 		}
 
-		sess := SessionFromRequest(r)
+		sess := SessionLoad(r)
 		user := &User{
 			Uid:  it.Me.Uid,
 			Name: it.Me.Nickname,

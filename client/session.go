@@ -11,24 +11,19 @@ const (
 )
 
 var (
-	smgr session.Manager
-
 	SessionIDCookieName = "_sess"
 )
 
-func init() {
-	SetupSessionStore(session.NewInMemStore())
-}
-
 func SetupSessionStore(store session.Store) {
-	smgr = session.NewCookieManagerOptions(store, &session.CookieMngrOptions{
+	session.Global.Close()
+	session.Global = session.NewCookieManagerOptions(store, &session.CookieMngrOptions{
 		SessIDCookieName: SessionIDCookieName,
 		AllowHTTP:        true,
 	})
 }
 
-func SessionFromRequest(r *http.Request) session.Session {
-	sess := smgr.Load(r)
+func SessionLoad(r *http.Request) session.Session {
+	sess := session.Global.Load(r)
 	if sess == nil {
 		sess = session.NewSession()
 	}
@@ -36,5 +31,5 @@ func SessionFromRequest(r *http.Request) session.Session {
 }
 
 func SessionSave(sess session.Session, w http.ResponseWriter) {
-	smgr.Save(sess, w)
+	session.Global.Save(sess, w)
 }

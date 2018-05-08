@@ -84,10 +84,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/getsentry/raven-go"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/gin-gonic/contrib"
 
 [[constraint]]

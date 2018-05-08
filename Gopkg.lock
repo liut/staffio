@@ -44,12 +44,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/getsentry/raven-go"
-  packages = ["."]
-  revision = "97c72035b621c19143a3485ff9cd2e588ddeb376"
-
-[[projects]]
-  branch = "master"
   name = "github.com/go-ldap/ldap"
   packages = ["."]
   revision = "95ede1266b237bf8e9aa5dce0b3250e51bfefe66"
