@@ -14,6 +14,10 @@ var (
 	SessionIDCookieName = "_sess"
 )
 
+func init() {
+	SetupSessionStore(session.NewInMemStore())
+}
+
 func SetupSessionStore(store session.Store) {
 	session.Global.Close()
 	session.Global = session.NewCookieManagerOptions(store, &session.CookieMngrOptions{

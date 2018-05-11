@@ -104,16 +104,19 @@ func AuthCodeCallback(roleName ...string) http.Handler {
 func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// verify state value.
-		stateCookie, err := r.Cookie(cKeyState)
-		if err != nil {
-			log.Printf("cookie not found: %s", cKeyState)
+		sess := SessionLoad(r)
+		var state string
+		v := sess.Get(cKeyState)
+		if v == nil {
+			log.Printf("last state not found: %s", cKeyState)
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		if stateCookie.Value != r.FormValue("state") {
-			log.Printf("Invalid state:\n%s\n%s", stateCookie.Value, r.FormValue("state"))
+		state = v.(string)
+		if state != r.FormValue("state") {
+			log.Printf("Invalid state:\n%s\n%s", state, r.FormValue("state"))
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("invalid state: " + stateCookie.Value))
+			w.Write([]byte("invalid state: " + state))
 			return
 		}
 

@@ -66,12 +66,9 @@ func Setup(redirectURL, clientID, clientSecret string, scopes []string) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	state := randToken()
-	http.SetCookie(w, &http.Cookie{
-		Name:     cKeyState,
-		Value:    state,
-		Path:     "/",
-		HttpOnly: true,
-	})
+	sess := SessionLoad(r)
+	sess.Set(cKeyState, state)
+	SessionSave(sess, w)
 	location := GetAuthCodeURL(state)
 	w.Header().Set("refresh", fmt.Sprintf("1; %s", location))
 	w.Write([]byte("<html><title>Staffio</title> <body style='padding: 2em;'> <p>Waiting...</p> <a href='" +
