@@ -23,7 +23,12 @@ func (u *User) IsExpired() bool {
 }
 
 func (u *User) NeedRefresh() bool {
-	return time.Now().Unix()-u.LastHit < UserLifetime/2
+	gash := time.Now().Unix() - u.LastHit
+	if UserLifetime == 0 || gash > UserLifetime { // expired
+		return false
+	}
+
+	return gash < UserLifetime && gash > UserLifetime/2
 }
 
 func (u *User) Refresh() {

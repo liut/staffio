@@ -67,8 +67,8 @@ func UserFromContext(ctx context.Context) *User {
 	if ctx == nil {
 		return nil
 	}
-	if tok, ok := ctx.Value(UserKey).(*User); ok {
-		return tok
+	if obj, ok := ctx.Value(UserKey).(*User); ok {
+		return obj
 	}
 	return nil
 }
