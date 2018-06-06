@@ -10,7 +10,6 @@ import (
 
 var (
 	once       sync.Once
-	smgr       session.Manager
 	sessionKey = "gin-session"
 )
 
@@ -41,16 +40,4 @@ func ginSession(c *gin.Context) session.Session {
 	sess := SessionLoad(c.Request)
 	c.Set(sessionKey, sess)
 	return sess
-}
-
-func (s *server) sessionsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		sess := ginSession(c)
-		defer func() {
-			if sess.Changed() {
-				smgr.Save(sess, c.Writer)
-			}
-		}()
-		c.Next()
-	}
 }

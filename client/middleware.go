@@ -114,7 +114,7 @@ func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 		}
 		state = v.(string)
 		if state != r.FormValue("state") {
-			log.Printf("Invalid state:\n%s\n%s", state, r.FormValue("state"))
+			log.Printf("Invalid state at %s:\n%s\n%s", r.RequestURI, state, r.FormValue("state"))
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("invalid state: " + state))
 			return
