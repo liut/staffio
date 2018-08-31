@@ -42,7 +42,7 @@ func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 	}
 }
 
-func AuthAdminMiddleware() gin.HandlerFunc {
+func (s *server) authAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, exist := c.Get(kAuthUser)
 		if !exist {
@@ -51,9 +51,10 @@ func AuthAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 		user := v.(*User)
-		if !user.IsKeeper() {
+		if !s.IsKeeper(user.Uid) {
 			c.AbortWithStatus(http.StatusForbidden)
 			c.Abort()
+			return
 		}
 	}
 }

@@ -48,25 +48,25 @@ func (s *server) StrapRouter() {
 	gr.GET("/info/:topic", s.oauth2Info)
 	gr.POST("/info/:topic", s.oauth2Info)
 
-	keeper := authed.Group("/dust", AuthAdminMiddleware())
+	keeper := authed.Group("/dust", s.authAdminMiddleware())
 	keeper.GET("/clients", s.clientsForm)
 	keeper.POST("/clients", s.clientsPost)
 	keeper.GET("/scopes", s.scopesForm)
 	keeper.GET("/status/:topic", s.handleStatus)
 	keeper.GET("/groups", s.groupList)
 
-	gr.GET("/article/:id", articleView)
-	keeper.GET("/articles", articleForm)
-	keeper.POST("/articles", articlePost)
+	gr.GET("/article/:id", s.articleView)
+	keeper.GET("/articles", s.articleForm)
+	keeper.POST("/articles", s.articlePost)
 
-	keeper.GET("/links", linksForm)
-	keeper.POST("/links", linksPost)
+	keeper.GET("/links", s.linksForm)
+	keeper.POST("/links", s.linksPost)
 
 	gr.GET("/cas/logout", casLogout)
 	gr.GET("/validate", s.casValidateV1)
 	gr.GET("/serviceValidate", s.casValidateV2)
 
-	gr.GET("/", welcome)
+	gr.GET("/", s.welcome)
 
 	{ // for new lcgc/staff only
 		gr.GET("/api/me", s.me)
@@ -91,7 +91,7 @@ func (s *server) StrapRouter() {
 		api.GET("/teams", s.teamListByRole)
 		api.POST("/team/member", s.teamMemberOp)
 
-		apiMan := api.Group("/", AuthAdminMiddleware())
+		apiMan := api.Group("/", s.authAdminMiddleware())
 		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
 		apiMan.POST("/weekly/report/ignore/add", s.weeklyIgnoreAdd)
 		apiMan.POST("/weekly/report/ignore/del", s.weeklyIgnoreRemove)

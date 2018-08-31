@@ -21,10 +21,6 @@ var (
 	debug = Debug("staffio:web")
 )
 
-func IsKeeper(uid string) bool {
-	return Default().service.InGroup("keeper", uid)
-}
-
 type server struct {
 	router  *gin.Engine
 	service backends.Servicer

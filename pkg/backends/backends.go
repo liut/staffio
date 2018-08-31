@@ -45,6 +45,7 @@ func (s *serviceImpl) InGroup(gname, uid string) bool {
 		log.Printf("GetGroup %s ERR %s", gname, err)
 		return false
 	}
+	// log.Printf("check uid %s in %v", uid, g)
 	return g.Has(uid)
 }
 

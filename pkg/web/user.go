@@ -53,10 +53,6 @@ func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
 }
 
-func (u *User) IsKeeper() bool {
-	return IsKeeper(u.Uid)
-}
-
 func UserFromStaff(staff *models.Staff) *User {
 	return &User{
 		Uid:  staff.Uid,

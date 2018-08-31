@@ -59,6 +59,6 @@ var (
 	etGroup  = NewEentryType("cn", "groupOfNames", "cn", "member")
 	etPeople = NewEentryType("uid", "inetOrgPerson",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
-		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp",
+		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp", "jpegPhoto",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 )

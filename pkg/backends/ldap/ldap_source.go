@@ -350,6 +350,9 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		}
 	}
+	if blob := entry.GetRawAttributeValue("jpegPhoto"); len(blob) > 0 {
+		u.JpegPhoto = blob
+	}
 	return
 }
 

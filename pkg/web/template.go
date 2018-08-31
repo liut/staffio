@@ -14,10 +14,6 @@ import (
 var (
 	cachedTemplates = map[string]*template.Template{}
 	cachedMutex     sync.Mutex
-	funcs           = template.FuncMap{
-		"urlFor":     UrlFor,
-		"avatarHtml": AvatarHTML,
-	}
 
 	avatarReplacer = strings.NewReplacer("/0", "/60")
 )
@@ -38,8 +34,8 @@ func markReferer(c *gin.Context) {
 	c.SetCookie(kReferer, c.Request.RequestURI, 10, "/", "", false, true)
 }
 
-func Render(c *gin.Context, name string, data interface{}) (err error) {
-	instance := T(name)
+func (s *server) Render(c *gin.Context, name string, data interface{}) (err error) {
+	instance := s.tpl(name)
 	if m, ok := data.(map[string]interface{}); ok {
 		m["base"] = base
 		m["appVersion"] = settings.Version()
@@ -63,7 +59,7 @@ func Render(c *gin.Context, name string, data interface{}) (err error) {
 	return
 }
 
-func T(name string) *template.Template {
+func (s *server) tpl(name string) *template.Template {
 	cachedMutex.Lock()
 	defer cachedMutex.Unlock()
 
@@ -71,7 +67,11 @@ func T(name string) *template.Template {
 		return t
 	}
 
-	t := template.New("_base.html").Funcs(funcs)
+	t := template.New("_base.html").Funcs(template.FuncMap{
+		"urlFor":     UrlFor,
+		"avatarHtml": AvatarHTML,
+		"isKeeper":   s.IsKeeper,
+	})
 	t = template.Must(t.ParseFiles(
 		filepath.Join(settings.Root, "templates/_base.html"),
 		filepath.Join(settings.Root, "templates", name),
@@ -81,12 +81,10 @@ func T(name string) *template.Template {
 	return t
 }
 
+// AvatarHTML 生成头像的HTML标签，目前仅支持微信头像
 func AvatarHTML(s string) template.HTML {
 	if len(s) == 0 {
 		return ""
 	}
-	if strings.HasSuffix(s, "/") {
-		s = s + "0"
-	}
-	return template.HTML("<img class=avatar src=\"http://p.qlogo.cn" + avatarReplacer.Replace(s) + "\">")
+	return template.HTML("<img class=avatar src=\"" + s + "\">")
 }

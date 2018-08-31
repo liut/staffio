@@ -14,7 +14,7 @@ func (s *server) handleStatus(c *gin.Context) {
 
 	switch c.Param("topic") {
 	case "monitor":
-		Render(c, "dust_status.html", map[string]interface{}{
+		s.Render(c, "dust_status.html", map[string]interface{}{
 			"SysStatus": keeper.CurrentSystemStatus(),
 			"ctx":       c,
 		})

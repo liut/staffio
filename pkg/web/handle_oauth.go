@@ -32,7 +32,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 					c.AbortWithError(404, err)
 					return
 				}
-				Render(c, "authorize.html", map[string]interface{}{
+				s.Render(c, "authorize.html", map[string]interface{}{
 					"link":          r.RequestURI,
 					"response_type": ar.Type,
 					"scopes":        scopes,

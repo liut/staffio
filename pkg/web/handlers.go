@@ -25,7 +25,7 @@ func (s *server) loginForm(c *gin.Context) {
 		c.Redirect(302, service+"?ticket="+st.Value)
 		return
 	}
-	Render(c, "login.html", map[string]interface{}{
+	s.Render(c, "login.html", map[string]interface{}{
 		"ctx":     c,
 		"service": service,
 	})
@@ -64,6 +64,7 @@ func (s *server) loginPost(c *gin.Context) {
 	//store the user id in the values and redirect to welcome
 	user := UserFromStaff(staff)
 	user.Refresh()
+	log.Printf("login ok %v", user)
 	sess := ginSession(c)
 	sess.Set(kAuthUser, user)
 	user.toResponse(c.Writer)
@@ -98,7 +99,7 @@ func (s *server) me(c *gin.Context) {
 		apiError(c, 1, nil)
 		return
 	}
-	if user.IsKeeper() {
+	if s.IsKeeper(user.Uid) {
 		user.Privileges = "admin"
 	}
 	apiOk(c, user, 0)
@@ -115,7 +116,7 @@ func (s *server) logout(c *gin.Context) {
 }
 
 func (s *server) passwordForm(c *gin.Context) {
-	Render(c, "password.html", map[string]interface{}{
+	s.Render(c, "password.html", map[string]interface{}{
 		"ctx": c,
 	})
 }
@@ -142,7 +143,7 @@ func (s *server) passwordChange(c *gin.Context) {
 }
 
 func (s *server) passwordForgotForm(c *gin.Context) {
-	Render(c, "password_forgot.html", map[string]interface{}{
+	s.Render(c, "password_forgot.html", map[string]interface{}{
 		"ctx": c,
 	})
 }
@@ -204,7 +205,7 @@ func (s *server) passwordResetForm(c *gin.Context) {
 		// c.Halt(http.StatusBadRequest, fmt.Sprintf("Invalid Token: %s", err))
 		return
 	}
-	Render(c, "password_reset.html", map[string]interface{}{
+	s.Render(c, "password_reset.html", map[string]interface{}{
 		"ctx":   c,
 		"token": token,
 		"uid":   uid,
@@ -249,7 +250,7 @@ func (s *server) profileForm(c *gin.Context) {
 		return
 	}
 
-	Render(c, "profile.html", map[string]interface{}{
+	s.Render(c, "profile.html", map[string]interface{}{
 		"ctx":   c,
 		"staff": staff,
 	})
