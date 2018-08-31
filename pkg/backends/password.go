@@ -61,11 +61,6 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	secret := []byte(settings.PwdSecret)
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(staff, token)
-	if err == nil {
-		log.Printf("send reset email of %q OK", staff.Email)
-	} else {
-		log.Printf("send reset email ERR %s", err)
-	}
 	return
 }
 
@@ -157,12 +152,23 @@ func InitSMTP() {
 }
 
 func sendResetEmail(staff *models.Staff, token string) error {
+	if !settings.SMTP.Enabled {
+		log.Print("smtp is disabled")
+		return nil
+	}
 	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
-	return csmtp.SendMail("Password reset request", message, staff.Email)
+	err := csmtp.SendMail("Password reset request", message, staff.Email)
+	if err != nil {
+		log.Printf("send reset email ERR %s", err)
+		return err
+	}
+	log.Printf("send reset email of %q OK", staff.Email)
+	return nil
 }
 
 const (
-	tplPasswordReset = `Dear %s:
-	<br/><br/>
-	To reset your password, pls <a href="%s/password/reset?rt=%s">click here</a>.`
+	// tplPasswordReset = `Dear %s: <br/><br/>
+	// To reset your password, pls <a href="%s/password/reset?rt=%s">click here</a>.`
+	tplPasswordReset = `Dear %s: <br/><br/>
+	To reset your password, pls <a href="%s/reset?token=%s">click here</a>.`
 )

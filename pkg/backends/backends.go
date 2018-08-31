@@ -14,7 +14,14 @@ var (
 )
 
 // save staff
-func (s *serviceImpl) StoreStaff(staff *models.Staff) error {
+func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
+	if staff.EmployeeNumber < 1 {
+		newId, err := NextStaffID()
+		if err != nil {
+			return err
+		}
+		staff.EmployeeNumber = newId
+	}
 	isNew, err := s.Save(staff)
 	if err == nil {
 		if isNew {
@@ -27,7 +34,7 @@ func (s *serviceImpl) StoreStaff(staff *models.Staff) error {
 			}
 		}
 	} else {
-		log.Printf("StoreStaff %s ERR %s", staff.Uid, err)
+		log.Printf("SaveStaff %s ERR %s", staff.Uid, err)
 	}
 	return err
 }
@@ -46,6 +53,14 @@ func (s *serviceImpl) ProfileModify(uid, password string, staff *models.Staff) e
 		return fmt.Errorf("mismatch uid %s and %s", uid, staff.Uid)
 	}
 	return s.ModifyBySelf(uid, password, staff)
+}
+
+// 返回下一个员工ID
+func NextStaffID() (eid int, err error) {
+	err = withDbQuery(func(db dber) error {
+		return db.Get(&eid, "SELECT nextval('staff_id_seq')")
+	})
+	return
 }
 
 func WriteUserLog(uid, subject, message string) error {

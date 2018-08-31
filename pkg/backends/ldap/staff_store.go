@@ -2,6 +2,8 @@ package ldap
 
 import (
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/go-ldap/ldap"
 
@@ -13,7 +15,7 @@ var (
 	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
 )
 
-func (ls *ldapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
+func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 	uid := staff.Uid
 	err = ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
@@ -25,8 +27,9 @@ func (ls *ldapSource) StoreStaff(staff *models.Staff) (isNew bool, err error) {
 	if err == nil {
 		// :update
 		mr := makeModifyRequest(dn, entry, staff)
-		if staff.EmployeeNumber != entry.GetAttributeValue("employeeNumber") {
-			mr.Replace("employeeNumber", []string{staff.EmployeeNumber})
+		eid_str := strconv.Itoa(staff.EmployeeNumber)
+		if staff.EmployeeNumber > 0 && eid_str != entry.GetAttributeValue("employeeNumber") {
+			mr.Replace("employeeNumber", []string{eid_str})
 		}
 		if staff.EmployeeType != entry.GetAttributeValue("employeeType") {
 			mr.Replace("employeeType", []string{staff.EmployeeType})
@@ -67,8 +70,8 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 		ar.Attribute("mobile", []string{staff.Mobile})
 	}
 
-	if staff.EmployeeNumber != "" {
-		ar.Attribute("employeeNumber", []string{staff.EmployeeNumber})
+	if staff.EmployeeNumber > 0 {
+		ar.Attribute("employeeNumber", []string{strconv.Itoa(staff.EmployeeNumber)})
 	}
 	if staff.EmployeeType != "" {
 		ar.Attribute("employeeType", []string{staff.EmployeeType})
@@ -84,6 +87,9 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 	}
 	if staff.AvatarPath != "" {
 		ar.Attribute("avatarPath", []string{staff.AvatarPath})
+	}
+	if staff.JoinDate != "" {
+		ar.Attribute("dateOfJoin", []string{staff.JoinDate})
 	}
 
 	// if staff.Passwd != "" {
@@ -105,27 +111,28 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 	if staff.CommonName != entry.GetAttributeValue("cn") {
 		mr.Replace("cn", []string{staff.GetCommonName()})
 	}
-	if staff.Nickname != "" && staff.Nickname != entry.GetAttributeValue("displayName") {
+	if len(staff.Nickname) > 0 && staff.Nickname != entry.GetAttributeValue("displayName") {
 		mr.Replace("displayName", []string{staff.Nickname})
 	}
-	if staff.Email != entry.GetAttributeValue("mail") {
+	if len(staff.Email) > 0 && staff.Email != entry.GetAttributeValue("mail") {
 		mr.Replace("mail", []string{staff.Email})
 	}
-	if staff.Mobile != entry.GetAttributeValue("mobile") {
+	if len(staff.Mobile) > 0 && staff.Mobile != entry.GetAttributeValue("mobile") {
 		mr.Replace("mobile", []string{staff.Mobile})
 	}
-	if staff.AvatarPath != entry.GetAttributeValue("avatarPath") {
+	if len(staff.AvatarPath) > 0 && staff.AvatarPath != entry.GetAttributeValue("avatarPath") {
 		mr.Replace("avatarPath", []string{staff.AvatarPath})
 	}
 	if staff.Gender != models.Unknown {
 		mr.Replace("gender", []string{staff.Gender.String()[0:1]})
 	}
-	if staff.Birthday != entry.GetAttributeValue("dateOfBirth") {
+	if len(staff.Birthday) > 0 && staff.Birthday != entry.GetAttributeValue("dateOfBirth") {
 		mr.Replace("dateOfBirth", []string{staff.Birthday})
 	}
-	if staff.Description != entry.GetAttributeValue("description") {
+	if len(staff.Description) > 0 && staff.Description != entry.GetAttributeValue("description") {
 		mr.Replace("description", []string{staff.Description})
 	}
+	mr.Replace("modifiedTime", []string{time.Now().Format(timeLayout)})
 	return mr
 }
 

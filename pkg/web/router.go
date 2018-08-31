@@ -27,7 +27,7 @@ func (s *server) StrapRouter() {
 	gr.GET("/password/reset", s.passwordResetForm)
 	gr.POST("/password/reset", s.passwordReset)
 
-	authed := gr.Group("/", AuthUserMiddleware())
+	authed := gr.Group("/", AuthUserMiddleware(true))
 	authed.GET("/password", s.passwordForm)
 	authed.POST("/password", s.passwordChange)
 
@@ -68,6 +68,39 @@ func (s *server) StrapRouter() {
 
 	gr.GET("/", welcome)
 
+	{ // for new lcgc/staff only
+		gr.GET("/api/me", s.me)
+		gr.POST("/api/verify", s.me)
+		gr.POST("/api/login", s.loginPost)
+		gr.POST("/api/logout", s.logout)
+		gr.POST("/api/password/forgot", s.passwordForgot)
+		gr.POST("/api/password/reset", s.passwordReset)
+	}
+
+	api := gr.Group("/api", AuthUserMiddleware(false))
+	{
+		api.POST("/weekly/report/add", s.weeklyReportAdd)
+		api.POST("/weekly/report/update", s.weeklyReportUpdate)
+		api.POST("/weekly/report/up", s.weeklyReportUp)
+		api.POST("/weekly/report/all", s.weeklyReportList)
+		api.POST("/weekly/report/self", s.weeklyReportListSelf)
+		api.POST("/weekly/problems", s.weeklyProblemList)
+		api.POST("/weekly/problem/add", s.weeklyProblemAdd)
+		api.POST("/weekly/problem/update", s.weeklyProblemUpdate)
+		api.GET("/staffs", s.staffList)
+		api.GET("/teams", s.teamListByRole)
+		api.POST("/team/member", s.teamMemberOp)
+
+		apiMan := api.Group("/", AuthAdminMiddleware())
+		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
+		apiMan.POST("/weekly/report/ignore/add", s.weeklyIgnoreAdd)
+		apiMan.POST("/weekly/report/ignore/del", s.weeklyIgnoreRemove)
+		apiMan.GET("/weekly/report/ignores", s.weeklyIgnoreList)
+		apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
+		apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
+		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
+	}
+
 	assets := newAssets(settings.Root, settings.FS)
 	assets.Base = base
 	ah := gin.WrapH(assets.GetHandler())
@@ -84,4 +117,28 @@ func IsAjax(r *http.Request) bool {
 
 func UrlFor(path string) string {
 	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
+}
+
+func apiError(c *gin.Context, status int, message interface{}) {
+	resp := map[string]interface{}{
+		"status": status,
+	}
+	switch ret := message.(type) {
+	case error:
+		resp["message"] = ret.Error()
+	default:
+		resp["message"] = ret
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func apiOk(c *gin.Context, data interface{}, count int) {
+	res := map[string]interface{}{"status": 0}
+	if data != nil {
+		res["data"] = data
+	}
+	if count > 0 {
+		res["count"] = count
+	}
+	c.JSON(http.StatusOK, res)
 }

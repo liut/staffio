@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/go-ldap/ldap"
 	. "github.com/wealthworks/go-debug"
@@ -304,20 +306,50 @@ func (ls *ldapSource) ListPaged(limit int) (staffs []*models.Staff) {
 func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 	// log.Printf("entry: %v", entry)
 	u = &models.Staff{
-		Uid:            entry.GetAttributeValue("uid"),
-		Surname:        entry.GetAttributeValue("sn"),
-		GivenName:      entry.GetAttributeValue("givenName"),
-		CommonName:     entry.GetAttributeValue("cn"),
-		Email:          entry.GetAttributeValue("mail"),
-		Nickname:       entry.GetAttributeValue("displayName"),
-		Mobile:         entry.GetAttributeValue("mobile"),
-		EmployeeNumber: entry.GetAttributeValue("employeeNumber"),
-		EmployeeType:   entry.GetAttributeValue("employeeType"),
-		Birthday:       entry.GetAttributeValue("dateOfBirth"),
-		AvatarPath:     entry.GetAttributeValue("avatarPath"),
-		Description:    entry.GetAttributeValue("description"),
+		Uid:          entry.GetAttributeValue("uid"),
+		Surname:      entry.GetAttributeValue("sn"),
+		GivenName:    entry.GetAttributeValue("givenName"),
+		CommonName:   entry.GetAttributeValue("cn"),
+		Email:        entry.GetAttributeValue("mail"),
+		Nickname:     entry.GetAttributeValue("displayName"),
+		Mobile:       entry.GetAttributeValue("mobile"),
+		EmployeeType: entry.GetAttributeValue("employeeType"),
+		Birthday:     entry.GetAttributeValue("dateOfBirth"),
+		AvatarPath:   entry.GetAttributeValue("avatarPath"),
+		Description:  entry.GetAttributeValue("description"),
+		JoinDate:     entry.GetAttributeValue("dateOfJoin"),
+		IDCN:         entry.GetAttributeValue("idcnNumber"),
 	}
 	(&u.Gender).UnmarshalText(entry.GetRawAttributeValue("gender"))
+	var err error
+	if str := entry.GetAttributeValue("employeeNumber"); str != "" {
+		u.EmployeeNumber, err = strconv.Atoi(str)
+		if err != nil {
+			log.Printf("invalid employee number %q, ERR %s", str, err)
+		}
+	}
+	if str := entry.GetAttributeValue("createdTime"); str != "" {
+		u.Created, err = time.Parse(timeLayout, str)
+		if err != nil {
+			log.Printf("invalid time %s, ERR %s", str, err)
+		}
+	} else if str := entry.GetAttributeValue("createTimestamp"); str != "" {
+		u.Created, err = time.Parse(timeLayout, str)
+		if err != nil {
+			log.Printf("invalid time %s, ERR %s", str, err)
+		}
+	}
+	if str := entry.GetAttributeValue("modifiedTime"); str != "" {
+		u.Updated, err = time.Parse(timeLayout, str)
+		if err != nil {
+			log.Printf("invalid time %s, ERR %s", str, err)
+		}
+	} else if str := entry.GetAttributeValue("modifyTimestamp"); str != "" {
+		u.Updated, err = time.Parse(timeLayout, str)
+		if err != nil {
+			log.Printf("invalid time %s, ERR %s", str, err)
+		}
+	}
 	return
 }
 

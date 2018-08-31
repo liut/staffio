@@ -1,0 +1,53 @@
+package weekly
+
+import (
+	"encoding/json"
+	"time"
+)
+
+type TeamRoleType int
+
+const (
+	RoleNothing TeamRoleType = iota
+	RoleMember
+	RoleManager
+)
+
+type TeamOpType int
+
+const (
+	TeamOpAdd    TeamOpType = 1 + iota // add
+	TeamOpRemove                       // remove
+)
+
+type TeamOpParam struct {
+	Op     TeamOpType `json:"op" valid:"[1:2]"`
+	TeamId int        `json:"group_id" valid:"required"`
+	Uids   []string   `json:"staff_uids" valid:"required"`
+}
+
+type TeamStore interface {
+	// Get 取一个
+	Get(id int) (*Team, error)
+	// All 查询全部数据
+	All(role TeamRoleType) (data []*Team, err error)
+	// Store 保存
+	Store(id int, name, leader string, members []string) error
+	// Add members
+	AddMember(id int, uids ...string) error
+	// Remove members
+	RemoveMember(id int, uids ...string) error
+	// Delete 删除 Team
+	Delete(id int) error
+}
+
+type Team struct {
+	Id        int64           `json:"id"`
+	Name      string          `json:"name"`
+	Leader    string          `json:"leader"`
+	Members   json.RawMessage `json:"members"`
+	Created   time.Time       `json:"created,omitempty" db:"created"`
+	Updated   time.Time       `json:"updated,omitempty" db:"updated,omitempty"`
+	StaffUid  string          `json:"staff_uid,omitempty" db:"staff_uid"`
+	StaffName string          `json:"staff_name,omitempty" db:"-"`
+}

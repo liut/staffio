@@ -9,10 +9,11 @@ import (
 )
 
 type User struct {
-	Uid     string `json:"uid"`
-	Name    string `json:"name"`
-	LastHit int64  `json:"-"`
-	ver     uint8
+	Uid        string `json:"uid"`
+	Name       string `json:"name"`
+	Privileges string `json:"privileges"`
+	LastHit    int64  `json:"-"`
+	ver        uint8
 }
 
 const ver uint8 = 0

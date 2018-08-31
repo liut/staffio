@@ -32,20 +32,28 @@ func (s *server) loginForm(c *gin.Context) {
 }
 
 func (s *server) loginPost(c *gin.Context) {
-	req := c.Request
-	uid, password := req.PostFormValue("username"), req.PostFormValue("password")
-	service := req.FormValue("service")
-	referer := req.FormValue("referer")
+	var param loginParam
 	res := make(osin.ResponseData)
-	if err := s.service.Authenticate(uid, password); err != nil {
+	if err := c.Bind(&param); err != nil {
+		res["ok"] = false
+		res["error"] = err.Error()
+		res["status"] = ERROR_PARAM
+		c.JSON(400, res)
+		return
+	}
+	// req := c.Request
+	// uid, password := req.PostFormValue("username"), req.PostFormValue("password")
 
+	if err := s.service.Authenticate(param.Username, param.Password); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
+		res["status"] = ERROR_PARAM
+		res["message"] = "Invalid Username/Password"
 		c.JSON(http.StatusOK, res)
 		return
 	}
 
-	staff, err := s.service.Get(uid)
+	staff, err := s.service.Get(param.Username)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Load user failed"}
@@ -60,16 +68,17 @@ func (s *server) loginPost(c *gin.Context) {
 	sess.Set(kAuthUser, user)
 	user.toResponse(c.Writer)
 	SessionSave(sess, c.Writer)
+	referer := param.Referer
 	res["ok"] = true
-	if service != "" {
-		st := cas.NewTicket("ST", service, user.Uid, true)
+	if param.Service != "" {
+		st := cas.NewTicket("ST", param.Service, user.Uid, true)
 		err = s.service.SaveTicket(st)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 		NewTGC(c, st)
-		res["referer"] = service + "?ticket=" + st.Value
+		res["referer"] = param.Service + "?ticket=" + st.Value
 		log.Printf("ref: %q", res["referer"])
 	} else {
 		if referer == "" {
@@ -77,13 +86,31 @@ func (s *server) loginPost(c *gin.Context) {
 		}
 		res["referer"] = referer
 	}
+	res["status"] = 0
 	c.JSON(http.StatusOK, res)
 	// http.Redirect(c.Writer, req, reverse("welcome"), http.StatusSeeOther)
+}
+
+// for staff/verify
+func (s *server) me(c *gin.Context) {
+	user, err := UserFromRequest(c.Request)
+	if err != nil {
+		apiError(c, 1, nil)
+		return
+	}
+	if user.IsKeeper() {
+		user.Privileges = "admin"
+	}
+	apiOk(c, user, 0)
 }
 
 func (s *server) logout(c *gin.Context) {
 	signout(c.Writer)
 	DeleteTGC(c)
+	if IsAjax(c.Request) {
+		apiOk(c, true, 0)
+		return
+	}
 	c.Redirect(http.StatusSeeOther, "/")
 }
 
@@ -121,35 +148,44 @@ func (s *server) passwordForgotForm(c *gin.Context) {
 }
 
 func (s *server) passwordForgot(c *gin.Context) {
-	req := c.Request
-	uid, email, mobile := req.FormValue("username"), req.FormValue("email"), req.FormValue("mobile")
+	var param forgotParam
 	res := make(osin.ResponseData)
-	staff, err := s.service.Get(uid)
+	if err := c.Bind(&param); err != nil {
+		res["ok"] = false
+		res["error"] = err.Error()
+		res["status"] = ERROR_PARAM
+		c.JSON(400, res)
+		return
+	}
+
+	staff, err := s.service.Get(param.Username)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username", "field": "username"}
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	if staff.Email != email {
+	if staff.Email != param.Email {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "No such email address", "field": "email"}
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	if staff.Mobile != mobile {
+	if staff.Mobile != param.Mobile {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	err = s.service.PasswordForgot(common.AtEmail, email, uid)
+	err = s.service.PasswordForgot(common.AtEmail, param.Email, param.Username)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "username"}
 	} else {
 		res["ok"] = true
+		res["status"] = 0
 	}
+
 	c.JSON(http.StatusOK, res)
 }
 
@@ -176,27 +212,31 @@ func (s *server) passwordResetForm(c *gin.Context) {
 }
 
 func (s *server) passwordReset(c *gin.Context) {
-	req := c.Request
-
-	token := req.FormValue("rt")
-	if token == "" {
-		c.AbortWithStatus(http.StatusBadRequest)
+	var param resetParam
+	res := make(osin.ResponseData)
+	if err := c.Bind(&param); err != nil {
+		res["ok"] = false
+		res["error"] = err.Error()
+		res["status"] = ERROR_PARAM
+		c.JSON(400, res)
 		return
 	}
-	uid, passwd, passwd2 := req.FormValue("username"), req.FormValue("password"), req.FormValue("password_confirm")
-	res := make(osin.ResponseData)
-	if uid == "" || passwd != passwd2 {
+
+	if param.Password != param.Password2 {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username or Password", "field": "password"}
+		res["status"] = ERROR_PARAM
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	err := s.service.PasswordResetWithToken(uid, token, passwd)
+	err := s.service.PasswordResetWithToken(param.Username, param.Token, param.Password)
 	if err != nil {
 		res["ok"] = false
+		res["status"] = ERROR_DB
 		res["error"] = map[string]string{"message": err.Error(), "field": "password"}
 	} else {
 		res["ok"] = true
+		res["status"] = 0
 	}
 	c.JSON(http.StatusOK, res)
 }

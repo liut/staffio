@@ -46,6 +46,10 @@ func DN(pk, name, parent string) string {
 	return fmt.Sprintf("%s=%s,%s", pk, name, parent)
 }
 
+const (
+	timeLayout = "20060102150405Z"
+)
+
 var (
 	Base   = "dc=mydomain,dc=net"
 	Domain = "mydomain.net"
@@ -55,5 +59,6 @@ var (
 	etGroup  = NewEentryType("cn", "groupOfNames", "cn", "member")
 	etPeople = NewEentryType("uid", "inetOrgPerson",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
+		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 )

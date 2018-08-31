@@ -79,9 +79,9 @@ func (s *LDAPStore) All() (staffs []*models.Staff) {
 
 func (s *LDAPStore) Save(staff *models.Staff) (isNew bool, err error) {
 	for _, ls := range s.sources {
-		isNew, err = ls.StoreStaff(staff)
+		isNew, err = ls.storeStaff(staff)
 		if err != nil {
-			log.Printf("StoreStaff at %s ERR: %s", ls.Addr, err)
+			log.Printf("storeStaff at %s ERR: %s", ls.Addr, err)
 			return
 		}
 	}

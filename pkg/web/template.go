@@ -3,6 +3,7 @@ package web
 import (
 	"html/template"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,11 @@ var (
 	cachedTemplates = map[string]*template.Template{}
 	cachedMutex     sync.Mutex
 	funcs           = template.FuncMap{
-		"urlFor": UrlFor,
+		"urlFor":     UrlFor,
+		"avatarHtml": AvatarHTML,
 	}
+
+	avatarReplacer = strings.NewReplacer("/0", "/60")
 )
 
 const (
@@ -75,4 +79,14 @@ func T(name string) *template.Template {
 	cachedTemplates[name] = t
 
 	return t
+}
+
+func AvatarHTML(s string) template.HTML {
+	if len(s) == 0 {
+		return ""
+	}
+	if strings.HasSuffix(s, "/") {
+		s = s + "0"
+	}
+	return template.HTML("<img class=avatar src=\"http://p.qlogo.cn" + avatarReplacer.Replace(s) + "\">")
 }

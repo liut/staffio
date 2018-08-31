@@ -195,7 +195,7 @@ func (s *server) staffPost(c *gin.Context) {
 			if estaff.Email != "" {
 				staff.Email = estaff.Email
 			}
-			if estaff.EmployeeNumber != "" {
+			if estaff.EmployeeNumber > 0 {
 				staff.EmployeeNumber = estaff.EmployeeNumber
 			}
 			if estaff.EmployeeType != "" {
@@ -217,7 +217,7 @@ func (s *server) staffPost(c *gin.Context) {
 			return
 		}
 
-		err = s.service.StoreStaff(staff)
+		err = s.service.SaveStaff(staff)
 		if err == nil {
 			res["ok"] = true
 			res["referer"] = "/contacts"

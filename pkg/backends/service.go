@@ -7,6 +7,7 @@ import (
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/weekly"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -19,17 +20,21 @@ type Servicer interface {
 	OSIN() OSINStore
 	Ready() error
 	CloseAll()
-	StoreStaff(*models.Staff) error
+	SaveStaff(staff *models.Staff) error
 	InGroup(gn, uid string) bool
 	ProfileModify(uid, password string, staff *models.Staff) error
 	PasswordForgot(at common.AliasType, target, uid string) error
 	PasswordResetTokenVerify(token string) (uid string, err error)
 	PasswordResetWithToken(login, token, passwd string) (err error)
+	Team() weekly.TeamStore
+	Weekly() weekly.WeeklyStore
 }
 
 type serviceImpl struct {
 	*ldap.LDAPStore
-	osinStore *DbStorage
+	osinStore   *DbStorage
+	teamStore   *teamStore
+	weeklyStore *weeklyStore
 }
 
 var _ Servicer = (*serviceImpl)(nil)
@@ -49,8 +54,10 @@ func NewService() Servicer {
 	}
 	// LDAP is a special store
 	return &serviceImpl{
-		LDAPStore: store,
-		osinStore: NewStorage(),
+		LDAPStore:   store,
+		osinStore:   NewStorage(),
+		teamStore:   &teamStore{},
+		weeklyStore: &weeklyStore{},
 	}
 
 }
@@ -66,4 +73,12 @@ func (s *serviceImpl) OSIN() OSINStore {
 func (s *serviceImpl) CloseAll() {
 	s.LDAPStore.Close()
 	s.osinStore.Close()
+}
+
+func (s *serviceImpl) Team() weekly.TeamStore {
+	return s.teamStore
+}
+
+func (s *serviceImpl) Weekly() weekly.WeeklyStore {
+	return s.weeklyStore
 }

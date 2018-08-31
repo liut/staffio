@@ -26,7 +26,7 @@
 		<td>{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
 		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
-		<td>{{ .Name }}</td>
+		<td> {{avatarHtml .AvatarPath }} {{ .Name }}</td>
 	</tr>
 	{{ end }}</tbody>
 </table>

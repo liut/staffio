@@ -19,14 +19,19 @@ const (
 	kAuthUser = "user"
 )
 
-func AuthUserMiddleware() gin.HandlerFunc {
+func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := UserFromRequest(c.Request)
 		if err != nil {
 			log.Printf("user from request ERR %s", err)
-			markReferer(c)
-			c.Redirect(302, UrlFor("login"))
-			c.Abort()
+			if redirect {
+				markReferer(c)
+				c.Redirect(302, UrlFor("login"))
+				c.Abort()
+			} else {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				// apiError(c, ERROR_INTERNAL, err)
+			}
 			return
 		}
 		// log.Printf("got user %q", user.Uid)

@@ -11,6 +11,7 @@ var (
 	EmailCheck  bool
 
 	SMTP struct {
+		Enabled        bool
 		Host           string
 		Port           int
 		SenderName     string
@@ -67,7 +68,7 @@ func init() {
 	fs.StringVar(&LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 
 	fs.StringVar(&HttpListen, "http-listen", "localhost:5000", "bind address and port")
-	fs.StringVar(&BaseURL, "prefix", "http://localhost:5000", "url prefix for self")
+	fs.StringVar(&BaseURL, "baseurl", "http://localhost:5000", "url base for self host")
 	fs.StringVar(&PwdSecret, "password-secret", "very secret", "the secret of password reset")
 	fs.StringVar(&Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Session.Domain, "sess-domain", "", "session domain")
@@ -84,6 +85,7 @@ func init() {
 
 	fs.StringVar(&EmailDomain, "email-domain", "example.net", "default email domain")
 	fs.BoolVar(&EmailCheck, "email-check", false, "check email unseen")
+	fs.BoolVar(&SMTP.Enabled, "smtp-enabled", true, "enable smtp")
 	fs.StringVar(&SMTP.Host, "smtp-host", "", "")
 	fs.IntVar(&SMTP.Port, "smtp-port", 465, "")
 	fs.StringVar(&SMTP.SenderName, "smtp-sender-name", "Notification", "")

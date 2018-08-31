@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
 	PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS staff_id_seq START 1027;
+
 
 CREATE TABLE IF NOT EXISTS articles
 (
