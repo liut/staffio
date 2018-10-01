@@ -49,7 +49,7 @@ func (s *weeklyStore) All(param weekly.ListParam) (data []*weekly.Report, total 
 		return
 	}
 
-	str := `SELECT r.id, r.uid, iso_year, iso_week, content, r.created, r.up_count
+	str := `SELECT r.id, r.uid, iso_year, iso_week, content, r.created, r.updated, r.up_count
 	   FROM weekly_report r LEFT JOIN team_member tm ON tm.uid = r.uid ` +
 		where +
 		param.Sort.Sql() + param.Pager.Sql()
@@ -67,11 +67,11 @@ func (s *weeklyStore) All(param weekly.ListParam) (data []*weekly.Report, total 
 }
 
 // 添加
-func (s *weeklyStore) Add(uid string, content string) (err error) {
+func (s *weeklyStore) Add(uid string, content string) error {
 	now := time.Now()
 	year, week := now.ISOWeek()
 
-	qs := func(db dbTxer) error {
+	return withTxQuery(func(db dbTxer) error {
 		var id int
 		err := db.Get(&id,
 			"SELECT id FROM weekly_report WHERE uid = $1 AND iso_year = $2 AND iso_week = $3", uid, year, week)
@@ -85,11 +85,7 @@ func (s *weeklyStore) Add(uid string, content string) (err error) {
 			return err
 		}
 		return err
-
-	}
-	err = withTxQuery(qs)
-
-	return
+	})
 }
 
 // 更新

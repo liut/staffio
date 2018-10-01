@@ -22,16 +22,16 @@ type weeklyReportAddParam struct {
 }
 
 type weeklyReportUpdateParam struct {
-	Id      int    `json:"id" binding:"required"`
+	ID      int    `json:"id" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }
 
 type weeklyReportUpParam struct {
-	Id int `json:"id" binding:"required"`
+	ID int `json:"id" binding:"required"`
 }
 
 type weeklyReportStatusParam struct {
-	Uid    string        `json:"uid" binding:"required"`
+	UID    string        `json:"uid" binding:"required"`
 	Year   int           `json:"year" `
 	Week   int           `json:"week" `
 	Weeks  []int         `json:"weeks" `
@@ -62,7 +62,7 @@ func (s *server) weeklyReportUpdate(c *gin.Context) {
 	}
 
 	user := UserWithContext(c)
-	obj, err := s.service.Weekly().Get(param.Id)
+	obj, err := s.service.Weekly().Get(param.ID)
 	if err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
@@ -72,7 +72,7 @@ func (s *server) weeklyReportUpdate(c *gin.Context) {
 		return
 	}
 
-	if err := s.service.Weekly().Update(param.Id, param.Content); err != nil {
+	if err := s.service.Weekly().Update(param.ID, param.Content); err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
@@ -87,7 +87,7 @@ func (s *server) weeklyReportUp(c *gin.Context) {
 	}
 
 	user := UserWithContext(c)
-	if err := s.service.Weekly().Applaud(param.Id, user.Uid); err != nil {
+	if err := s.service.Weekly().Applaud(param.ID, user.Uid); err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
@@ -111,6 +111,7 @@ func (s *server) weeklyReportList(c *gin.Context) {
 		for _, staff := range staffs {
 			if staff.Uid == ret[i].Uid {
 				ret[i].Name = staff.GetCommonName()
+				ret[i].Avatar = staff.AvatarUri()
 			}
 		}
 
@@ -168,7 +169,7 @@ func (s *server) weeklyReportStat(c *gin.Context) {
 		apiError(c, ERROR_DB, err)
 		return
 	}
-	all := s.allStaffs()
+	all := s.allStaffs(false)
 	ignores, err := s.service.Weekly().StatusRecords(weekly.WRIgnore)
 	if err != nil {
 		apiError(c, ERROR_DB, err)
@@ -300,7 +301,7 @@ func (s *server) weeklyStatusAdd(c *gin.Context, status weekly.Status) {
 	if len(param.Weeks) > 0 && param.Week == 0 {
 		param.Week = param.Weeks[0]
 	}
-	if err := s.service.Weekly().AddStatus(param.Uid, param.Year, param.Week, status); err != nil {
+	if err := s.service.Weekly().AddStatus(param.UID, param.Year, param.Week, status); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
@@ -313,7 +314,7 @@ func (s *server) weeklyStatusRemove(c *gin.Context) {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
-	if err := s.service.Weekly().RemoveStatus(param.Id); err != nil {
+	if err := s.service.Weekly().RemoveStatus(param.ID); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
@@ -335,7 +336,7 @@ func (s *server) teamListByRole(c *gin.Context) {
 	staffs := s.service.All()
 	for i := 0; i < len(data); i++ {
 		for _, staff := range staffs {
-			if data[i].StaffUid == staff.Uid {
+			if data[i].StaffUID == staff.Uid {
 				data[i].StaffName = staff.GetCommonName()
 			}
 		}
@@ -351,12 +352,36 @@ func (s *server) teamMemberOp(c *gin.Context) {
 	}
 	switch param.Op {
 	case weekly.TeamOpAdd:
-		if err := s.service.Team().AddMember(param.TeamId, param.Uids...); err != nil {
+		if err := s.service.Team().AddMember(param.TeamID, param.UIDs...); err != nil {
 			apiError(c, ERROR_DB, err)
 			return
 		}
 	case weekly.TeamOpRemove:
-		if err := s.service.Team().RemoveMember(param.TeamId, param.Uids...); err != nil {
+		if err := s.service.Team().RemoveMember(param.TeamID, param.UIDs...); err != nil {
+			apiError(c, ERROR_DB, err)
+			return
+		}
+	default:
+		apiError(c, ERROR_PARAM, "unknown operate")
+		return
+	}
+	apiOk(c, true, 0)
+}
+
+func (s *server) teamManagerOp(c *gin.Context) {
+	var param weekly.TeamOpParam
+	if err := c.Bind(&param); err != nil {
+		apiError(c, ERROR_PARAM, err)
+		return
+	}
+	switch param.Op {
+	case weekly.TeamOpAdd:
+		if err := s.service.Team().AddManager(param.TeamID, param.UIDs[0]); err != nil {
+			apiError(c, ERROR_DB, err)
+			return
+		}
+	case weekly.TeamOpRemove:
+		if err := s.service.Team().RemoveManager(param.TeamID, param.UIDs[0]); err != nil {
 			apiError(c, ERROR_DB, err)
 			return
 		}
@@ -368,33 +393,39 @@ func (s *server) teamMemberOp(c *gin.Context) {
 }
 
 type simpStaff struct {
-	Id      int       `json:"id"`
+	ID      int       `json:"id,omitempty"`
 	Uid     string    `json:"uid"`
 	Name    string    `json:"name"`
-	Email   string    `json:"email"`
-	Mobile  string    `json:"mobile"`
+	Email   string    `json:"email,omitempty"`
+	Mobile  string    `json:"mobile,omitempty"`
+	Avatar  string    `json:"avatar,omitempty"`
 	Created time.Time `json:"created,omitempty"`
 }
 
 func (s *server) staffList(c *gin.Context) {
-	ret := s.allStaffs()
+	ret := s.allStaffs(c.Request.FormValue("simple") != "yes")
+
 	apiOk(c, ret, len(ret))
 }
 
-func (s *server) allStaffs() []*simpStaff {
+func (s *server) allStaffs(isFull bool) []*simpStaff {
 
 	staffs := s.service.All()
 	models.ByUid.Sort(staffs)
 	var ret = make([]*simpStaff, len(staffs))
 	for i, v := range staffs {
-		ret[i] = &simpStaff{
-			Id:      v.EmployeeNumber,
+		ss := &simpStaff{
 			Uid:     v.Uid,
 			Name:    v.GetCommonName(),
-			Email:   v.Email,
-			Mobile:  v.Mobile,
 			Created: v.Created,
 		}
+		if isFull {
+			ss.ID = v.EmployeeNumber
+			ss.Email = v.Email
+			ss.Mobile = v.Mobile
+			ss.Avatar = v.AvatarUri()
+		}
+		ret[i] = ss
 	}
 	return ret
 }

@@ -38,7 +38,7 @@ func main() {
 
 	log.Printf("action: %s", action)
 
-	wechat := exwechat.NewAPI()
+	wechat := exwechat.New(settings.WechatCorpID, settings.WechatContactSecret)
 	if action == "query" {
 		if len(uid) > 0 {
 			user, err := wechat.GetUser(uid)
@@ -69,7 +69,7 @@ func main() {
 		}
 		name := dept.Name
 
-		if parent, err := exwechat.FilterDepartment(department, dept.ParentId); err == nil {
+		if parent, _err := exwechat.FilterDepartment(department, dept.ParentId); _err == nil {
 			name = nameReplacer.Replace(parent.Name) + "-" + dept.Name
 		}
 		var members []string

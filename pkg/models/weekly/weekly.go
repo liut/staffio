@@ -47,7 +47,8 @@ const (
 type Report struct {
 	Id      int             `json:"id"`
 	Uid     string          `json:"uid"`
-	Name    string          `json:"name" db:"-"` // staff name
+	Name    string          `json:"name,omitempty" db:"-"`   // staff name
+	Avatar  string          `json:"avatar,omitempty" db:"-"` // staff name
 	Year    int             `json:"year" db:"iso_year"`
 	Week    int             `json:"week" db:"iso_week"`
 	Status  Status          `json:"status"` // 0代表正常，1代表休假

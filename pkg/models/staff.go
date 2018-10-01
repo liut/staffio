@@ -15,6 +15,7 @@ const (
 )
 
 var (
+	// ProfileEditables deprecated
 	ProfileEditables = map[string]string{
 		"nickname":    "displayName",
 		"cn":          "cn",

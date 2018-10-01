@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -111,6 +112,16 @@ func (user *User) toResponse(w http.ResponseWriter) error {
 		HttpOnly: true,
 	})
 	return nil
+}
+
+func signinStaffGin(c *gin.Context, staff *models.Staff) {
+	user := UserFromStaff(staff)
+	user.Refresh()
+	log.Printf("login ok %v", user)
+	sess := ginSession(c)
+	sess.Set(kAuthUser, user)
+	user.toResponse(c.Writer)
+	SessionSave(sess, c.Writer)
 }
 
 func signout(w http.ResponseWriter) {

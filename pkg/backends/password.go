@@ -101,7 +101,6 @@ func (s *serviceImpl) PasswordResetWithToken(login, token, passwd string) (err e
 
 func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 	qs := func(db dbTxer) error {
-		log.Printf("save %v", uv)
 		euv, err := s.LoadVerify(uv.Uid)
 		if err == nil {
 			str := `DELETE FROM password_reset WHERE id = $1`
@@ -117,7 +116,7 @@ func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 		var id int
 		err = db.Get(&id, str, uv.Type, uv.Target, uv.Uid, uv.CodeHash, uv.LifeSeconds)
 		if err == nil {
-			log.Printf("new password_reset id: %d of %s", id, uv.Uid)
+			log.Printf("new password_reset id: %d of %s(%s)", id, uv.Uid, uv.Target)
 			if id > 0 {
 				uv.Id = id
 			}
@@ -156,6 +155,7 @@ func sendResetEmail(staff *models.Staff, token string) error {
 		log.Print("smtp is disabled")
 		return nil
 	}
+	log.Printf("sending reset email to %s via %s", staff.Email, csmtp.Host)
 	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
 	err := csmtp.SendMail("Password reset request", message, staff.Email)
 	if err != nil {

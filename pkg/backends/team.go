@@ -95,8 +95,8 @@ func (s *teamStore) AddMember(id int, uids ...string) error {
 func dbTeamAddMember(db dbTxer, id int, uids []string) (err error) {
 	for _, uid := range uids {
 		uid = strings.ToLower(uid)
-		var exist_id int
-		if db.Get(&exist_id, "SELECT id FROM team_member WHERE uid = $1", uid) == nil {
+		var existID int
+		if db.Get(&existID, "SELECT id FROM team_member WHERE team_id = $1 AND uid = $2", id, uid) == nil {
 			continue
 		}
 		_, err = db.Exec("INSERT INTO team_member(team_id, uid) VALUES($1, $2)", id, uid)
@@ -118,6 +118,28 @@ func (s *teamStore) RemoveMember(id int, uids ...string) error {
 		}
 		_, err = db.Exec("DELETE FROM team_member WHERE team_id = $1 AND uid IN ("+strings.Join(arr, ",")+") ",
 			bind...)
+		return
+	})
+}
+
+// Add Manager
+func (s *teamStore) AddManager(id int, uid string) error {
+	return withTxQuery(func(db dbTxer) (err error) {
+		uid = strings.ToLower(uid)
+		var existID int
+		if db.Get(&existID, "SELECT id FROM team_leader WHERE team_id = $1 AND leader = $2", id, uid) == nil {
+			return
+		}
+		_, err = db.Exec("INSERT INTO team_leader(team_id, leader) VALUES($1, $2)", id, uid)
+		return
+	})
+}
+
+// Remove Manager
+func (s *teamStore) RemoveManager(id int, uid string) error {
+	return withTxQuery(func(db dbTxer) (err error) {
+		_, err = db.Exec("DELETE FROM team_leader WHERE team_id = $1 AND leader = $2",
+			id, strings.ToLower(uid))
 		return
 	})
 }

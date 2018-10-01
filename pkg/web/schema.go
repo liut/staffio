@@ -21,6 +21,13 @@ type resetParam struct {
 	Token     string `form:"rt" json:"token" binding:"required" description:"token"`
 }
 
+// 修改密码，需要在登录后
+type passwordParam struct {
+	OldPassword  string `form:"old_password" json:"old_password" binding:"required" description:"旧密码"`
+	NewPassword  string `form:"password" json:"password" binding:"required" description:"密码"`
+	NewPassword2 string `form:"password_confirm" json:"password2" binding:"required" description:"密码确认"`
+}
+
 type idParam struct {
-	Id int `form:"id" json:"id" binding:"required"`
+	ID int `form:"id" json:"id" binding:"required"`
 }

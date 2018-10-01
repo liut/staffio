@@ -52,6 +52,11 @@ var (
 
 	CacheSize     int
 	CacheLifetime uint
+
+	WechatCorpID        string
+	WechatContactSecret string
+	WechatPortalSecret  string
+	WechatPortalAgentID int
 )
 
 var (
@@ -95,6 +100,11 @@ func init() {
 
 	fs.IntVar(&CacheSize, "cache-size", 512*1024, "cache size")
 	fs.UintVar(&CacheLifetime, "cache-life", 60, "cache lifetime in seconds")
+
+	fs.StringVar(&WechatCorpID, "wechat-corpid", "", "wechat corpId")
+	fs.StringVar(&WechatContactSecret, "wechat-contact-secret", "", "wechat secret of contacts")
+	fs.StringVar(&WechatPortalSecret, "wechat-portal-secret", "", "wechat secret of portal(oauth)")
+	fs.IntVar(&WechatPortalAgentID, "wechat-portal-agentid", 0, "wechat agentId of portal(oauth)")
 
 }
 

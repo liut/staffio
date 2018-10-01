@@ -68,13 +68,17 @@ func (s *server) StrapRouter() {
 
 	gr.GET("/", s.welcome)
 
-	{ // for new lcgc/staff only
+	{ // apis
 		gr.GET("/api/me", s.me)
 		gr.POST("/api/verify", s.me)
 		gr.POST("/api/login", s.loginPost)
 		gr.POST("/api/logout", s.logout)
 		gr.POST("/api/password/forgot", s.passwordForgot)
 		gr.POST("/api/password/reset", s.passwordReset)
+		// wechat work auth
+		gr.POST("/api/auth/wechat", s.wechatOAuth2Start)
+		gr.GET("/api/auth/wechat/callback", s.wechatOAuth2Callback) // deprecated
+		gr.POST("/api/auth/wechat/callback", s.wechatOAuth2Callback)
 	}
 
 	api := gr.Group("/api", AuthUserMiddleware(false))
@@ -90,6 +94,7 @@ func (s *server) StrapRouter() {
 		api.GET("/staffs", s.staffList)
 		api.GET("/teams", s.teamListByRole)
 		api.POST("/team/member", s.teamMemberOp)
+		api.POST("/team/manager", s.teamManagerOp)
 
 		apiMan := api.Group("/", s.authAdminMiddleware())
 		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
@@ -112,7 +117,7 @@ func (s *server) StrapRouter() {
 
 func IsAjax(r *http.Request) bool {
 	accept := r.Header.Get("Accept")
-	return strings.Index(accept, "application/json") >= 0
+	return strings.Contains(accept, "application/json")
 }
 
 func UrlFor(path string) string {

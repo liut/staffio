@@ -62,17 +62,11 @@ func (s *server) loginPost(c *gin.Context) {
 	}
 
 	//store the user id in the values and redirect to welcome
-	user := UserFromStaff(staff)
-	user.Refresh()
-	log.Printf("login ok %v", user)
-	sess := ginSession(c)
-	sess.Set(kAuthUser, user)
-	user.toResponse(c.Writer)
-	SessionSave(sess, c.Writer)
+	signinStaffGin(c, staff)
 	referer := param.Referer
 	res["ok"] = true
 	if param.Service != "" {
-		st := cas.NewTicket("ST", param.Service, user.Uid, true)
+		st := cas.NewTicket("ST", param.Service, staff.Uid, true)
 		err = s.service.SaveTicket(st)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -122,21 +116,31 @@ func (s *server) passwordForm(c *gin.Context) {
 }
 
 func (s *server) passwordChange(c *gin.Context) {
-	req := c.Request
-	uid, pwdOld, pwdNew := req.FormValue("username"), req.FormValue("old_password"), req.FormValue("new_password")
+	var param passwordParam
 	res := make(osin.ResponseData)
-	if err := s.service.Authenticate(uid, pwdOld); err != nil {
+	if err := c.Bind(&param); err != nil {
+		res["ok"] = false
+		res["error"] = err.Error()
+		res["status"] = ERROR_PARAM
+		c.JSON(400, res)
+		return
+	}
+	user := UserWithContext(c)
+	if err := s.service.Authenticate(user.Uid, param.OldPassword); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "old_password"}
+		res["status"] = ERROR_PARAM
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	err := s.service.PasswordChange(uid, pwdOld, pwdNew)
+	err := s.service.PasswordChange(user.Uid, param.OldPassword, param.NewPassword)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "old_password"}
+		res["status"] = ERROR_DB
 	} else {
 		res["ok"] = true
+		res["status"] = 0
 	}
 
 	c.JSON(http.StatusOK, res)
