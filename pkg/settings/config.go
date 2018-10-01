@@ -11,6 +11,7 @@ var (
 	EmailCheck  bool
 
 	SMTP struct {
+		Enabled        bool
 		Host           string
 		Port           int
 		SenderName     string
@@ -51,6 +52,11 @@ var (
 
 	CacheSize     int
 	CacheLifetime uint
+
+	WechatCorpID        string
+	WechatContactSecret string
+	WechatPortalSecret  string
+	WechatPortalAgentID int
 )
 
 var (
@@ -67,7 +73,7 @@ func init() {
 	fs.StringVar(&LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 
 	fs.StringVar(&HttpListen, "http-listen", "localhost:5000", "bind address and port")
-	fs.StringVar(&BaseURL, "prefix", "http://localhost:5000", "url prefix for self")
+	fs.StringVar(&BaseURL, "baseurl", "http://localhost:5000", "url base for self host")
 	fs.StringVar(&PwdSecret, "password-secret", "very secret", "the secret of password reset")
 	fs.StringVar(&Session.Name, "sess-name", "staff_sess", "session name")
 	fs.StringVar(&Session.Domain, "sess-domain", "", "session domain")
@@ -84,6 +90,7 @@ func init() {
 
 	fs.StringVar(&EmailDomain, "email-domain", "example.net", "default email domain")
 	fs.BoolVar(&EmailCheck, "email-check", false, "check email unseen")
+	fs.BoolVar(&SMTP.Enabled, "smtp-enabled", true, "enable smtp")
 	fs.StringVar(&SMTP.Host, "smtp-host", "", "")
 	fs.IntVar(&SMTP.Port, "smtp-port", 465, "")
 	fs.StringVar(&SMTP.SenderName, "smtp-sender-name", "Notification", "")
@@ -93,6 +100,11 @@ func init() {
 
 	fs.IntVar(&CacheSize, "cache-size", 512*1024, "cache size")
 	fs.UintVar(&CacheLifetime, "cache-life", 60, "cache lifetime in seconds")
+
+	fs.StringVar(&WechatCorpID, "wechat-corpid", "", "wechat corpId")
+	fs.StringVar(&WechatContactSecret, "wechat-contact-secret", "", "wechat secret of contacts")
+	fs.StringVar(&WechatPortalSecret, "wechat-portal-secret", "", "wechat secret of portal(oauth)")
+	fs.IntVar(&WechatPortalAgentID, "wechat-portal-agentid", 0, "wechat agentId of portal(oauth)")
 
 }
 

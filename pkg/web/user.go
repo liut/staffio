@@ -9,10 +9,11 @@ import (
 )
 
 type User struct {
-	Uid     string `json:"uid"`
-	Name    string `json:"name"`
-	LastHit int64  `json:"-"`
-	ver     uint8
+	Uid        string `json:"uid"`
+	Name       string `json:"name"`
+	Privileges string `json:"privileges"`
+	LastHit    int64  `json:"-"`
+	ver        uint8
 }
 
 const ver uint8 = 0
@@ -50,10 +51,6 @@ func (u *User) IsExpired(lifetime int) bool {
 // refresh lastHit to time Unix
 func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
-}
-
-func (u *User) IsKeeper() bool {
-	return IsKeeper(u.Uid)
 }
 
 func UserFromStaff(staff *models.Staff) *User {

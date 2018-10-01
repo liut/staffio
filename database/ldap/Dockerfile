@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.6
 
 RUN apk add --update bash openldap openldap-clients openldap-passwd-pbkdf2 \
   && rm -rf /var/cache/apk/*

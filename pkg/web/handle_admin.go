@@ -24,7 +24,7 @@ func (s *server) clientsForm(c *gin.Context) {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
-	Render(c, "clients.html", map[string]interface{}{
+	s.Render(c, "clients.html", map[string]interface{}{
 		"ctx":     c,
 		"clients": clients,
 	})
@@ -107,7 +107,7 @@ func (s *server) scopesForm(c *gin.Context) {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
-	Render(c, "scopes.html", map[string]interface{}{
+	s.Render(c, "scopes.html", map[string]interface{}{
 		"ctx":    c,
 		"scopes": scopes,
 	})
@@ -118,7 +118,7 @@ func (s *server) contactsTable(c *gin.Context) {
 	staffs := s.service.All()
 	models.ByUid.Sort(staffs)
 
-	Render(c, "contact.html", map[string]interface{}{
+	s.Render(c, "contact.html", map[string]interface{}{
 		"staffs": staffs,
 		"ctx":    c,
 	})
@@ -146,7 +146,7 @@ func (s *server) staffForm(c *gin.Context) {
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
-	Render(c, "staff_edit.html", data)
+	s.Render(c, "staff_edit.html", data)
 }
 
 func (s *server) staffPost(c *gin.Context) {
@@ -195,7 +195,7 @@ func (s *server) staffPost(c *gin.Context) {
 			if estaff.Email != "" {
 				staff.Email = estaff.Email
 			}
-			if estaff.EmployeeNumber != "" {
+			if estaff.EmployeeNumber > 0 {
 				staff.EmployeeNumber = estaff.EmployeeNumber
 			}
 			if estaff.EmployeeType != "" {
@@ -217,7 +217,7 @@ func (s *server) staffPost(c *gin.Context) {
 			return
 		}
 
-		err = s.service.StoreStaff(staff)
+		err = s.service.SaveStaff(staff)
 		if err == nil {
 			res["ok"] = true
 			res["referer"] = "/contacts"
@@ -269,7 +269,7 @@ func (s *server) staffDelete(c *gin.Context) {
 func (s *server) groupList(c *gin.Context) {
 
 	data := s.service.AllGroup()
-	Render(c, "group.html", map[string]interface{}{
+	s.Render(c, "group.html", map[string]interface{}{
 		"groups": data,
 		"ctx":    c,
 	})

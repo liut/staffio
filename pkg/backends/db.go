@@ -17,6 +17,8 @@ var (
 	ErrNotFound = errors.New("Not Found")
 	valueError  = errors.New("value error")
 	dbc         *sqlx.DB
+
+	ErrNoRows = sql.ErrNoRows
 )
 
 const (

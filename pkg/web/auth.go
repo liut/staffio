@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -19,14 +20,19 @@ const (
 	kAuthUser = "user"
 )
 
-func AuthUserMiddleware() gin.HandlerFunc {
+func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := UserFromRequest(c.Request)
 		if err != nil {
 			log.Printf("user from request ERR %s", err)
-			markReferer(c)
-			c.Redirect(302, UrlFor("login"))
-			c.Abort()
+			if redirect {
+				markReferer(c)
+				c.Redirect(302, UrlFor("login"))
+				c.Abort()
+			} else {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				// apiError(c, ERROR_INTERNAL, err)
+			}
 			return
 		}
 		// log.Printf("got user %q", user.Uid)
@@ -37,7 +43,7 @@ func AuthUserMiddleware() gin.HandlerFunc {
 	}
 }
 
-func AuthAdminMiddleware() gin.HandlerFunc {
+func (s *server) authAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		v, exist := c.Get(kAuthUser)
 		if !exist {
@@ -46,9 +52,10 @@ func AuthAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 		user := v.(*User)
-		if !user.IsKeeper() {
+		if !s.IsKeeper(user.Uid) {
 			c.AbortWithStatus(http.StatusForbidden)
 			c.Abort()
+			return
 		}
 	}
 }
@@ -105,6 +112,16 @@ func (user *User) toResponse(w http.ResponseWriter) error {
 		HttpOnly: true,
 	})
 	return nil
+}
+
+func signinStaffGin(c *gin.Context, staff *models.Staff) {
+	user := UserFromStaff(staff)
+	user.Refresh()
+	log.Printf("login ok %v", user)
+	sess := ginSession(c)
+	sess.Set(kAuthUser, user)
+	user.toResponse(c.Writer)
+	SessionSave(sess, c.Writer)
 }
 
 func signout(w http.ResponseWriter) {

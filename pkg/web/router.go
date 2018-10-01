@@ -27,7 +27,7 @@ func (s *server) StrapRouter() {
 	gr.GET("/password/reset", s.passwordResetForm)
 	gr.POST("/password/reset", s.passwordReset)
 
-	authed := gr.Group("/", AuthUserMiddleware())
+	authed := gr.Group("/", AuthUserMiddleware(true))
 	authed.GET("/password", s.passwordForm)
 	authed.POST("/password", s.passwordChange)
 
@@ -48,25 +48,63 @@ func (s *server) StrapRouter() {
 	gr.GET("/info/:topic", s.oauth2Info)
 	gr.POST("/info/:topic", s.oauth2Info)
 
-	keeper := authed.Group("/dust", AuthAdminMiddleware())
+	keeper := authed.Group("/dust", s.authAdminMiddleware())
 	keeper.GET("/clients", s.clientsForm)
 	keeper.POST("/clients", s.clientsPost)
 	keeper.GET("/scopes", s.scopesForm)
 	keeper.GET("/status/:topic", s.handleStatus)
 	keeper.GET("/groups", s.groupList)
 
-	gr.GET("/article/:id", articleView)
-	keeper.GET("/articles", articleForm)
-	keeper.POST("/articles", articlePost)
+	gr.GET("/article/:id", s.articleView)
+	keeper.GET("/articles", s.articleForm)
+	keeper.POST("/articles", s.articlePost)
 
-	keeper.GET("/links", linksForm)
-	keeper.POST("/links", linksPost)
+	keeper.GET("/links", s.linksForm)
+	keeper.POST("/links", s.linksPost)
 
 	gr.GET("/cas/logout", casLogout)
 	gr.GET("/validate", s.casValidateV1)
 	gr.GET("/serviceValidate", s.casValidateV2)
 
-	gr.GET("/", welcome)
+	gr.GET("/", s.welcome)
+
+	{ // apis
+		gr.GET("/api/me", s.me)
+		gr.POST("/api/verify", s.me)
+		gr.POST("/api/login", s.loginPost)
+		gr.POST("/api/logout", s.logout)
+		gr.POST("/api/password/forgot", s.passwordForgot)
+		gr.POST("/api/password/reset", s.passwordReset)
+		// wechat work auth
+		gr.POST("/api/auth/wechat", s.wechatOAuth2Start)
+		gr.GET("/api/auth/wechat/callback", s.wechatOAuth2Callback) // deprecated
+		gr.POST("/api/auth/wechat/callback", s.wechatOAuth2Callback)
+	}
+
+	api := gr.Group("/api", AuthUserMiddleware(false))
+	{
+		api.POST("/weekly/report/add", s.weeklyReportAdd)
+		api.POST("/weekly/report/update", s.weeklyReportUpdate)
+		api.POST("/weekly/report/up", s.weeklyReportUp)
+		api.POST("/weekly/report/all", s.weeklyReportList)
+		api.POST("/weekly/report/self", s.weeklyReportListSelf)
+		api.POST("/weekly/problems", s.weeklyProblemList)
+		api.POST("/weekly/problem/add", s.weeklyProblemAdd)
+		api.POST("/weekly/problem/update", s.weeklyProblemUpdate)
+		api.GET("/staffs", s.staffList)
+		api.GET("/teams", s.teamListByRole)
+		api.POST("/team/member", s.teamMemberOp)
+		api.POST("/team/manager", s.teamManagerOp)
+
+		apiMan := api.Group("/", s.authAdminMiddleware())
+		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
+		apiMan.POST("/weekly/report/ignore/add", s.weeklyIgnoreAdd)
+		apiMan.POST("/weekly/report/ignore/del", s.weeklyIgnoreRemove)
+		apiMan.GET("/weekly/report/ignores", s.weeklyIgnoreList)
+		apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
+		apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
+		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
+	}
 
 	assets := newAssets(settings.Root, settings.FS)
 	assets.Base = base
@@ -79,9 +117,33 @@ func (s *server) StrapRouter() {
 
 func IsAjax(r *http.Request) bool {
 	accept := r.Header.Get("Accept")
-	return strings.Index(accept, "application/json") >= 0
+	return strings.Contains(accept, "application/json")
 }
 
 func UrlFor(path string) string {
 	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
+}
+
+func apiError(c *gin.Context, status int, message interface{}) {
+	resp := map[string]interface{}{
+		"status": status,
+	}
+	switch ret := message.(type) {
+	case error:
+		resp["message"] = ret.Error()
+	default:
+		resp["message"] = ret
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func apiOk(c *gin.Context, data interface{}, count int) {
+	res := map[string]interface{}{"status": 0}
+	if data != nil {
+		res["data"] = data
+	}
+	if count > 0 {
+		res["count"] = count
+	}
+	c.JSON(http.StatusOK, res)
 }

@@ -61,11 +61,6 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	secret := []byte(settings.PwdSecret)
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(staff, token)
-	if err == nil {
-		log.Printf("send reset email of %q OK", staff.Email)
-	} else {
-		log.Printf("send reset email ERR %s", err)
-	}
 	return
 }
 
@@ -106,7 +101,6 @@ func (s *serviceImpl) PasswordResetWithToken(login, token, passwd string) (err e
 
 func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 	qs := func(db dbTxer) error {
-		log.Printf("save %v", uv)
 		euv, err := s.LoadVerify(uv.Uid)
 		if err == nil {
 			str := `DELETE FROM password_reset WHERE id = $1`
@@ -122,7 +116,7 @@ func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 		var id int
 		err = db.Get(&id, str, uv.Type, uv.Target, uv.Uid, uv.CodeHash, uv.LifeSeconds)
 		if err == nil {
-			log.Printf("new password_reset id: %d of %s", id, uv.Uid)
+			log.Printf("new password_reset id: %d of %s(%s)", id, uv.Uid, uv.Target)
 			if id > 0 {
 				uv.Id = id
 			}
@@ -157,12 +151,24 @@ func InitSMTP() {
 }
 
 func sendResetEmail(staff *models.Staff, token string) error {
+	if !settings.SMTP.Enabled {
+		log.Print("smtp is disabled")
+		return nil
+	}
+	log.Printf("sending reset email to %s via %s", staff.Email, csmtp.Host)
 	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
-	return csmtp.SendMail("Password reset request", message, staff.Email)
+	err := csmtp.SendMail("Password reset request", message, staff.Email)
+	if err != nil {
+		log.Printf("send reset email ERR %s", err)
+		return err
+	}
+	log.Printf("send reset email of %q OK", staff.Email)
+	return nil
 }
 
 const (
-	tplPasswordReset = `Dear %s:
-	<br/><br/>
-	To reset your password, pls <a href="%s/password/reset?rt=%s">click here</a>.`
+	// tplPasswordReset = `Dear %s: <br/><br/>
+	// To reset your password, pls <a href="%s/password/reset?rt=%s">click here</a>.`
+	tplPasswordReset = `Dear %s: <br/><br/>
+	To reset your password, pls <a href="%s/reset?token=%s">click here</a>.`
 )

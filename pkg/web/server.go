@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/gin"
 	. "github.com/wealthworks/go-debug"
+	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/settings"
@@ -21,14 +22,11 @@ var (
 	debug = Debug("staffio:web")
 )
 
-func IsKeeper(uid string) bool {
-	return Default().service.InGroup("keeper", uid)
-}
-
 type server struct {
 	router  *gin.Engine
 	service backends.Servicer
 	osvr    *osin.Server
+	wxAuth  *exwechat.API
 }
 
 func (s *server) IsKeeper(uid string) bool {
@@ -62,6 +60,7 @@ func Default() *server {
 		router:  gin.New(),
 		service: service,
 		osvr:    osvr,
+		wxAuth:  exwechat.New(settings.WechatCorpID, settings.WechatPortalSecret),
 	}
 
 	if settings.IsDevelop() {

@@ -4,7 +4,7 @@
 {{ end }}
 
 {{ define "content" }}
-{{ $isKeeper := and ( .currUser ) ( .currUser.IsKeeper ) }}
+{{ $isKeeper := and ( .currUser ) ( isKeeper .currUser.Uid ) }}
 {{ $base := .base }}
 <table id="contacts" class="table table-striped" data-order='[[ 1, "asc" ]]' data-page-length='25'>
 <thead>
@@ -15,6 +15,7 @@
 		<th>Email</th>
 		{{if $isKeeper }}<th>Mobile</th>{{ end }}
 		<th>Nickname</th>
+		<th>Avatar</th>
 	</tr>
 </thead>
 <tbody>{{ range .staffs }}
@@ -26,7 +27,8 @@
 		<td>{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
 		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
-		<td>{{ .Name }}</td>
+		<td> {{ .Name }} </td>
+		<td> {{avatarHtml .AvatarUri }}</td>
 	</tr>
 	{{ end }}</tbody>
 </table>

@@ -19,7 +19,7 @@ const (
 	LimitLinks   = 10
 )
 
-func welcome(c *gin.Context) {
+func (s *server) welcome(c *gin.Context) {
 
 	articles, err := backends.LoadArticles(LimitArticle, 0)
 	if err != nil {
@@ -33,14 +33,14 @@ func welcome(c *gin.Context) {
 	}
 
 	//execute the template
-	Render(c, "welcome.html", map[string]interface{}{
+	s.Render(c, "welcome.html", map[string]interface{}{
 		"ctx":      c,
 		"articles": articles,
 		"links":    links,
 	})
 }
 
-func articleView(c *gin.Context) {
+func (s *server) articleView(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -65,26 +65,26 @@ func articleView(c *gin.Context) {
 		return
 	}
 
-	Render(c, "article_view.html", map[string]interface{}{
+	s.Render(c, "article_view.html", map[string]interface{}{
 		"ctx":     c,
 		"article": article,
 	})
 }
 
-func articleForm(c *gin.Context) {
+func (s *server) articleForm(c *gin.Context) {
 	articles, err := backends.LoadArticles(9, 0)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
-	Render(c, "article_edit.html", map[string]interface{}{
+	s.Render(c, "article_edit.html", map[string]interface{}{
 		"ctx":      c,
 		"articles": articles,
 	})
 }
 
-func articlePost(c *gin.Context) {
+func (s *server) articlePost(c *gin.Context) {
 	req := c.Request
 	obj := new(models.Article)
 	err := binding.FormPost.Bind(req, obj)
@@ -106,20 +106,20 @@ func articlePost(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func linksForm(c *gin.Context) {
+func (s *server) linksForm(c *gin.Context) {
 	links, err := backends.LoadLinks(9, 0)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
-	Render(c, "links.html", map[string]interface{}{
+	s.Render(c, "links.html", map[string]interface{}{
 		"ctx":   c,
 		"links": links,
 	})
 }
 
-func linksPost(c *gin.Context) {
+func (s *server) linksPost(c *gin.Context) {
 
 	req := c.Request
 	res := make(osin.ResponseData)

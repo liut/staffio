@@ -1,7 +1,9 @@
 package models
 
 import (
+	"encoding/base64"
 	"strings"
+	"time"
 
 	"github.com/liut/staffio/pkg/common"
 )
@@ -13,6 +15,7 @@ const (
 )
 
 var (
+	// ProfileEditables deprecated
 	ProfileEditables = map[string]string{
 		"nickname":    "displayName",
 		"cn":          "cn",
@@ -29,6 +32,8 @@ var (
 	}
 
 	cnFormat = "<gn> <sn>"
+
+	avatarReplacer = strings.NewReplacer("/0", "/60")
 )
 
 func SetNameFormat(s string) {
@@ -47,10 +52,17 @@ type Staff struct {
 	Email          string `json:"email" form:"email" binding:"required"`    // 邮箱
 	Mobile         string `json:"mobile" form:"mobile" binding:"required"`  // 手机
 	Tel            string `json:"tel,omitempty" form:"tel"`                 // 座机
-	EmployeeNumber string `json:"eid,omitempty" form:"eid"`                 // 员工编号
+	EmployeeNumber int    `json:"eid,omitempty" form:"eid"`                 // 员工编号
 	EmployeeType   string `json:"etype,omitempty" form:"etitle"`            // 员工岗位
 	AvatarPath     string `json:"avatarPath,omitempty" form:"avatar"`       // 头像
+	JpegPhoto      []byte `json:"-" form:"-"`                               // jpegPhoto data
 	Description    string `json:"description,omitempty" form:"description"` // 描述
+	JoinDate       string `json:"joinDate,omitempty" form:"joinDate"`       // 加入日期
+	IDCN           string `json:"idcn,omitempty" form:"idcn"`               // 身份证号
+
+	Created time.Time `json:"created,omitempty" form:"created"` // 创建时间
+	Updated time.Time `json:"updated,omitempty" form:"updated"` // 修改时间
+
 }
 
 func (u *Staff) Name() string {
@@ -75,6 +87,20 @@ func (u *Staff) GetCommonName() string {
 	}
 
 	return formatCN(u.GivenName, u.Surname)
+}
+
+func (u *Staff) AvatarUri() string {
+	if len(u.JpegPhoto) > 0 {
+		return "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(u.JpegPhoto)
+	}
+	if len(u.AvatarPath) > 0 {
+		s := u.AvatarPath
+		if strings.HasSuffix(s, "/") {
+			s = s + "0"
+		}
+		return "http://p.qlogo.cn" + avatarReplacer.Replace(s)
+	}
+	return ""
 }
 
 // func (u *Staff) String() string {

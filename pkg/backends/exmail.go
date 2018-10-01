@@ -3,6 +3,7 @@ package backends
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/wealthworks/go-tencent-api/exmail"
@@ -21,18 +22,22 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 	sn, gn := models.SplitName(user.Name)
 
 	// log.Printf("got %q %q %q", user.Name, sn, gn)
+	eid, _ := strconv.Atoi(user.ExtId)
 
-	return &models.Staff{
-		Uid:            strings.Split(user.Alias, "@")[0],
-		Email:          user.Alias,
-		CommonName:     user.Name,
-		Surname:        sn,
-		GivenName:      gn,
-		EmployeeNumber: user.ExtId,
-		EmployeeType:   user.Title,
-		Mobile:         user.Mobile,
-		Gender:         models.Gender(user.Gender),
-	}, nil
+	staff := &models.Staff{
+		Uid:          strings.Split(user.Alias, "@")[0],
+		Email:        user.Alias,
+		CommonName:   user.Name,
+		Surname:      sn,
+		GivenName:    gn,
+		EmployeeType: user.Title,
+		Mobile:       user.Mobile,
+		Gender:       models.Gender(user.Gender),
+	}
+	if eid > 0 {
+		staff.EmployeeNumber = eid
+	}
+	return staff, nil
 }
 
 func GetEmailAddress(uid string) string {
