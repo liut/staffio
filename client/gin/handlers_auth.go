@@ -22,31 +22,22 @@ var (
 
 func AuthMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sess := ginSession(c)
-		if user, ok := sess.Get(sKeyUser).(*User); ok {
-			if !user.IsExpired() {
-				if user.NeedRefresh() {
-					user.Refresh()
-					sess.Set(sKeyUser, user)
-					staffio.SessionSave(sess, c.Writer)
-				}
-				c.Set(sKeyUser, user)
-				c.Next()
+		user, err := staffio.UserFromRequest(c.Request)
+		if err != nil {
+			if redirect {
+				c.Redirect(http.StatusFound, staffio.LoginPath)
+				c.Abort()
 				return
 			}
-		}
-
-		if redirect {
-			c.Redirect(http.StatusFound, staffio.LoginPath)
-			c.Abort()
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.Set(sKeyUser, user)
+		c.Next()
 	}
 }
 
-func UserWithContext(c *gin.Context) (user *User, ok bool) {
+func UserFromContext(c *gin.Context) (user *User, ok bool) {
 	v, ok := c.Get(sKeyUser)
 	if ok {
 		user = v.(*User)
@@ -64,12 +55,14 @@ func AuthCodeCallback(roleName ...string) gin.HandlerFunc {
 }
 
 func HandlerShowMe(c *gin.Context) {
-	user, ok := UserWithContext(c)
+	user, ok := UserFromContext(c)
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
+	token, _ := user.Encode()
 	c.JSON(http.StatusOK, gin.H{
-		"me": user,
+		"me":    user,
+		"token": token,
 	})
 }

@@ -44,7 +44,7 @@ func init() {
 }
 
 func randToken() string {
-	b := make([]byte, 32)
+	b := make([]byte, 12)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
 }
@@ -65,7 +65,17 @@ func Setup(redirectURL, clientID, clientSecret string, scopes []string) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	state := randToken()
+	fakeUser := &User{Name: randToken()}
+	fakeUser.Refresh()
+	state, _ := fakeUser.Encode()
+	http.SetCookie(w, &http.Cookie{
+		Name:     cKeyState,
+		Value:    state,
+		Path:     "/",
+		HttpOnly: true,
+	})
+	// g6F1oKFu2SxkalR3cms5dkIxSW1KcmppWUFxOThnNUlBS0lFNE5EV1VpUkgzMVdxc1VBPaFo0luyTHg
+	// g6F1oKFusDZVa0J6MDNVLTZ1Q2lKN1ShaNJbsldv
 	sess := SessionLoad(r)
 	sess.Set(cKeyState, state)
 	SessionSave(sess, w)

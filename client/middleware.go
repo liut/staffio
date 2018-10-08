@@ -37,26 +37,18 @@ func SetAdminPath(path string) {
 func AuthMiddleware(redirect bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hf := func(w http.ResponseWriter, r *http.Request) {
-			sess := SessionLoad(r)
-			if user, ok := sess.Get(SessKeyUser).(*User); ok {
-				if !user.IsExpired() {
-					if user.NeedRefresh() {
-						user.Refresh()
-						sess.Set(SessKeyUser, user)
-						SessionSave(sess, w)
-					}
-					ctx := r.Context()
-					ctx = context.WithValue(ctx, UserKey, user)
-					next.ServeHTTP(w, r.WithContext(ctx))
+			user, err := UserFromRequest(r)
+			if err != nil {
+				if redirect {
+					http.Redirect(w, r, LoginPath, http.StatusFound)
 					return
 				}
-			}
-
-			if redirect {
-				http.Redirect(w, r, LoginPath, http.StatusFound)
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
+			ctx := context.WithValue(r.Context(), UserKey, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(hf)
 	}
@@ -83,14 +75,12 @@ func AuthCodeCallback(roleName ...string) http.Handler {
 			return
 		}
 
-		sess := SessionLoad(r)
 		user := &User{
 			Uid:  it.Me.Uid,
 			Name: it.Me.Nickname,
 		}
 		user.Refresh()
-		sess.Set(SessKeyUser, user)
-		SessionSave(sess, w)
+		Signin(user, w)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Refresh", fmt.Sprintf("0; %s", AdminPath))
 		w.WriteHeader(http.StatusAccepted)
@@ -100,7 +90,7 @@ func AuthCodeCallback(roleName ...string) http.Handler {
 	return AuthCodeCallbackWrap(http.HandlerFunc(hf))
 }
 
-// AuthCodeCallbackWrap is a middleware that injects a InfoToken with roles into the context of each request
+// AuthCodeCallbackWrap is a middleware that injects a InfoToken with roles into the context of callback request
 func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// verify state value.
@@ -128,6 +118,7 @@ func AuthCodeCallbackWrap(next http.Handler) http.Handler {
 		}
 
 		// log.Printf("exchanged token: %s", tok)
+		sess.Set(cKeyToken, tok.AccessToken)
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, TokenKey, tok)

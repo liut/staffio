@@ -89,6 +89,7 @@ func UserFromRequest(r *http.Request) (user *User, err error) {
 	err = user.Decode(b)
 	if err != nil {
 		log.Printf("decode msgpack ERR %s", err)
+		return
 	}
 	if user.IsExpired(settings.UserLifetime) {
 		err = fmt.Errorf("user %s is expired", user.Uid)

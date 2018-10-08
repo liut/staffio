@@ -1,13 +1,17 @@
 package client
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-osin/session"
 )
 
+// TODO: deprecated with cookie
+
 const (
-	SessKeyUser = "user"
+	SessKeyUser  = "user"
+	SessKeyToken = "token"
 )
 
 var (
@@ -36,4 +40,18 @@ func SessionLoad(r *http.Request) session.Session {
 
 func SessionSave(sess session.Session, w http.ResponseWriter) {
 	session.Global.Save(sess, w)
+}
+
+func UserFromSession(sess session.Session) (u *User, ok bool) {
+	u, ok = sess.Get(SessKeyUser).(*User)
+	return
+}
+
+func (user *User) SaveToSession(sess session.Session, w http.ResponseWriter, force bool) {
+	if force || user.NeedRefresh() {
+		user.Refresh()
+		sess.Set(SessKeyUser, user)
+		SessionSave(sess, w)
+		log.Printf("saved user %v to session", user)
+	}
 }
