@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -10,6 +11,7 @@ import (
 
 const (
 	sKeyUser = "user"
+	KeyOper  = "oper"
 )
 
 type User = staffio.User
@@ -32,6 +34,8 @@ func AuthMiddleware(redirect bool) gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+		ctx := context.WithValue(c.Request.Context(), KeyOper, user)
+		c.Request = c.Request.WithContext(ctx)
 		c.Set(sKeyUser, user)
 		c.Next()
 	}
