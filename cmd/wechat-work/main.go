@@ -75,6 +75,10 @@ func main() {
 		var members []string
 		var staffs []*models.Staff
 		for _, val := range users {
+			if !val.IsActived() || !val.IsEnabled() {
+				log.Printf("user %s status %s, enabled %v", val.Name, val.Status, val.Enabled)
+				continue
+			}
 			members = append(members, val.UID)
 			staff := userToStaff(&val)
 			// fmt.Println(staff)
