@@ -71,6 +71,10 @@ docker run -e DB_NAME=staffio -e DB_USER=staffio -e DB_PASS=mypassword -e TZ=Hon
 cat database/schema.sql | docker exec -i staffio-db psql -Ustaffio
 cat database/init.sql | docker exec -i staffio-db psql -Ustaffio
 
+-- example ldif
+
+ldapadd -x -D "cn=admin,dc=example,dc=org" -W -f database/example/init.ldif
+
 -- demo client
 echo "INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://localhost:3000/appauth', '{}', now());" | docker exec -i staffio-db psql -Ustaffio staffio
 
