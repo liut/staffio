@@ -29,9 +29,9 @@ type WeeklyStore interface {
 	// AllStatus
 	StatusRecords(status Status) (data []*ReportUser, err error)
 	// AddStatus
-	AddStatus(uid string, year, week int, status Status) error
+	AddStatus(uid string, status Status, year int, weeks ...int) error
 	// RemoveStatus
-	RemoveStatus(id int) error
+	RemoveStatus(ids ...int) error
 	// StatusRecordsWithUser
 	StatusRecordsWithUser(status Status, uid string) (data []*ReportStat, err error)
 }

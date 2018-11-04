@@ -170,27 +170,39 @@ func (s *weeklyStore) StatusRecordsWithUser(status weekly.Status, uid string) (d
 }
 
 // AddStatus
-func (s *weeklyStore) AddStatus(uid string, year, week int, status weekly.Status) error {
-	qs := func(db dbTxer) error {
-		var id int
-		err := db.Get(&id, "SELECT id FROM weekly_status WHERE uid = $1 AND iso_year = $2 AND iso_week = $3",
-			uid, year, week)
-		if err == nil {
-			_, err = db.Exec("UPDATE weekly_status SET status = $1 WHERE id = $2", status, id)
-			return err
+func (s *weeklyStore) AddStatus(uid string, status weekly.Status, year int, weeks ...int) error {
+	qs := func(db dbTxer) (err error) {
+		for _, week := range weeks {
+			var id int
+			err = db.Get(&id, "SELECT id FROM weekly_status WHERE uid = $1 AND iso_year = $2 AND iso_week = $3",
+				uid, year, week)
+			if err == nil {
+				_, err = db.Exec("UPDATE weekly_status SET status = $1 WHERE id = $2", status, id)
+			} else if err == ErrNoRows {
+				_, err = db.Exec("INSERT INTO weekly_status(uid, iso_year, iso_week, status) VALUES($1, $2, $3, $4)",
+					uid, year, week, status)
+			}
+			if err != nil {
+				return
+			}
 		}
-		_, err = db.Exec("INSERT INTO weekly_status(uid, iso_year, iso_week, status) VALUES($1, $2, $3, $4)",
-			uid, year, week, status)
-		return err
+
+		return
 	}
 	return withTxQuery(qs)
 }
 
 // RemoveStatus
-func (s *weeklyStore) RemoveStatus(id int) error {
-	return withTxQuery(func(db dbTxer) error {
-		_, err := db.Exec("DELETE FROM weekly_status WHERE id = $1 ",
-			id)
-		return err
+func (s *weeklyStore) RemoveStatus(ids ...int) error {
+	return withTxQuery(func(db dbTxer) (err error) {
+		for _, id := range ids {
+			_, err = db.Exec("DELETE FROM weekly_status WHERE id = $1 ",
+				id)
+			if err != nil {
+				return
+			}
+		}
+
+		return
 	})
 }

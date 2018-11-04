@@ -298,10 +298,10 @@ func (s *server) weeklyStatusAdd(c *gin.Context, status weekly.Status) {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
-	if len(param.Weeks) > 0 && param.Week == 0 {
-		param.Week = param.Weeks[0]
+	if len(param.Weeks) == 0 && param.Week > 0 {
+		param.Weeks = []int{param.Week}
 	}
-	if err := s.service.Weekly().AddStatus(param.UID, param.Year, param.Week, status); err != nil {
+	if err := s.service.Weekly().AddStatus(param.UID, status, param.Year, param.Weeks...); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
