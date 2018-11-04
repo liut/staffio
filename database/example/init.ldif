@@ -1,0 +1,48 @@
+
+version: 1
+
+dn: dc=example,dc=org
+dc: example
+o: Example
+objectclass: top
+objectclass: dcObject
+objectclass: organization
+
+dn: ou=groups,dc=example,dc=org
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+dn: cn=keeper,ou=groups,dc=example,dc=org
+cn: keeper
+member: uid=eagle,ou=people,dc=example,dc=org
+member: uid=liutao,ou=people,dc=example,dc=org
+objectclass: groupOfNames
+objectclass: top
+
+dn: ou=people,dc=example,dc=org
+objectclass: organizationalUnit
+objectclass: top
+ou: people
+
+dn: uid=liutao,ou=people,dc=example,dc=org
+cn:: 5rab
+mail: liutao@example.org
+objectclass: inetOrgPerson
+objectclass: uidObject
+objectclass: simpleSecurityObject
+objectclass: top
+sn:: 5YiY
+uid: liutao
+userpassword: {SHA}GP93WKNmbMpAoA64JNxec0lM8Ag=
+
+dn: uid=eagle,ou=people,dc=example,dc=org
+cn: eagle
+mail: eagle@example.org
+objectclass: inetOrgPerson
+objectclass: uidObject
+objectclass: simpleSecurityObject
+objectclass: top
+sn: liut
+uid: eagle
+userpassword: {MD5}8VN7PZDnUmECjgv/3QoAsA==
