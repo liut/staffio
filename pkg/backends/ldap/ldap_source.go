@@ -270,7 +270,7 @@ func (ls *ldapSource) GetStaff(uid string) (*models.Staff, error) {
 	return entryToUser(entry), nil
 }
 
-func (ls *ldapSource) ListPaged(limit int) (staffs []*models.Staff) {
+func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 	err := ls.Bind(ls.BindDN, ls.Passwd, false)
 	if err != nil {
 		// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
@@ -294,7 +294,7 @@ func (ls *ldapSource) ListPaged(limit int) (staffs []*models.Staff) {
 	}
 
 	if len(sr.Entries) > 0 {
-		staffs = make([]*models.Staff, len(sr.Entries))
+		staffs = make(models.Staffs, len(sr.Entries))
 		for i, entry := range sr.Entries {
 			staffs[i] = entryToUser(entry)
 		}

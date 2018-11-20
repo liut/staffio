@@ -49,7 +49,7 @@ func (s *weeklyStore) All(param weekly.ListParam) (data []*weekly.Report, total 
 		return
 	}
 
-	str := `SELECT r.id, r.uid, iso_year, iso_week, content, r.created, r.updated, r.up_count
+	str := `SELECT DISTINCT r.id, r.uid, iso_year, iso_week, content, r.created, r.updated, r.up_count
 	   FROM weekly_report r LEFT JOIN team_member tm ON tm.uid = r.uid ` +
 		where +
 		param.Sort.Sql() + param.Pager.Sql()

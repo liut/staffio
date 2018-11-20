@@ -67,7 +67,7 @@ func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 	return
 }
 
-func (s *LDAPStore) All() (staffs []*models.Staff) {
+func (s *LDAPStore) All() (staffs models.Staffs) {
 	for _, ls := range s.sources {
 		staffs = ls.ListPaged(s.pageSize)
 		if len(staffs) > 0 {

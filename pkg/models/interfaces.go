@@ -1,9 +1,9 @@
 package models
 
-// Storage for Staff
+// StaffStore Storage for Staff
 type StaffStore interface {
 	// All browse from store, like LDAP
-	All() []*Staff
+	All() Staffs
 	// Get with uid
 	Get(uid string) (*Staff, error)
 	// Delete with uid
@@ -14,21 +14,21 @@ type StaffStore interface {
 	ModifyBySelf(uid, password string, staff *Staff) error
 }
 
-// Storage for Password
+// PasswordStore Storage for Password
 type PasswordStore interface {
 	// Change password by self
-	PasswordChange(uid, old_password, new_password string) error
+	PasswordChange(uid, oldPassword, newPassword string) error
 	// Reset password by administrator
-	PasswordReset(uid, new_password string) error
+	PasswordReset(uid, newPassword string) error
 }
 
-// Authenticator
+// Authenticator for Authenticate
 type Authenticator interface {
 	// Authenticate with uid and password
 	Authenticate(uid, password string) error
 }
 
-// Storage for Group
+// GroupStore Storage for Group
 type GroupStore interface {
 	AllGroup() []Group
 	GetGroup(name string) (*Group, error)

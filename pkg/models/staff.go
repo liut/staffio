@@ -98,7 +98,7 @@ func (u *Staff) AvatarUri() string {
 		if strings.HasSuffix(s, "/") {
 			s = s + "0"
 		}
-		return "http://p.qlogo.cn" + avatarReplacer.Replace(s)
+		return "https://p.qlogo.cn" + avatarReplacer.Replace(s)
 	}
 	return ""
 }
@@ -115,4 +115,15 @@ func (u *Staff) AvatarUri() string {
 func formatCN(gn, sn string) string {
 	r := strings.NewReplacer("<gn>", gn, "<sn>", sn)
 	return r.Replace(cnFormat)
+}
+
+type Staffs []*Staff
+
+func (arr Staffs) WithUid(uid string) *Staff {
+	for _, u := range arr {
+		if u.Uid == uid {
+			return u
+		}
+	}
+	return nil
 }

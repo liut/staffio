@@ -108,13 +108,11 @@ func (s *server) weeklyReportList(c *gin.Context) {
 	}
 	staffs := s.service.All()
 	for i := 0; i < len(ret); i++ {
-		for _, staff := range staffs {
-			if staff.Uid == ret[i].Uid {
-				ret[i].Name = staff.GetCommonName()
-				ret[i].Avatar = staff.AvatarUri()
-			}
+		staff := staffs.WithUid(ret[i].Uid)
+		if staff != nil {
+			ret[i].Name = staff.GetCommonName()
+			ret[i].Avatar = staff.AvatarUri()
 		}
-
 	}
 	apiOk(c, ret, total)
 }
