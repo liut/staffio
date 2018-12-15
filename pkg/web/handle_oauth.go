@@ -21,8 +21,8 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 
 	if ar := s.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
 		log.Printf("client: %v", ar.Client)
-		if store.IsAuthorized(ar.Client.GetId(), user.Uid) {
-			ar.UserData = user.Uid
+		if store.IsAuthorized(ar.Client.GetId(), user.UID) {
+			ar.UserData = user.UID
 			ar.Authorized = true
 			s.osvr.FinishAuthorizeRequest(resp, r, ar)
 		} else {
@@ -43,11 +43,11 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 			}
 
 			if r.PostForm.Get("authorize") == "1" {
-				ar.UserData = user.Uid
+				ar.UserData = user.UID
 				ar.Authorized = true
 				s.osvr.FinishAuthorizeRequest(resp, r, ar)
 				if r.PostForm.Get("remember") != "" {
-					err := store.SaveAuthorized(ar.Client.GetId(), user.Uid)
+					err := store.SaveAuthorized(ar.Client.GetId(), user.UID)
 					if err != nil {
 						log.Printf("remember ERR %s", err)
 					}
@@ -64,7 +64,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 		log.Printf("authorize ERROR: %s\n", resp.InternalError)
 	}
 	// if !resp.IsError {
-	// 	resp.Output["uid"] = c.User.Uid
+	// 	resp.Output["uid"] = c.user.UID
 	// }
 
 	debug("oauthAuthorize resp: %v", resp)
@@ -182,7 +182,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 			} else if topic == "staff" {
 				resp.Output["staff"] = staff
 			} else if topic == "grafana" || topic == "generic" {
-				resp.Output["name"] = staff.Name()
+				resp.Output["name"] = staff.GetName()
 				resp.Output["login"] = staff.Uid
 				resp.Output["username"] = staff.Uid
 				resp.Output["email"] = staff.Email

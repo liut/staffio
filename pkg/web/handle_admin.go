@@ -242,7 +242,7 @@ func (s *server) staffDelete(c *gin.Context) {
 
 	user := UserWithContext(c)
 
-	if uid == user.Uid {
+	if uid == user.UID {
 		res["ok"] = false
 		res["error"] = "Can not delete yourself"
 		c.JSON(http.StatusOK, res)

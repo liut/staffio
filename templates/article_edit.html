@@ -2,7 +2,7 @@
 {{ define "head" }}
 {{ end }}
 {{ define "content" }}
-{{ $isKeeper := and ( .currUser ) ( isKeeper .currUser.Uid ) }}
+{{ $isKeeper := and ( .currUser ) ( isKeeper .currUser.UID ) }}
     <h4>All articles:</h4>
       <table class="table">
           <tr>

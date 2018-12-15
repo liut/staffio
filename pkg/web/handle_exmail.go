@@ -16,11 +16,11 @@ import (
 
 func (s *server) countNewMail(c *gin.Context) {
 	user := UserWithContext(c)
-	// log.Printf("user %q", user.Uid)
-	email := backends.GetEmailAddress(user.Uid)
+	// log.Printf("user %q", user.UID)
+	email := backends.GetEmailAddress(user.UID)
 	res := make(osin.ResponseData)
 	res["email"] = email
-	key := []byte(fmt.Sprintf("mail-count-%s", user.Uid))
+	key := []byte(fmt.Sprintf("mail-count-%s", user.UID))
 
 	if bv, err := cache.Get(key); err == nil {
 		res["unseen"] = binary.LittleEndian.Uint32(bv)
@@ -43,7 +43,7 @@ func (s *server) countNewMail(c *gin.Context) {
 
 func (s *server) loginToExmail(c *gin.Context) {
 	user := UserWithContext(c)
-	email := user.Uid + "@" + settings.EmailDomain
+	email := user.UID + "@" + settings.EmailDomain
 	url, err := exmail.GetLoginURL(email)
 	if err != nil {
 		c.AbortWithError(http.StatusForbidden, err)

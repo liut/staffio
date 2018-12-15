@@ -94,7 +94,7 @@ func (s *server) articlePost(c *gin.Context) {
 		return
 	}
 	user := UserWithContext(c)
-	obj.Author = user.Uid
+	obj.Author = user.UID
 	res := make(osin.ResponseData)
 	err = backends.SaveArticle(obj)
 	if err == nil {
@@ -132,7 +132,7 @@ func (s *server) linksPost(c *gin.Context) {
 			res["error"] = map[string]string{"message": err.Error()}
 		}
 		user := UserWithContext(c)
-		obj.Author = user.Uid
+		obj.Author = user.UID
 		err = backends.SaveLink(obj)
 		if err != nil {
 			res["ok"] = false

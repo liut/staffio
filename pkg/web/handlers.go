@@ -11,6 +11,7 @@ import (
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/web/auth"
 )
 
 func (s *server) loginForm(c *gin.Context) {
@@ -88,19 +89,19 @@ func (s *server) loginPost(c *gin.Context) {
 
 // for staff/verify
 func (s *server) me(c *gin.Context) {
-	user, err := UserFromRequest(c.Request)
+	user, err := auth.UserFromRequest(c.Request)
 	if err != nil {
 		apiError(c, 1, nil)
 		return
 	}
-	if s.IsKeeper(user.Uid) {
+	if s.IsKeeper(user.UID) {
 		user.Privileges = "admin"
 	}
 	apiOk(c, user, 0)
 }
 
 func (s *server) logout(c *gin.Context) {
-	signout(c.Writer)
+	auth.Signout(c.Writer)
 	DeleteTGC(c)
 	if IsAjax(c.Request) {
 		apiOk(c, true, 0)
@@ -126,14 +127,14 @@ func (s *server) passwordChange(c *gin.Context) {
 		return
 	}
 	user := UserWithContext(c)
-	if err := s.service.Authenticate(user.Uid, param.OldPassword); err != nil {
+	if err := s.service.Authenticate(user.UID, param.OldPassword); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "old_password"}
 		res["status"] = ERROR_PARAM
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	err := s.service.PasswordChange(user.Uid, param.OldPassword, param.NewPassword)
+	err := s.service.PasswordChange(user.UID, param.OldPassword, param.NewPassword)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "old_password"}
@@ -248,7 +249,7 @@ func (s *server) passwordReset(c *gin.Context) {
 
 func (s *server) profileForm(c *gin.Context) {
 	user := UserWithContext(c)
-	staff, err := s.service.Get(user.Uid)
+	staff, err := s.service.Get(user.UID)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -273,7 +274,7 @@ func (s *server) profilePost(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	err = s.service.ProfileModify(user.Uid, password, staff)
+	err = s.service.ProfileModify(user.UID, password, staff)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "password"}

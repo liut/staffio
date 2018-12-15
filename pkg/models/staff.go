@@ -65,6 +65,14 @@ type Staff struct {
 
 }
 
+func (u *Staff) GetUID() string {
+	return u.Uid
+}
+
+func (u *Staff) GetName() string {
+	return u.Name()
+}
+
 func (u *Staff) Name() string {
 	if u.Nickname != "" {
 		return u.Nickname

@@ -6,7 +6,7 @@ import (
 
 // Staff is a retrieved employee struct.
 type Staff struct {
-	Uid            string        `json:"uid" form:"uid"`                     // 登录名
+	UID            string        `json:"uid" form:"uid"`                     // 登录名
 	CommonName     string        `json:"cn,omitempty" form:"cn"`             // 全名
 	GivenName      string        `json:"gn,omitempty" form:"gn"`             // 名
 	Surname        string        `json:"sn,omitempty" form:"sn"`             // 姓

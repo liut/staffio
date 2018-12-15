@@ -8,7 +8,11 @@ import (
 	"net/http"
 
 	"golang.org/x/oauth2"
+
+	"github.com/liut/staffio/pkg/web/auth"
 )
+
+type User = auth.User
 
 var (
 	ErrNoToken = errors.New("oauth2 token not found")
@@ -16,6 +20,8 @@ var (
 
 	AdminPath = "/admin/"
 	LoginPath = "/auth/login"
+
+	UserFromRequest = auth.UserFromRequest
 )
 
 type ctxKey int
@@ -37,7 +43,7 @@ func SetAdminPath(path string) {
 func AuthMiddleware(redirect bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hf := func(w http.ResponseWriter, r *http.Request) {
-			user, err := UserFromRequest(r)
+			user, err := auth.UserFromRequest(r)
 			if err != nil {
 				if redirect {
 					http.Redirect(w, r, LoginPath, http.StatusFound)
@@ -76,11 +82,11 @@ func AuthCodeCallback(roleName ...string) http.Handler {
 		}
 
 		user := &User{
-			Uid:  it.Me.Uid,
+			UID:  it.Me.UID,
 			Name: it.Me.Nickname,
 		}
 		user.Refresh()
-		Signin(user, w)
+		auth.Signin(user, w)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Refresh", fmt.Sprintf("0; %s", AdminPath))
 		w.WriteHeader(http.StatusAccepted)

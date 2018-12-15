@@ -1,6 +1,4 @@
-//go:generate msgp
-
-package client
+package auth
 
 import (
 	"encoding/base64"
@@ -9,22 +7,26 @@ import (
 	"time"
 )
 
+//go:generate msgp -io=false
+
 var (
 	UserLifetime int64 = 3600
 	Guest              = &User{}
 )
 
+// User 在线用户
 type User struct {
-	Uid     string `json:"uid" msg:"u"`
-	Name    string `json:"name" msg:"n"`
-	LastHit int64  `json:"hit,omitempty" msg:"h"`
+	UID        string `json:"uid" msg:"u"`
+	Name       string `json:"name" msg:"n"`
+	Privileges string `json:"privileges,omitempty" msg:"p"`
+	LastHit    int64  `json:"hit,omitempty" msg:"h"`
 }
 
 func (u *User) IsExpired() bool {
-	if UserLifetime == 0 {
+	if UserLifetime <= 0 {
 		return false
 	}
-	return u.LastHit+UserLifetime < time.Now().Unix()
+	return u.LastHit+int64(UserLifetime) < time.Now().Unix()
 }
 
 func (u *User) NeedRefresh() bool {
@@ -36,6 +38,7 @@ func (u *User) NeedRefresh() bool {
 	return gash < UserLifetime && gash > UserLifetime/2
 }
 
+// refresh lastHit to time Unix
 func (u *User) Refresh() {
 	u.LastHit = time.Now().Unix()
 }
@@ -68,4 +71,16 @@ func (u *User) Decode(s string) (err error) {
 	}
 
 	return
+}
+
+type staff interface {
+	GetUID() string
+	GetName() string
+}
+
+func FromStaff(staff staff) *User {
+	return &User{
+		UID:  staff.GetUID(),
+		Name: staff.GetName(),
+	}
 }

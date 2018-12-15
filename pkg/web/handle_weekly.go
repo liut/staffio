@@ -47,7 +47,7 @@ func (s *server) weeklyReportAdd(c *gin.Context) {
 
 	user := UserWithContext(c)
 
-	if err := s.service.Weekly().Add(user.Uid, param.Content); err != nil {
+	if err := s.service.Weekly().Add(user.UID, param.Content); err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
@@ -67,7 +67,7 @@ func (s *server) weeklyReportUpdate(c *gin.Context) {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
-	if obj.Uid != user.Uid {
+	if obj.Uid != user.UID {
 		apiError(c, ERROR_PARAM, "not yours")
 		return
 	}
@@ -87,7 +87,7 @@ func (s *server) weeklyReportUp(c *gin.Context) {
 	}
 
 	user := UserWithContext(c)
-	if err := s.service.Weekly().Applaud(param.ID, user.Uid); err != nil {
+	if err := s.service.Weekly().Applaud(param.ID, user.UID); err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
@@ -124,7 +124,7 @@ func (s *server) weeklyReportListSelf(c *gin.Context) {
 		return
 	}
 	user := UserWithContext(c)
-	param.Uid = user.Uid
+	param.Uid = user.UID
 
 	ret, total, err := s.service.Weekly().All(param)
 	if err != nil {

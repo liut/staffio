@@ -1,4 +1,4 @@
-package client
+package auth
 
 import (
 	"fmt"
@@ -10,8 +10,6 @@ var (
 	CookieName   = "_user"
 	CookiePath   = "/"
 	CookieMaxAge = 3600
-
-	// ErrInvalidToken = errors.New("invalid token or expired")
 )
 
 // UserFromRequest get user from cookie
@@ -22,19 +20,22 @@ func UserFromRequest(r *http.Request) (user *User, err error) {
 		log.Printf("cookie %q ERR %s", CookieName, err)
 		return
 	}
-
 	user = new(User)
 	err = user.Decode(cookie.Value)
 	if err != nil {
-		log.Printf("decode cookie ERR %s", err)
+		log.Printf("decode user ERR %s", err)
 		return
 	}
 	if user.IsExpired() {
-		err = fmt.Errorf("user %q from %q is expired", user.Uid, cookie.Value)
-		log.Print(err)
+		err = fmt.Errorf("user %s is expired", user.UID)
 	}
-
+	// log.Printf("got user %v", user)
 	return
+}
+
+// Signin call Signin for login
+func (user *User) Signin(w http.ResponseWriter) error {
+	return Signin(user, w)
 }
 
 type encoder interface {
@@ -45,7 +46,7 @@ type encoder interface {
 func Signin(user encoder, w http.ResponseWriter) error {
 	value, err := user.Encode()
 	if err != nil {
-		log.Printf("call user.Encode() ERR: %s", err)
+		log.Printf("encode user ERR: %s", err)
 		return err
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -55,11 +56,10 @@ func Signin(user encoder, w http.ResponseWriter) error {
 		Path:     CookiePath,
 		HttpOnly: true,
 	})
-	log.Printf("signin user %v, %q", user, value)
 	return nil
 }
 
-// Signout clear cookie for user
+// Signout setcookie with empty
 func Signout(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     CookieName,
