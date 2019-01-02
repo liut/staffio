@@ -89,7 +89,7 @@ func (s *server) wechatOAuth2Callback(c *gin.Context) {
 	}
 	log.Printf("auth2 with wechat work OK %v", ou)
 
-	staff, err := s.service.Get(ou.UserID)
+	staff, err := s.service.Get(strings.ToLower(ou.UserID))
 	if err != nil {
 		c.AbortWithError(http.StatusServiceUnavailable, err)
 		return

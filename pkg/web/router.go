@@ -83,6 +83,7 @@ func (s *server) StrapRouter() {
 
 	api := gr.Group("/api", AuthUserMiddleware(false))
 	{
+		api.POST("/password", s.passwordChange)
 		api.POST("/weekly/report/add", s.weeklyReportAdd)
 		api.POST("/weekly/report/update", s.weeklyReportUpdate)
 		api.POST("/weekly/report/up", s.weeklyReportUp)
