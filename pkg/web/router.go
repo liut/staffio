@@ -68,7 +68,7 @@ func (s *server) StrapRouter() {
 
 	gr.GET("/", s.welcome)
 
-	{ // apis
+	{ // apis for unauth
 		gr.GET("/api/me", s.me)
 		gr.POST("/api/verify", s.me)
 		gr.POST("/api/login", s.loginPost)
@@ -96,6 +96,8 @@ func (s *server) StrapRouter() {
 		api.GET("/teams", s.teamListByRole)
 		api.POST("/team/member", s.teamMemberOp)
 		api.POST("/team/manager", s.teamManagerOp)
+
+		api.GET("/work/checkins", s.wechatCheckinList)
 
 		apiMan := api.Group("/", s.authAdminMiddleware())
 		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)

@@ -27,6 +27,7 @@ type server struct {
 	service backends.Servicer
 	osvr    *osin.Server
 	wxAuth  *exwechat.API
+	checkin *exwechat.CAPI
 }
 
 func (s *server) IsKeeper(uid string) bool {
@@ -61,6 +62,7 @@ func Default() *server {
 		service: service,
 		osvr:    osvr,
 		wxAuth:  exwechat.New(settings.WechatCorpID, settings.WechatPortalSecret),
+		checkin: exwechat.NewCAPI(),
 	}
 
 	if settings.IsDevelop() {
