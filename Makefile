@@ -13,13 +13,12 @@ main:
 
 all: vet dist package
 
-dep: vet
-	go get github.com/golang/dep/cmd/dep
-	dep ensure
+dep:
+	go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
 
 vet:
 	echo "Checking ./pkg ./cmd"
-	go tool vet -atomic -bool -copylocks -nilfunc -printf -shadow -rangeloops -unreachable -unsafeptr -unusedresult ./pkg ./cmd
+	go vet -vettool=$(which shadow) -atomic -bool -copylocks -nilfunc -printf -rangeloops -unreachable -unsafeptr -unusedresult ./pkg/...
 
 clean:
 	echo "Cleaning dist"
