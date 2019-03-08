@@ -81,7 +81,7 @@ func (s *weeklyStore) Add(uid string, content string) error {
 					" RETURNING id", uid, year, week, content)
 		}
 		if id > 0 {
-			_, err = db.Exec("UPDATE weekly_report SET content = $1 WHERE id = $2", content, id)
+			_, err = db.Exec("UPDATE weekly_report SET content = $1, updated = now() WHERE id = $2", content, id)
 			return err
 		}
 		return err
@@ -92,7 +92,7 @@ func (s *weeklyStore) Add(uid string, content string) error {
 func (s *weeklyStore) Update(id int, content string) (err error) {
 	qs := func(db dbTxer) error {
 		if id > 0 {
-			_, err = db.Exec("UPDATE weekly_report SET content = $1 WHERE id = $2", content, id)
+			_, err = db.Exec("UPDATE weekly_report SET content = $1, updated = now() WHERE id = $2", content, id)
 			return err
 		}
 		return fmt.Errorf("invalid id value %d", id)
@@ -119,11 +119,12 @@ func (s *weeklyStore) Applaud(id int, uid string) error {
 func (s *weeklyStore) Stat(start, end time.Time) (rsr *weekly.ReportStatResponse, err error) {
 	rsr = &weekly.ReportStatResponse{}
 	rsr.Commited = []*weekly.ReportStat{}
-	year, week := end.ISOWeek()
+	year1, _ := start.ISOWeek()
+	year2, week2 := end.ISOWeek()
 	qs := func(db dber) error {
 		return db.Select(&rsr.Commited,
-			// TODO: 使用create_at来作为筛选条件，如果将来加上了补交功能，则这块儿需要更改
-			// 如果report和status两张表有user_id、year、week三个字段都想同的数据，以status为准
+			// TODO: 使用 created 来作为筛选条件， 如果将来加上了补交功能，则这块儿需要更改
+			// 如果 report 和 status 两张表有 uid、year、week 三个字段都想同的数据，以 status 为准
 			"SELECT id, uid, iso_year,iso_week, 0 AS status, created FROM weekly_report "+
 				"WHERE created >=$1 AND created <=$2 "+
 				"AND NOT EXISTS(SELECT uid, iso_year, iso_week FROM weekly_status "+
@@ -131,11 +132,12 @@ func (s *weeklyStore) Stat(start, end time.Time) (rsr *weekly.ReportStatResponse
 				"AND weekly_report.iso_year=weekly_status.iso_year "+
 				"AND weekly_report.iso_week=weekly_status.iso_week) UNION "+
 				"SELECT id, uid,iso_year,iso_week,status, created FROM weekly_status "+
-				"WHERE iso_year>0 AND iso_week>0 AND (iso_year<$3 OR (iso_year=$3 AND iso_week<=$4))",
+				"WHERE iso_year>0 AND iso_week>0 AND (iso_year >= $5 AND iso_year<=$3 OR (iso_year=$3 AND iso_week<=$4))",
 			start,
 			end,
-			year,
-			week,
+			year2,
+			week2,
+			year1,
 		)
 	}
 	err = withDbQuery(qs)
