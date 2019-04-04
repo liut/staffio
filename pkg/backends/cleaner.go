@@ -1,44 +1,52 @@
 package backends
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
 	"time"
 )
 
 const (
-	AuthorizationExpiration = 900
-	AccessExpiration        = 86400
+	authorizationExpiration = 60 * 15
+	accessExpiration        = 60 * 60 * 24
+	passwordExpiration      = 60 * 120
+	sessionExpiration       = 60 * 30
 )
 
 // 清理过期的数据
-func Cleanup() error {
+func Cleanup() (err error) {
 	now := time.Now()
-	return withDbQuery(func(db dber) (err error) {
-		var (
-			r1, r2, r3 sql.Result
-			c1, c2, c3 int64
-		)
-		r1, err = db.Exec("DELETE FROM oauth_authorization_code WHERE created < $1", now.Add(-time.Second*AuthorizationExpiration))
-		if err != nil {
-			log.Printf("clean authorize ERR %s", err)
-			return
-		}
-		c1, _ = r1.RowsAffected()
-		r2, err = db.Exec("DELETE FROM oauth_access_token WHERE created < $1", now.Add(-time.Second*AccessExpiration))
-		if err != nil {
-			log.Printf("clean access ERR %s", err)
-			return
-		}
-		c2, _ = r2.RowsAffected()
-		r3, err = db.Exec("DELETE FROM http_sessions WHERE expires_on < now()")
-		if err != nil {
-			log.Printf("clean sessions ERR %s", err)
-			return
-		}
-		c3, _ = r3.RowsAffected()
-		debug("Cleanup done at %s: %d, %d, %d", now, c1, c2, c3)
+
+	err = deleteWithEnd("oauth_authorization_code", "created", now.Add(-time.Second*authorizationExpiration))
+	if err != nil {
 		return
+	}
+	err = deleteWithEnd("oauth_access_token", "created", now.Add(-time.Second*accessExpiration))
+	if err != nil {
+		return
+	}
+	err = deleteWithEnd("password_reset", "created", now.Add(-time.Second*passwordExpiration))
+	if err != nil {
+		return
+	}
+	err = deleteWithEnd("http_sessions", "created", now.Add(-time.Second*sessionExpiration))
+	if err != nil {
+		return
+	}
+	return
+}
+
+func deleteWithEnd(name, field string, end time.Time) error {
+	return withDbQuery(func(db dber) error {
+		qs := fmt.Sprintf("DELETE FROM %s WHERE %s < $1", name, field)
+		res, err := db.Exec(qs, end)
+		if err != nil {
+			log.Printf("clean %q ERR %s", name, err)
+			return err
+		}
+		count, _ := res.RowsAffected()
+		log.Printf("clean %q: %d affected", name, count)
+		return nil
 	})
 }
 
