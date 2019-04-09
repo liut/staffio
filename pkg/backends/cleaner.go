@@ -29,7 +29,7 @@ func Cleanup() (err error) {
 	if err != nil {
 		return
 	}
-	err = deleteWithEnd("http_sessions", "created", now.Add(-time.Second*sessionExpiration))
+	err = deleteWithEnd("http_sessions", "expires_on", now.Add(-time.Second*sessionExpiration))
 	if err != nil {
 		return
 	}
