@@ -3,9 +3,10 @@
 
 FIRST_START_DONE="/var/lib/openldap/slapd-first-start-done"
 
+CONF=/etc/openldap/slapd.conf
+
 if [ ! -e "$FIRST_START_DONE" ]; then
 
-	CONF=/etc/openldap/slapd.conf
 	LDAP_ADMIN_PASSWORD_ENCRYPTED=$(slappasswd -s $LDAP_ADMIN_PASSWORD)
 
 	sed -i 's|^include		/etc/openldap/schema/core.schema|&\
@@ -33,7 +34,18 @@ access to *\
 	echo 'index   sn          eq' >> $CONF
 	echo 'index   mail        eq' >> $CONF
 
+	echo '' >> $CONF
+
+	ETC_HOSTS=$(cat /etc/hosts | sed "/$HOSTNAME/d")
+	echo "0.0.0.0 $HOSTNAME" > /etc/hosts
+	echo "$ETC_HOSTS" >> /etc/hosts
+
+	cat $CONF
+
+	[ -e /run/openldap ] || mkdir /run/openldap && chown ldap:ldap /run/openldap
+
 	touch $FIRST_START_DONE
 fi
 
-slapd -h "ldap://$HOSTNAME ldaps://$HOSTNAME ldapi:///" -u ldap -d ${LDAP_LOG_LEVEL}
+echo "slapd starting on $HOSTNAME"
+exec /usr/sbin/slapd -h "ldap://$HOSTNAME ldaps://$HOSTNAME" -u ldap -g ldap -f ${CONF} -d ${LDAP_LOG_LEVEL}

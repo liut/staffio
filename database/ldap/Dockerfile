@@ -1,6 +1,12 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
-RUN apk add --update bash openldap openldap-clients openldap-passwd-pbkdf2 \
+RUN apk add --update \
+	bash \
+	openldap \
+	openldap-back-mdb \
+	openldap-clients \
+	openldap-passwd-pbkdf2 \
+	openssl \
   && rm -rf /var/cache/apk/*
 
 ENV LDAP_LOG_LEVEL=256 LDAP_ORGANISATION="Example Inc." LDAP_DOMAIN=example.org \
@@ -9,7 +15,7 @@ ENV LDAP_LOG_LEVEL=256 LDAP_ORGANISATION="Example Inc." LDAP_DOMAIN=example.org 
 
 EXPOSE 389 636
 
-ADD schema/staffio.schema /etc/openldap/schema/
-ADD scripts/* /usr/sbin/
+ADD schema/* /etc/openldap/schema/
+ADD sbin/* /usr/sbin/
 
 CMD ["/usr/sbin/start.sh"]

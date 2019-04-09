@@ -152,7 +152,7 @@ func (ls *ldapSource) readyBase() (err error) {
 	dn := Base
 	_, err = ls.Entry(dn, etBase.Filter, etBase.Attributes...)
 	if err == ErrNotFound {
-		ar := ldap.NewAddRequest(dn)
+		ar := ldap.NewAddRequest(dn, nil)
 		ar.Attribute("objectClass", []string{etBase.OC, "organization", "top"})
 		ar.Attribute("o", []string{Domain})
 		ar.Attribute(etBase.PK, []string{splitDC(Base)})
@@ -172,7 +172,7 @@ func (ls *ldapSource) readyParent(name string) (err error) {
 	_, err = ls.Entry(dn, etParent.Filter, etParent.Attributes...)
 	if err == ErrNotFound {
 		debug("ready parent %s, ERR %s", name, err)
-		ar := ldap.NewAddRequest(dn)
+		ar := ldap.NewAddRequest(dn, nil)
 		ar.Attribute("objectClass", []string{etParent.OC, "top"})
 		ar.Attribute(etParent.PK, []string{name})
 		err = ls.c.Add(ar)

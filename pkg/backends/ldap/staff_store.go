@@ -56,7 +56,7 @@ func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 }
 
 func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
-	ar := ldap.NewAddRequest(dn)
+	ar := ldap.NewAddRequest(dn, nil)
 	ar.Attribute("objectClass", objectClassPeople)
 	ar.Attribute("uid", []string{staff.Uid})
 	ar.Attribute("sn", []string{staff.Surname})
@@ -100,7 +100,7 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 }
 
 func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.ModifyRequest {
-	mr := ldap.NewModifyRequest(dn)
+	mr := ldap.NewModifyRequest(dn, nil)
 	mr.Replace("objectClass", objectClassPeople)
 	if staff.Surname != entry.GetAttributeValue("sn") {
 		mr.Replace("sn", []string{staff.Surname})
