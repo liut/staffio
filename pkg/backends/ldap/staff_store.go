@@ -10,11 +10,6 @@ import (
 	"github.com/liut/staffio/pkg/models"
 )
 
-var (
-	// simpleSecurityObject, "simpleSecurityObject"
-	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
-)
-
 func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 	uid := staff.Uid
 	err = ls.Bind(ls.BindDN, ls.Passwd, false)
@@ -27,9 +22,9 @@ func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 	if err == nil {
 		// :update
 		mr := makeModifyRequest(dn, entry, staff)
-		eid_str := strconv.Itoa(staff.EmployeeNumber)
-		if staff.EmployeeNumber > 0 && eid_str != entry.GetAttributeValue("employeeNumber") {
-			mr.Replace("employeeNumber", []string{eid_str})
+		eidStr := strconv.Itoa(staff.EmployeeNumber)
+		if staff.EmployeeNumber > 0 && eidStr != entry.GetAttributeValue("employeeNumber") {
+			mr.Replace("employeeNumber", []string{eidStr})
 		}
 		if staff.EmployeeType != entry.GetAttributeValue("employeeType") {
 			mr.Replace("employeeType", []string{staff.EmployeeType})

@@ -2,9 +2,10 @@ package ldap
 
 import (
 	"fmt"
+	"os"
 )
 
-// LDAP config
+// Config LDAP config
 type Config struct {
 	Addr, Base   string
 	Bind, Passwd string
@@ -51,8 +52,8 @@ const (
 )
 
 var (
-	Base   = "dc=mydomain,dc=net"
-	Domain = "mydomain.net"
+	Base   string
+	Domain string
 
 	etBase   = NewEentryType("dc", "dcObject", "dc", "o")
 	etParent = NewEentryType("ou", "organizationalUnit", "ou")
@@ -61,4 +62,19 @@ var (
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp", "jpegPhoto",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
+
+	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
 )
+
+func init() {
+	Base = envOr("LDAP_BASE_DN", "dc=mydomain,dc=net")
+	Domain = envOr("LDAP_DOMAIN", "mydomain.net")
+}
+
+func envOr(key, dft string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		return dft
+	}
+	return v
+}
