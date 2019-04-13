@@ -96,17 +96,13 @@ echo "INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://loc
 
 > `cat .env`
 ```
-STAFFIO_PREFIX=http://localhost:3000
-STAFFIO_PASSWORD_SECRET="mypasswordsecret"
-STAFFIO_HTTP_LISTEN="localhost:3000"
+STAFFIO_HTTP_LISTEN=":3000"
 STAFFIO_LDAP_HOSTS=slapd.hostname
 STAFFIO_LDAP_BASE="dc=example,dc=org"
 STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org"
 STAFFIO_LDAP_PASS="mypassword"
 STAFFIO_BACKEND_DSN="postgres://staffio:mypassword@localhost:54322/staffio?sslmode=disable"
-STAFFIO_SESS_NAME="staff_sess"
-STAFFIO_SESS_SECRET="very-secret"
-STAFFIO_SESS_MAXAGE=86400
+STAFFIO_PASSWORD_SECRET="mypasswordsecret"
 ```
 
 ## launch development
@@ -123,8 +119,8 @@ forego start
 
 ```sh
 make dist package
-scp *-linux-amd64-*.tar.xz remote:/path/of/app/bin/
-rsync -rpt --delete templates htdocs remote:/path/of/app/
+scp dist/linux_amd64/staffio remote:/opt/staffio/bin/
+rsync -rpt --delete templates htdocs remote:/opt/staffio/
 ```
 
 ### add staff
