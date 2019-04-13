@@ -64,13 +64,13 @@ var addstaffCmd = &cobra.Command{
 			CommonName: cn,
 			Surname:    sn,
 		}
-		_, err := svc.Save(staff)
+		isNew, err := svc.Save(staff)
 		if err != nil {
 			log.Printf("save %v ERR %s", staff, err)
 			return
 		}
 		log.Printf("saved staff %v", staff)
-		if password != "" {
+		if isNew && password != "" {
 			err = svc.PasswordReset(uid, password)
 			if err != nil {
 				log.Printf("reset %s password ERR %s", uid, err)
@@ -96,4 +96,7 @@ func init() {
 	addstaffCmd.Flags().StringP("password", "p", "", "password")
 	addstaffCmd.Flags().StringP("name", "n", "", "name")
 	addstaffCmd.Flags().String("sn", "", "name")
+	addstaffCmd.MarkFlagRequired("uid")
+	addstaffCmd.MarkFlagRequired("name")
+	addstaffCmd.MarkFlagRequired("sn")
 }
