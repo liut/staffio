@@ -48,7 +48,8 @@ func DN(pk, name, parent string) string {
 }
 
 const (
-	timeLayout = "20060102150405Z"
+	TimeLayout = "20060102150405Z"
+	DateLayout = "20060102"
 )
 
 var (

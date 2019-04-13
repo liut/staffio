@@ -2,6 +2,8 @@
 .PHONY : dep vet main clean dist package
 DATE := `date '+%Y%m%d'`
 
+WITH_ENV = env `cat .env 2>/dev/null | xargs`
+
 NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
 TAG:=`git describe --tags --always`
@@ -82,8 +84,8 @@ gofmt:
 
 test-ldap: vet
 	mkdir -p tests
-	@$(WITH_ENV) go test -v -cover -coverprofile tests/cover_ldap.out ./pkg/backends/ldap
-	@$(WITH_ENV) go tool cover -html=tests/cover_ldap.out -o tests/cover_ldap.out.html
+	@DEBUG=staffio:ldap go test -v -cover -coverprofile tests/cover_ldap.out ./pkg/backends/ldap
+	@go tool cover -html=tests/cover_ldap.out -o tests/cover_ldap.out.html
 
 
 docker-build:

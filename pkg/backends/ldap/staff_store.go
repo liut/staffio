@@ -133,7 +133,7 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 	if len(staff.Description) > 0 && staff.Description != entry.GetAttributeValue("description") {
 		mr.Replace("description", []string{staff.Description})
 	}
-	mr.Replace("modifiedTime", []string{time.Now().Format(timeLayout)})
+	mr.Replace("modifiedTime", []string{time.Now().Format(TimeLayout)})
 	return mr
 }
 

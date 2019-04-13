@@ -3,6 +3,7 @@ package ldap
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -43,8 +44,9 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func TestSourceFailed(t *testing.T) {
+func TestStoreFailed(t *testing.T) {
 	var err error
+	var _s *LDAPStore
 	_, err = NewStore(&Config{})
 	assert.Error(t, err)
 	assert.EqualError(t, err, ErrEmptyBase.Error())
@@ -53,16 +55,15 @@ func TestSourceFailed(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "parse")
 
-	var s *ldapSource
-	s, err = NewSource(&Config{
+	_s, err = NewStore(&Config{
 		Addr: "ldaps://localhost",
 		Base: defaultBase,
 	})
 	assert.NoError(t, err)
-	log.Printf("ldap source: %s", s)
-	err = s.Ready()
+	// log.Printf("ldap store: %s", _s)
+	err = _s.Ready()
 	assert.Error(t, err)
-	s.Close()
+	_s.Close()
 }
 
 func TestStaffError(t *testing.T) {
@@ -91,9 +92,21 @@ func TestStaff(t *testing.T) {
 	sn := "doe"
 	password := "secret"
 	staff := &models.Staff{
+		// required fields
 		Uid:        uid,
 		CommonName: cn,
 		Surname:    sn,
+
+		// optional fields
+		GivenName:   "fawn",
+		AvatarPath:  "avatar.png",
+		Description: "It's me",
+		Email:       "fawn@deer.cc",
+		Nickname:    "tiny",
+		Birthday:    "20120304",
+		Gender:      models.Male,
+		Mobile:      "13012341234",
+		JoinDate:    time.Now().Format(DateLayout),
 	}
 
 	var isNew bool
@@ -119,7 +132,16 @@ func TestStaff(t *testing.T) {
 	err = store.Authenticate(uid, password)
 	assert.NoError(t, err)
 
-	staff.GivenName = "fawn"
+	staff.CommonName = "doe2"
+	staff.GivenName = "fawn2"
+	staff.Surname = "deer2"
+	staff.AvatarPath = "avatar2.png"
+	staff.Description = "It's me 2"
+	staff.Email = "fawn2@deer.cc"
+	staff.Nickname = "tiny2"
+	staff.Birthday = "20120305"
+	staff.Gender = models.Female
+	staff.Mobile = "13012345678"
 	err = store.ModifyBySelf(uid, password, staff)
 	assert.NoError(t, err)
 
@@ -141,11 +163,12 @@ func TestGroup(t *testing.T) {
 func TestReady(t *testing.T) {
 	var err error
 	name := "teams"
-	err = store.sources[0].Ready("")
+	ls := store.sources[0]
+	err = ls.Ready("")
 	assert.NoError(t, err)
-	err = store.sources[0].Ready(name)
+	err = ls.Ready(name)
 	assert.NoError(t, err)
 
-	err = store.sources[0].Delete(etParent.DN(name))
+	err = ls.Delete(etParent.DN(name))
 	assert.NoError(t, err)
 }

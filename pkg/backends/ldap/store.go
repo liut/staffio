@@ -40,16 +40,21 @@ func NewStore(cfg *Config) (*LDAPStore, error) {
 	return store, nil
 }
 
+func (s *LDAPStore) Close() {
+	for _, ls := range s.sources {
+		ls.Close()
+	}
+}
+
 func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
-		dn := ls.UDN(uid)
-		err = ls.Bind(dn, passwd)
+		err = ls.Bind(ls.UDN(uid), passwd)
 		if err == nil {
 			debug("authenticate(%s,****) ok", uid)
 			return
 		}
 	}
-	log.Printf("Authen failed for %s, reason: %s", uid, err)
+	log.Printf("Authen failed for %s, ERR: %s", uid, err)
 	return
 }
 

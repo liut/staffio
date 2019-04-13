@@ -30,6 +30,7 @@ func (ls *ldapSource) Delete(dn string) error {
 		if err != nil {
 			log.Printf("LDAP delete(%s) ERR %s", dn, err)
 		}
+		debug("delete %q, err %v", dn, err)
 		return
 	})
 }

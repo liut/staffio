@@ -12,6 +12,8 @@ type Gender = common.Gender
 
 const (
 	Unknown = common.Unknown
+	Male    = common.Male
+	Female  = common.Female
 )
 
 var (

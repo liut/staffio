@@ -47,7 +47,8 @@ func (ls *ldapSource) PasswordReset(uid, newPasswd string) error {
 		dn := ls.UDN(uid)
 		passwordModifyRequest := ldap.NewPasswordModifyRequest(dn, "", newPasswd)
 		passwordModifyResponse, err := c.PasswordModify(passwordModifyRequest)
-		log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
+		debug("passwordModify %q, result %v, err %v", dn, passwordModifyResponse, err)
+		// log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
 		return err
 	})
 

@@ -94,16 +94,6 @@ func NewSource(cfg *Config) (*ldapSource, error) {
 	return ls, nil
 }
 
-func (s *LDAPStore) Close() {
-	for _, ls := range s.sources {
-		ls.Close()
-	}
-}
-
-func (ls *ldapSource) String() string {
-	return ls.Addr
-}
-
 func (ls *ldapSource) Close() {
 	if ls.cp != nil {
 		ls.cp.Close()
@@ -309,23 +299,23 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 		}
 	}
 	if str := entry.GetAttributeValue("createdTime"); str != "" {
-		u.Created, err = time.Parse(timeLayout, str)
+		u.Created, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		}
 	} else if str := entry.GetAttributeValue("createTimestamp"); str != "" {
-		u.Created, err = time.Parse(timeLayout, str)
+		u.Created, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		}
 	}
 	if str := entry.GetAttributeValue("modifiedTime"); str != "" {
-		u.Updated, err = time.Parse(timeLayout, str)
+		u.Updated, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		}
 	} else if str := entry.GetAttributeValue("modifyTimestamp"); str != "" {
-		u.Updated, err = time.Parse(timeLayout, str)
+		u.Updated, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		}

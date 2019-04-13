@@ -21,7 +21,7 @@ func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err
 
 func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
 
-	debug("change profile for %s staff: %v", uid, staff)
+	debug("modify self %s staff: %v", uid, staff)
 
 	userdn := ls.UDN(uid)
 	return ls.opWithDN(userdn, password, func(c ldap.Client) (err error) {
@@ -35,6 +35,7 @@ func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
 		if err = c.Modify(modify); err != nil {
 			log.Printf("Modify ERROR: %s\n", err)
 		}
+		debug("modified %q, err %v", userdn, err)
 		return nil
 	})
 

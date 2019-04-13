@@ -23,9 +23,6 @@ func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
 			return
 		}
 	}
-	if err == nil {
-		err = ErrNotFound
-	}
 	return
 }
 
