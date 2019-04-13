@@ -23,11 +23,12 @@ var (
 )
 
 type server struct {
-	router  *gin.Engine
-	service backends.Servicer
-	osvr    *osin.Server
-	wxAuth  *exwechat.API
-	checkin *exwechat.CAPI
+	root, fs string
+	router   *gin.Engine
+	service  backends.Servicer
+	osvr     *osin.Server
+	wxAuth   *exwechat.API
+	checkin  *exwechat.CAPI
 }
 
 func (s *server) IsKeeper(uid string) bool {
@@ -38,8 +39,8 @@ func (s *server) InGroup(gn, uid string) bool {
 	return s.service.InGroup(gn, uid)
 }
 
-// Default returns current server instance
-func Default() *server {
+// New returns current server instance
+func New(root, fs string) *server {
 	if svr != nil {
 		return svr
 	}
@@ -58,6 +59,8 @@ func Default() *server {
 	}
 
 	svr = &server{
+		root:    root,
+		fs:      fs,
 		router:  gin.New(),
 		service: service,
 		osvr:    osvr,

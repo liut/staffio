@@ -17,17 +17,24 @@ func (s *LDAPStore) Delete(uid string) (err error) {
 }
 
 func (ls *ldapSource) DeleteStaff(uid string) (err error) {
-	err = ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err != nil {
-		return
-	}
-	dn := ls.UDN(uid)
-	delRequest := ldap.NewDelRequest(dn, nil)
-	err = ls.c.Del(delRequest)
-
-	if err != nil {
+	if err = ls.Delete(ls.UDN(uid)); err != nil {
 		log.Printf("DeleteStaff %q Err: %s", uid, err)
 	}
 
 	return
+}
+
+func (ls *ldapSource) Delete(dn string) error {
+	return ls.opWithMan(func(c ldap.Client) (err error) {
+		err = ldapEntryDel(c, dn)
+		if err != nil {
+			log.Printf("LDAP delete(%s) ERR %s", dn, err)
+		}
+		return
+	})
+}
+
+func ldapEntryDel(c ldap.Client, dn string) error {
+	delRequest := ldap.NewDelRequest(dn, nil)
+	return c.Del(delRequest)
 }

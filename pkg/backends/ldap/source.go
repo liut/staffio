@@ -12,21 +12,19 @@ import (
 	"github.com/go-ldap/ldap"
 	. "github.com/wealthworks/go-debug"
 
+	"github.com/liut/staffio/pkg/backends/ldap/pool"
 	"github.com/liut/staffio/pkg/models"
 )
 
+type PoolStats = pool.Stats
+
 // Basic LDAP authentication service
 type ldapSource struct {
-	Addr       string     // LDAP address with host and port
-	UseSSL     bool       // Use SSL
-	Base       string     // Base DN
-	BindDN     string     // default reader dn
-	Passwd     string     // reader passwd
-	Filter     string     // Query filter to validate entry
-	Attributes []string   // Select fileds
-	Enabled    bool       // if this source is disabled
-	c          *ldap.Conn // conn
-	bound      bool
+	Addr   string      // LDAP address with host and port
+	Base   string      // Base DN
+	BindDN string      // default reader dn
+	Passwd string      // reader passwd
+	cp     pool.Pooler // conn
 }
 
 var (
@@ -71,20 +69,26 @@ func NewSource(cfg *Config) (*ldapSource, error) {
 		}
 	}
 
-	filter := etPeople.Filter
-	if cfg.Filter != "" {
-		filter = cfg.Filter
+	opt := &pool.Options{
+		Factory: func() (ldap.Client, error) {
+			if useSSL {
+				return ldap.DialTLS("tcp", u.Host, &tls.Config{InsecureSkipVerify: true})
+			}
+			return ldap.Dial("tcp", u.Host)
+		},
+		PoolSize:           PoolSize,
+		PoolTimeout:        30 * time.Second,
+		MaxConnAge:         25 * time.Minute,
+		IdleTimeout:        5 * time.Minute,
+		IdleCheckFrequency: 2 * time.Minute,
 	}
 
 	ls := &ldapSource{
-		Addr:       u.Host,
-		UseSSL:     useSSL,
-		Base:       cfg.Base,
-		BindDN:     cfg.Bind,
-		Passwd:     cfg.Passwd,
-		Filter:     filter,
-		Attributes: etPeople.Attributes,
-		Enabled:    true,
+		Addr:   u.Host,
+		Base:   cfg.Base,
+		BindDN: cfg.Bind,
+		Passwd: cfg.Passwd,
+		cp:     pool.NewPool(opt),
 	}
 
 	return ls, nil
@@ -100,33 +104,9 @@ func (ls *ldapSource) String() string {
 	return ls.Addr
 }
 
-func (ls *ldapSource) dial() (*ldap.Conn, error) {
-	if ls.c != nil {
-		return ls.c, nil
-	}
-
-	var err error
-	if ls.UseSSL {
-		ls.c, err = ldap.DialTLS("tcp", ls.Addr, &tls.Config{InsecureSkipVerify: true})
-	} else {
-		ls.c, err = ldap.Dial("tcp", ls.Addr)
-	}
-
-	if err != nil {
-		log.Printf("LDAP Connect error, %s:%v", ls.Addr, err)
-		ls.Enabled = false
-		return nil, err
-	}
-
-	debug("connect to %s ok", ls.Addr)
-	return ls.c, nil
-}
-
 func (ls *ldapSource) Close() {
-	ls.bound = false
-	if ls.c != nil {
-		ls.c.Close()
-		ls.c = nil
+	if ls.cp != nil {
+		ls.cp.Close()
 	}
 }
 
@@ -134,30 +114,32 @@ func (ls *ldapSource) UDN(uid string) string {
 	return etPeople.DN(uid)
 }
 
-func (ls *ldapSource) Ready() (err error) {
-	err = ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err == nil {
-		if err = ls.readyBase(); err != nil {
-			return
+func (ls *ldapSource) Ready(names ...string) (err error) {
+	err = ls.opWithMan(func(c ldap.Client) (err error) {
+		for _, name := range names {
+			if name == "" {
+				continue
+			}
+			if name == "base" {
+				err = ldapEntryReady(c, etBase, splitDC(ls.Base))
+			} else {
+				err = ldapEntryReady(c, etParent, name)
+			}
 		}
-		err = ls.readyParent("groups")
-		if err == nil {
-			err = ls.readyParent("people")
-		}
-	}
+		return
+	})
 	return
 }
 
-func (ls *ldapSource) readyBase() (err error) {
-	dn := Base
-	_, err = ls.Entry(dn, etBase.Filter, etBase.Attributes...)
+func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
+	dn := et.DN(name)
+	_, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
 	if err == ErrNotFound {
 		ar := ldap.NewAddRequest(dn, nil)
-		ar.Attribute("objectClass", []string{etBase.OC, "organization", "top"})
-		ar.Attribute("o", []string{Domain})
-		ar.Attribute(etBase.PK, []string{splitDC(Base)})
+		ar.Attribute("objectClass", []string{et.OC, "top"})
+		ar.Attribute(et.PK, []string{name})
 		debug("add %v", ar)
-		err = ls.c.Add(ar)
+		err = c.Add(ar)
 		if err != nil {
 			debug("add %q, ERR: %s", dn, err)
 		} else {
@@ -167,76 +149,14 @@ func (ls *ldapSource) readyBase() (err error) {
 	return
 }
 
-func (ls *ldapSource) readyParent(name string) (err error) {
-	dn := etParent.DN(name)
-	_, err = ls.Entry(dn, etParent.Filter, etParent.Attributes...)
-	if err == ErrNotFound {
-		debug("ready parent %s, ERR %s", name, err)
-		ar := ldap.NewAddRequest(dn, nil)
-		ar.Attribute("objectClass", []string{etParent.OC, "top"})
-		ar.Attribute(etParent.PK, []string{name})
-		err = ls.c.Add(ar)
-		if err != nil {
-			debug("add %q, ERR: %s", dn, err)
-		}
-	}
-	return
-}
-
-func (ls *ldapSource) Bind(dn, passwd string, force bool) error {
-	if !force && ls.bound {
-		return nil
-	}
-
-	l, err := ls.dial()
-	if err != nil {
-		return err
-	}
-
-	err = l.Bind(dn, passwd)
-	if err != nil {
-		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err.Error())
-		if le, ok := err.(*ldap.Error); ok {
-			if le.ResultCode == 49 {
-				return ErrLogin
-			}
-		}
-		return err
-	}
-
-	debug("bind(%s, ***) ok", dn)
-	ls.bound = true
-	return nil
-}
-
-// deprecated with Entry(dn, filter string, attrs ...string)
-func (ls *ldapSource) getEntry(udn string) (*ldap.Entry, error) {
-	return ls.Entry(udn, ls.Filter, ls.Attributes...)
-}
-
-func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
-	return ls.Entry(ls.GDN(cn), etGroup.Filter, etGroup.Attributes...)
-}
-
-func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
-	return ls.Entry(ls.UDN(uid), ls.Filter, ls.Attributes...)
-}
-
-// Entry return a special entry with dn and filter
-func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, error) {
-	if !ls.bound {
-		err := ls.Bind(ls.BindDN, ls.Passwd, false)
-		if err != nil {
-			return nil, err
-		}
-	}
+func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
 		dn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		filter,
 		attrs,
 		nil)
-	sr, err := ls.c.Search(search)
+	sr, err := c.Search(search)
 	if err == nil {
 		if len(sr.Entries) > 0 {
 			return sr.Entries[0], nil
@@ -250,20 +170,74 @@ func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, er
 	}
 	log.Printf("LDAP Search '%s' Error: %s", dn, err)
 	return nil, err
+}
 
+func (ls *ldapSource) Bind(dn, passwd string) error {
+	err := ls.opWithDN(dn, passwd, func(c ldap.Client) error {
+		return nil
+	})
+	if err != nil {
+		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err)
+		if le, ok := err.(*ldap.Error); ok {
+			if le.ResultCode == 49 {
+				return ErrLogin
+			}
+		}
+		return err
+	}
+
+	debug("bind(%s, ***) ok", dn)
+	return nil
+}
+
+type opFunc func(c ldap.Client) error
+
+// opWithMan admin operate
+func (ls *ldapSource) opWithMan(op opFunc) error {
+	return ls.opWithDN(ls.BindDN, ls.Passwd, op)
+}
+
+func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
+	c, err := ls.cp.Get()
+	if err == nil {
+		defer ls.cp.Put(c)
+		err = c.Bind(dn, passwd)
+		if err == nil {
+			debug("conn from %s (%d, %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), splitDC(dn))
+			return op(c)
+		}
+		log.Printf("LDAP bind(%s) ERR %s", dn, err)
+		return err
+	}
+
+	log.Printf("get LDAP client from pool error, %s:%v", ls.Addr, err)
+	return err
+}
+
+func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
+	return ls.Entry(ls.GDN(cn), etGroup.Filter, etGroup.Attributes...)
+}
+
+func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
+	return ls.Entry(ls.UDN(uid), etPeople.Filter, etPeople.Attributes...)
+}
+
+// Entry return a special entry with dn and filter
+func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, error) {
+	var entry *ldap.Entry
+	err := ls.opWithMan(func(c ldap.Client) (err error) {
+		entry, err = ldapEntryGet(c, dn, filter, attrs...)
+		return
+	})
+	return entry, err
 }
 
 // GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
-func (ls *ldapSource) GetStaff(uid string) (*models.Staff, error) {
-	err := ls.Bind(ls.BindDN, ls.Passwd, false)
+func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
+	var entry *ldap.Entry
+	entry, err = ls.People(uid)
 	if err != nil {
-		log.Printf("bind faild %s", err)
-		return nil, err
-	}
-
-	entry, err := ls.getEntry(ls.UDN(uid))
-	if err != nil {
-		log.Printf("getEntry(%s) ERR %s", uid, err)
+		log.Printf("ldapEntryGet(%s) ERR %s", uid, err)
 		return nil, err
 	}
 
@@ -271,11 +245,11 @@ func (ls *ldapSource) GetStaff(uid string) (*models.Staff, error) {
 }
 
 func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
-	err := ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err != nil {
-		// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
-		return nil
-	}
+	// err := ls.Bind(ls.BindDN, ls.Passwd, false)
+	// if err != nil {
+	// 	// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
+	// 	return nil
+	// }
 
 	if limit < 1 {
 		limit = 1
@@ -283,11 +257,17 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 	search := ldap.NewSearchRequest(
 		"ou=people,"+ls.Base,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		ls.Filter,
-		ls.Attributes,
+		etPeople.Filter,
+		etPeople.Attributes,
 		nil)
 
-	sr, err := ls.c.SearchWithPaging(search, uint32(limit))
+	var (
+		sr *ldap.SearchResult
+	)
+	err := ls.opWithMan(func(c ldap.Client) (err error) {
+		sr, err = c.SearchWithPaging(search, uint32(limit))
+		return
+	})
 	if err != nil {
 		log.Printf("ERROR: %s for search %v\n", err, search)
 		return

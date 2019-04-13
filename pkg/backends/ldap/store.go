@@ -43,7 +43,7 @@ func NewStore(cfg *Config) (*LDAPStore, error) {
 func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
 		dn := ls.UDN(uid)
-		err = ls.Bind(dn, passwd, true)
+		err = ls.Bind(dn, passwd)
 		if err == nil {
 			debug("authenticate(%s,****) ok", uid)
 			return
@@ -54,13 +54,10 @@ func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 }
 
 func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
-	// log.Printf("sources %s", ldapSources)
 	for _, ls := range s.sources {
 		staff, err = ls.GetStaff(uid)
 		if err == nil {
 			return
-		} else {
-			log.Printf("GetStaff %s ERR %s", uid, err)
 		}
 	}
 	err = ErrNotFound
@@ -70,9 +67,6 @@ func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 func (s *LDAPStore) All() (staffs models.Staffs) {
 	for _, ls := range s.sources {
 		staffs = ls.ListPaged(s.pageSize)
-		if len(staffs) > 0 {
-			return
-		}
 	}
 	return
 }
@@ -90,7 +84,7 @@ func (s *LDAPStore) Save(staff *models.Staff) (isNew bool, err error) {
 
 func (s *LDAPStore) Ready() error {
 	for _, ls := range s.sources {
-		err := ls.Ready()
+		err := ls.Ready("base", "groups", "people")
 		if err != nil {
 			return err
 		}

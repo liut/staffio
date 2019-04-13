@@ -64,6 +64,8 @@ var (
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 
 	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
+
+	PoolSize = 10
 )
 
 func init() {
