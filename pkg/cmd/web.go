@@ -1,0 +1,119 @@
+// Copyright © 2019 liut <liutao@liut.cc>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+package cmd
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/wealthworks/go-utils/reaper"
+
+	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/web"
+)
+
+// webCmd represents the web command
+var webCmd = &cobra.Command{
+	Use:   "web",
+	Short: "Start main web server",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.ParseFlags(args)
+		webRun()
+	},
+}
+
+var webFS string
+var webRoot string
+
+func init() {
+	RootCmd.AddCommand(webCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// webCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	webCmd.Flags().StringVar(&webFS, "fs", "bind", "file system [bind | local]")
+	webCmd.Flags().StringVar(&webRoot, "root", "./", "app root directory")
+}
+
+const (
+	readTimeout  time.Duration = 10 * time.Second
+	writeTimeout               = 15 * time.Second
+)
+
+func webRun() {
+	log.SetFlags(log.Ltime | log.Lshortfile)
+	settings.Parse()
+
+	backends.InitSMTP()
+
+	// web.SetBase("/v1/")
+	ws := web.New(webRoot, webFS)
+	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
+
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)
+
+	srv := &http.Server{
+		Addr:         settings.HttpListen,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		Handler:      ws,
+	}
+
+	go func() {
+		// service connections
+		if err := srv.ListenAndServe(); err != nil {
+			log.Printf("listen: %s", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt, os.Kill)
+	<-quit
+	log.Print("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	log.Print("Server exit")
+
+}

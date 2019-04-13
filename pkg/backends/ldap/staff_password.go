@@ -1,8 +1,9 @@
 package ldap
 
 import (
-	"github.com/go-ldap/ldap"
 	"log"
+
+	"github.com/go-ldap/ldap"
 )
 
 func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
@@ -17,20 +18,17 @@ func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error)
 
 func (ls *ldapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	userdn := ls.UDN(uid)
-	err := ls.Bind(userdn, oldPasswd, true)
-	if err != nil {
-		return err
-	}
-	passwordModifyRequest := ldap.NewPasswordModifyRequest(userdn, oldPasswd, newPasswd)
-	passwordModifyResponse, err := ls.c.PasswordModify(passwordModifyRequest)
+	return ls.opWithDN(userdn, oldPasswd, func(c ldap.Client) error {
+		passwordModifyRequest := ldap.NewPasswordModifyRequest(userdn, oldPasswd, newPasswd)
+		passwordModifyResponse, err := c.PasswordModify(passwordModifyRequest)
 
-	if err != nil {
-		log.Printf("PasswordModify ERR: %s", err)
-		return err
-	}
-
-	log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
-	return nil
+		if err != nil {
+			log.Printf("PasswordModify ERR: %s", err)
+			return err
+		}
+		log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
+		return nil
+	})
 }
 
 func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
@@ -45,20 +43,19 @@ func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
 
 // password reset by administrator
 func (ls *ldapSource) PasswordReset(uid, newPasswd string) error {
-	err := ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err != nil {
+	err := ls.opWithMan(func(c ldap.Client) error {
+		dn := ls.UDN(uid)
+		passwordModifyRequest := ldap.NewPasswordModifyRequest(dn, "", newPasswd)
+		passwordModifyResponse, err := c.PasswordModify(passwordModifyRequest)
+		debug("passwordModify %q, result %v, err %v", dn, passwordModifyResponse, err)
+		// log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
 		return err
-	}
-	dn := ls.UDN(uid)
-
-	passwordModifyRequest := ldap.NewPasswordModifyRequest(dn, "", newPasswd)
-	passwordModifyResponse, err := ls.c.PasswordModify(passwordModifyRequest)
+	})
 
 	if err != nil {
 		log.Printf("PasswordModify ERR: %s", err)
 		return err
 	}
 
-	log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
 	return nil
 }

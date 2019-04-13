@@ -30,7 +30,7 @@ type Authenticator interface {
 
 // GroupStore Storage for Group
 type GroupStore interface {
-	AllGroup() []Group
+	AllGroup() ([]Group, error)
 	GetGroup(name string) (*Group, error)
 	SaveGroup(*Group) error
 }

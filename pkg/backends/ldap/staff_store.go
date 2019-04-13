@@ -11,41 +11,39 @@ import (
 )
 
 func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
-	uid := staff.Uid
-	err = ls.Bind(ls.BindDN, ls.Passwd, false)
-	if err != nil {
-		return
-	}
-	dn := ls.UDN(uid)
-	var entry *ldap.Entry
-	entry, err = ls.getEntry(ls.UDN(uid))
-	if err == nil {
-		// :update
-		mr := makeModifyRequest(dn, entry, staff)
-		eidStr := strconv.Itoa(staff.EmployeeNumber)
-		if staff.EmployeeNumber > 0 && eidStr != entry.GetAttributeValue("employeeNumber") {
-			mr.Replace("employeeNumber", []string{eidStr})
+	err = ls.opWithMan(func(c ldap.Client) (err error) {
+		dn := ls.UDN(staff.Uid)
+		var entry *ldap.Entry
+		entry, err = ldapEntryGet(c, ls.UDN(staff.Uid), etPeople.Filter, etPeople.Attributes...)
+		if err == nil {
+			// :update
+			mr := makeModifyRequest(dn, entry, staff)
+			eidStr := strconv.Itoa(staff.EmployeeNumber)
+			if staff.EmployeeNumber > 0 && eidStr != entry.GetAttributeValue("employeeNumber") {
+				mr.Replace("employeeNumber", []string{eidStr})
+			}
+			if staff.EmployeeType != entry.GetAttributeValue("employeeType") {
+				mr.Replace("employeeType", []string{staff.EmployeeType})
+			}
+			err = c.Modify(mr)
+			if err != nil {
+				log.Printf("modify %v ERR %s", mr, err)
+			}
+			return
 		}
-		if staff.EmployeeType != entry.GetAttributeValue("employeeType") {
-			mr.Replace("employeeType", []string{staff.EmployeeType})
+		if err == ErrNotFound {
+			isNew = true
+			ar := makeAddRequest(dn, staff)
+			err = c.Add(ar)
+			if err != nil {
+				log.Printf("add %v ERR %s", ar, err)
+			}
+			return
 		}
-		err = ls.c.Modify(mr)
-		if err != nil {
-			log.Printf("modify %v ERR %s", mr, err)
-		}
-		return
-	}
-	if err == ErrNotFound {
-		isNew = true
-		ar := makeAddRequest(dn, staff)
-		err = ls.c.Add(ar)
-		if err != nil {
-			log.Printf("add %v ERR %s", ar, err)
-		}
-		return
-	}
+		log.Printf("storeStaff %s ERR %s", staff.Uid, err)
 
-	log.Printf("getEntry %s ERR %s", uid, err)
+		return
+	})
 
 	return
 }
@@ -54,10 +52,18 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 	ar := ldap.NewAddRequest(dn, nil)
 	ar.Attribute("objectClass", objectClassPeople)
 	ar.Attribute("uid", []string{staff.Uid})
-	ar.Attribute("sn", []string{staff.Surname})
-	ar.Attribute("givenName", []string{staff.GivenName})
 	ar.Attribute("cn", []string{staff.GetCommonName()})
-	ar.Attribute("mail", []string{staff.Email})
+	if staff.Surname != "" {
+		ar.Attribute("sn", []string{staff.Surname})
+	}
+	if staff.GivenName != "" {
+		ar.Attribute("givenName", []string{staff.GivenName})
+	}
+
+	if staff.Email != "" {
+		ar.Attribute("mail", []string{staff.Email})
+	}
+
 	if staff.Nickname != "" {
 		ar.Attribute("displayName", []string{staff.Nickname})
 	}
@@ -127,7 +133,7 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 	if len(staff.Description) > 0 && staff.Description != entry.GetAttributeValue("description") {
 		mr.Replace("description", []string{staff.Description})
 	}
-	mr.Replace("modifiedTime", []string{time.Now().Format(timeLayout)})
+	mr.Replace("modifiedTime", []string{time.Now().Format(TimeLayout)})
 	return mr
 }
 

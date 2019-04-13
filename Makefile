@@ -2,6 +2,8 @@
 .PHONY : dep vet main clean dist package
 DATE := `date '+%Y%m%d'`
 
+WITH_ENV = env `cat .env 2>/dev/null | xargs`
+
 NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
 TAG:=`git describe --tags --always`
@@ -9,7 +11,7 @@ LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
 main:
 	echo "Building $(NAME)"
-	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)
+	go build -ldflags "$(LDFLAGS)" .
 
 all: vet dist package
 
@@ -27,11 +29,11 @@ clean:
 
 dist: clean
 	echo "Building $(NAME) for linux"
-	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)/cmd/$(NAME)
+	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 	echo "Building $(NAME) for darwin"
-	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS) -w" $(ROOF)/cmd/$(NAME)
+	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS) -w" $(ROOF)
 	echo "Building $(NAME) for windows"
-	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)/cmd/$(NAME)
+	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 
 package: dist
 	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
@@ -80,8 +82,11 @@ gofmt:
 		exit 1; \
 	fi
 
-test:
-	go test
+test-ldap: vet
+	mkdir -p tests
+	@DEBUG=staffio:ldap go test -v -cover -coverprofile tests/cover_ldap.out ./pkg/backends/ldap
+	@go tool cover -html=tests/cover_ldap.out -o tests/cover_ldap.out.html
+
 
 docker-build:
 	docker build --rm -t $(NAME) .

@@ -4,6 +4,8 @@ import (
 	// "fmt"
 	"log"
 
+	"github.com/go-ldap/ldap"
+
 	"github.com/liut/staffio/pkg/models"
 )
 
@@ -19,23 +21,22 @@ func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err
 
 func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
 
-	debug("change profile for %s staff: %v", uid, staff)
+	debug("modify self %s staff: %v", uid, staff)
 
 	userdn := ls.UDN(uid)
-	err := ls.Bind(userdn, password, true)
-	if err != nil {
-		return ErrLogin
-	}
-	entry, err := ls.getEntry(userdn)
-	if err != nil {
-		return err
-	}
+	return ls.opWithDN(userdn, password, func(c ldap.Client) (err error) {
+		entry, err := ldapEntryGet(c, userdn, etPeople.Filter, etPeople.Attributes...)
+		if err != nil {
+			return err
+		}
 
-	modify := makeModifyRequest(userdn, entry, staff)
+		modify := makeModifyRequest(userdn, entry, staff)
 
-	if err = ls.c.Modify(modify); err != nil {
-		log.Printf("Modify ERROR: %s\n", err)
-	}
+		if err = c.Modify(modify); err != nil {
+			log.Printf("Modify ERROR: %s\n", err)
+		}
+		debug("modified %q, err %v", userdn, err)
+		return nil
+	})
 
-	return nil
 }

@@ -174,8 +174,8 @@ func (s *server) staffPost(c *gin.Context) {
 		}
 	}
 
-	email := uid + "@" + settings.EmailDomain
 	if op == "fetch-exmail" && uid != "" {
+		email := uid + "@" + settings.EmailDomain
 		staff, err = backends.GetStaffFromExmail(email)
 		if err != nil {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -268,7 +268,7 @@ func (s *server) staffDelete(c *gin.Context) {
 
 func (s *server) groupList(c *gin.Context) {
 
-	data := s.service.AllGroup()
+	data, _ := s.service.AllGroup()
 	s.Render(c, "group.html", map[string]interface{}{
 		"groups": data,
 		"ctx":    c,

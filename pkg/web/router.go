@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -109,7 +107,7 @@ func (s *server) StrapRouter() {
 		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
 	}
 
-	assets := newAssets(settings.Root, settings.FS)
+	assets := newAssets(s.root, s.fs)
 	assets.Base = base
 	ah := gin.WrapH(assets.GetHandler())
 	s.router.GET("/static/*filepath", ah)

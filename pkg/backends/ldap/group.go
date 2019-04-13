@@ -16,16 +16,12 @@ var (
 	groupLimit  = 20
 )
 
-func (s *LDAPStore) AllGroup() (data []models.Group) {
-	var err error
+func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
 	for _, ls := range s.sources {
 		data, err = ls.SearchGroup("")
 		if err == nil {
 			return
 		}
-	}
-	if err == nil {
-		err = ErrNotFound
 	}
 	return
 }
@@ -33,10 +29,10 @@ func (s *LDAPStore) AllGroup() (data []models.Group) {
 func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 	// log.Printf("Search group %s", name)
 	for _, ls := range s.sources {
-		var data []models.Group
-		data, err = ls.SearchGroup(name)
+		var entry *ldap.Entry
+		entry, err = ls.Group(name)
 		if err == nil {
-			group = &data[0]
+			group = entryToGroup(entry)
 			return
 		}
 		log.Printf("search group %q from %s error: %s", name, ls.Addr, err)
@@ -49,21 +45,11 @@ func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 }
 
 func (ls *ldapSource) GDN(name string) string {
-	return fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
+	return etGroup.DN(name)
+	// return fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
 }
 
 func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
-	l, err := ls.dial()
-	if err != nil {
-		return nil, err
-	}
-
-	err = l.Bind(ls.BindDN, ls.Passwd)
-	if err != nil {
-		log.Printf("ERROR: Cannot bind: %s\n", err.Error())
-		return nil, err
-	}
-
 	var (
 		dn string
 	)
@@ -73,29 +59,36 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 		dn = ls.GDN(name)
 	}
 
-	search := ldap.NewSearchRequest(
-		dn,
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		etGroup.Filter,
-		etGroup.Attributes,
-		nil)
-	sr, err := ls.c.SearchWithPaging(search, uint32(groupLimit))
+	var sr *ldap.SearchResult
+	err = ls.opWithMan(func(c ldap.Client) (err error) {
+		search := ldap.NewSearchRequest(
+			dn,
+			ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+			etGroup.Filter,
+			etGroup.Attributes,
+			nil)
+		sr, err = c.SearchWithPaging(search, uint32(groupLimit))
+		return
+	})
+
 	if err != nil {
 		log.Printf("LDAP search group error: %s", err)
-		return nil, err
+		return
 	}
 
 	if len(sr.Entries) > 0 {
 		data = make([]models.Group, len(sr.Entries))
 		for i, entry := range sr.Entries {
-			data[i] = entryToGroup(entry)
+			g := entryToGroup(entry)
+			data[i] = *g
 		}
 	}
 
 	return
 }
 
-func entryToGroup(entry *ldap.Entry) (g models.Group) {
+func entryToGroup(entry *ldap.Entry) (g *models.Group) {
+	g = new(models.Group)
 	for _, attr := range entry.Attributes {
 		if attr.Name == "cn" {
 			g.Name = attr.Values[0]

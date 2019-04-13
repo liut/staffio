@@ -24,14 +24,6 @@ var (
 		Base     string
 		BindDN   string
 		Password string
-		Filter   string
-	}
-
-	Session struct {
-		Name   string
-		Domain string
-		Secret string
-		MaxAge int // cookie maxAge
 	}
 
 	HttpListen   string
@@ -70,15 +62,10 @@ func init() {
 	fs.StringVar(&LDAP.Base, "ldap-base", "", "ldap base")
 	fs.StringVar(&LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
 	fs.StringVar(&LDAP.Password, "ldap-pass", "", "ldap bind password")
-	fs.StringVar(&LDAP.Filter, "ldap-user-filter", "(objectclass=inetOrgPerson)", "ldap search filter")
 
 	fs.StringVar(&HttpListen, "http-listen", "localhost:5000", "bind address and port")
 	fs.StringVar(&BaseURL, "baseurl", "http://localhost:5000", "url base for self host")
 	fs.StringVar(&PwdSecret, "password-secret", "very secret", "the secret of password reset")
-	fs.StringVar(&Session.Name, "sess-name", "staff_sess", "session name")
-	fs.StringVar(&Session.Domain, "sess-domain", "", "session domain")
-	fs.StringVar(&Session.Secret, "sess-secret", "very-secret", "session secret")
-	fs.IntVar(&Session.MaxAge, "sess-maxage", 86400*7, "session cookie life time (in seconds)")
 	fs.IntVar(&UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 
 	fs.StringVar(&Backend.DSN, "backend-dsn", "postgres://staffio@localhost/staffio?sslmode=disable", "database dsn string for backend")
