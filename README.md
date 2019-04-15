@@ -40,32 +40,10 @@ An OAuth2 server with management for enterprise employees.
 | `/p3/proxyValidate` **TODO** | service/proxy ticket validation [CAS 3.0] |
 
 
-## prepare development
+## Quick start
 
-### checkout
+### Run all components as docker containers
 
-````sh
-mkdir -p $GOPATH/src/github.com/liut
-cd $GOPATH/src/github.com/liut
-git clone https://github.com/liut/staffio.git
-cd $GOPATH/src/liut/staffio
-make dep
-````
-
-### LDAP
-
-#### append schema first time only
-
-- Special schema: [ldif](database/ldap_schema/staffio.ldif) or [schema](database/ldap_schema/staffio.schema)
-
-```sh
-cat database/ldap_schema/staffio.schema | sudo slapd-config schema write staffio
-```
-
-*TODO*
-
-### database
-*recommend docker for development*
 ````sh
 
 # openldap
@@ -79,13 +57,38 @@ docker run --name staffio-db -p 54322:5432 \
 	-e DB_USER=staffio \
 	-e DB_PASS=mypassword \
 	-e TZ=Hongkong \
-	-d lcgc/postgresql:9.5.4
-cat database/schema*.sql | docker exec -i staffio-db psql -Ustaffio
-cat database/init.sql | docker exec -i staffio-db psql -Ustaffio
+	-d liut7/staffio-db:latest
 
+# staffio
+docker run --name staffio -p 8030:80 \
+	-e STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
+	-e STAFFIO_LDAP_HOSTS=slapd \
+	-e STAFFIO_LDAP_BASE="dc=example,dc=org" \
+	-e STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org" \
+	-e STAFFIO_LDAP_PASS='mypassword' \
+	--link staffio-db --link staffio-ldap:slapd \
+	-d liut7/staffio:latest
+
+# create a user as first staff or adminstrator
+docker exec staffio staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
+
+# add a oauth2 client (optional)
 # demo client
 echo "INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://localhost:3000/appauth', '{}', now());" | docker exec -i staffio-db psql -Ustaffio staffio
 
+````
+
+
+## prepare development
+
+### checkout
+
+````sh
+mkdir -p $GOPATH/src/github.com/liut
+cd $GOPATH/src/github.com/liut
+git clone https://github.com/liut/staffio.git
+cd $GOPATH/src/liut/staffio
+make dep
 ````
 
 ### environment
@@ -125,7 +128,7 @@ rsync -rpt --delete templates htdocs remote:/opt/staffio/
 
 ### add staff
 ```sh
-forego run ./staffio addstaff -n eagle -p mysecret -n eagle --sn eagle
+forego run ./staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
 ```
 
 ## Plan

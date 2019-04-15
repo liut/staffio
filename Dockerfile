@@ -1,7 +1,7 @@
 FROM alpine:3.5
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV VERSION=v0.6.1 \
+ENV VERSION=v0.8.5 \
     PGHOST="staffio-db" \
     STAFFIO_HTTP_LISTEN=":80" \
     STAFFIO_LDAP_HOST="slapd" \

@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS cas_ticket (
 	PRIMARY KEY (id)
 ) WITH (OIDS=FALSE);
 
-CREATE INDEX idx_cas_ticket_uid ON cas_ticket (uid);
-CREATE INDEX idx_cas_ticket_created ON cas_ticket (created);
-CREATE INDEX idx_cas_ticket_value ON cas_ticket (value);
+CREATE INDEX IF NOT EXISTS idx_cas_ticket_uid ON cas_ticket (uid);
+CREATE INDEX IF NOT EXISTS idx_cas_ticket_created ON cas_ticket (created);
+CREATE INDEX IF NOT EXISTS idx_cas_ticket_value ON cas_ticket (value);
