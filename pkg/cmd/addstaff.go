@@ -47,7 +47,7 @@ var addstaffCmd = &cobra.Command{
 		uid, _ := cmd.Flags().GetString("uid")
 		password, _ := cmd.Flags().GetString("password")
 		if uid == "" {
-			fmt.Println("empty uid or password")
+			fmt.Println("empty uid")
 			return
 		}
 		cn, _ := cmd.Flags().GetString("name")

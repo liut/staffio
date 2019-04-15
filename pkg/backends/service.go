@@ -11,6 +11,8 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
+type PoolStats = ldap.PoolStats
+
 type Servicer interface {
 	models.Authenticator
 	models.StaffStore
@@ -28,6 +30,7 @@ type Servicer interface {
 	PasswordResetWithToken(login, token, passwd string) (err error)
 	Team() weekly.TeamStore
 	Weekly() weekly.WeeklyStore
+	PoolStats() *PoolStats
 }
 
 type serviceImpl struct {

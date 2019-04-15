@@ -1,0 +1,29 @@
+FROM alpine:3.8
+MAINTAINER Eagle Liut <eagle@dantin.me>
+
+# RUN apk add --update \
+#   bash \
+#   ca-certificates \
+#   && rm -rf /var/cache/apk/*
+
+ENV VERSION=v0.8.5 \
+    PGHOST="staffio-db" \
+    STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
+    STAFFIO_HTTP_LISTEN=":80" \
+    STAFFIO_LDAP_HOSTS="slapd" \
+    STAFFIO_LDAP_BASE="dc=example,dc=org" \
+    STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org" \
+    STAFFIO_LDAP_PASS='mypassword' \
+    STAFFIO_PASSWORD_SECRET=vajanuyogohusopekujabagaliquha \
+    STAFFIO_ROOT="/app"
+
+RUN mkdir /app
+WORKDIR /app
+
+ADD linux_amd64/staffio /usr/bin/
+
+ADD templates /app/templates
+
+EXPOSE 80
+
+CMD ["/usr/bin/staffio", "web"]

@@ -97,6 +97,18 @@ func (s *LDAPStore) Ready() error {
 	return nil
 }
 
+func (s *LDAPStore) PoolStats() *PoolStats {
+	var pss PoolStats
+	for _, ls := range s.sources {
+		s := ls.cp.Stats()
+		pss.Hits += s.Hits
+		pss.Misses += s.Misses
+		pss.Timeouts += s.Timeouts
+		pss.TotalConns += s.TotalConns
+		pss.IdleConns += s.IdleConns
+	}
+	return &pss
+}
 func splitDC(base string) string {
 	pos1 := strings.Index(base, "=")
 	pos2 := strings.Index(base, ",")

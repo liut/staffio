@@ -24,3 +24,8 @@ func (s *server) handleStatus(c *gin.Context) {
 		http.NotFound(w, req)
 	}
 }
+
+func (s *server) handleServiceStats(c *gin.Context) {
+	stats := s.service.PoolStats()
+	c.JSON(200, stats)
+}

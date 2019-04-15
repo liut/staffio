@@ -105,6 +105,8 @@ func (s *server) StrapRouter() {
 		apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
 		apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
 		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
+
+		apiMan.GET("/service/stats", s.handleServiceStats)
 	}
 
 	assets := newAssets(s.root, s.fs)

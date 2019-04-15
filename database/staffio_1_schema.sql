@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS oauth_access_token
 	PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_access_created ON oauth_access_token (created);
-CREATE INDEX idx_access_refresh ON oauth_access_token (refresh_token);
+CREATE INDEX IF NOT EXISTS idx_access_created ON oauth_access_token (created);
+CREATE INDEX IF NOT EXISTS idx_access_refresh ON oauth_access_token (refresh_token);
 
 CREATE TABLE IF NOT EXISTS oauth_authorization_code
 (
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS articles
 	PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_article_created ON articles (created);
+CREATE INDEX IF NOT EXISTS idx_article_created ON articles (created);
 
 
 CREATE TABLE IF NOT EXISTS links
@@ -102,8 +102,8 @@ CREATE TABLE IF NOT EXISTS links
 	PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_links_created ON links (created);
-CREATE INDEX idx_links_position ON links (position);
+CREATE INDEX IF NOT EXISTS idx_links_created ON links (created);
+CREATE INDEX IF NOT EXISTS idx_links_position ON links (position);
 
 
 CREATE TABLE IF NOT EXISTS password_reset (
@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS password_reset (
 	PRIMARY KEY (id)
 ) WITH (OIDS=FALSE);
 
-CREATE INDEX idx_password_reset_uid ON password_reset (uid, created);
-CREATE INDEX idx_password_reset_created ON password_reset (created);
+CREATE INDEX IF NOT EXISTS idx_password_reset_uid ON password_reset (uid, created);
+CREATE INDEX IF NOT EXISTS idx_password_reset_created ON password_reset (created);
 
 
 CREATE TABLE IF NOT EXISTS user_log (
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS user_log (
 	PRIMARY KEY (id)
 ) WITH (OIDS=FALSE);
 
-CREATE INDEX idx_user_log_uid ON user_log (uid);
+CREATE INDEX IF NOT EXISTS idx_user_log_uid ON user_log (uid);
 
 
 END;

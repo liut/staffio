@@ -88,6 +88,18 @@ test-ldap: vet
 	@go tool cover -html=tests/cover_ldap.out -o tests/cover_ldap.out.html
 
 
-docker-build:
+docker-db-build:
+	docker build --rm -t liut7/$(NAME)-db:$(TAG) database/
+	docker tag liut7/$(NAME)-db:$(TAG) liut7/$(NAME)-db:latest
+
+docker-auto-build:
 	docker build --rm -t $(NAME) .
+
+docker-local-build: dist
+	echo "Building docker image"
+	cp -rf templates dist/
+	cp -rf Dockerfile.local dist/Dockerfile
+	docker build --rm -t liut7/$(NAME):$(TAG) dist/
+	docker tag liut7/$(NAME):$(TAG) liut7/$(NAME):latest
+.PHONY: $@
 
