@@ -23,13 +23,13 @@ var timers = sync.Pool{
 
 // Stats contains pool state information and accumulated stats.
 type Stats struct {
-	Hits     uint32 // number of times free connection was found in the pool
-	Misses   uint32 // number of times free connection was NOT found in the pool
-	Timeouts uint32 // number of times a wait timeout occurred
+	Hits     uint32 `json:"hits"`     // number of times free connection was found in the pool
+	Misses   uint32 `json:"misses"`   // number of times free connection was NOT found in the pool
+	Timeouts uint32 `json:"timeouts"` // number of times a wait timeout occurred
 
-	TotalConns uint32 // number of total connections in the pool
-	IdleConns  uint32 // number of idle connections in the pool
-	StaleConns uint32 // number of stale connections removed from the pool
+	TotalConns uint32 `json:"totalConns"` // number of total connections in the pool
+	IdleConns  uint32 `json:"idelConns"`  // number of idle connections in the pool
+	StaleConns uint32 `json:"staleConns"` // number of stale connections removed from the pool
 }
 
 type Pooler interface {
