@@ -53,8 +53,6 @@ docker run --name staffio-ldap -p 389:389 -p 636:636 \
 
 # postgresql
 docker run --name staffio-db -p 54322:5432 \
-	-e DB_NAME=staffio \
-	-e DB_USER=staffio \
 	-e DB_PASS=mypassword \
 	-e TZ=Hongkong \
 	-d liut7/staffio-db:latest
@@ -71,6 +69,8 @@ docker run --name staffio -p 8030:80 \
 
 # create a user as first staff or adminstrator
 docker exec staffio staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
+
+# now can open http://localhost:8030/ in browser
 
 # add a oauth2 client (optional)
 # demo client
