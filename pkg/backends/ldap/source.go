@@ -37,8 +37,8 @@ var (
 	debug = Debug("staffio:ldap")
 )
 
-// Add a new source (LDAP directory) to the global pool
-func NewSource(cfg *Config) (*ldapSource, error) {
+// newSource Add a new source (LDAP directory) to the global pool
+func newSource(cfg *Config) (*ldapSource, error) {
 	if cfg.Base == "" {
 		return nil, ErrEmptyBase
 	}
@@ -126,8 +126,9 @@ func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 	_, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
 	if err == ErrNotFound {
 		ar := ldap.NewAddRequest(dn, nil)
-		ar.Attribute("objectClass", []string{et.OC, "top"})
-		ar.Attribute(et.PK, []string{name})
+		// ar.Attribute("objectClass", []string{et.OC, "top"})
+		// ar.Attribute(et.PK, []string{name})
+		et.prepareTo(name, ar)
 		debug("add %v", ar)
 		err = c.Add(ar)
 		if err != nil {

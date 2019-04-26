@@ -30,7 +30,7 @@ func NewStore(cfg *Config) (*LDAPStore, error) {
 			Bind:   cfg.Bind,
 			Passwd: cfg.Passwd,
 		}
-		ls, err := NewSource(c)
+		ls, err := newSource(c)
 		if err != nil {
 			return nil, err
 		}
