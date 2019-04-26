@@ -59,7 +59,7 @@ docker run --name staffio-db -p 54322:5432 \
 	--volumes-from=staffio-db-data \
 	-d liut7/staffio-db:latest
 
-# staffio
+# staffio main server
 docker run --name staffio -p 3030:3030 \
 	-e STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
 	-e STAFFIO_LDAP_HOSTS=slapd \
@@ -71,7 +71,7 @@ docker run --name staffio -p 3030:3030 \
 	-d liut7/staffio:latest web
 
 # create a user as first staff or adminstrator
-docker exec staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
+docker exec staffio staffio addstaff -u eagle -p mysecret -n eagleliut --sn liut
 
 # now can open http://localhost:3030/ in browser
 

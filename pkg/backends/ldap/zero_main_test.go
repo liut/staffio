@@ -149,6 +149,9 @@ func TestStaff(t *testing.T) {
 	err = store.ModifyBySelf(uid, password, staff)
 	assert.NoError(t, err)
 
+	err = store.PasswordChange(uid, "bad", "bad new")
+	assert.Error(t, err)
+
 	err = store.PasswordChange(uid, password, "secretNew")
 	assert.NoError(t, err)
 

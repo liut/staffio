@@ -194,7 +194,7 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 		defer ls.cp.Put(c)
 		err = c.Bind(dn, passwd)
 		if err == nil {
-			debug("conn from %s (%d, %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), splitDC(dn))
+			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), splitDC(dn))
 			return op(c)
 		}
 		log.Printf("LDAP bind(%s) ERR %s", dn, err)
