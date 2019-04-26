@@ -98,15 +98,17 @@ func TestStaff(t *testing.T) {
 		Surname:    sn,
 
 		// optional fields
-		GivenName:   "fawn",
-		AvatarPath:  "avatar.png",
-		Description: "It's me",
-		Email:       "fawn@deer.cc",
-		Nickname:    "tiny",
-		Birthday:    "20120304",
-		Gender:      models.Male,
-		Mobile:      "13012341234",
-		JoinDate:    time.Now().Format(DateLayout),
+		GivenName:      "fawn",
+		AvatarPath:     "avatar.png",
+		Description:    "It's me",
+		Email:          "fawn@deer.cc",
+		Nickname:       "tiny",
+		Birthday:       "20120304",
+		Gender:         models.Male,
+		Mobile:         "13012341234",
+		JoinDate:       time.Now().Format(DateLayout),
+		EmployeeNumber: 001,
+		EmployeeType:   "Engineer",
 	}
 
 	var isNew bool
@@ -142,8 +144,13 @@ func TestStaff(t *testing.T) {
 	staff.Birthday = "20120305"
 	staff.Gender = models.Female
 	staff.Mobile = "13012345678"
+	staff.EmployeeNumber = 002
+	staff.EmployeeType = "Chief Engineer"
 	err = store.ModifyBySelf(uid, password, staff)
 	assert.NoError(t, err)
+
+	err = store.PasswordChange(uid, "bad", "bad new")
+	assert.Error(t, err)
 
 	err = store.PasswordChange(uid, password, "secretNew")
 	assert.NoError(t, err)
@@ -171,4 +178,8 @@ func TestReady(t *testing.T) {
 
 	err = ls.Delete(etParent.DN(name))
 	assert.NoError(t, err)
+}
+
+func TestStoreStats(t *testing.T) {
+	t.Logf("stats: %v", store.PoolStats())
 }

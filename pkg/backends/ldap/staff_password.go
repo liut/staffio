@@ -11,6 +11,7 @@ func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error)
 		err = ls.PasswordChange(uid, oldPasswd, newPasswd)
 		if err != nil {
 			log.Printf("PasswordChange at %s ERR: %s", ls.Addr, err)
+			break
 		}
 	}
 	return
@@ -18,17 +19,19 @@ func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error)
 
 func (ls *ldapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	userdn := ls.UDN(uid)
-	return ls.opWithDN(userdn, oldPasswd, func(c ldap.Client) error {
-		passwordModifyRequest := ldap.NewPasswordModifyRequest(userdn, oldPasswd, newPasswd)
-		passwordModifyResponse, err := c.PasswordModify(passwordModifyRequest)
-
+	c, err := ls.cp.Get()
+	defer ls.cp.Put(c)
+	if err == nil {
+		pmr := ldap.NewPasswordModifyRequest(userdn, oldPasswd, newPasswd)
+		_, err := c.PasswordModify(pmr)
 		if err != nil {
-			log.Printf("PasswordModify ERR: %s", err)
+			log.Printf("PasswordModify(%s) ERR: %s", uid, err)
 			return err
 		}
-		log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
-		return nil
-	})
+		debug("PasswordModify(%s) OK", uid)
+	}
+
+	return err
 }
 
 func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
@@ -36,6 +39,7 @@ func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
 		err = ls.PasswordReset(uid, passwd)
 		if err != nil {
 			log.Printf("PasswordReset at %s ERR: %s", ls.Addr, err)
+			break
 		}
 	}
 	return
@@ -43,19 +47,15 @@ func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
 
 // password reset by administrator
 func (ls *ldapSource) PasswordReset(uid, newPasswd string) error {
-	err := ls.opWithMan(func(c ldap.Client) error {
-		dn := ls.UDN(uid)
+	dn := ls.UDN(uid)
+	return ls.opWithMan(func(c ldap.Client) error {
 		passwordModifyRequest := ldap.NewPasswordModifyRequest(dn, "", newPasswd)
-		passwordModifyResponse, err := c.PasswordModify(passwordModifyRequest)
-		debug("passwordModify %q, result %v, err %v", dn, passwordModifyResponse, err)
-		// log.Printf("passwordModifyResponse: %v", passwordModifyResponse)
-		return err
+		_, err := c.PasswordModify(passwordModifyRequest)
+		if err != nil {
+			log.Printf("PasswordModify(%s) ERR: %s", uid, err)
+			return err
+		}
+		debug("PasswordModify(%s) OK", uid)
+		return nil
 	})
-
-	if err != nil {
-		log.Printf("PasswordModify ERR: %s", err)
-		return err
-	}
-
-	return nil
 }

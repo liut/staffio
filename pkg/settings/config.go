@@ -63,8 +63,8 @@ func init() {
 	fs.StringVar(&LDAP.BindDN, "ldap-bind-dn", "", "ldap bind dn")
 	fs.StringVar(&LDAP.Password, "ldap-pass", "", "ldap bind password")
 
-	fs.StringVar(&HttpListen, "http-listen", "localhost:5000", "bind address and port")
-	fs.StringVar(&BaseURL, "baseurl", "http://localhost:5000", "url base for self host")
+	fs.StringVar(&HttpListen, "http-listen", "localhost:3030", "bind address and port")
+	fs.StringVar(&BaseURL, "baseurl", "http://localhost:3030", "url base for self host")
 	fs.StringVar(&PwdSecret, "password-secret", "very secret", "the secret of password reset")
 	fs.IntVar(&UserLifetime, "user-life", 2500, "user online life time (in seconds)")
 

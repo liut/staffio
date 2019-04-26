@@ -43,6 +43,25 @@ func (et *entryType) DN(name string) string {
 	return DN(et.PK, name, Base)
 }
 
+type attributer interface {
+	Attribute(attrType string, attrVals []string)
+}
+
+func (et *entryType) objectClasses() []string {
+	if et.PK == "dc" {
+		return []string{et.OC, "organization", "top"}
+	}
+	return []string{et.OC, "top"}
+}
+
+func (et *entryType) prepareTo(name string, ar attributer) {
+	ar.Attribute("objectClass", et.objectClasses())
+	ar.Attribute(et.PK, []string{name})
+	if et.PK == "dc" {
+		ar.Attribute("o", []string{name})
+	}
+}
+
 func DN(pk, name, parent string) string {
 	return fmt.Sprintf("%s=%s,%s", pk, name, parent)
 }

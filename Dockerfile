@@ -1,9 +1,14 @@
 FROM alpine:3.5
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV VERSION=v0.8.5 \
+RUN apk add --update \
+  bash \
+  su-exec \
+  && rm -rf /var/cache/apk/*
+
+ENV VERSION=v0.8.6 \
     PGHOST="staffio-db" \
-    STAFFIO_HTTP_LISTEN=":80" \
+    STAFFIO_HTTP_LISTEN=":3030" \
     STAFFIO_LDAP_HOST="slapd" \
     STAFFIO_LDAP_BASE="dc=example,dc=org" \
     STAFFIO_PASSWORD_SECRET=vajanuyogohusopekujabagaliquha \
@@ -21,8 +26,9 @@ RUN mkdir /app
 WORKDIR /app
 
 ADD templates /app/templates
+ADD entrypoint.sh /app/entrypoint.sh
 
-EXPOSE 80
+EXPOSE 3030
 
-# ENTRYPOINT ["/usr/bin/staffio"]
-CMD ["/usr/bin/staffio"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["web"]
