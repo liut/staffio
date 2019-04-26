@@ -6,6 +6,7 @@ WITH_ENV = env `cat .env 2>/dev/null | xargs`
 
 NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
+SOURCES=$(shell find client cmd pkg templates -type f \( -name "*.go" ! -name "*_test.go" \) -print )
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
@@ -19,7 +20,7 @@ dep:
 	go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
 
 vet:
-	echo "Checking ./pkg ./cmd"
+	echo "Checking ./pkg/..."
 	go vet -vettool=$(which shadow) -atomic -bool -copylocks -nilfunc -printf -rangeloops -unreachable -unsafeptr -unusedresult ./pkg/...
 
 clean:
@@ -27,13 +28,20 @@ clean:
 	rm -rf dist fe/build
 	rm -f $(NAME) $(NAME)-*
 
-dist: clean
-	echo "Building $(NAME) for linux"
+dist/linux_amd64/$(NAME): $(SOURCES)
+	echo "Building $(NAME) of linux"
 	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
-	echo "Building $(NAME) for darwin"
+
+dist/darwin_amd64/$(NAME): $(SOURCES)
+	echo "Building $(NAME) of darwin"
 	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS) -w" $(ROOF)
-	echo "Building $(NAME) for windows"
+
+dist/windows_amd64/$(NAME): $(SOURCES)
+	echo "Building $(NAME) of windows"
 	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
+
+dist: vet dist/linux_amd64/$(NAME) dist/darwin_amd64/$(NAME) dist/windows_amd64/$(NAME)
+
 
 package: dist
 	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
@@ -95,9 +103,9 @@ docker-db-build:
 docker-auto-build:
 	docker build --rm -t $(NAME) .
 
-docker-local-build: dist
+docker-local-build: dist/linux_amd64/$(NAME)
 	echo "Building docker image"
-	cp -rf templates dist/
+	cp -rf templates entrypoint.sh dist/
 	cp -rf Dockerfile.local dist/Dockerfile
 	docker build --rm -t liut7/$(NAME):$(TAG) dist/
 	docker tag liut7/$(NAME):$(TAG) liut7/$(NAME):latest

@@ -52,25 +52,28 @@ docker run --name staffio-ldap -p 389:389 -p 636:636 \
 	-d liut7/staffio-ldap:2.4.47-r2
 
 # postgresql
+docker create --name staffio-db-data -v /var/lib/postgresql busybox:1 echo staffio db data
 docker run --name staffio-db -p 54322:5432 \
 	-e DB_PASS=mypassword \
 	-e TZ=Hongkong \
+	--volumes-from=staffio-db-data \
 	-d liut7/staffio-db:latest
 
 # staffio
-docker run --name staffio -p 8030:80 \
+docker run --name staffio -p 3030:3030 \
 	-e STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
 	-e STAFFIO_LDAP_HOSTS=slapd \
 	-e STAFFIO_LDAP_BASE="dc=example,dc=org" \
 	-e STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org" \
 	-e STAFFIO_LDAP_PASS='mypassword' \
+	-e DEBUG='staffio:backends,staffio:ldap' \
 	--link staffio-db --link staffio-ldap:slapd \
-	-d liut7/staffio:latest
+	-d liut7/staffio:latest web
 
 # create a user as first staff or adminstrator
-docker exec staffio staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
+docker exec staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
 
-# now can open http://localhost:8030/ in browser
+# now can open http://localhost:3030/ in browser
 
 # add a oauth2 client (optional)
 # demo client

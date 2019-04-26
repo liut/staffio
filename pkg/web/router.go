@@ -127,17 +127,20 @@ func UrlFor(path string) string {
 	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
 }
 
-func apiError(c *gin.Context, status int, message interface{}) {
+func apiError(c *gin.Context, status int, err interface{}) {
 	resp := map[string]interface{}{
 		"status": status,
+		"error":  err,
 	}
-	switch ret := message.(type) {
+	switch ret := err.(type) {
 	case error:
 		resp["message"] = ret.Error()
-	default:
+	case fmt.Stringer:
+		resp["message"] = ret.String()
+	case string, *string, []byte:
 		resp["message"] = ret
 	}
-	c.JSON(http.StatusOK, resp)
+	c.AbortWithStatusJSON(http.StatusOK, resp)
 }
 
 func apiOk(c *gin.Context, data interface{}, count int) {
