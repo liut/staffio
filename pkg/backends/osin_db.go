@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/openshift/osin"
@@ -14,8 +15,8 @@ import (
 )
 
 var (
-	clients_sortable_fields           = []string{"id", "created"}
-	_                       OSINStore = (*DbStorage)(nil)
+	clientsSortableFields           = []string{"id", "created"}
+	_                     OSINStore = (*DbStorage)(nil)
 )
 
 type OSINStore interface {
@@ -30,14 +31,14 @@ type OSINStore interface {
 }
 
 type DbStorage struct {
-	refresh map[string]string
+	refresh *sync.Map
 	isDebug bool
 }
 
 func NewStorage() *DbStorage {
 
 	s := &DbStorage{
-		refresh: make(map[string]string),
+		refresh: new(sync.Map),
 		isDebug: settings.Debug,
 	}
 
@@ -148,7 +149,7 @@ func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
 		s.logf("save AccessData token %s OK %v", data.AccessToken, r)
 
 		if data.RefreshToken != "" {
-			s.refresh[data.RefreshToken] = data.AccessToken
+			s.refresh.Store(data.RefreshToken, data.AccessToken)
 		}
 		return nil
 	}
@@ -203,15 +204,15 @@ func (s *DbStorage) RemoveAccess(code string) error {
 
 func (s *DbStorage) LoadRefresh(code string) (*osin.AccessData, error) {
 	s.logf("LoadRefresh: %s\n", code)
-	if d, ok := s.refresh[code]; ok {
-		return s.LoadAccess(d)
+	if v, ok := s.refresh.Load(code); ok {
+		return s.LoadAccess(v.(string))
 	}
 	return nil, fmt.Errorf("RefreshToken %q not found", code)
 }
 
 func (s *DbStorage) RemoveRefresh(code string) error {
 	log.Printf("RemoveRefresh: %s\n", code)
-	delete(s.refresh, code)
+	s.refresh.Delete(code)
 	return nil
 }
 
@@ -238,7 +239,7 @@ func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients
 
 	var orders []string
 	for k, v := range sort {
-		if inArray(k, clients_sortable_fields) {
+		if inArray(k, clientsSortableFields) {
 			var o string
 			if v == ASCENDING {
 				o = "ASC"
