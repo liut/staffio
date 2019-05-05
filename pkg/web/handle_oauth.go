@@ -4,10 +4,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/RangelReale/osin"
 	"github.com/gin-gonic/gin"
+	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/oauth"
 )
 
 // Authorization code endpoint
@@ -36,7 +37,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 					"link":          r.RequestURI,
 					"response_type": ar.Type,
 					"scopes":        scopes,
-					"client":        ar.Client.(*models.Client),
+					"client":        ar.Client.(*oauth.Client),
 					"ctx":           c,
 				})
 				return

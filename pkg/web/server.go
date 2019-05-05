@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/RangelReale/osin"
-	"github.com/coocood/freecache"
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/gin"
+	"github.com/openshift/osin"
 	. "github.com/wealthworks/go-debug"
 	"github.com/wealthworks/go-tencent-api/exwechat"
 
@@ -17,7 +16,6 @@ import (
 )
 
 var (
-	cache *freecache.Cache
 	svr   *server
 	debug = Debug("staffio:web")
 )
@@ -82,8 +80,6 @@ func New(root, fs string) *server {
 	}
 
 	svr.StrapRouter()
-
-	cache = freecache.NewCache(settings.CacheSize)
 
 	return svr
 }
