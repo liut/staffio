@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -19,7 +18,6 @@ func (s *server) countNewMail(c *gin.Context) {
 	email := backends.GetEmailAddress(user.UID)
 	res := make(osin.ResponseData)
 	res["email"] = email
-	key := []byte(fmt.Sprintf("mail-count-%s", user.UID))
 
 	count, err := exmail.CountNewMail(email)
 	if err != nil {
