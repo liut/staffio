@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/RangelReale/osin"
+	"github.com/openshift/osin"
 )
 
 type serverMux interface {

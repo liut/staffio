@@ -3,8 +3,8 @@ package web
 import (
 	"log"
 
-	"github.com/RangelReale/osin"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/settings"
 )

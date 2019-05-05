@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RangelReale/osin"
+	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
