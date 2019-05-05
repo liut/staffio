@@ -9,7 +9,7 @@ import (
 
 	"github.com/RangelReale/osin"
 
-	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -20,11 +20,11 @@ var (
 
 type OSINStore interface {
 	osin.Storage
-	LoadClients(limit, offset int, sort map[string]int) ([]*models.Client, error)
+	LoadClients(limit, offset int, sort map[string]int) ([]*oauth.Client, error)
 	CountClients() uint
-	GetClientWithCode(code string) (*models.Client, error)
-	SaveClient(client *models.Client) error
-	LoadScopes() (scopes []*models.Scope, err error)
+	GetClientWithCode(code string) (*oauth.Client, error)
+	SaveClient(client *oauth.Client) error
+	LoadScopes() (scopes []*oauth.Scope, err error)
 	IsAuthorized(client_id, username string) bool
 	SaveAuthorized(client_id, username string) error
 }
@@ -215,8 +215,8 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 	return nil
 }
 
-func (s *DbStorage) GetClientWithCode(code string) (*models.Client, error) {
-	c := new(models.Client)
+func (s *DbStorage) GetClientWithCode(code string) (*oauth.Client, error) {
+	c := new(oauth.Client)
 	qs := func(db dber) error {
 		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
 			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
@@ -228,7 +228,7 @@ func (s *DbStorage) GetClientWithCode(code string) (*models.Client, error) {
 	return c, nil
 }
 
-func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients []*models.Client, err error) {
+func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients []*oauth.Client, err error) {
 	if limit < 1 {
 		limit = 1
 	}
@@ -259,7 +259,7 @@ func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients
 
 	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
 
-	clients = make([]*models.Client, 0)
+	clients = make([]*oauth.Client, 0)
 	qs := func(db dber) error {
 		rows, err := db.Query(str)
 		if err != nil {
@@ -268,7 +268,7 @@ func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients
 		}
 		defer rows.Close()
 		for rows.Next() {
-			c := new(models.Client)
+			c := new(oauth.Client)
 			var (
 				grandTypes, responseTypes, scopes string
 			)
@@ -301,7 +301,7 @@ func (s *DbStorage) CountClients() (total uint) {
 	return
 }
 
-func (s *DbStorage) SaveClient(client *models.Client) error {
+func (s *DbStorage) SaveClient(client *oauth.Client) error {
 	log.Printf("SaveClient: id %d code %s", client.Id, client.Code)
 	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectUri == "" {
 		return valueError
@@ -332,8 +332,8 @@ func (s *DbStorage) SaveClient(client *models.Client) error {
 	return withTxQuery(qs)
 }
 
-func (s *DbStorage) LoadScopes() (scopes []*models.Scope, err error) {
-	scopes = make([]*models.Scope, 0)
+func (s *DbStorage) LoadScopes() (scopes []*oauth.Scope, err error) {
+	scopes = make([]*oauth.Scope, 0)
 	qs := func(db dber) error {
 		rows, err := db.Query("SELECT name, label, description, is_default FROM oauth_scope")
 		if err != nil {
@@ -342,7 +342,7 @@ func (s *DbStorage) LoadScopes() (scopes []*models.Scope, err error) {
 		}
 		defer rows.Close()
 		for rows.Next() {
-			s := new(models.Scope)
+			s := new(oauth.Scope)
 			err = rows.Scan(&s.Name, &s.Label, &s.Description, &s.IsDefault)
 			if err != nil {
 				log.Printf("rows scan error: %s", err)

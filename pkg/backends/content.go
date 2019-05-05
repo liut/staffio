@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/content"
 )
 
-func LoadArticle(id int) (*models.Article, error) {
-	a := new(models.Article)
+func LoadArticle(id int) (*content.Article, error) {
+	a := new(content.Article)
 
 	qs := func(db dber) error {
 		return db.Get(a, `SELECT id, title, content, author, created
@@ -21,7 +21,7 @@ func LoadArticle(id int) (*models.Article, error) {
 	return nil, err
 }
 
-func LoadArticles(limit, offset int) (data []*models.Article, err error) {
+func LoadArticles(limit, offset int) (data []*content.Article, err error) {
 	if limit < 1 {
 		limit = 1
 	}
@@ -34,7 +34,7 @@ func LoadArticles(limit, offset int) (data []*models.Article, err error) {
 
 	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
 
-	data = make([]*models.Article, 0)
+	data = make([]*content.Article, 0)
 	qs := func(db dber) error {
 		return db.Select(&data, str)
 	}
@@ -46,7 +46,7 @@ func LoadArticles(limit, offset int) (data []*models.Article, err error) {
 	return data, nil
 }
 
-func LoadLinks(limit, offset int) (data []*models.Link, err error) {
+func LoadLinks(limit, offset int) (data []*content.Link, err error) {
 	if limit < 1 {
 		limit = 1
 	}
@@ -58,7 +58,7 @@ func LoadLinks(limit, offset int) (data []*models.Link, err error) {
 
 	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
 
-	data = make([]*models.Link, 0)
+	data = make([]*content.Link, 0)
 	qs := func(db dber) error {
 		return db.Select(&data, str)
 	}
@@ -70,7 +70,7 @@ func LoadLinks(limit, offset int) (data []*models.Link, err error) {
 	return data, nil
 }
 
-func SaveArticle(a *models.Article) error {
+func SaveArticle(a *content.Article) error {
 	qs := func(db dbTxer) error {
 		log.Printf("save %d", a.Id)
 		if a.Id > 0 {
@@ -93,8 +93,8 @@ func SaveArticle(a *models.Article) error {
 	return withTxQuery(qs)
 }
 
-func LoadLink(id int) (*models.Link, error) {
-	link := new(models.Link)
+func LoadLink(id int) (*content.Link, error) {
+	link := new(content.Link)
 	qs := func(db dber) (err error) {
 		err = db.Get(link, "SELECT * FROM links WHERE id = $1", id)
 		return
@@ -106,7 +106,7 @@ func LoadLink(id int) (*models.Link, error) {
 	return link, nil
 }
 
-func SaveLink(l *models.Link) error {
+func SaveLink(l *content.Link) error {
 	qs := func(db dbTxer) (err error) {
 		if l.Id > 0 {
 			_, err = db.Exec("UPDATE links SET title = $1, url = $2, position = $3 WHERE id = $4", l.Title, string(l.Url), l.Position, l.Id)

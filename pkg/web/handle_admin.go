@@ -10,6 +10,7 @@ import (
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -34,13 +35,13 @@ func (s *server) clientsPost(c *gin.Context) {
 	res := make(osin.ResponseData)
 	req := c.Request
 	var (
-		client *models.Client
+		client *oauth.Client
 		err    error
 	)
 
 	if req.FormValue("op") == "new" {
 		// create new client
-		client = models.NewClient(
+		client = oauth.NewClient(
 			req.PostFormValue("name"),
 			req.PostFormValue("code"),
 			req.PostFormValue("secret"),

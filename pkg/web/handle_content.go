@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	"github.com/liut/staffio/pkg/backends"
-	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/content"
 )
 
 const (
@@ -86,7 +86,7 @@ func (s *server) articleForm(c *gin.Context) {
 
 func (s *server) articlePost(c *gin.Context) {
 	req := c.Request
-	obj := new(models.Article)
+	obj := new(content.Article)
 	err := binding.FormPost.Bind(req, obj)
 	if err != nil {
 		log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
@@ -124,7 +124,7 @@ func (s *server) linksPost(c *gin.Context) {
 	req := c.Request
 	res := make(osin.ResponseData)
 	if req.FormValue("op") == "new" {
-		obj := new(models.Link)
+		obj := new(content.Link)
 		err := binding.FormPost.Bind(req, obj)
 		if err != nil {
 			log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
