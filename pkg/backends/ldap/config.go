@@ -39,6 +39,8 @@ func (et *entryType) DN(name string) string {
 		return DN(et.PK, name, etParent.DN("groups"))
 	case etPeople:
 		return DN(et.PK, name, etParent.DN("people"))
+	case etADgroup:
+		return "CN=" + name + ",CN=Builtin," + Base
 	case etADuser:
 		return "CN=" + name + ",CN=Users," + Base
 	case etBase:
@@ -88,7 +90,8 @@ var (
 		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp", "jpegPhoto",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 
-	etADuser = NewEentryType("cn", "user",
+	etADgroup = NewEentryType("cn", "group", "cn", "member", "name", "description", "instanceType")
+	etADuser  = NewEentryType("cn", "user", "name", "sAMAccountName", "userPrincipalName",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"employeeNumber", "employeeType", "title", "jpegPhoto")
 

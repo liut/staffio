@@ -168,7 +168,7 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 	sr, err := c.Search(search)
 	if err == nil {
 		if len(sr.Entries) > 0 {
-			debug("found entries %d", len(sr.Entries))
+			debug("found dn %q entries %d", dn, len(sr.Entries))
 			return sr.Entries[0], nil
 		}
 		debug("search %s with filter %s, not found", dn, filter)
@@ -236,7 +236,10 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 }
 
 func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
-	return ls.Entry(ls.GDN(cn), etGroup.Filter, etGroup.Attributes...)
+	if isADsource {
+		return ls.Entry(etADgroup.DN(cn), etADgroup.Filter, etADgroup.Attributes...)
+	}
+	return ls.Entry(etGroup.DN(cn), etGroup.Filter, etGroup.Attributes...)
 }
 
 func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
@@ -261,7 +264,7 @@ func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
 	var entry *ldap.Entry
 	entry, err = ls.People(uid)
 	if err != nil {
-		log.Printf("ldapEntryGet(%s) ERR %s", uid, err)
+		log.Printf("GetStaff(%s) ERR %s", uid, err)
 		return nil, err
 	}
 
@@ -278,11 +281,17 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 	if limit < 1 {
 		limit = 1
 	}
+	var et *entryType
+	if isADsource {
+		et = etADuser
+	} else {
+		et = etPeople
+	}
 	search := ldap.NewSearchRequest(
-		"ou=people,"+ls.Base,
+		ls.Base,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		etPeople.Filter,
-		etPeople.Attributes,
+		et.Filter,
+		et.Attributes,
 		nil)
 
 	var (
@@ -323,6 +332,12 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 		Description:  entry.GetAttributeValue("description"),
 		JoinDate:     entry.GetAttributeValue("dateOfJoin"),
 		IDCN:         entry.GetAttributeValue("idcnNumber"),
+	}
+	if str := entry.GetAttributeValue("sAMAccountName"); str != "" && u.Uid == "" {
+		u.Uid = str
+	}
+	if str := entry.GetAttributeValue("userPrincipalName"); str != "" && u.Email == "" {
+		u.Email = str
 	}
 	(&u.Gender).UnmarshalText(entry.GetRawAttributeValue("gender"))
 	var err error
