@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-ldap/ldap"
@@ -33,6 +34,8 @@ var (
 	ErrLogin     = errors.New("049: Invalid Username/Password")
 	ErrNotFound  = errors.New("Not Found")
 	userDnFmt    = "uid=%s,ou=people,%s"
+
+	once sync.Once
 
 	debug = Debug("staffio:ldap")
 )
@@ -101,6 +104,9 @@ func (ls *ldapSource) Close() {
 }
 
 func (ls *ldapSource) UDN(uid string) string {
+	if isADsource {
+		etADuser.DN(uid)
+	}
 	return etPeople.DN(uid)
 }
 
@@ -123,7 +129,18 @@ func (ls *ldapSource) Ready(names ...string) (err error) {
 
 func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 	dn := et.DN(name)
-	_, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+	var entry *ldap.Entry
+	entry, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+	debug("check ready for %s done, ERR %v", name, err)
+	if err == nil && et == etBase {
+		once.Do(func() {
+			if entry.GetAttributeValue("instanceType") != "" {
+				debug("The source is Active Directory!")
+				isADsource = true
+			}
+		})
+		return
+	}
 	if err == ErrNotFound {
 		ar := ldap.NewAddRequest(dn, nil)
 		// ar.Attribute("objectClass", []string{et.OC, "top"})
@@ -136,6 +153,7 @@ func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 		} else {
 			debug("add %q OK", dn)
 		}
+		return
 	}
 	return
 }
@@ -143,15 +161,17 @@ func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
 		dn,
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
 		filter,
 		attrs,
 		nil)
 	sr, err := c.Search(search)
 	if err == nil {
 		if len(sr.Entries) > 0 {
+			debug("found entries %d", len(sr.Entries))
 			return sr.Entries[0], nil
 		}
+		debug("search %s with filter %s, not found", dn, filter)
 		return nil, ErrNotFound
 	}
 
@@ -161,6 +181,15 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 	}
 	log.Printf("LDAP Search '%s' Error: %s", dn, err)
 	return nil, err
+}
+
+func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
+	err = ls.Bind(ls.UDN(uid), passwd)
+	if err == ErrLogin && Domain != "" {
+		upn := uid + "@" + Domain
+		err = ls.Bind(upn, passwd)
+	}
+	return
 }
 
 func (ls *ldapSource) Bind(dn, passwd string) error {
@@ -194,7 +223,7 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 		defer ls.cp.Put(c)
 		err = c.Bind(dn, passwd)
 		if err == nil {
-			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), splitDC(dn))
+			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), dn)
 			return op(c)
 		}
 		log.Printf("LDAP bind(%s) ERR %s", dn, err)
@@ -210,7 +239,10 @@ func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
 }
 
 func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
-	return ls.Entry(ls.UDN(uid), etPeople.Filter, etPeople.Attributes...)
+	if isADsource {
+		return ls.Entry(etADuser.DN(uid), etADuser.Filter, etADuser.Attributes...)
+	}
+	return ls.Entry(etPeople.DN(uid), etPeople.Filter, etPeople.Attributes...)
 }
 
 // Entry return a special entry with dn and filter
