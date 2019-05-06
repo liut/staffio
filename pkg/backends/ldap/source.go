@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-ldap/ldap"
@@ -33,6 +34,8 @@ var (
 	ErrLogin     = errors.New("049: Invalid Username/Password")
 	ErrNotFound  = errors.New("Not Found")
 	userDnFmt    = "uid=%s,ou=people,%s"
+
+	once sync.Once
 
 	debug = Debug("staffio:ldap")
 )
@@ -101,6 +104,9 @@ func (ls *ldapSource) Close() {
 }
 
 func (ls *ldapSource) UDN(uid string) string {
+	if isADsource {
+		etADuser.DN(uid)
+	}
 	return etPeople.DN(uid)
 }
 
@@ -123,7 +129,18 @@ func (ls *ldapSource) Ready(names ...string) (err error) {
 
 func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 	dn := et.DN(name)
-	_, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+	var entry *ldap.Entry
+	entry, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+	debug("check ready for %s done, ERR %v", name, err)
+	if err == nil && et == etBase {
+		once.Do(func() {
+			if entry.GetAttributeValue("instanceType") != "" {
+				debug("The source is Active Directory!")
+				isADsource = true
+			}
+		})
+		return
+	}
 	if err == ErrNotFound {
 		ar := ldap.NewAddRequest(dn, nil)
 		// ar.Attribute("objectClass", []string{et.OC, "top"})
@@ -136,6 +153,7 @@ func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 		} else {
 			debug("add %q OK", dn)
 		}
+		return
 	}
 	return
 }
@@ -143,15 +161,17 @@ func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
 func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
 		dn,
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
 		filter,
 		attrs,
 		nil)
 	sr, err := c.Search(search)
 	if err == nil {
 		if len(sr.Entries) > 0 {
+			debug("found dn %q entries %d", dn, len(sr.Entries))
 			return sr.Entries[0], nil
 		}
+		debug("search %s with filter %s, not found", dn, filter)
 		return nil, ErrNotFound
 	}
 
@@ -163,6 +183,15 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 	return nil, err
 }
 
+func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
+	err = ls.Bind(ls.UDN(uid), passwd)
+	if err == ErrLogin && Domain != "" {
+		upn := uid + "@" + Domain
+		err = ls.Bind(upn, passwd)
+	}
+	return
+}
+
 func (ls *ldapSource) Bind(dn, passwd string) error {
 	err := ls.opWithDN(dn, passwd, func(c ldap.Client) error {
 		return nil
@@ -170,7 +199,8 @@ func (ls *ldapSource) Bind(dn, passwd string) error {
 	if err != nil {
 		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err)
 		if le, ok := err.(*ldap.Error); ok {
-			if le.ResultCode == 49 {
+			if le.ResultCode == ldap.LDAPResultInvalidCredentials ||
+				le.ResultCode == ldap.LDAPResultInvalidDNSyntax {
 				return ErrLogin
 			}
 		}
@@ -194,7 +224,7 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 		defer ls.cp.Put(c)
 		err = c.Bind(dn, passwd)
 		if err == nil {
-			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), splitDC(dn))
+			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), dn)
 			return op(c)
 		}
 		log.Printf("LDAP bind(%s) ERR %s", dn, err)
@@ -206,11 +236,17 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 }
 
 func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
-	return ls.Entry(ls.GDN(cn), etGroup.Filter, etGroup.Attributes...)
+	if isADsource {
+		return ls.Entry(etADgroup.DN(cn), etADgroup.Filter, etADgroup.Attributes...)
+	}
+	return ls.Entry(etGroup.DN(cn), etGroup.Filter, etGroup.Attributes...)
 }
 
 func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
-	return ls.Entry(ls.UDN(uid), etPeople.Filter, etPeople.Attributes...)
+	if isADsource {
+		return ls.Entry(etADuser.DN(uid), etADuser.Filter, etADuser.Attributes...)
+	}
+	return ls.Entry(etPeople.DN(uid), etPeople.Filter, etPeople.Attributes...)
 }
 
 // Entry return a special entry with dn and filter
@@ -228,28 +264,43 @@ func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
 	var entry *ldap.Entry
 	entry, err = ls.People(uid)
 	if err != nil {
-		log.Printf("ldapEntryGet(%s) ERR %s", uid, err)
+		log.Printf("GetStaff(%s) ERR %s", uid, err)
 		return nil, err
 	}
 
 	return entryToUser(entry), nil
 }
 
-func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
-	// err := ls.Bind(ls.BindDN, ls.Passwd, false)
-	// if err != nil {
-	// 	// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
-	// 	return nil
-	// }
+func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
+	var et *entryType
+	if isADsource {
+		et = etADuser
+	} else {
+		et = etPeople
+	}
+	var entry *ldap.Entry
+	entry, err = ls.Entry(dn, et.Filter, et.Attributes...)
+	if err != nil {
+		return
+	}
+	return entryToUser(entry), nil
+}
 
+func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 	if limit < 1 {
 		limit = 1
 	}
+	var et *entryType
+	if isADsource {
+		et = etADuser
+	} else {
+		et = etPeople
+	}
 	search := ldap.NewSearchRequest(
-		"ou=people,"+ls.Base,
+		ls.Base,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		etPeople.Filter,
-		etPeople.Attributes,
+		et.Filter,
+		et.Attributes,
 		nil)
 
 	var (
@@ -275,8 +326,8 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 }
 
 func entryToUser(entry *ldap.Entry) (u *models.Staff) {
-	// log.Printf("entry: %v", entry)
 	u = &models.Staff{
+		DN:           entry.DN,
 		Uid:          entry.GetAttributeValue("uid"),
 		Surname:      entry.GetAttributeValue("sn"),
 		GivenName:    entry.GetAttributeValue("givenName"),
@@ -290,6 +341,12 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 		Description:  entry.GetAttributeValue("description"),
 		JoinDate:     entry.GetAttributeValue("dateOfJoin"),
 		IDCN:         entry.GetAttributeValue("idcnNumber"),
+	}
+	if str := entry.GetAttributeValue("sAMAccountName"); str != "" && u.Uid == "" {
+		u.Uid = str
+	}
+	if str := entry.GetAttributeValue("userPrincipalName"); str != "" && u.Email == "" {
+		u.Email = str
 	}
 	(&u.Gender).UnmarshalText(entry.GetRawAttributeValue("gender"))
 	var err error

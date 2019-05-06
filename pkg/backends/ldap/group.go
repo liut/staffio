@@ -1,7 +1,6 @@
 package ldap
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -10,10 +9,13 @@ import (
 	"github.com/liut/staffio/pkg/models"
 )
 
+const (
+	groupAdminDefault = "keeper"
+	groupAdminAD      = "Administrators"
+)
+
 var (
-	groupSuffix = "ou=groups"
-	groupDnFmt  = "cn=%s,%s,%s"
-	groupLimit  = 20
+	groupLimit = 20
 )
 
 func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
@@ -27,7 +29,10 @@ func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
 }
 
 func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
-	// log.Printf("Search group %s", name)
+	if name == groupAdminDefault && isADsource {
+		name = groupAdminAD
+	}
+	// debug("Search group %s", name)
 	for _, ls := range s.sources {
 		var entry *ldap.Entry
 		entry, err = ls.Group(name)
@@ -44,19 +49,20 @@ func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 	return
 }
 
-func (ls *ldapSource) GDN(name string) string {
-	return etGroup.DN(name)
-	// return fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
-}
-
 func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
 	var (
 		dn string
 	)
-	if name == "" { // all
-		dn = fmt.Sprintf("%s,%s", groupSuffix, ls.Base)
+	var et *entryType
+	if isADsource {
+		et = etADgroup
 	} else {
-		dn = ls.GDN(name)
+		et = etGroup
+	}
+	if name == "" { // all
+		dn = ls.Base
+	} else {
+		dn = et.DN(name)
 	}
 
 	var sr *ldap.SearchResult
@@ -64,8 +70,8 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 		search := ldap.NewSearchRequest(
 			dn,
 			ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-			etGroup.Filter,
-			etGroup.Attributes,
+			et.Filter,
+			et.Attributes,
 			nil)
 		sr, err = c.SearchWithPaging(search, uint32(groupLimit))
 		return
@@ -90,7 +96,7 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 func entryToGroup(entry *ldap.Entry) (g *models.Group) {
 	g = new(models.Group)
 	for _, attr := range entry.Attributes {
-		if attr.Name == "cn" {
+		if attr.Name == "cn" || attr.Name == "name" {
 			g.Name = attr.Values[0]
 		} else if attr.Name == "member" {
 			g.Members = make([]string, len(attr.Values))
@@ -99,6 +105,7 @@ func entryToGroup(entry *ldap.Entry) (g *models.Group) {
 			}
 		}
 	}
+	// debug("group %q", g)
 	return
 }
 

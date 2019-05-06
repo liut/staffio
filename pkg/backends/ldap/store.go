@@ -21,7 +21,7 @@ type LDAPStore struct {
 
 func NewStore(cfg *Config) (*LDAPStore, error) {
 	store := &LDAPStore{
-		pageSize: 100,
+		pageSize: PageSize,
 	}
 	for _, addr := range strings.Split(cfg.Addr, ",") {
 		c := &Config{
@@ -48,7 +48,7 @@ func (s *LDAPStore) Close() {
 
 func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
-		err = ls.Bind(ls.UDN(uid), passwd)
+		err = ls.Authenticate(uid, passwd)
 		if err == nil {
 			debug("authenticate(%s,****) ok", uid)
 			return
@@ -61,6 +61,17 @@ func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
 func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.GetStaff(uid)
+		if err == nil {
+			return
+		}
+	}
+	err = ErrNotFound
+	return
+}
+
+func (s *LDAPStore) GetByDN(dn string) (staff *models.Staff, err error) {
+	for _, ls := range s.sources {
+		staff, err = ls.GetByDN(dn)
 		if err == nil {
 			return
 		}

@@ -25,7 +25,10 @@ func NewEentryType(pk, oc string, attrs ...string) (et *entryType) {
 		OC:         oc,
 		Attributes: attrs,
 	}
-	et.Filter = fmt.Sprintf("(objectclass=%s)", et.OC)
+	if oc == "" {
+		oc = "*"
+	}
+	et.Filter = fmt.Sprintf("(objectclass=%s)", oc)
 
 	return
 }
@@ -36,6 +39,10 @@ func (et *entryType) DN(name string) string {
 		return DN(et.PK, name, etParent.DN("groups"))
 	case etPeople:
 		return DN(et.PK, name, etParent.DN("people"))
+	case etADgroup:
+		return "CN=" + name + ",CN=Builtin," + Base
+	case etADuser:
+		return "CN=" + name + ",CN=Users," + Base
 	case etBase:
 		return Base
 	}
@@ -49,7 +56,7 @@ type attributer interface {
 
 func (et *entryType) objectClasses() []string {
 	if et.PK == "dc" {
-		return []string{et.OC, "organization", "top"}
+		return []string{"dcObject", "organization", "top"}
 	}
 	return []string{et.OC, "top"}
 }
@@ -75,7 +82,7 @@ var (
 	Base   string
 	Domain string
 
-	etBase   = NewEentryType("dc", "dcObject", "dc", "o")
+	etBase   = NewEentryType("dc", "", "dc", "o", "instanceType")
 	etParent = NewEentryType("ou", "organizationalUnit", "ou")
 	etGroup  = NewEentryType("cn", "groupOfNames", "cn", "member")
 	etPeople = NewEentryType("uid", "inetOrgPerson",
@@ -83,9 +90,17 @@ var (
 		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp", "jpegPhoto",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 
+	etADgroup = NewEentryType("cn", "group", "cn", "member", "name", "description", "instanceType")
+	etADuser  = NewEentryType("cn", "user", "name", "sAMAccountName", "userPrincipalName",
+		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
+		"employeeNumber", "employeeType", "title", "jpegPhoto", "logonCount")
+
+	isADsource bool
+
 	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
 
 	PoolSize = 10
+	PageSize = 100
 )
 
 func init() {

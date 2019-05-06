@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// 这个其实没有用
+// SplitName 这个其实没有用
 func SplitName(cn string) (sn, gn string) {
 	cn = strings.TrimSpace(cn)
 	if pos := strings.LastIndexByte(cn, ' '); pos > 0 {

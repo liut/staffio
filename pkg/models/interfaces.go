@@ -6,6 +6,8 @@ type StaffStore interface {
 	All() Staffs
 	// Get with uid
 	Get(uid string) (*Staff, error)
+	// GetByDN with dn
+	GetByDN(dn string) (*Staff, error)
 	// Delete with uid
 	Delete(uid string) error
 	// Save add or update
