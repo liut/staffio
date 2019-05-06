@@ -93,7 +93,7 @@ var (
 	etADgroup = NewEentryType("cn", "group", "cn", "member", "name", "description", "instanceType")
 	etADuser  = NewEentryType("cn", "user", "name", "sAMAccountName", "userPrincipalName",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
-		"employeeNumber", "employeeType", "title", "jpegPhoto")
+		"employeeNumber", "employeeType", "title", "jpegPhoto", "logonCount")
 
 	isADsource bool
 

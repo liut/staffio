@@ -69,6 +69,17 @@ func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 	return
 }
 
+func (s *LDAPStore) GetByDN(dn string) (staff *models.Staff, err error) {
+	for _, ls := range s.sources {
+		staff, err = ls.GetByDN(dn)
+		if err == nil {
+			return
+		}
+	}
+	err = ErrNotFound
+	return
+}
+
 func (s *LDAPStore) All() (staffs models.Staffs) {
 	for _, ls := range s.sources {
 		staffs = ls.ListPaged(s.pageSize)

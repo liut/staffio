@@ -21,14 +21,14 @@
 <tbody>{{ range .staffs }}
 	<tr>
 		<td class="text-right">{{ .EmployeeNumber }}</td>
-		<td>{{ .Uid }}{{if $isKeeper }}
+		<td title="{{ .DN }}">{{ .Uid }}{{if $isKeeper }}
 		<a href="{{$base}}staff/{{ .Uid }}"><i class="glyphicon glyphicon-pencil"></i></a>
 		{{ end }}</td>
-		<td>{{ .CommonName }}</td>
+		<td title="{{ .Description }}">{{ .CommonName }}</td>
 		<td>{{ .Email }}</td>
 		{{if $isKeeper }}<td>{{ .Mobile }}</td>{{ end }}
-		<td> {{ .Name }} </td>
-		<td> {{avatarHtml .AvatarUri }}</td>
+		<td>{{ .Name }}</td>
+		<td>{{avatarHtml .AvatarUri }}</td>
 	</tr>
 	{{ end }}</tbody>
 </table>

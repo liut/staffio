@@ -184,7 +184,7 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 }
 
 func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
-	err = ls.Bind(etPeople.DN(uid), passwd)
+	err = ls.Bind(ls.UDN(uid), passwd)
 	if err == ErrLogin && Domain != "" {
 		upn := uid + "@" + Domain
 		err = ls.Bind(upn, passwd)
@@ -271,13 +271,22 @@ func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
 	return entryToUser(entry), nil
 }
 
-func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
-	// err := ls.Bind(ls.BindDN, ls.Passwd, false)
-	// if err != nil {
-	// 	// log.Printf("ERROR: Cannot bind: %s\n", err.Error())
-	// 	return nil
-	// }
+func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
+	var et *entryType
+	if isADsource {
+		et = etADuser
+	} else {
+		et = etPeople
+	}
+	var entry *ldap.Entry
+	entry, err = ls.Entry(dn, et.Filter, et.Attributes...)
+	if err != nil {
+		return
+	}
+	return entryToUser(entry), nil
+}
 
+func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 	if limit < 1 {
 		limit = 1
 	}
@@ -317,8 +326,8 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 }
 
 func entryToUser(entry *ldap.Entry) (u *models.Staff) {
-	// log.Printf("entry: %v", entry)
 	u = &models.Staff{
+		DN:           entry.DN,
 		Uid:          entry.GetAttributeValue("uid"),
 		Surname:      entry.GetAttributeValue("sn"),
 		GivenName:    entry.GetAttributeValue("givenName"),

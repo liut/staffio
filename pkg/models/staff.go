@@ -65,6 +65,7 @@ type Staff struct {
 	Created time.Time `json:"created,omitempty" form:"created"` // 创建时间
 	Updated time.Time `json:"updated,omitempty" form:"updated"` // 修改时间
 
+	DN string `json:"-" form:"-"` // distinguishedName of LDAP entry
 }
 
 func (u *Staff) GetUID() string {

@@ -15,9 +15,7 @@ const (
 )
 
 var (
-	groupSuffix = "ou=groups"
-	groupDnFmt  = "cn=%s,%s,%s"
-	groupLimit  = 20
+	groupLimit = 20
 )
 
 func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
@@ -49,11 +47,6 @@ func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 		err = ErrNotFound
 	}
 	return
-}
-
-func (ls *ldapSource) GDN(name string) string {
-	return etGroup.DN(name)
-	// return fmt.Sprintf(groupDnFmt, name, groupSuffix, ls.Base)
 }
 
 func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
