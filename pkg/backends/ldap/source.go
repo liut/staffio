@@ -184,7 +184,7 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 }
 
 func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
-	err = ls.Bind(ls.UDN(uid), passwd)
+	err = ls.Bind(etPeople.DN(uid), passwd)
 	if err == ErrLogin && Domain != "" {
 		upn := uid + "@" + Domain
 		err = ls.Bind(upn, passwd)
@@ -199,7 +199,8 @@ func (ls *ldapSource) Bind(dn, passwd string) error {
 	if err != nil {
 		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err)
 		if le, ok := err.(*ldap.Error); ok {
-			if le.ResultCode == 49 {
+			if le.ResultCode == ldap.LDAPResultInvalidCredentials ||
+				le.ResultCode == ldap.LDAPResultInvalidDNSyntax {
 				return ErrLogin
 			}
 		}
