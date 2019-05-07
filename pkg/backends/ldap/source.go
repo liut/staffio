@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -33,6 +34,8 @@ type ldapSource struct {
 var (
 	ErrEmptyAddr = errors.New("ldap addr is empty")
 	ErrEmptyBase = errors.New("ldap base is empty")
+	ErrEmptyDN   = errors.New("ldap dn is empty")
+	ErrEmptyPwd  = errors.New("ldap passwd is empty")
 	ErrLogin     = errors.New("Incorrect Username/Password")
 	ErrNotFound  = errors.New("Not Found")
 	userDnFmt    = "uid=%s,ou=people,%s"
@@ -73,6 +76,7 @@ func newSource(cfg *Config) (*ldapSource, error) {
 
 	opt := &pool.Options{
 		Factory: func() (ldap.Client, error) {
+			debug("dial to %s", u.Host)
 			if useSSL {
 				return ldap.DialTLS("tcp", u.Host, &tls.Config{InsecureSkipVerify: true})
 			}
@@ -127,7 +131,7 @@ func (ls *ldapSource) Ready(names ...string) (err error) {
 						}
 					})
 				}
-			} else {
+			} else if !ls.isAD {
 				_, err = ldapEntryReady(c, etParent, name, ls.Base)
 			}
 		}
@@ -188,7 +192,7 @@ func (ls *ldapSource) Authenticate(uid, passwd string) (staff *models.Staff, err
 	dn := ls.UDN(uid)
 	entry, err = ls.bind(uid, dn, passwd, false)
 	debug("authenticate(%q) %q ERR %v", dn, ls.Domain, err)
-	if err == ErrLogin && ls.Domain != "" {
+	if err == ErrLogin && ls.Domain != "" && !strings.Contains(uid, "@") {
 		dn = uid + "@" + ls.Domain
 		entry, err = ls.bind(uid, dn, passwd, true)
 	}
@@ -241,6 +245,12 @@ func (ls *ldapSource) opWithMan(op opFunc) error {
 }
 
 func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
+	if dn == "" {
+		return ErrEmptyDN
+	}
+	if passwd == "" {
+		return ErrEmptyPwd
+	}
 	c, err := ls.cp.Get()
 	if err == nil {
 		defer ls.cp.Put(c)

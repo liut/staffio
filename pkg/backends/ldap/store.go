@@ -36,6 +36,7 @@ func NewStore(cfg Config) (*LDAPStore, error) {
 		}
 		ls, err := newSource(c)
 		if err != nil {
+			log.Printf("newSource(%s) ERR %s", addr, err)
 			return nil, err
 		}
 		store.sources = append(store.sources, ls)
