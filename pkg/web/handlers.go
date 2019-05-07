@@ -45,19 +45,15 @@ func (s *server) loginPost(c *gin.Context) {
 	// req := c.Request
 	// uid, password := req.PostFormValue("username"), req.PostFormValue("password")
 
-	if err := s.service.Authenticate(param.Username, param.Password); err != nil {
+	var (
+		staff *models.Staff
+		err   error
+	)
+	if staff, err = s.service.Authenticate(param.Username, param.Password); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
 		res["status"] = ERROR_PARAM
 		res["message"] = "Invalid Username/Password"
-		c.JSON(http.StatusOK, res)
-		return
-	}
-
-	staff, err := s.service.Get(param.Username)
-	if err != nil {
-		res["ok"] = false
-		res["error"] = map[string]string{"message": "Load user failed"}
 		c.JSON(http.StatusOK, res)
 		return
 	}
@@ -127,7 +123,7 @@ func (s *server) passwordChange(c *gin.Context) {
 		return
 	}
 	user := UserWithContext(c)
-	if err := s.service.Authenticate(user.UID, param.OldPassword); err != nil {
+	if _, err := s.service.Authenticate(user.UID, param.OldPassword); err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "old_password"}
 		res["status"] = ERROR_PARAM

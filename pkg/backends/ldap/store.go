@@ -32,6 +32,7 @@ func NewStore(cfg Config) (*LDAPStore, error) {
 			Base:   cfg.Base,
 			Bind:   cfg.Bind,
 			Passwd: cfg.Passwd,
+			Domain: cfg.Domain,
 		}
 		ls, err := newSource(c)
 		if err != nil {
@@ -49,9 +50,10 @@ func (s *LDAPStore) Close() {
 	}
 }
 
-func (s *LDAPStore) Authenticate(uid, passwd string) (err error) {
+// Authenticate verify uid and password from one of sources, return valid DN and error
+func (s *LDAPStore) Authenticate(uid, passwd string) (staff *models.Staff, err error) {
 	for _, ls := range s.sources {
-		err = ls.Authenticate(uid, passwd)
+		staff, err = ls.Authenticate(uid, passwd)
 		if err == nil {
 			debug("authenticate(%s,****) ok", uid)
 			return

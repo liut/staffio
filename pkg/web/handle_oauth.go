@@ -102,14 +102,9 @@ func (s *server) oauth2Token(c *gin.Context) {
 			// TODO: load refresh
 			ar.Authorized = true
 		case osin.PASSWORD:
-			if err = s.service.Authenticate(ar.Username, ar.Password); err != nil {
+			var staff *models.Staff
+			if staff, err = s.service.Authenticate(ar.Username, ar.Password); err != nil {
 				resp.SetError("authentication_failed", err.Error())
-				break
-			}
-			staff, err := s.service.Get(ar.Username)
-			if err != nil {
-				// resp.InternalError = err
-				resp.SetError("get_user_failed", err.Error())
 				break
 			}
 			ar.Authorized = true

@@ -33,7 +33,7 @@ type ldapSource struct {
 var (
 	ErrEmptyAddr = errors.New("ldap addr is empty")
 	ErrEmptyBase = errors.New("ldap base is empty")
-	ErrLogin     = errors.New("049: Invalid Username/Password")
+	ErrLogin     = errors.New("Incorrect Username/Password")
 	ErrNotFound  = errors.New("Not Found")
 	userDnFmt    = "uid=%s,ou=people,%s"
 
@@ -160,7 +160,7 @@ func ldapEntryReady(c ldap.Client, et *entryType, name, base string) (exist *lda
 func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entry, error) {
 	search := ldap.NewSearchRequest(
 		dn,
-		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		filter,
 		attrs,
 		nil)
@@ -182,32 +182,55 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 	return nil, err
 }
 
-func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
-	err = ls.Bind(ls.UDN(uid), passwd)
+// Authenticate
+func (ls *ldapSource) Authenticate(uid, passwd string) (staff *models.Staff, err error) {
+	var entry *ldap.Entry
+	dn := ls.UDN(uid)
+	entry, err = ls.bind(uid, dn, passwd, false)
+	debug("authenticate(%q) %q ERR %v", dn, ls.Domain, err)
 	if err == ErrLogin && ls.Domain != "" {
-		upn := uid + "@" + ls.Domain
-		err = ls.Bind(upn, passwd)
+		dn = uid + "@" + ls.Domain
+		entry, err = ls.bind(uid, dn, passwd, true)
+	}
+	if err == nil {
+		staff = entryToUser(entry)
 	}
 	return
 }
 
-func (ls *ldapSource) Bind(dn, passwd string) error {
-	err := ls.opWithDN(dn, passwd, func(c ldap.Client) error {
-		return nil
+func (ls *ldapSource) bind(uid, dn, passwd string, isUPN bool) (entry *ldap.Entry, err error) {
+	var et *entryType
+	if ls.isAD {
+		et = etADuser
+	} else {
+		et = etPeople
+	}
+	err = ls.opWithDN(dn, passwd, func(c ldap.Client) (err error) {
+		if !isUPN {
+			entry, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+		} else {
+			entry, err = ldapEntryGet(c, ls.Base, "(userPrincipalName="+dn+")", et.Attributes...)
+			if err == ErrNotFound {
+				entry, err = ldapEntryGet(c, ls.Base, "(sAMAccountName="+uid+")", et.Attributes...)
+			}
+		}
+
+		return
 	})
 	if err != nil {
 		log.Printf("LDAP Bind failed for %s, reason: %s", dn, err)
 		if le, ok := err.(*ldap.Error); ok {
 			if le.ResultCode == ldap.LDAPResultInvalidCredentials ||
 				le.ResultCode == ldap.LDAPResultInvalidDNSyntax {
-				return ErrLogin
+				err = ErrLogin
+				return
 			}
 		}
-		return err
+		return
 	}
 
 	debug("bind(%s, ***) ok", dn)
-	return nil
+	return
 }
 
 type opFunc func(c ldap.Client) error
@@ -282,10 +305,10 @@ func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
 	}
 	var entry *ldap.Entry
 	entry, err = ls.Entry(dn, et.Filter, et.Attributes...)
-	if err != nil {
-		return
+	if err == nil {
+		staff = entryToUser(entry)
 	}
-	return entryToUser(entry), nil
+	return
 }
 
 func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
