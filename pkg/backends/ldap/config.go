@@ -5,12 +5,34 @@ import (
 	"os"
 )
 
+/*
+
+	cfg := NewConfig()
+	store, err := NewStore(cfg)
+	if err != nil {
+		log.Fatalf("new service ERR %s", err)
+	}
+
+*/
+
 // Config LDAP config
 type Config struct {
 	Addr, Base   string
 	Bind, Passwd string
-	Filter       string
-	Attributes   []string
+	Domain       string
+	PageSize     int
+}
+
+// NewConfig return default Config from Environment
+func NewConfig() Config {
+	return Config{
+		Addr:     envOr("LDAP_HOSTS", envOr("STAFFIO_LDAP_HOSTS", "localhost")),
+		Base:     envOr("LDAP_BASE_DN", envOr("STAFFIO_LDAP_BASE_DN", "dc=mydomain,dc=net")),
+		Domain:   envOr("LDAP_DOMAIN", envOr("STAFFIO_EMAIL_DOMAIN", "mydomain.net")),
+		Bind:     envOr("LDAP_BIND_DN", envOr("STAFFIO_LDAP_BIND_DN", "")),
+		Passwd:   envOr("LDAP_PASSWD", envOr("STAFFIO_LDAP_PASS", "")),
+		PageSize: DefaultPageSize,
+	}
 }
 
 type entryType struct {
@@ -33,21 +55,21 @@ func NewEentryType(pk, oc string, attrs ...string) (et *entryType) {
 	return
 }
 
-func (et *entryType) DN(name string) string {
+func (et *entryType) DN(name, base string) string {
 	switch et {
 	case etGroup:
-		return DN(et.PK, name, etParent.DN("groups"))
+		return DN(et.PK, name, etParent.DN("groups", base))
 	case etPeople:
-		return DN(et.PK, name, etParent.DN("people"))
+		return DN(et.PK, name, etParent.DN("people", base))
 	case etADgroup:
-		return "CN=" + name + ",CN=Builtin," + Base
+		return "CN=" + name + ",CN=Builtin," + base
 	case etADuser:
-		return "CN=" + name + ",CN=Users," + Base
+		return "CN=" + name + ",CN=Users," + base
 	case etBase:
-		return Base
+		return base
 	}
 	// parent
-	return DN(et.PK, name, Base)
+	return DN(et.PK, name, base)
 }
 
 type attributer interface {
@@ -76,12 +98,12 @@ func DN(pk, name, parent string) string {
 const (
 	TimeLayout = "20060102150405Z"
 	DateLayout = "20060102"
+
+	DefaultPageSize = 100
+	DefaultPoolSize = 10
 )
 
 var (
-	Base   string
-	Domain string
-
 	etBase   = NewEentryType("dc", "", "dc", "o", "instanceType")
 	etParent = NewEentryType("ou", "organizationalUnit", "ou")
 	etGroup  = NewEentryType("cn", "groupOfNames", "cn", "member")
@@ -95,18 +117,8 @@ var (
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"employeeNumber", "employeeType", "title", "jpegPhoto", "logonCount")
 
-	isADsource bool
-
 	objectClassPeople = []string{"top", "staffioPerson", "uidObject", "inetOrgPerson"}
-
-	PoolSize = 10
-	PageSize = 100
 )
-
-func init() {
-	Base = envOr("LDAP_BASE_DN", "dc=mydomain,dc=net")
-	Domain = envOr("LDAP_DOMAIN", "mydomain.net")
-}
 
 func envOr(key, dft string) string {
 	v := os.Getenv(key)
