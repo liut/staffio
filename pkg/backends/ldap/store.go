@@ -19,9 +19,12 @@ type LDAPStore struct {
 	pageSize int
 }
 
-func NewStore(cfg *Config) (*LDAPStore, error) {
+func NewStore(cfg Config) (*LDAPStore, error) {
+	if cfg.Base == "" {
+		return nil, ErrEmptyBase
+	}
 	store := &LDAPStore{
-		pageSize: PageSize,
+		pageSize: cfg.PageSize,
 	}
 	for _, addr := range strings.Split(cfg.Addr, ",") {
 		c := &Config{

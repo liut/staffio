@@ -23,9 +23,11 @@ type PoolStats = pool.Stats
 type ldapSource struct {
 	Addr   string      // LDAP address with host and port
 	Base   string      // Base DN
+	Domain string      // Domain of userPrincipalName
 	BindDN string      // default reader dn
 	Passwd string      // reader passwd
 	cp     pool.Pooler // conn
+	isAD   bool
 }
 
 var (
@@ -42,9 +44,6 @@ var (
 
 // newSource Add a new source (LDAP directory) to the global pool
 func newSource(cfg *Config) (*ldapSource, error) {
-	if cfg.Base == "" {
-		return nil, ErrEmptyBase
-	}
 
 	log.Printf("new source %s", cfg.Addr)
 
@@ -79,7 +78,7 @@ func newSource(cfg *Config) (*ldapSource, error) {
 			}
 			return ldap.Dial("tcp", u.Host)
 		},
-		PoolSize:           PoolSize,
+		PoolSize:           DefaultPoolSize,
 		PoolTimeout:        30 * time.Second,
 		MaxConnAge:         25 * time.Minute,
 		IdleTimeout:        5 * time.Minute,
@@ -89,6 +88,7 @@ func newSource(cfg *Config) (*ldapSource, error) {
 	ls := &ldapSource{
 		Addr:   u.Host,
 		Base:   cfg.Base,
+		Domain: cfg.Domain,
 		BindDN: cfg.Bind,
 		Passwd: cfg.Passwd,
 		cp:     pool.NewPool(opt),
@@ -104,10 +104,10 @@ func (ls *ldapSource) Close() {
 }
 
 func (ls *ldapSource) UDN(uid string) string {
-	if isADsource {
-		etADuser.DN(uid)
+	if ls.isAD {
+		return etADuser.DN(uid, ls.Base)
 	}
-	return etPeople.DN(uid)
+	return etPeople.DN(uid, ls.Base)
 }
 
 func (ls *ldapSource) Ready(names ...string) (err error) {
@@ -117,9 +117,18 @@ func (ls *ldapSource) Ready(names ...string) (err error) {
 				continue
 			}
 			if name == "base" {
-				err = ldapEntryReady(c, etBase, splitDC(ls.Base))
+				var exist *ldap.Entry
+				exist, err = ldapEntryReady(c, etBase, splitDC(ls.Base), ls.Base)
+				if err == nil && exist != nil {
+					once.Do(func() {
+						if exist.GetAttributeValue("instanceType") != "" {
+							debug("The source is Active Directory!")
+							ls.isAD = true
+						}
+					})
+				}
 			} else {
-				err = ldapEntryReady(c, etParent, name)
+				_, err = ldapEntryReady(c, etParent, name, ls.Base)
 			}
 		}
 		return
@@ -127,20 +136,10 @@ func (ls *ldapSource) Ready(names ...string) (err error) {
 	return
 }
 
-func ldapEntryReady(c ldap.Client, et *entryType, name string) (err error) {
-	dn := et.DN(name)
-	var entry *ldap.Entry
-	entry, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
+func ldapEntryReady(c ldap.Client, et *entryType, name, base string) (exist *ldap.Entry, err error) {
+	dn := et.DN(name, base)
+	exist, err = ldapEntryGet(c, dn, et.Filter, et.Attributes...)
 	debug("check ready for %s done, ERR %v", name, err)
-	if err == nil && et == etBase {
-		once.Do(func() {
-			if entry.GetAttributeValue("instanceType") != "" {
-				debug("The source is Active Directory!")
-				isADsource = true
-			}
-		})
-		return
-	}
 	if err == ErrNotFound {
 		ar := ldap.NewAddRequest(dn, nil)
 		// ar.Attribute("objectClass", []string{et.OC, "top"})
@@ -185,8 +184,8 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 
 func (ls *ldapSource) Authenticate(uid, passwd string) (err error) {
 	err = ls.Bind(ls.UDN(uid), passwd)
-	if err == ErrLogin && Domain != "" {
-		upn := uid + "@" + Domain
+	if err == ErrLogin && ls.Domain != "" {
+		upn := uid + "@" + ls.Domain
 		err = ls.Bind(upn, passwd)
 	}
 	return
@@ -236,17 +235,20 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 }
 
 func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
-	if isADsource {
-		return ls.Entry(etADgroup.DN(cn), etADgroup.Filter, etADgroup.Attributes...)
+	if ls.isAD {
+		if cn == groupAdminDefault {
+			cn = groupAdminAD
+		}
+		return ls.Entry(etADgroup.DN(cn, ls.Base), etADgroup.Filter, etADgroup.Attributes...)
 	}
-	return ls.Entry(etGroup.DN(cn), etGroup.Filter, etGroup.Attributes...)
+	return ls.Entry(etGroup.DN(cn, ls.Base), etGroup.Filter, etGroup.Attributes...)
 }
 
 func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
-	if isADsource {
-		return ls.Entry(etADuser.DN(uid), etADuser.Filter, etADuser.Attributes...)
+	if ls.isAD {
+		return ls.Entry(etADuser.DN(uid, ls.Base), etADuser.Filter, etADuser.Attributes...)
 	}
-	return ls.Entry(etPeople.DN(uid), etPeople.Filter, etPeople.Attributes...)
+	return ls.Entry(etPeople.DN(uid, ls.Base), etPeople.Filter, etPeople.Attributes...)
 }
 
 // Entry return a special entry with dn and filter
@@ -273,7 +275,7 @@ func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
 
 func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
 	var et *entryType
-	if isADsource {
+	if ls.isAD {
 		et = etADuser
 	} else {
 		et = etPeople
@@ -291,7 +293,7 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 		limit = 1
 	}
 	var et *entryType
-	if isADsource {
+	if ls.isAD {
 		et = etADuser
 	} else {
 		et = etPeople

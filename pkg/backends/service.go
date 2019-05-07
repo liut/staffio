@@ -42,15 +42,14 @@ type serviceImpl struct {
 
 var _ Servicer = (*serviceImpl)(nil)
 
+// NewService return new Servicer
 func NewService() Servicer {
-	ldap.Base = settings.LDAP.Base
-	ldap.Domain = settings.EmailDomain
-	cfg := &ldap.Config{
-		Addr:   settings.LDAP.Hosts,
-		Base:   settings.LDAP.Base,
-		Bind:   settings.LDAP.BindDN,
-		Passwd: settings.LDAP.Password,
-	}
+	cfg := ldap.NewConfig()
+	cfg.Addr = settings.LDAP.Hosts
+	cfg.Base = settings.LDAP.Base
+	cfg.Domain = settings.EmailDomain
+	cfg.Bind = settings.LDAP.BindDN
+	cfg.Passwd = settings.LDAP.Password
 	store, err := ldap.NewStore(cfg)
 	if err != nil {
 		log.Fatalf("new service ERR %s", err)

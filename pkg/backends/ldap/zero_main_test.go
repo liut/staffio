@@ -11,8 +11,10 @@ import (
 )
 
 const (
-	defaultBase   = "dc=example,dc=org"
-	defaultDomain = "example.org"
+	testBase   = "dc=example,dc=org"
+	testDomain = "example.org"
+	testBind   = "cn=admin,dc=example,dc=org"
+	testPasswd = "mypassword"
 )
 
 var (
@@ -23,15 +25,13 @@ func TestMain(m *testing.M) {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	var err error
-	Base = envOr("LDAP_BASE_DN", defaultBase)
-	Domain = envOr("LDAP_DOMAIN", defaultDomain)
 
-	cfg := &Config{
-		Addr:   envOr("LDAP_ADDRS", "localhost"),
-		Base:   Base,
-		Bind:   envOr("LDAP_BIND_DN", "cn=admin,dc=example,dc=org"),
-		Passwd: envOr("LDAP_PASSWD", "mypassword"),
-	}
+	cfg := NewConfig()
+	cfg.Base = envOr("LDAP_BASE_DN", testBase)
+	cfg.Domain = envOr("LDAP_DOMAIN", testDomain)
+	cfg.Bind = envOr("LDAP_BIND_DN", testBind)
+	cfg.Passwd = envOr("LDAP_PASSWD", testPasswd)
+
 	store, err = NewStore(cfg)
 	if err != nil {
 		log.Fatalf("new store ERR %s", err)
@@ -47,17 +47,17 @@ func TestMain(m *testing.M) {
 func TestStoreFailed(t *testing.T) {
 	var err error
 	var _s *LDAPStore
-	_, err = NewStore(&Config{})
+	_, err = NewStore(Config{})
 	assert.Error(t, err)
 	assert.EqualError(t, err, ErrEmptyBase.Error())
 
-	_, err = NewStore(&Config{Addr: ":bad", Base: defaultBase})
+	_, err = NewStore(Config{Addr: ":bad", Base: testBase})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "parse")
 
-	_s, err = NewStore(&Config{
+	_s, err = NewStore(Config{
 		Addr: "ldaps://localhost",
-		Base: defaultBase,
+		Base: testBase,
 	})
 	assert.NoError(t, err)
 	// log.Printf("ldap store: %s", _s)
@@ -176,7 +176,7 @@ func TestReady(t *testing.T) {
 	err = ls.Ready(name)
 	assert.NoError(t, err)
 
-	err = ls.Delete(etParent.DN(name))
+	err = ls.Delete(etParent.DN(name, testBase))
 	assert.NoError(t, err)
 }
 

@@ -29,9 +29,6 @@ func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
 }
 
 func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
-	if name == groupAdminDefault && isADsource {
-		name = groupAdminAD
-	}
 	// debug("Search group %s", name)
 	for _, ls := range s.sources {
 		var entry *ldap.Entry
@@ -54,7 +51,7 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 		dn string
 	)
 	var et *entryType
-	if isADsource {
+	if ls.isAD {
 		et = etADgroup
 	} else {
 		et = etGroup
@@ -62,7 +59,7 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 	if name == "" { // all
 		dn = ls.Base
 	} else {
-		dn = et.DN(name)
+		dn = et.DN(name, ls.Base)
 	}
 
 	var sr *ldap.SearchResult
