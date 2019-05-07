@@ -27,7 +27,7 @@ type PasswordStore interface {
 // Authenticator for Authenticate
 type Authenticator interface {
 	// Authenticate with uid and password
-	Authenticate(uid, password string) error
+	Authenticate(uid, password string) (*Staff, error)
 }
 
 // GroupStore Storage for Group

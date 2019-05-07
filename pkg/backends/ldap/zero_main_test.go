@@ -80,7 +80,7 @@ func TestStaffError(t *testing.T) {
 	_, err = store.Save(&models.Staff{Uid: "six"})
 	assert.Error(t, err)
 
-	err = store.Authenticate("baduid", "badPwd")
+	_, err = store.Authenticate("baduid", "badPwd")
 	assert.Error(t, err)
 	assert.EqualError(t, err, ErrLogin.Error())
 }
@@ -131,8 +131,14 @@ func TestStaff(t *testing.T) {
 	err = store.PasswordReset(uid, password)
 	assert.NoError(t, err)
 
-	err = store.Authenticate(uid, password)
+	var _s *models.Staff
+	_s, err = store.Authenticate(uid, password)
 	assert.NoError(t, err)
+	assert.NotNil(t, _s)
+
+	staff, err = store.GetByDN(_s.DN)
+	assert.NoError(t, err)
+	assert.NotNil(t, staff)
 
 	staff.CommonName = "doe2"
 	staff.GivenName = "fawn2"

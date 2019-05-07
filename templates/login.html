@@ -8,7 +8,7 @@
       <div class="form-group has-feedback">
         <label for="username" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10 col-md-8">
-          <input type="text" class="form-control" name="username" id="username" placeholder="Username" pattern="^[a-z]{4,}$" minlength="4" maxlength="24" data-bv-trigger="keyup" data-bv-notempty-message="用户名不能为空" data-bv-regexp-message="用户名只能使用英文" data-remote-error="用户名或密码错误" required autofocus>
+          <input type="text" class="form-control" name="username" id="username" placeholder="Username" pattern="^[a-z][a-z0-9@_-]{2,}$" minlength="3" maxlength="24" data-bv-trigger="keyup" data-bv-notempty-message="用户名不能为空" data-bv-regexp-message="用户名只能使用英文" data-remote-error="用户名或密码错误" required autofocus>
           <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
           <div class="help-block with-errors"></div>
         </div>
