@@ -1,0 +1,15 @@
+.git
+vendor/
+client/
+cmd/
+database/
+dist/
+fe/
+htdocs/
+tests/
+tmp/
+.env*
+Dockerfile*
+gulpfile.*
+package.json
+/staffio
