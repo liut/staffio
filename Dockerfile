@@ -1,14 +1,16 @@
 FROM golang:1.12
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
-ENV GO111MODULE=on GOPROXY=https://goproxy.io
-WORKDIR /go/src/github.com/liut/staffio/
+ENV GO111MODULE=on GOPROXY=https://goproxy.io ROOF=github.com/liut/staffio
+WORKDIR /go/src/$ROOF/
 COPY main.go go.* ./
 COPY pkg ./pkg
 
-RUN pwd && ls \
-  && go mod download \
-  && CGO_ENABLED=0 GOOS=linux go build -v .
+RUN go mod download \
+  && export LDFLAGS="-X ${ROOF}/pkg/settings.buildVersion=$(date '+%Y%m%d')" \
+  && env \
+  && CGO_ENABLED=0 GOOS=linux go build -ldflags "${LDFLAGS} -s -w" . \
+  && echo "build done"
 
 
 FROM alpine:3.6
