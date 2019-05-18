@@ -59,7 +59,7 @@ func (s *server) casValidateV1(c *gin.Context) {
 				fmt.Fprint(c.Writer, "no\n")
 			} else {
 				s.service.DeleteTicket(ticket)
-				fmt.Fprint(c.Writer, "yes\n"+t.Uid)
+				fmt.Fprint(c.Writer, "yes\n"+t.UID)
 			}
 		}
 	}
@@ -118,10 +118,10 @@ func v2ResponseFailure(casError *cas.CasError, format string) string {
 // v2ResponseSuccess produces XML string for success
 func v2ResponseSuccess(ticket *cas.Ticket, format string) string {
 	if format == "XML" {
-		return fmt.Sprintf(v2ValidationSuccessXML, ticket.Uid, ticket.Value)
+		return fmt.Sprintf(v2ValidationSuccessXML, ticket.UID, ticket.Value)
 	}
 
-	return fmt.Sprintf(v2ValidationSuccessJSON, ticket.Uid, ticket.Value)
+	return fmt.Sprintf(v2ValidationSuccessJSON, ticket.UID, ticket.Value)
 }
 
 const (

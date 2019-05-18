@@ -18,7 +18,7 @@ func (s *server) loginForm(c *gin.Context) {
 	service := c.Request.FormValue("service")
 	tgc := GetTGC(c)
 	if service != "" && tgc != nil {
-		st := cas.NewTicket("ST", service, tgc.Uid, false)
+		st := cas.NewTicket("ST", service, tgc.UID, false)
 		err := s.service.SaveTicket(st)
 		if err != nil {
 			return
