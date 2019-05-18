@@ -19,7 +19,7 @@ func TestTicket(t *testing.T) {
 	assert.Nil(t, err)
 	ticket, err := svc.GetTicket(st.Value)
 	assert.Nil(t, err)
-	assert.NotEmpty(t, ticket.Service, ticket.Uid)
+	assert.NotEmpty(t, ticket.Service, ticket.UID)
 	assert.NotZero(t, ticket.Id)
 	assert.Nil(t, svc.DeleteTicket(st.Value))
 }
