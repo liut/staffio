@@ -36,7 +36,7 @@ func (s *serviceImpl) SaveTicket(t *cas.Ticket) error {
 
 	return withTxQuery(func(db dbTxer) error {
 		_, err := db.Exec("INSERT INTO cas_ticket (type, value, uid, service, created) VALUES($1, $2, $3, $4, $5)",
-			t.Class, t.Value, t.Uid, t.Service, t.CreatedAt)
+			t.Class, t.Value, t.UID, t.Service, t.CreatedAt)
 		if err != nil {
 			log.Printf("save tick %v ERR %s", t, err)
 		}

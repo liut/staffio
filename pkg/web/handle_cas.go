@@ -14,7 +14,7 @@ const (
 )
 
 func NewTGC(c *gin.Context, ticket *cas.Ticket) {
-	tgt := cas.NewTicket("TGT", ticket.Service, ticket.Uid, false)
+	tgt := cas.NewTicket("TGT", ticket.Service, ticket.UID, false)
 	session := ginSession(c)
 	session.Set(ticketCKey, tgt)
 }

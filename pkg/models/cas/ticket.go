@@ -14,17 +14,11 @@ const (
 	MinValueLength = 32
 )
 
-type TicketStore interface {
-	GetTicket(value string) (*Ticket, error)
-	DeleteTicket(value string) error
-	SaveTicket(t *Ticket) error
-}
-
 type Ticket struct {
 	Id        int       `db:"id,pk" json:"id" form:"id"` // seriel in database
 	Class     string    `db:"type" json:"type"`          // ticket type: ST, PGT, PT, ...
 	Value     string    `db:"value" json:"value"`        // ticket id: (ST-|PGT-|PT-)
-	Uid       string    `db:"uid" json:"uid"`            // uid in staff
+	UID       string    `db:"uid" json:"uid"`            // uid in staff
 	Service   string    `db:"service" json:"service"`    // is an URL
 	CreatedAt time.Time `db:"created" json:"created"`
 	Renew     bool
@@ -35,7 +29,7 @@ func NewTicket(class string, service string, uid string, renew bool) *Ticket {
 		Class:     class,
 		Value:     fmt.Sprintf("%s-%s", class, random.GenString(ValueLength)),
 		CreatedAt: time.Now(),
-		Uid:       uid,
+		UID:       uid,
 		Service:   service,
 		Renew:     renew}
 	return &t
@@ -54,8 +48,8 @@ func (t *Ticket) Check() *CasError {
 		return err
 	}
 
-	if t.Uid == "" {
-		return NewCasError("empty ticket.Uid", ERROR_CODE_INVALID_USERNAME)
+	if t.UID == "" {
+		return NewCasError("empty ticket.UID", ERROR_CODE_INVALID_USERNAME)
 	}
 
 	return nil
