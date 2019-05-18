@@ -16,7 +16,7 @@ func (s *teamStore) Get(id int) (obj *weekly.Team, err error) {
 	obj = &weekly.Team{}
 	err = withDbQuery(func(db dber) error {
 		return db.Get(obj,
-			"SELECT id, name, leader, members, created FROM teams WHERE id = $1",
+			"SELECT id, name, leaders, members, created FROM teams WHERE id = $1",
 			id)
 	})
 
@@ -30,13 +30,13 @@ func (s *teamStore) All(role weekly.TeamRoleType) (data []*weekly.Team, err erro
 		data = make([]*weekly.Team, 0)
 		switch role {
 		case weekly.RoleMember:
-			return db.Select(&data, `SELECT t.id, name, t.leader, members, tm.created, tm.uid as staff_uid
+			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.uid as staff_uid
 				FROM teams t JOIN team_member tm ON tm.team_id = t.id`)
 		case weekly.RoleManager:
-			return db.Select(&data, `SELECT t.id, name, t.leader, members, tm.created, tm.leader as staff_uid
+			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.leader as staff_uid
 				FROM teams t JOIN team_leader tm ON tm.team_id = t.id`)
 		default:
-			return db.Select(&data, "SELECT id, name, leader, members, created FROM teams")
+			return db.Select(&data, "SELECT id, name, leaders, members, created FROM teams")
 		}
 
 	})
