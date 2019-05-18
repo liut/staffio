@@ -1,9 +1,12 @@
 package weekly
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/liut/staffio/pkg/models/types"
 )
+
+type StringSlice = types.StringSlice
 
 type TeamRoleType int
 
@@ -33,7 +36,7 @@ type TeamStore interface {
 	// All 查询全部数据
 	All(role TeamRoleType) (data []*Team, err error)
 	// Store 保存
-	Store(id int, name, leader string, members []string) error
+	Store(t *Team) error
 	// Add members
 	AddMember(id int, uids ...string) error
 	// Remove members
@@ -48,12 +51,12 @@ type TeamStore interface {
 
 // Team work group
 type Team struct {
-	ID        int64           `json:"id"`
-	Name      string          `json:"name"`
-	Leader    string          `json:"leader"`
-	Members   json.RawMessage `json:"members"`
-	Created   time.Time       `json:"created,omitempty" db:"created"`
-	Updated   time.Time       `json:"updated,omitempty" db:"updated,omitempty"`
-	StaffUID  string          `json:"staff_uid,omitempty" db:"staff_uid"`
-	StaffName string          `json:"staff_name,omitempty" db:"-"`
+	ID        int         `json:"id"`
+	Name      string      `json:"name"`
+	Leaders   StringSlice `json:"leaders"`
+	Members   StringSlice `json:"members"`
+	Created   time.Time   `json:"created,omitempty" db:"created"`
+	Updated   time.Time   `json:"updated,omitempty" db:"updated,omitempty"`
+	StaffUID  string      `json:"staff_uid,omitempty" db:"staff_uid"`
+	StaffName string      `json:"staff_name,omitempty" db:"-"`
 }

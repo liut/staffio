@@ -1,10 +1,10 @@
 package backends
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/liut/staffio/pkg/models/weekly"
 )
@@ -43,36 +43,35 @@ func (s *teamStore) All(role weekly.TeamRoleType) (data []*weekly.Team, err erro
 	return
 }
 
-func (s *teamStore) Store(id int, name, leader string, members []string) error {
-	bVal, err := json.Marshal(members)
-	if err != nil {
-		return err
-	}
+func (s *teamStore) Store(t *weekly.Team) error {
 	return withTxQuery(func(db dbTxer) (err error) {
-		if id < 1 {
-			err = db.Get(&id, "INSERT INTO teams(name, leader, members) VALUES($1, $2, $3) RETURNING id",
-				name, leader, bVal)
+		if t.ID < 1 {
+			var id int
+			err = db.Get(&id, "INSERT INTO teams(name, leaders, members) VALUES($1, $2, $3) RETURNING id",
+				t.Name, t.Leaders, t.Members)
 			if err != nil {
 				log.Printf("insert net team ERR %s", err)
 			} else {
 				log.Printf("insert new team id %d", id)
+				t.ID = id
 			}
 
 		} else {
-			var leader string
-			err = db.Get(&leader, "SELECT leader FROM teams WHERE id = $1", id)
+			var created time.Time
+			err = db.Get(&created, "SELECT created FROM teams WHERE id = $1", t.ID)
 			if err == nil {
 				_, err = db.Exec(`UPDATE teams SET
-					(name, leader, members, updated) = ($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4`,
-					name, leader, bVal, id)
+					(name, leaders, members, updated) = ($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4`,
+					t.Name, t.Leaders, t.Members, t.ID)
+				log.Printf("changed team %d %q %q", t.ID, t.Name, t.Leaders)
 			} else if err == ErrNoRows {
-				_, err = db.Exec("INSERT INTO teams(id, name, leader, members) VALUES($1, $2, $3, $4)",
-					id, name, leader, bVal)
+				_, err = db.Exec("INSERT INTO teams(id, name, leaders, members) VALUES($1, $2, $3, $4)",
+					t.ID, t.Name, t.Leaders, t.Members)
 			}
 
 		}
 		if err == nil {
-			err = dbTeamAddMember(db, id, members)
+			err = dbTeamAddMember(db, t.ID, t.Members)
 		}
 		return
 	})

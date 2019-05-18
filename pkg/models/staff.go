@@ -66,6 +66,8 @@ type Staff struct {
 	Updated time.Time `json:"updated,omitempty" form:"updated"` // 修改时间
 
 	DN string `json:"-" form:"-"` // distinguishedName of LDAP entry
+
+	Leader bool `json:"-" form:"-"` // temporary var
 }
 
 func (u *Staff) GetUID() string {
