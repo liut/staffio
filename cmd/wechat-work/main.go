@@ -87,11 +87,11 @@ func main() {
 				log.Printf("user %s status %s, enabled %v", val.Name, val.Status, val.Enabled)
 				continue
 			}
-			if val.IsLeader == 1 {
-				team.Leaders = append(team.Leaders, val.UID)
-			}
 			team.Members = append(team.Members, val.UID)
 			staff := userToStaff(&val)
+			if val.IsLeader == 1 {
+				team.Leaders = append(team.Leaders, staff.Uid)
+			}
 			// fmt.Println(staff)
 			staffs = append(staffs, staff)
 			// fmt.Printf("%4s %10s  %v\n", val.UID, val.Name, val.DepartmentIds)

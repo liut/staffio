@@ -67,7 +67,8 @@ type Staff struct {
 
 	DN string `json:"-" form:"-"` // distinguishedName of LDAP entry
 
-	Leader bool `json:"-" form:"-"` // temporary var
+	Leader bool `json:"leader,omitempty" form:"-"` // temporary var
+	TeamID int  `json:"teamID,omitempty" form:"-"` // department id
 }
 
 func (u *Staff) GetUID() string {

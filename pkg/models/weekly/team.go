@@ -47,13 +47,15 @@ type TeamStore interface {
 	AddManager(id int, uid string) error
 	// Remove Manager
 	RemoveManager(id int, uid string) error
+	// GetWithMember
+	GetWithMember(uid string) (*Team, error)
 }
 
 // Team work group
 type Team struct {
 	ID        int         `json:"id"`
 	Name      string      `json:"name"`
-	Leaders   StringSlice `json:"leaders"`
+	Leaders   StringSlice `json:"leaders,omitempty"`
 	Members   StringSlice `json:"members"`
 	Created   time.Time   `json:"created,omitempty" db:"created"`
 	Updated   time.Time   `json:"updated,omitempty" db:"updated,omitempty"`

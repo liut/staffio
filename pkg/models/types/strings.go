@@ -26,3 +26,13 @@ func (a *StringSlice) Scan(value interface{}) error {
 
 	return json.Unmarshal(b, &a)
 }
+
+// Contains reports is in slice
+func (a StringSlice) Contains(s string) bool {
+	for _, i := range a {
+		if i == s {
+			return true
+		}
+	}
+	return false
+}

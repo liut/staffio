@@ -20,6 +20,7 @@ type User struct {
 	Name       string `json:"name" msg:"n"`
 	Privileges string `json:"privileges,omitempty" msg:"p"`
 	LastHit    int64  `json:"hit,omitempty" msg:"h"`
+	TeamID     int    `json:"tid,omitempty" msg:"t"`
 }
 
 func (u *User) IsExpired() bool {

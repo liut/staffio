@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "department" (
 CREATE TABLE IF NOT EXISTS teams (
 	id serial,
 	name VARCHAR(120) NOT NULL UNIQUE,
-	leaders jsonb NOT NULL, -- leader uid
+	leaders jsonb NOT NULL DEFAULT '[]'::jsonb, -- leader uid
 	members jsonb NOT NULL DEFAULT '[]'::jsonb,
 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

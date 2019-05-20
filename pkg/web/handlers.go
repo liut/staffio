@@ -90,8 +90,16 @@ func (s *server) me(c *gin.Context) {
 		apiError(c, 1, nil)
 		return
 	}
+	team, err := s.service.Team().GetWithMember(user.UID)
+	if err == nil {
+		user.TeamID = team.ID
+	} else {
+		log.Printf("get team with member %s ERR %s", user.UID, err)
+	}
 	if s.IsKeeper(user.UID) {
 		user.Privileges = "admin"
+	} else if team.Leaders.Contains(user.UID) {
+		user.Privileges = "leader"
 	}
 	apiOk(c, user, 0)
 }

@@ -23,6 +23,19 @@ func (s *teamStore) Get(id int) (obj *weekly.Team, err error) {
 	return
 }
 
+func (s *teamStore) GetWithMember(uid string) (obj *weekly.Team, err error) {
+	obj = new(weekly.Team)
+	err = withDbQuery(func(db dber) error {
+		var teamID int
+		err := db.Get(&teamID, "SELECT team_id FROM team_member WHERE uid = $1", uid)
+		if err == nil {
+			return db.Get(obj, "SELECT * FROM teams WHERE id = $1", teamID)
+		}
+		return err
+	})
+	return
+}
+
 // 查询
 func (s *teamStore) All(role weekly.TeamRoleType) (data []*weekly.Team, err error) {
 
@@ -117,6 +130,11 @@ func (s *teamStore) RemoveMember(id int, uids ...string) error {
 		}
 		_, err = db.Exec("DELETE FROM team_member WHERE team_id = $1 AND uid IN ("+strings.Join(arr, ",")+") ",
 			bind...)
+		if err != nil {
+			log.Printf("delete team(%d) members %v, ERR %s", id, uids, err)
+		} else {
+			log.Printf("delete team(%d) members %v done", id, uids)
+		}
 		return
 	})
 }
