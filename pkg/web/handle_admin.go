@@ -3,6 +3,7 @@ package web
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -147,6 +148,8 @@ func (s *server) staffForm(c *gin.Context) {
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
+	data["exmail"] = settings.EmailCheck
+	data["exwechat"] = settings.WechatCorpID != ""
 	s.Render(c, "staff_edit.html", data)
 }
 
@@ -158,6 +161,7 @@ func (s *server) staffPost(c *gin.Context) {
 		estaff, staff *models.Staff
 		res           = make(osin.ResponseData)
 		op            = req.FormValue("op")
+		src           = req.FormValue("src")
 		err           error
 	)
 	if uid == "" || uid == "new" {
@@ -175,14 +179,24 @@ func (s *server) staffPost(c *gin.Context) {
 		}
 	}
 
-	if op == "fetch-exmail" && uid != "" {
-		email := uid + "@" + settings.EmailDomain
-		staff, err = backends.GetStaffFromExmail(email)
-		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
-			log.Printf("GetStaff err %s", err)
-			return
+	if strings.HasPrefix(op, "fetch-ex") && uid != "" {
+		if src == "wechat" {
+			exuser, err := s.wxAuth.GetUser(uid)
+			if err != nil {
+				c.AbortWithError(404, err)
+				return
+			}
+			staff = backends.GetStaffFromWechatUser(exuser)
+		} else {
+			email := uid + "@" + settings.EmailDomain
+			staff, err = backends.GetStaffFromExmail(email)
+			if err != nil {
+				c.AbortWithError(http.StatusNotFound, err)
+				log.Printf("GetStaff err %s", err)
+				return
+			}
 		}
+
 		// log.Print(staff)
 		if estaff != nil {
 			staff.CommonName = estaff.CommonName
@@ -209,7 +223,9 @@ func (s *server) staffPost(c *gin.Context) {
 		res["ok"] = true
 		res["staff"] = staff
 		c.JSON(http.StatusOK, res)
-	} else if op == "store" {
+		return
+	}
+	if op == "store" {
 		fb := binding.Form
 		staff = new(models.Staff)
 		err = fb.Bind(req, staff)

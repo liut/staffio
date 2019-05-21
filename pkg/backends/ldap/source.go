@@ -38,6 +38,7 @@ var (
 	ErrEmptyPwd  = errors.New("ldap passwd is empty")
 	ErrLogin     = errors.New("Incorrect Username/Password")
 	ErrNotFound  = errors.New("Not Found")
+	ErrUnsupport = errors.New("Unsupported")
 	userDnFmt    = "uid=%s,ou=people,%s"
 
 	once sync.Once
@@ -256,10 +257,10 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 		defer ls.cp.Put(c)
 		err = c.Bind(dn, passwd)
 		if err == nil {
-			debug("conn from %s (len %d, idle %d) and bind(%s) ok", ls.Addr, ls.cp.Len(), ls.cp.IdleLen(), dn)
+			debug("bind(%s) OK @ %s (len %d, idle %d)", dn, ls.Addr, ls.cp.Len(), ls.cp.IdleLen())
 			return op(c)
 		}
-		log.Printf("LDAP bind(%s) ERR %s", dn, err)
+		log.Printf("bind(%s) ERR %s", dn, err)
 		return err
 	}
 

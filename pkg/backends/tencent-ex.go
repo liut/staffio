@@ -7,10 +7,28 @@ import (
 	"strings"
 
 	"github.com/wealthworks/go-tencent-api/exmail"
+	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/settings"
 )
+
+func GetStaffFromWechatUser(user *exwechat.User) *models.Staff {
+
+	debug("got from exmail: %s", user)
+	sn, gn := models.SplitName(user.Name)
+	staff := &models.Staff{
+		Uid:          user.UID,
+		Email:        user.Email,
+		CommonName:   user.Name,
+		Surname:      sn,
+		GivenName:    gn,
+		EmployeeType: user.Title,
+		Mobile:       user.Mobile,
+		Gender:       models.Gender(user.Gender),
+	}
+	return staff
+}
 
 func GetStaffFromExmail(email string) (*models.Staff, error) {
 	user, err := exmail.GetUser(email)

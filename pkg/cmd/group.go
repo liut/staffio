@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 
@@ -31,72 +30,82 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-// addstaffCmd represents the addstaff command
-var addstaffCmd = &cobra.Command{
-	Use:   "addstaff",
-	Short: "Add a simple user for develop",
-	Long: `Add a simple user for develop, Required argument:
+// groupCmd represents the group command
+var groupCmd = &cobra.Command{
+	Use:   "group",
+	Short: "Operate a group",
+	Long: `Add or modify a group, Required argument:
 
---uid
 --name
---password
---sn`,
+--add-member
+--kick-member`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("group called")
 		settings.Parse()
 		cmd.ParseFlags(args)
-		uid, _ := cmd.Flags().GetString("uid")
-		password, _ := cmd.Flags().GetString("password")
-		if uid == "" {
-			fmt.Println("empty uid")
+		name, _ := cmd.Flags().GetString("name")
+		if name == "" {
+			fmt.Println("empty group name")
 			return
-		}
-		cn, _ := cmd.Flags().GetString("name")
-		if cn == "" {
-			cn = uid
-		}
-		sn, _ := cmd.LocalFlags().GetString("sn")
-		if sn == "" {
-			sn = cn
 		}
 		svc := backends.NewService()
-		staff := &models.Staff{
-			Uid:        uid,
-			CommonName: cn,
-			Surname:    sn,
-		}
-		isNew, err := svc.Save(staff)
-		if err != nil {
-			log.Printf("save %v ERR %s", staff, err)
+		group, err := svc.GetGroup(name)
+		if err != nil && err != backends.ErrStoreNotFound {
+			fmt.Printf("get group ERR %s\n", err)
 			return
 		}
-		log.Printf("saved staff %v", staff)
-		if isNew && password != "" {
-			err = svc.PasswordReset(uid, password)
+
+		if uid, _ := cmd.Flags().GetString("add-member"); uid != "" {
+			if err == backends.ErrStoreNotFound {
+				group = &models.Group{
+					Name:    name,
+					Members: []string{uid},
+				}
+			} else {
+				group.Members = append(group.Members, uid)
+			}
+			err = svc.SaveGroup(group)
 			if err != nil {
-				log.Printf("reset %s password ERR %s", uid, err)
+				fmt.Printf("save group ERR %s\n", err)
+			} else {
+				fmt.Println("save group OK")
+			}
+			return
+		}
+
+		if uid, _ := cmd.Flags().GetString("kick-member"); uid != "" && err == nil {
+			var members []string
+			for _, m := range group.Members {
+				if m != uid {
+					members = append(members, m)
+				}
+			}
+			if len(members) == len(group.Members) {
 				return
 			}
-			log.Printf("reset %s password OK", uid)
+			group.Members = members
+			err = svc.SaveGroup(group)
+			if err != nil {
+				fmt.Printf("save group ERR %s\n", err)
+			} else {
+				fmt.Println("save group OK")
+			}
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(addstaffCmd)
+	RootCmd.AddCommand(groupCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// addstaffCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// groupCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	addstaffCmd.Flags().StringP("uid", "u", "", "staff uid")
-	addstaffCmd.Flags().StringP("password", "p", "", "staff password")
-	addstaffCmd.Flags().StringP("name", "n", "", "staff name")
-	addstaffCmd.Flags().String("sn", "", "surname")
-	addstaffCmd.MarkFlagRequired("uid")
-	addstaffCmd.MarkFlagRequired("name")
-	addstaffCmd.MarkFlagRequired("sn")
+	groupCmd.Flags().StringP("name", "g", "", "Group name")
+	groupCmd.Flags().StringP("add-member", "a", "", "UID of member will add")
+	groupCmd.Flags().StringP("kick-member", "t", "", "UID of member will kick")
 }

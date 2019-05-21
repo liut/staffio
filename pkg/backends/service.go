@@ -11,6 +11,10 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
+var (
+	ErrStoreNotFound = ldap.ErrNotFound
+)
+
 type PoolStats = ldap.PoolStats
 
 type Servicer interface {

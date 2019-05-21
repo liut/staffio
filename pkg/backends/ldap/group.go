@@ -107,6 +107,63 @@ func entryToGroup(entry *ldap.Entry) (g *models.Group) {
 }
 
 func (s *LDAPStore) SaveGroup(group *models.Group) error {
-	// TODO:
+	for _, ls := range s.sources {
+		err := ls.saveGroup(group)
+		if err != nil {
+			log.Printf("save group %q ERR %s", group.Name, err)
+			return err
+		}
+	}
 	return nil
+}
+
+func (ls *ldapSource) saveGroup(group *models.Group) error {
+	if ls.isAD {
+		return ErrUnsupport
+	}
+	err := ls.opWithMan(func(c ldap.Client) error {
+		gdn := etGroup.DN(group.Name, ls.Base)
+		var members []string
+		for _, m := range group.Members {
+			members = append(members, ls.UDN(m))
+		}
+		_, err := ldapEntryGet(c, gdn, etGroup.Filter, etGroup.Attributes...)
+		if err == nil { // update
+			mr := ldap.NewModifyRequest(gdn, nil)
+			mr.Replace("member", members)
+			debug("change group %v", mr)
+			err = c.Modify(mr)
+		}
+		if err == ErrNotFound { // create
+			ar := ldap.NewAddRequest(gdn, nil)
+			etGroup.prepareTo(group.Name, ar)
+			ar.Attribute("member", members)
+			debug("add group %v", ar)
+			err = c.Add(ar)
+		}
+		return err
+	})
+	return err
+}
+
+func (s *LDAPStore) EraseGroup(name string) error {
+	for _, ls := range s.sources {
+		err := ls.eraseGroup(name)
+		if err != nil {
+			log.Printf("save group %q ERR %s", name, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (ls *ldapSource) eraseGroup(name string) error {
+	if ls.isAD {
+		return ErrUnsupport
+	}
+	err := ls.opWithMan(func(c ldap.Client) error {
+		dr := ldap.NewDelRequest(etGroup.DN(name, ls.Base), nil)
+		return c.Del(dr)
+	})
+	return err
 }

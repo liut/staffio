@@ -169,7 +169,25 @@ func TestGroup(t *testing.T) {
 	var err error
 	_, err = store.GetGroup("noexist")
 	assert.Error(t, err)
+
+	group := &models.Group{
+		Name:    "testgroup",
+		Members: []string{"doe"},
+	}
+
+	err = store.SaveGroup(group)
+	assert.NoError(t, err)
+	err = store.SaveGroup(group)
+	assert.NoError(t, err)
+
+	_g, _e := store.GetGroup(group.Name)
+	assert.NoError(t, _e)
+	assert.NotEmpty(t, _g.Members)
+
 	_, err = store.AllGroup()
+	assert.NoError(t, err)
+
+	err = store.EraseGroup(group.Name)
 	assert.NoError(t, err)
 }
 

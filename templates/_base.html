@@ -36,10 +36,10 @@
               <li class="active"><a href="{{.base}}">Home</a></li>
               <!-- <li><a href="{{.base}}about">About</a></li> -->
               <li><a href="{{.base}}contacts">Contacts</a></li>
-            {{ if .currUser }}
+            {{ if .currUser }}{{ if .checkEmail }}
               <li><a href="{{.base}}email/open"><span class="glyphicon glyphicon-envelope"></span> <span id="mail-unseen" class="badge hide">0</span></a>
               </li>
-            {{ end }}
+            {{ end }}{{ end }}
             </ul>
             <ul class="nav navbar-nav navbar-right">
               {{ if .currUser }}

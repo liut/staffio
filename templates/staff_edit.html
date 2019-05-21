@@ -7,12 +7,13 @@
 
     <div class="form-group">
         <label class="col-xs-3 control-label">Login (Unique)</label>
-        <div class="col-xs-5">
+        <div class="col-xs-4">
             <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.Uid }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
             {{ .staff.Uid }} (eid <span id="eid">{{ .staff.EmployeeNumber }}</span>)
         </div>
-        <div class="col-xs-1">
-            <a class="btn btn-default" href="javascript:void(0);" id="btnFetch" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>
+        <div class="col-xs-2">
+            {{if .exmail }}<a class="btn btn-default btnFetch" href="javascript:void(0);" id="fetchExmail" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>{{ end }}
+            {{if .exwechat }}<a class="btn btn-default btnFetch" href="javascript:void(0);" id="fetchExwechat" title="fetch from wechat"><i class="fa fa-wexin">从微信</i></a>{{ end }}
         </div>
     </div>
 
@@ -115,10 +116,13 @@
   <script type="text/javascript">
       jQuery(document).ready(function () {
         $('#gender-{{.staff.Gender}}').attr('checked', true);
-        $("#btnFetch").click(function(){
+        $("a.btnFetch").click(function(e){
             var uid = $("#uid").val()
+            var src = 'mail'
+            console.log(e)
+            if (e.target.id == 'fetchExwechat') {src = 'wechat'}
             console.log("searching for uid:", uid)
-            $.post(location.pathname + '?op=fetch-exmail',{uid:uid},function(res,status,xhr){
+            $.post(location.pathname + '?op=fetch-ex',{uid:uid,src:src},function(res,status,xhr){
                 console.log(res,status)
                 var staff = res.staff
                 $("#CommonName").val(staff.cn)

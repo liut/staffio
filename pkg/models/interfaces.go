@@ -34,5 +34,6 @@ type Authenticator interface {
 type GroupStore interface {
 	AllGroup() ([]Group, error)
 	GetGroup(name string) (*Group, error)
-	SaveGroup(*Group) error
+	SaveGroup(group *Group) error
+	EraseGroup(name string) error
 }
