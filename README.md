@@ -70,8 +70,9 @@ docker run --name staffio -p 3030:3030 \
 	--link staffio-db --link staffio-ldap:slapd \
 	-d liut7/staffio:latest web
 
-# create a user as first staff or adminstrator
+# create a user as first staff and adminstrator
 docker exec staffio staffio addstaff -u eagle -p mysecret -n eagleliut --sn liut
+docker exec staffio staffio group -g keeper -a eagle
 
 # now can open http://localhost:3030/ in browser
 

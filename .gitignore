@@ -37,3 +37,4 @@ htdocs/static/
 fe/build/static/
 output.*
 tests/
+.fe-build

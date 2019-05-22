@@ -31,9 +31,11 @@ paths =
     './node_modules/bootstrap-select/dist/css',
     './node_modules/x-editable/dist/bootstrap3-editable/css',
     './node_modules/datatables.net-bs/css',
+    './node_modules/font-awesome-stylus/lib',
   ],
   fonts: [
     './node_modules/bootstrap/fonts/*',
+    './node_modules/font-awesome-stylus/fonts/*',
   ],
   images: [
     './node_modules/x-editable/dist/bootstrap3-editable/img/*.*'

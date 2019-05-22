@@ -4,9 +4,11 @@ DATE := `date '+%Y%m%d'`
 
 WITH_ENV = env `cat .env 2>/dev/null | xargs`
 
+ORIG:=liut7
 NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
 SOURCES=$(shell find client cmd pkg templates -type f \( -name "*.go" ! -name "*_test.go" \) -print )
+UIFILES=$(shell find fe/{css,scripts} -type f \( -name "*.styl" -o -name "*.js" \) -print )
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
@@ -27,6 +29,7 @@ clean:
 	echo "Cleaning dist"
 	rm -rf dist fe/build
 	rm -f $(NAME) $(NAME)-*
+	fm -f .fe-build
 
 dist/linux_amd64/$(NAME): $(SOURCES)
 	echo "Building $(NAME) of linux"
@@ -48,7 +51,7 @@ package: dist
 	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
 	tar -cvJf $(NAME)-templates-$(TAG).tar.xz templates
 
-fetch-exmail:
+fetch-exmail: # deprecated
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
@@ -60,26 +63,29 @@ wechat-work:
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
 .PHONY: wechat-work
 
-demo:
+demo: # deprecated
 	echo "Building $@"
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
 .PHONY: demo
 
-gen-key:
+gen-key: # deprecated
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/gen-key
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/gen-key
 .PHONY: gen-key
 
-js-deps:
+fe-deps:
 	npm install
-.PHONY: js-deps
+.PHONY: fe-deps
 
-js-build:
+.fe-build: $(UIFILES)
 	./node_modules/.bin/gulp clean build
-.PHONY: js-build
+	touch $@
 
-statik:
+fe-build: .fe-build
+
+statik: .fe-build
+	echo 'packing UI files into static'
 	statik -src htdocs -dest ./pkg/web
 .PHONY: statik
 
@@ -97,8 +103,11 @@ test-ldap: vet
 
 
 docker-db-build:
-	docker build --rm -t liut7/$(NAME)-db:$(TAG) database/
-	docker tag liut7/$(NAME)-db:$(TAG) liut7/$(NAME)-db:latest
+	docker build --rm -t $(ORIG)/$(NAME)-db:$(TAG) database/
+	docker tag $(ORIG)/$(NAME)-db:$(TAG) $(ORIG)/$(NAME)-db:latest
+
+docker-db-save:
+	docker save -o $(ORIG)_$(NAME)-db.tar $(ORIG)/$(NAME)-db:$(TAG) $(ORIG)/$(NAME)-db:latest && gzip -9f $(ORIG)_$(NAME)_db.tar
 
 docker-auto-build:
 	docker build --rm -t $(NAME) .
@@ -107,7 +116,11 @@ docker-local-build: dist/linux_amd64/$(NAME)
 	echo "Building docker image"
 	cp -rf templates entrypoint.sh dist/
 	cp -rf Dockerfile.local dist/Dockerfile
-	docker build --rm -t liut7/$(NAME):$(TAG) dist/
-	docker tag liut7/$(NAME):$(TAG) liut7/$(NAME):latest
+	docker build --rm -t $(ORIG)/$(NAME):$(TAG) dist/
+	docker tag $(ORIG)/$(NAME):$(TAG) $(ORIG)/$(NAME):latest
+.PHONY: $@
+
+docker-local-save:
+	docker save -o $(ORIG)_$(NAME).tar $(ORIG)/$(NAME):$(TAG) $(ORIG)/$(NAME):latest && gzip -9f $(ORIG)_$(NAME).tar
 .PHONY: $@
 
