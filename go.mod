@@ -12,7 +12,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73
 	github.com/gin-gonic/gin v1.3.0
 	github.com/go-ldap/ldap v3.0.3+incompatible
-	github.com/go-osin/session v1.1.1-0.20190114034510-4bb4e9c1262b
+	github.com/go-osin/session v2.1.0+incompatible
 	github.com/golang/protobuf v1.3.0 // indirect
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

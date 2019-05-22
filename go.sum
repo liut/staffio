@@ -22,6 +22,8 @@ github.com/go-ldap/ldap v3.0.3+incompatible/go.mod h1:qfd9rJvER9Q0/D/Sqn1DfHRoBp
 github.com/go-osin/session v1.1.0 h1:BF//a16F64NFV7TJ+utlxUgZAH2S+wXj94CmmIxi3fw=
 github.com/go-osin/session v1.1.0/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
 github.com/go-osin/session v1.1.1-0.20190114034510-4bb4e9c1262b/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
+github.com/go-osin/session v2.1.0+incompatible h1:NL/TJyVHXFgVEexAbCa8hplGQW4Z4B/8IjzjAxGpdaA=
+github.com/go-osin/session v2.1.0+incompatible/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
 github.com/go-sql-driver/mysql v1.4.0 h1:7LxgVwFb2hIQtMm87NdgAVfXjnt4OePseqT1tKx+opk=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
