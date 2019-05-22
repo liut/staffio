@@ -32,11 +32,11 @@ ENV PGHOST="staffio-db" \
 
 WORKDIR /app
 
-COPY --from=0 /go/src/github.com/liut/staffio/staffio .
+COPY --from=0 /go/src/github.com/liut/staffio/staffio /usr/bin/
 ADD templates /app/templates
-ADD entrypoint.sh /app/entrypoint.sh
+ADD entrypoint.sh /start.sh
 
 EXPOSE 3030
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/start.sh"]
 CMD ["web"]

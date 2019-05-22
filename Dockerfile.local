@@ -23,9 +23,9 @@ WORKDIR /app
 ADD linux_amd64/staffio /usr/bin/
 
 ADD templates /app/templates
-ADD entrypoint.sh /app/entrypoint.sh
+ADD entrypoint.sh /start.sh
 
 EXPOSE 3030
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/start.sh"]
 CMD ["web"]
