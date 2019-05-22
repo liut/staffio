@@ -37,10 +37,10 @@ func (s *teamStore) GetWithMember(uid string) (obj *weekly.Team, err error) {
 }
 
 // 查询
-func (s *teamStore) All(role weekly.TeamRoleType) (data []*weekly.Team, err error) {
+func (s *teamStore) All(role weekly.TeamRoleType) (data weekly.Teams, err error) {
 
 	err = withDbQuery(func(db dber) error {
-		data = make([]*weekly.Team, 0)
+		data = make(weekly.Teams, 0)
 		switch role {
 		case weekly.RoleMember:
 			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.uid as staff_uid
@@ -57,15 +57,21 @@ func (s *teamStore) All(role weekly.TeamRoleType) (data []*weekly.Team, err erro
 }
 
 func (s *teamStore) Store(t *weekly.Team) error {
+	if t.Name == "" {
+		return ErrEmptyVal
+	}
 	return withTxQuery(func(db dbTxer) (err error) {
 		if t.ID < 1 {
 			var id int
+			if err = db.Get(&id, "SELECT id FROM teams WHERE name = $1", t.Name); err == nil {
+				return
+			}
 			err = db.Get(&id, "INSERT INTO teams(name, leaders, members) VALUES($1, $2, $3) RETURNING id",
 				t.Name, t.Leaders, t.Members)
 			if err != nil {
-				log.Printf("insert net team ERR %s", err)
+				log.Printf("insert new team ERR %s", err)
 			} else {
-				log.Printf("insert new team id %d", id)
+				log.Printf("insert new team id %q#%d", t.Name, id)
 				t.ID = id
 			}
 

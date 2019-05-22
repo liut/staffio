@@ -27,7 +27,6 @@ import (
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/settings"
 )
 
 // groupCmd represents the group command
@@ -40,8 +39,6 @@ var groupCmd = &cobra.Command{
 --add-member
 --kick-member`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("group called")
-		settings.Parse()
 		cmd.ParseFlags(args)
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {

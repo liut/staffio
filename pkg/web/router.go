@@ -92,6 +92,7 @@ func (s *server) StrapRouter() {
 		api.POST("/weekly/problem/update", s.weeklyProblemUpdate)
 		api.GET("/staffs", s.staffList)
 		api.GET("/teams", s.teamListByRole)
+		api.POST("/team/add", s.teamAdd)
 		api.POST("/team/member", s.teamMemberOp)
 		api.POST("/team/manager", s.teamManagerOp)
 

@@ -24,21 +24,21 @@ func (s *weeklyStore) Get(id int) (obj *weekly.Report, err error) {
 }
 
 // 查询
-func (s *weeklyStore) All(param weekly.ListParam) (data []*weekly.Report, total int, err error) {
+func (s *weeklyStore) All(spec weekly.ReportsSpec) (data weekly.Reports, total int, err error) {
 
 	var where string
 	bind := []interface{}{}
-	if param.GroupId > 0 {
+	if spec.TeamID > 0 {
 		where = " WHERE team_id = $1"
-		bind = append(bind, param.GroupId)
+		bind = append(bind, spec.TeamID)
 	}
-	if param.Uid != "" {
+	if spec.UID != "" {
 		if where == "" {
 			where = " WHERE r.uid = $1"
 		} else {
 			where += " AND r.uid = $2"
 		}
-		bind = append(bind, param.Uid)
+		bind = append(bind, spec.UID)
 	}
 
 	if err = withDbQuery(func(db dber) error {
@@ -52,9 +52,9 @@ func (s *weeklyStore) All(param weekly.ListParam) (data []*weekly.Report, total 
 	str := `SELECT DISTINCT r.id, r.uid, iso_year, iso_week, content, r.created, r.updated, r.up_count
 	   FROM weekly_report r LEFT JOIN team_member tm ON tm.uid = r.uid ` +
 		where +
-		param.Sort.Sql() + param.Pager.Sql()
+		spec.Sort.Sql() + spec.Pager.Sql()
 
-	data = make([]*weekly.Report, 0)
+	data = make(weekly.Reports, 0)
 	qs := func(db dber) error {
 		return db.Select(&data, str, bind...)
 	}

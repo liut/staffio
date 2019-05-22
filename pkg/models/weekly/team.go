@@ -25,7 +25,7 @@ const (
 
 type TeamOpParam struct {
 	Op     TeamOpType `json:"op" binding:"required" valid:"[1:2]"`
-	TeamID int        `json:"group_id" binding:"required" valid:"required"`
+	TeamID int        `json:"team_id" binding:"required" valid:"required"`
 	UIDs   []string   `json:"staff_uids" binding:"required" valid:"required"`
 }
 
@@ -34,7 +34,7 @@ type TeamStore interface {
 	// Get 取一个
 	Get(id int) (*Team, error)
 	// All 查询全部数据
-	All(role TeamRoleType) (data []*Team, err error)
+	All(role TeamRoleType) (data Teams, err error)
 	// Store 保存
 	Store(t *Team) error
 	// Add members
@@ -62,3 +62,5 @@ type Team struct {
 	StaffUID  string      `json:"staff_uid,omitempty" db:"staff_uid"`
 	StaffName string      `json:"staff_name,omitempty" db:"-"`
 }
+
+type Teams []Team

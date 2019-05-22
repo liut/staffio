@@ -6,18 +6,18 @@ import (
 )
 
 // 查询周报参数
-type ListParam struct {
-	Uid     string     `json:"uid"`
-	GroupId int        `json:"group_id"`
-	Pager   *ListPager `json:"pager" valid:"required"`
-	Sort    *ListSort  `json:"sort" valid:"required"` // weekly_report.id,work_group_id
+type ReportsSpec struct {
+	UID    string     `json:"uid"`
+	TeamID int        `json:"team_id"`
+	Pager  *ListPager `json:"pager" valid:"required"`
+	Sort   *ListSort  `json:"sort" valid:"required"` // weekly_report.id,work_group_id
 }
 
 type WeeklyStore interface {
 	// Get
 	Get(id int) (*Report, error)
 	// 查询
-	All(param ListParam) (data []*Report, total int, err error)
+	All(spec ReportsSpec) (data Reports, total int, err error)
 	// 添加
 	Add(uid string, content string) error
 	// 更新
@@ -44,6 +44,7 @@ const (
 	WRIgnore
 )
 
+// Report 周报
 type Report struct {
 	Id      int             `json:"id"`
 	Uid     string          `json:"uid"`
@@ -58,6 +59,8 @@ type Report struct {
 	Created *time.Time `db:"created" json:"created"`
 	Updated *time.Time `db:"updated" json:"updated,omitempty"`
 }
+
+type Reports []Report
 
 type ReportWithProblem struct {
 	Id   int `json:"id"`

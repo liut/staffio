@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	ErrEmptyVal = errors.New("empty value")
 	dbError     = errors.New("database error")
 	ErrNotFound = errors.New("Not Found")
 	valueError  = errors.New("value error")

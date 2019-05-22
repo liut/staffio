@@ -38,6 +38,14 @@ type weeklyReportStatusParam struct {
 	Status weekly.Status `json:"status" `
 }
 
+type teamAddParam struct {
+	Name string `json:"name" binding:"required" valid:"[1:128]"`
+}
+
+type teamDeleteParam struct {
+	ID int64 `json:"id" binding:"required" valid:"required"`
+}
+
 func (s *server) weeklyReportAdd(c *gin.Context) {
 	var param weeklyReportAddParam
 	if err := c.Bind(&param); err != nil {
@@ -95,7 +103,7 @@ func (s *server) weeklyReportUp(c *gin.Context) {
 }
 
 func (s *server) weeklyReportList(c *gin.Context) {
-	var param weekly.ListParam
+	var param weekly.ReportsSpec
 	if err := c.Bind(&param); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
@@ -118,13 +126,13 @@ func (s *server) weeklyReportList(c *gin.Context) {
 }
 
 func (s *server) weeklyReportListSelf(c *gin.Context) {
-	var param weekly.ListParam
+	var param weekly.ReportsSpec
 	if err := c.Bind(&param); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
 	user := UserWithContext(c)
-	param.Uid = user.UID
+	param.UID = user.UID
 
 	ret, total, err := s.service.Weekly().All(param)
 	if err != nil {
@@ -340,6 +348,23 @@ func (s *server) teamListByRole(c *gin.Context) {
 		}
 	}
 	apiOk(c, data, 0)
+}
+
+func (s *server) teamAdd(c *gin.Context) {
+	var param teamAddParam
+	if err := c.Bind(&param); err != nil {
+		apiError(c, ERROR_PARAM, err)
+		return
+	}
+
+	team := &weekly.Team{
+		Name: param.Name,
+	}
+	if err := s.service.Team().Store(team); err != nil {
+		apiError(c, ERROR_DB, err)
+		return
+	}
+	apiOk(c, true, 0)
 }
 
 func (s *server) teamMemberOp(c *gin.Context) {

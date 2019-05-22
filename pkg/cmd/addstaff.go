@@ -28,7 +28,6 @@ import (
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/settings"
 )
 
 // addstaffCmd represents the addstaff command
@@ -42,7 +41,6 @@ var addstaffCmd = &cobra.Command{
 --password
 --sn`,
 	Run: func(cmd *cobra.Command, args []string) {
-		settings.Parse()
 		cmd.ParseFlags(args)
 		uid, _ := cmd.Flags().GetString("uid")
 		password, _ := cmd.Flags().GetString("password")

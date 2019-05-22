@@ -77,9 +77,6 @@ const (
 )
 
 func webRun() {
-	log.SetFlags(log.Ltime | log.Lshortfile)
-	settings.Parse()
-
 	backends.InitSMTP()
 
 	// web.SetBase("/v1/")
