@@ -391,13 +391,14 @@ func (s *server) teamManagerOp(c *gin.Context) {
 }
 
 type simpStaff struct {
-	ID      int       `json:"id,omitempty"`
-	Uid     string    `json:"uid"`
-	Name    string    `json:"name"`
-	Email   string    `json:"email,omitempty"`
-	Mobile  string    `json:"mobile,omitempty"`
-	Avatar  string    `json:"avatar,omitempty"`
-	Created time.Time `json:"created,omitempty"`
+	ID     int    `json:"id,omitempty"`
+	Uid    string `json:"uid"`
+	Name   string `json:"name"`
+	Email  string `json:"email,omitempty"`
+	Mobile string `json:"mobile,omitempty"`
+	Avatar string `json:"avatar,omitempty"`
+
+	Created *time.Time `json:"created,omitempty"`
 }
 
 func (s *server) staffList(c *gin.Context) {

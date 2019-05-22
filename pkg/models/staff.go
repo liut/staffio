@@ -62,8 +62,8 @@ type Staff struct {
 	JoinDate       string `json:"joinDate,omitempty" form:"joinDate"`       // 加入日期
 	IDCN           string `json:"idcn,omitempty" form:"idcn"`               // 身份证号
 
-	Created time.Time `json:"created,omitempty" form:"created"` // 创建时间
-	Updated time.Time `json:"updated,omitempty" form:"updated"` // 修改时间
+	Created *time.Time `json:"created,omitempty" form:"created"` // 创建时间
+	Updated *time.Time `json:"updated,omitempty" form:"updated"` // 修改时间
 
 	DN string `json:"-" form:"-"` // distinguishedName of LDAP entry
 

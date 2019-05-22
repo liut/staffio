@@ -392,26 +392,35 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 			log.Printf("invalid employee number %q, ERR %s", str, err)
 		}
 	}
+	var t time.Time
 	if str := entry.GetAttributeValue("createdTime"); str != "" {
-		u.Created, err = time.Parse(TimeLayout, str)
+		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
+		} else {
+			u.Created = &t
 		}
 	} else if str := entry.GetAttributeValue("createTimestamp"); str != "" {
-		u.Created, err = time.Parse(TimeLayout, str)
+		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
+		} else {
+			u.Created = &t
 		}
 	}
 	if str := entry.GetAttributeValue("modifiedTime"); str != "" {
-		u.Updated, err = time.Parse(TimeLayout, str)
+		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
+		} else {
+			u.Updated = &t
 		}
 	} else if str := entry.GetAttributeValue("modifyTimestamp"); str != "" {
-		u.Updated, err = time.Parse(TimeLayout, str)
+		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
+		} else {
+			u.Updated = &t
 		}
 	}
 	if blob := entry.GetRawAttributeValue("jpegPhoto"); len(blob) > 0 {

@@ -54,8 +54,9 @@ type Report struct {
 	Status  Status          `json:"status"` // 0代表正常，1代表休假
 	Content json.RawMessage `json:"content"`
 	UpCount int             `json:"upCount" db:"up_count"`
-	Created time.Time       `db:"created" json:"created"`
-	Updated time.Time       `db:"updated" json:"updated,omitempty"`
+
+	Created *time.Time `db:"created" json:"created"`
+	Updated *time.Time `db:"updated" json:"updated,omitempty"`
 }
 
 type ReportWithProblem struct {
@@ -63,27 +64,30 @@ type ReportWithProblem struct {
 	Year int `json:"year" db:"iso_year"`
 	Week int `json:"week" db:"iso_week"`
 	// Status    int64  `json:"status"` // 0代表正常，1代表休假
-	Content   string    `json:"content"`
-	ProblemId int       `json:"problem_id"`
-	Problem   string    `json:"problem"`
-	Created   time.Time `db:"created" json:"created"`
-	Updated   time.Time `db:"updated,nullempty" json:"updated,omitempty"`
+	Content   string `json:"content"`
+	ProblemId int    `json:"problem_id"`
+	Problem   string `json:"problem"`
+
+	Created *time.Time `db:"created" json:"created"`
+	Updated *time.Time `db:"updated,nullempty" json:"updated,omitempty"`
 }
 
 type ReportStat struct {
-	Id      int       `json:"id,omitempty"`
-	Uid     string    `json:"uid,omitempty"`
-	Year    int       `json:"year" db:"iso_year"`
-	Week    int       `json:"week" db:"iso_week"`
-	Status  Status    `json:"status"` //0正常，1休假，2表示忽略该用户所有或特定周报
-	Created time.Time `db:"created,omitempty" json:"created"`
+	Id     int    `json:"id,omitempty"`
+	Uid    string `json:"uid,omitempty"`
+	Year   int    `json:"year" db:"iso_year"`
+	Week   int    `json:"week" db:"iso_week"`
+	Status Status `json:"status"` //0正常，1休假，2表示忽略该用户所有或特定周报
+
+	Created *time.Time `db:"created,omitempty" json:"created"`
 }
 
 type ReportUser struct {
-	Id      int       `json:"id,omitempty"`
-	Uid     string    `json:"uid"`
-	Name    string    `json:"name"`
-	Created time.Time `json:"created"`
+	Id   int    `json:"id,omitempty"`
+	Uid  string `json:"uid"`
+	Name string `json:"name"`
+
+	Created *time.Time `json:"created,omitempty"`
 }
 
 // 周报统计参数
