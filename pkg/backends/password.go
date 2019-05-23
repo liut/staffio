@@ -16,7 +16,7 @@ import (
 
 var (
 	ErrInvalidResetToken = errors.New("invalid reset token or not found")
-	ErrEmptyMailhost     = errors.New("empty smtp host")
+	ErrMailNotReady      = errors.New("email system is not ready")
 )
 
 func (s *serviceImpl) getResetHash(uid string) ([]byte, error) {
@@ -49,6 +49,9 @@ func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (e
 }
 
 func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
+	if smtpHost == "" {
+		return ErrMailNotReady
+	}
 	uv := models.NewVerify(common.AtEmail, staff.Email, staff.Uid)
 	err = s.SaveVerify(uv)
 	if err != nil {
@@ -153,6 +156,8 @@ var (
 	smtpPort = 587
 	smtpUser string
 	smtpPass string
+
+	mailSender = "no-reply"
 )
 
 func SetupSMTPhost(host string, port int) {
@@ -167,12 +172,12 @@ func SetupSMTPAuth(from, password string) {
 
 func sendResetEmail(staff *models.Staff, token string) error {
 	if smtpHost == "" {
-		log.Print("smtp is disabled")
-		return ErrEmptyMailhost
+		logger().Warnw("smtp host is empty")
+		return ErrMailNotReady
 	}
 
 	m := mail.NewMessage()
-	m.SetHeader("From", smtpUser)
+	m.SetHeader("From", fmt.Sprintf("%s <%s>", mailSender, smtpUser))
 	m.SetHeader("To", staff.Email)
 	m.SetHeader("Subject", "Password reset request")
 	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token))
