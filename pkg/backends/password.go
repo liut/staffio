@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dchest/passwordreset"
-	"github.com/wealthworks/csmtp"
+	"gopkg.in/mail.v2"
 
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
@@ -16,6 +16,7 @@ import (
 
 var (
 	ErrInvalidResetToken = errors.New("invalid reset token or not found")
+	ErrEmptyMailhost     = errors.New("empty smtp host")
 )
 
 func (s *serviceImpl) getResetHash(uid string) ([]byte, error) {
@@ -143,26 +144,48 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 }
 
 func InitSMTP() {
-	csmtp.Host = settings.SMTP.Host
-	csmtp.Port = settings.SMTP.Port
-	csmtp.Name = settings.SMTP.SenderName
-	csmtp.From = settings.SMTP.SenderEmail
-	csmtp.Auth(settings.SMTP.SenderPassword)
+	SetupSMTPhost(settings.SMTP.Host, settings.SMTP.Port)
+	SetupSMTPAuth(settings.SMTP.SenderEmail, settings.SMTP.SenderPassword)
+}
+
+var (
+	smtpHost string
+	smtpPort = 587
+	smtpUser string
+	smtpPass string
+)
+
+func SetupSMTPhost(host string, port int) {
+	smtpHost = host
+	smtpPort = port
+}
+
+func SetupSMTPAuth(from, password string) {
+	smtpUser = from
+	smtpPass = password
 }
 
 func sendResetEmail(staff *models.Staff, token string) error {
-	if !settings.SMTP.Enabled {
+	if smtpHost == "" {
 		log.Print("smtp is disabled")
-		return nil
+		return ErrEmptyMailhost
 	}
-	log.Printf("sending reset email to %s via %s", staff.Email, csmtp.Host)
-	message := fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token)
-	err := csmtp.SendMail("Password reset request", message, staff.Email)
-	if err != nil {
-		log.Printf("send reset email ERR %s", err)
+
+	m := mail.NewMessage()
+	m.SetHeader("From", smtpUser)
+	m.SetHeader("To", staff.Email)
+	m.SetHeader("Subject", "Password reset request")
+	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token))
+
+	logger().Infow("sending reset email", "email", staff.Email, "host", smtpHost)
+
+	d := mail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
+
+	if err := d.DialAndSend(m); err != nil {
+		logger().Warnw("send reset email failed", "host", smtpHost, "err", err)
 		return err
 	}
-	log.Printf("send reset email of %q OK", staff.Email)
+	logger().Infow("send reset email OK", "email", staff.Email)
 	return nil
 }
 
