@@ -34,12 +34,7 @@ import (
 var addstaffCmd = &cobra.Command{
 	Use:   "addstaff",
 	Short: "Add a simple user for develop",
-	Long: `Add a simple user for develop, Required argument:
-
---uid
---name
---password
---sn`,
+	Long:  `Add a simple user for develop`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.ParseFlags(args)
 		uid, _ := cmd.Flags().GetString("uid")

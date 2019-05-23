@@ -33,11 +33,7 @@ import (
 var groupCmd = &cobra.Command{
 	Use:   "group",
 	Short: "Operate a group",
-	Long: `Add or modify a group, Required argument:
-
---name
---add-member
---kick-member`,
+	Long:  `Add or Kick a user into a group, new group will be create`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.ParseFlags(args)
 		name, _ := cmd.Flags().GetString("name")
@@ -105,4 +101,5 @@ func init() {
 	groupCmd.Flags().StringP("name", "g", "", "Group name")
 	groupCmd.Flags().StringP("add-member", "a", "", "UID of member will add")
 	groupCmd.Flags().StringP("kick-member", "t", "", "UID of member will kick")
+	addstaffCmd.MarkFlagRequired("name")
 }
