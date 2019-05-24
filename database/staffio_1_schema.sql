@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS oauth_client
 	redirect_uri varchar(255) NOT NULL DEFAULT '',
 	userdata jsonb NOT NULL DEFAULT '{}'::jsonb,
 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	allowed_grant_types varchar(255) DEFAULT '',
-	allowed_response_types varchar(255) DEFAULT '',
-	allowed_scopes varchar(255) DEFAULT '',
+	grant_types jsonb NOT NULL DEFAULT '[]'::jsonb,
+	response_types jsonb NOT NULL DEFAULT '[]'::jsonb,
+	scopes jsonb NOT NULL DEFAULT '[]'::jsonb,
 	UNIQUE (code),
 	PRIMARY KEY (id)
 );

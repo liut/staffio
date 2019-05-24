@@ -1,7 +1,6 @@
 package backends
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"strings"
@@ -15,20 +14,12 @@ import (
 )
 
 var (
-	clientsSortableFields           = []string{"id", "created"}
-	_                     OSINStore = (*DbStorage)(nil)
+	clientsSortableFields = []string{"id", "created"}
+
+	_ OSINStore = (*DbStorage)(nil)
 )
 
-type OSINStore interface {
-	osin.Storage
-	LoadClients(limit, offset int, sort map[string]int) ([]*oauth.Client, error)
-	CountClients() uint
-	GetClientWithCode(code string) (*oauth.Client, error)
-	SaveClient(client *oauth.Client) error
-	LoadScopes() (scopes []*oauth.Scope, err error)
-	IsAuthorized(client_id, username string) bool
-	SaveAuthorized(client_id, username string) error
-}
+type OSINStore = oauth.OSINStore
 
 type DbStorage struct {
 	refresh *sync.Map
@@ -216,78 +207,69 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 	return nil
 }
 
-func (s *DbStorage) GetClientWithCode(code string) (*oauth.Client, error) {
-	c := new(oauth.Client)
-	qs := func(db dber) error {
-		return db.QueryRow("SELECT id, name, code, secret, redirect_uri, created FROM oauth_client WHERE code = $1",
-			code).Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt)
-	}
-	if err := withDbQuery(qs); err != nil {
-		log.Printf("GetClientWithCode ERROR: %s", err)
-		return nil, err
-	}
-	return c, nil
+func (s *DbStorage) GetClientWithCode(code string) (c *oauth.Client, err error) {
+	c = new(oauth.Client)
+	err = withDbQuery(func(db dber) error {
+		return db.Get(c, "SELECT * FROM oauth_client WHERE code = $1", code)
+	})
+	return
 }
 
-func (s *DbStorage) LoadClients(limit, offset int, sort map[string]int) (clients []*oauth.Client, err error) {
-	if limit < 1 {
-		limit = 1
+func (s *DbStorage) GetClientWithID(id int) (c *oauth.Client, err error) {
+	c = new(oauth.Client)
+	err = withDbQuery(func(db dber) error {
+		return db.Get(c, "SELECT * FROM oauth_client WHERE id = $1", id)
+	})
+	return
+}
+
+func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client, err error) {
+	if spec.Limit < 1 {
+		spec.Limit = 1
 	}
-	if offset < 0 {
-		offset = 0
-	}
-
-	var orders []string
-	for k, v := range sort {
-		if inArray(k, clientsSortableFields) {
-			var o string
-			if v == ASCENDING {
-				o = "ASC"
-			} else {
-				o = "DESC"
-			}
-			orders = append(orders, k+" "+o)
-		}
-	}
-
-	str := `SELECT id, name, code, secret, redirect_uri, created
-	  , allowed_grant_types, allowed_response_types, allowed_scopes
-	   FROM oauth_client `
-
-	if len(orders) > 0 {
-		str = str + " ORDER BY " + strings.Join(orders, ",")
-	}
-
-	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, limit, offset)
-
-	clients = make([]*oauth.Client, 0)
-	qs := func(db dber) error {
-		rows, err := db.Query(str)
-		if err != nil {
-			log.Printf("db query error: %s for sql %s", err, str)
-			return err
-		}
-		defer rows.Close()
-		for rows.Next() {
-			c := new(oauth.Client)
-			var (
-				grandTypes, responseTypes, scopes string
-			)
-			err = rows.Scan(&c.Id, &c.Name, &c.Code, &c.Secret, &c.RedirectUri, &c.CreatedAt,
-				&grandTypes, &responseTypes, &scopes)
+	if spec.Page < 1 {
+		spec.Page = 1
+	} else {
+		withDbQuery(func(db dber) error {
+			err := db.Get(&spec.Total, "SELECT COUNT(id) as total FROM oauth_client")
 			if err != nil {
-				log.Printf("rows scan error: %s", err)
-				continue
+				logger().Infow("count oauth_client ERR ", "err", err)
 			}
-			c.AllowedGrantTypes = strings.Split(grandTypes, ",")
-			c.AllowedResponseTypes = strings.Split(responseTypes, ",")
-			c.AllowedScopes = strings.Split(scopes, ",")
-			clients = append(clients, c)
+			return err
+		})
+		if spec.Total == 0 {
+			return
 		}
-		return rows.Err()
 	}
 
-	if err := withDbQuery(qs); err != nil {
+	str := `SELECT * FROM oauth_client `
+
+	if len(spec.Orders) > 0 {
+		var orders []string
+		for _, order := range spec.Orders {
+			if pos := strings.LastIndex(order, " "); pos > -1 {
+				field := order[:pos]
+				if inArray(field, clientsSortableFields) {
+					sort := order[pos+1:]
+					switch strings.ToUpper(sort) {
+					case "ASC", "DESC", "":
+						orders = append(orders, field+" "+sort)
+					}
+				}
+			}
+		}
+		if len(orders) > 0 {
+			str = str + " ORDER BY " + strings.Join(orders, ",")
+		}
+	}
+
+	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, spec.Limit, (spec.Page-1)*spec.Limit)
+
+	clients = make([]oauth.Client, 0)
+	err = withDbQuery(func(db dber) error {
+		return db.Select(&clients, str)
+	})
+	if err != nil {
 		return nil, err
 	}
 
@@ -303,57 +285,44 @@ func (s *DbStorage) CountClients() (total uint) {
 }
 
 func (s *DbStorage) SaveClient(client *oauth.Client) error {
-	log.Printf("SaveClient: id %d code %s", client.Id, client.Code)
-	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectUri == "" {
+	log.Printf("SaveClient: id %d code %s", client.ID, client.Code)
+	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectURI == "" {
 		return valueError
 	}
 	qs := func(tx dbTxer) error {
 		var err error
-		if client.Id > 0 {
+		if client.ID > 0 {
 			str := `UPDATE oauth_client SET name = $1, code = $2, secret = $3, redirect_uri = $4
 			 WHERE id = $5`
-			var r sql.Result
-			r, err = tx.Exec(str, client.Name, client.Code, client.Secret, client.RedirectUri, client.Id)
-			log.Printf("UPDATE client result: %v", r)
+			_, err = tx.Exec(str, client.Name, client.Code, client.Secret, client.RedirectURI, client.ID)
+			logger().Infow("UPDATE client result", "err", err)
 		} else {
 			str := `INSERT INTO
-		 oauth_client(name, code, secret, redirect_uri, allowed_grant_types, allowed_scopes, created)
+		 oauth_client(name, code, secret, redirect_uri, grant_types, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
 			err = tx.QueryRow(str,
 				client.Name,
 				client.Code,
 				client.Secret,
-				client.RedirectUri,
-				strings.Join(client.AllowedGrantTypes, ","),
-				strings.Join(client.AllowedScopes, ","),
-				client.CreatedAt).Scan(&client.Id)
+				client.RedirectURI,
+				client.AllowedGrantTypes,
+				client.AllowedScopes,
+				client.CreatedAt).Scan(&client.ID)
+		}
+		if err != nil {
+			logger().Warnw("save client failed ", "client", client, "err", err)
 		}
 		return err
 	}
 	return withTxQuery(qs)
 }
 
-func (s *DbStorage) LoadScopes() (scopes []*oauth.Scope, err error) {
-	scopes = make([]*oauth.Scope, 0)
-	qs := func(db dber) error {
-		rows, err := db.Query("SELECT name, label, description, is_default FROM oauth_scope")
-		if err != nil {
-			log.Printf("load scopes error: %s", err)
-			return err
-		}
-		defer rows.Close()
-		for rows.Next() {
-			s := new(oauth.Scope)
-			err = rows.Scan(&s.Name, &s.Label, &s.Description, &s.IsDefault)
-			if err != nil {
-				log.Printf("rows scan error: %s", err)
-			}
-			scopes = append(scopes, s)
-		}
-		return rows.Err()
-	}
+func (s *DbStorage) LoadScopes() (scopes []oauth.Scope, err error) {
+	scopes = make([]oauth.Scope, 0)
 
-	if err := withDbQuery(qs); err != nil {
+	if err = withDbQuery(func(db dber) error {
+		return db.Select(&scopes, "SELECT name, label, description, is_default FROM oauth_scope")
+	}); err != nil {
 		return nil, err
 	}
 

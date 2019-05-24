@@ -6,11 +6,17 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
+	zlog "github.com/liut/staffio/pkg/log"
 )
 
 var (
 	base = "/"
 )
+
+func logger() zlog.Logger {
+	return zlog.GetLogger()
+}
 
 func SetBase(s string) {
 	base = fmt.Sprintf("%s/", strings.TrimRight(s, "/"))
@@ -47,7 +53,7 @@ func (s *server) StrapRouter() {
 	gr.POST("/info/:topic", s.oauth2Info)
 
 	keeper := authed.Group("/dust", s.authAdminMiddleware())
-	keeper.GET("/clients", s.clientsForm)
+	keeper.GET("/clients", s.clientsGet)
 	keeper.POST("/clients", s.clientsPost)
 	keeper.GET("/scopes", s.scopesForm)
 	keeper.GET("/status/:topic", s.handleStatus)
@@ -106,6 +112,9 @@ func (s *server) StrapRouter() {
 		apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
 		apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
 		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
+
+		apiMan.GET("/oauth/clients", s.clientsGet)
+		apiMan.POST("/oauth/clients", s.clientsPost)
 
 		apiMan.GET("/service/stats", s.handleServiceStats)
 	}

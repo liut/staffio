@@ -15,21 +15,40 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-func (s *server) clientsForm(c *gin.Context) {
-	var (
-		limit  = 20
-		offset = 0
-		sort   = map[string]int{"id": backends.ASCENDING}
-	)
-	clients, err := s.service.OSIN().LoadClients(limit, offset, sort)
+func (s *server) clientsGet(c *gin.Context) {
+	spec := new(oauth.ClientSpec)
+	if err := c.Bind(spec); err != nil {
+		apiError(c, 400, err)
+		return
+	}
+
+	clients, err := s.service.OSIN().LoadClients(spec)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	if IsAjax(c.Request) {
+		apiOk(c, clients, len(clients))
 		return
 	}
 	s.Render(c, "clients.html", map[string]interface{}{
 		"ctx":     c,
 		"clients": clients,
 	})
+}
+
+type inlineEdit struct {
+	PK    string `form:"pk" json:"pk" binding:"required" description:"主键"`
+	Field string `form:"name" json:"name" binding:"required" description:"名称"`
+	Value string `form:"value" json:"value" binding:"required"`
+}
+
+type clientParam struct {
+	ID          int    `form:"id" json:"id" binding:"required"`
+	Name        string `form:"name" json:"name"`
+	Code        string `form:"code" json:"code"`
+	Secret      string `form:"secret" json:"secret"`
+	RedirectURI string `form:"redirect_uri" json:"redirect_uri"`
 }
 
 func (s *server) clientsPost(c *gin.Context) {
@@ -50,50 +69,71 @@ func (s *server) clientsPost(c *gin.Context) {
 		// log.Printf("new client: %v", client)
 		_, e := s.service.OSIN().GetClientWithCode(client.Code) // check exists
 		if e == nil {
+			logger().Warnw("client exists", "client", client, "err", e)
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "duplicate client_id"}
 			c.JSON(http.StatusOK, res)
+		}
+		return
+
+	}
+	if req.FormValue("pk") != "" {
+		var inline inlineEdit
+		err = c.Bind(&inline)
+		if err != nil {
+			apiError(c, 400, err)
 			return
 		}
-
-	} else {
-
-		pk, name, value := req.PostFormValue("pk"), req.PostFormValue("name"), req.PostFormValue("value")
-		// log.Printf("clientsPost: pk %s, name %s, value %s", pk, name, value)
-		if pk == "" {
-			res["ok"] = false
-			res["error"] = map[string]string{"message": "pk is empty"}
-			c.JSON(http.StatusOK, res)
-		}
-		// id, err := strconv.ParseUint(pk, 10, 32)
-		client, err = s.service.OSIN().GetClientWithCode(pk)
+		client, err = s.service.OSIN().GetClientWithCode(inline.PK)
 		if err != nil {
+			logger().Warnw("get client ERR ", "inline", inline, "err", err)
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is invalid or not found"}
 			c.JSON(http.StatusOK, res)
 			return
 		}
-		switch name {
+		switch inline.Field {
 		case "name":
-			client.Name = value
+			client.Name = inline.Value
 		case "secret":
-			client.Secret = value
+			client.Secret = inline.Value
 		case "redirect_uri":
-			client.RedirectUri = value
+			client.RedirectURI = inline.Value
 		default:
-			log.Printf("invalid filed: %s", name)
+			log.Printf("invalid filed: %s", inline.Field)
+			apiError(c, 400, "invalid field")
+			return
 		}
 	}
 
-	if client != nil {
+	var param clientParam
+	if err = c.Bind(&param); err == nil {
+		client, err = s.service.OSIN().GetClientWithID(param.ID)
+		if len(param.Name) > 0 && client.Name != param.Name {
+			client.Name = param.Name
+		}
+		if len(param.Secret) > 0 && client.Secret != param.Secret {
+			client.Secret = param.Secret
+		}
+		if len(param.RedirectURI) > 0 && client.RedirectURI != param.RedirectURI {
+			client.RedirectURI = param.RedirectURI
+		}
+	} else {
+		logger().Warnw("bind failed ", c.Request.Method, c.Request.RequestURI, "err", err)
+		apiError(c, 400, err)
+		return
+	}
+
+	if err == nil && client != nil {
 		err = s.service.OSIN().SaveClient(client)
 		if err != nil {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": err.Error()}
 			c.JSON(http.StatusOK, res)
+			return
 		}
 		res["ok"] = true
-		res["id"] = client.Id
+		res["id"] = client.ID
 		c.JSON(http.StatusOK, res)
 		return
 	}

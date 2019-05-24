@@ -26,7 +26,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
+	zlog "github.com/liut/staffio/pkg/log"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -45,6 +47,18 @@ var RootCmd = &cobra.Command{
 func Execute() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	settings.Parse()
+
+	var logger *zap.Logger
+
+	if settings.IsDevelop() {
+		logger, _ = zap.NewDevelopment()
+	} else {
+		logger, _ = zap.NewProduction()
+	}
+	defer logger.Sync() // flushes buffer, if any
+	sugar := logger.Sugar()
+
+	zlog.SetLogger(sugar)
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
