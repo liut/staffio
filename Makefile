@@ -107,7 +107,7 @@ docker-db-build:
 	docker tag $(ORIG)/$(NAME)-db:$(TAG) $(ORIG)/$(NAME)-db:latest
 
 docker-db-save:
-	docker save -o $(ORIG)_$(NAME)-db.tar $(ORIG)/$(NAME)-db:$(TAG) $(ORIG)/$(NAME)-db:latest && gzip -9f $(ORIG)_$(NAME)_db.tar
+	docker save -o $(ORIG)_$(NAME)_db.tar $(ORIG)/$(NAME)-db:$(TAG) $(ORIG)/$(NAME)-db:latest && gzip -9f $(ORIG)_$(NAME)_db.tar
 
 docker-auto-build:
 	docker build --rm -t $(NAME) .

@@ -30,6 +30,7 @@ _testmain.go
 dist/
 dist-*/
 *.tar.?z
+*.tar
 
 npm-debug.log
 node_modules/
@@ -38,3 +39,4 @@ fe/build/static/
 output.*
 tests/
 .fe-build
+package-lock.json
