@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/models/oauth"
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -27,10 +25,8 @@ type DbStorage struct {
 }
 
 func NewStorage() *DbStorage {
-
 	s := &DbStorage{
 		refresh: new(sync.Map),
-		isDebug: settings.Debug,
 	}
 
 	return s
@@ -43,23 +39,16 @@ func (s *DbStorage) Clone() osin.Storage {
 func (s *DbStorage) Close() {
 }
 
-func (s *DbStorage) logf(format string, args ...interface{}) {
-	if s.isDebug {
-		log.Printf(format, args...)
-	}
-}
-
 func (s *DbStorage) GetClient(id string) (osin.Client, error) {
-	s.logf("GetClient: '%s'", id)
 	c, err := s.GetClientWithCode(id)
 	if err == nil {
 		return c, nil
 	}
+	logger().Infow("Client not found", "id", id, "err", err)
 	return nil, fmt.Errorf("Client %q not found", id)
 }
 
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
-	s.logf("SaveAuthorize: '%s'\n", data.Code)
 	qs := func(tx dbTxer) error {
 		sql := `INSERT INTO
 		 oauth_authorization_code(code, client_id, username, redirect_uri, expires_in, scopes, created)
@@ -67,10 +56,11 @@ func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 		r, err := tx.Exec(sql, data.Code, data.Client.GetId(), data.UserData.(string),
 			data.RedirectUri, data.ExpiresIn, data.Scope, data.CreatedAt)
 		if err != nil {
+			logger().Infow("save authorizeData fail", "code", data.Code, "err", err)
 			return err
 		}
 
-		s.logf("save authorizeData code %s OK %v", data.Code, r)
+		logger().Debugw("save authorizeData OK", "code", data.Code, "result", r)
 
 		return nil
 	}
@@ -78,7 +68,6 @@ func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 }
 
 func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
-	s.logf("LoadAuthorize: '%s'\n", code)
 	var (
 		client_id string
 		username  string
@@ -94,31 +83,29 @@ func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 	if err == nil {
 		a.UserData = username
 		a.Client, err = s.GetClientWithCode(client_id)
-		if err != nil {
-			return nil, err
-		}
-		s.logf("loaded authorization ok, createdAt %s", a.CreatedAt)
-		return a, nil
 	}
-
-	s.logf("load authorize error: %s", err)
-	return nil, fmt.Errorf("Authorize %q not found", code)
+	if err != nil {
+		logger().Infow("load authorization fail", "code", code, "err", err)
+		return nil, err
+	}
+	logger().Debugw("loaded authorization OK", "code", code, "created", a.CreatedAt)
+	return a, nil
 }
 
 func (s *DbStorage) RemoveAuthorize(code string) error {
-	s.logf("RemoveAuthorize: '%s'\n", code)
 	if code == "" {
-		log.Print("authorize code is empty")
+		logger().Infow("empty code when remove authorize")
 		return nil
 	}
 	qs := func(tx dbTxer) error {
 		sql := `DELETE FROM oauth_authorization_code WHERE code = $1;`
 		r, err := tx.Exec(sql, code)
 		if err != nil {
+			logger().Infow("delete authorization fail", "code", code, "err", err)
 			return err
 		}
 
-		s.logf("delete authorizeData code %s OK %v", code, r)
+		logger().Debugw("delete authorizeData OK", "code", code, "r", r)
 
 		return nil
 	}
@@ -126,18 +113,16 @@ func (s *DbStorage) RemoveAuthorize(code string) error {
 }
 
 func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
-	s.logf("SaveAccess: '%s'\n", data.AccessToken)
 	qs := func(tx dbTxer) error {
 		str := `INSERT INTO
 		 oauth_access_token(client_id, username, access_token, refresh_token, expires_in, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7);`
-		r, err := tx.Exec(str, data.Client.GetId(), data.UserData.(string),
+		_, err := tx.Exec(str, data.Client.GetId(), data.UserData.(string),
 			data.AccessToken, data.RefreshToken, data.ExpiresIn, data.Scope, data.CreatedAt)
 		if err != nil {
+			logger().Infow("save accessData fail", "data", data, "err", err)
 			return err
 		}
-
-		s.logf("save AccessData token %s OK %v", data.AccessToken, r)
 
 		if data.RefreshToken != "" {
 			s.refresh.Store(data.RefreshToken, data.AccessToken)
@@ -148,7 +133,6 @@ func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
 }
 
 func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
-	s.logf("LoadAccess: '%s'", code)
 	var (
 		client_id string
 		username  string
@@ -166,27 +150,21 @@ func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 	if err == nil {
 		a.UserData = username
 		a.Client, err = s.GetClientWithCode(client_id)
-		if err != nil {
-			return nil, err
-		}
-		s.logf("access token '%d' expires: \n\t%s created \n\t%s expire_at \n\t%s now \n\tis_expired %v", id, a.CreatedAt, a.ExpireAt(), time.Now(), a.IsExpired())
-		return a, nil
 	}
-
-	log.Printf("load access error: %s", err)
-	return nil, fmt.Errorf("AccessToken %q not found", code)
+	if err != nil {
+		logger().Warnw("load access fail", "code", code, "err", err)
+		return nil, err
+	}
+	return a, nil
 }
 
 func (s *DbStorage) RemoveAccess(code string) error {
-	s.logf("RemoveAccess: %s\n", code)
 	qs := func(tx dbTxer) error {
 		str := `DELETE FROM oauth_access_token WHERE access_token = $1;`
-		r, err := tx.Exec(str, code)
+		_, err := tx.Exec(str, code)
 		if err != nil {
 			return err
 		}
-
-		s.logf("delete accessToken %s OK %v", code, r)
 
 		return nil
 	}
@@ -194,7 +172,6 @@ func (s *DbStorage) RemoveAccess(code string) error {
 }
 
 func (s *DbStorage) LoadRefresh(code string) (*osin.AccessData, error) {
-	s.logf("LoadRefresh: %s\n", code)
 	if v, ok := s.refresh.Load(code); ok {
 		return s.LoadAccess(v.(string))
 	}
@@ -202,7 +179,6 @@ func (s *DbStorage) LoadRefresh(code string) (*osin.AccessData, error) {
 }
 
 func (s *DbStorage) RemoveRefresh(code string) error {
-	log.Printf("RemoveRefresh: %s\n", code)
 	s.refresh.Delete(code)
 	return nil
 }
@@ -285,7 +261,6 @@ func (s *DbStorage) CountClients() (total uint) {
 }
 
 func (s *DbStorage) SaveClient(client *oauth.Client) error {
-	log.Printf("SaveClient: id %d code %s", client.ID, client.Code)
 	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectURI == "" {
 		return valueError
 	}
@@ -329,24 +304,24 @@ func (s *DbStorage) LoadScopes() (scopes []oauth.Scope, err error) {
 	return scopes, nil
 }
 
-func (s *DbStorage) IsAuthorized(client_id, username string) bool {
+func (s *DbStorage) IsAuthorized(clientId, username string) bool {
 	var (
 		created time.Time
 	)
 	if err := withDbQuery(func(db dber) error {
 		return db.QueryRow("SELECT created FROM oauth_client_user_authorized WHERE client_id = $1 AND username = $2",
-			client_id, username).Scan(&created)
+			clientId, username).Scan(&created)
 	}); err != nil {
-		log.Printf("load IsAuthorized(%s, %s) ERROR: %s", client_id, username, err)
+		logger().Warnw("load isAuthorized fail", "clientId", clientId, "err", err)
 		return false
 	}
 	return true
 }
 
-func (s *DbStorage) SaveAuthorized(client_id, username string) error {
+func (s *DbStorage) SaveAuthorized(clientId, username string) error {
 	return withDbQuery(func(db dber) error {
 		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ",
-			client_id, username)
+			clientId, username)
 		return err
 	})
 }

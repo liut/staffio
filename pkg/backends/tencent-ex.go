@@ -10,7 +10,10 @@ import (
 	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/settings"
+)
+
+var (
+	EmailDomain string
 )
 
 func GetStaffFromWechatUser(user *exwechat.User) *models.Staff {
@@ -59,7 +62,7 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 }
 
 func GetEmailAddress(uid string) string {
-	return fmt.Sprintf("%s@%s", uid, settings.EmailDomain)
+	return fmt.Sprintf("%s@%s", uid, EmailDomain)
 }
 
 func CheckMailUnseen(uid string) int {

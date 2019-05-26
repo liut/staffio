@@ -48,7 +48,7 @@ func getTokenGenJWT() (tokenGen osin.AccessTokenGen, err error) {
 		hmacKey []byte
 	)
 
-	hmacKey, err = jwt.DecodeSegment(settings.TokenGen.Key)
+	hmacKey, err = jwt.DecodeSegment(settings.Current.TokenGenKey)
 	if err != nil {
 		log.Printf("ERROR: key %s\n", err)
 		return

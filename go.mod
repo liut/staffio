@@ -18,6 +18,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.6 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.1.1
 	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
 	github.com/mattn/go-isatty v0.0.7 // indirect
@@ -36,10 +37,12 @@ require (
 	github.com/tinylib/msgp v1.1.0
 	github.com/ugorji/go v1.1.4 // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
-	github.com/wealthworks/envflagset v0.0.0-20170327023918-f382ae2fc063
 	github.com/wealthworks/go-debug v0.0.0-20141022193016-ff4a55a20a86
 	github.com/wealthworks/go-tencent-api v0.0.0-20190505064513-2d4bd9e8bab0
 	github.com/wealthworks/go-utils v0.0.0-20170614083745-eeb719fe278f
+	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/multierr v1.1.0 // indirect
+	go.uber.org/zap v1.10.0
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	google.golang.org/appengine v1.5.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

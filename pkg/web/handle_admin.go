@@ -188,8 +188,8 @@ func (s *server) staffForm(c *gin.Context) {
 		data["staff"] = staff
 	}
 	data["inEdit"] = inEdit
-	data["exmail"] = settings.EmailCheck
-	data["exwechat"] = settings.WechatCorpID != ""
+	data["exmail"] = settings.Current.EmailCheck
+	data["exwechat"] = settings.Current.WechatCorpID != ""
 	s.Render(c, "staff_edit.html", data)
 }
 
@@ -228,7 +228,7 @@ func (s *server) staffPost(c *gin.Context) {
 			}
 			staff = backends.GetStaffFromWechatUser(exuser)
 		} else {
-			email := uid + "@" + settings.EmailDomain
+			email := uid + "@" + settings.Current.EmailDomain
 			staff, err = backends.GetStaffFromExmail(email)
 			if err != nil {
 				c.AbortWithError(http.StatusNotFound, err)

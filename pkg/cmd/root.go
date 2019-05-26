@@ -28,8 +28,9 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
+	"github.com/liut/staffio/pkg/backends"
 	zlog "github.com/liut/staffio/pkg/log"
-	"github.com/liut/staffio/pkg/settings"
+	config "github.com/liut/staffio/pkg/settings"
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -42,15 +43,20 @@ var RootCmd = &cobra.Command{
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+var settings *config.Config
+
+func init() {
+	settings = config.Current
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
-	settings.Parse()
 
 	var logger *zap.Logger
 
-	if settings.IsDevelop() {
+	if config.IsDevelop() {
 		logger, _ = zap.NewDevelopment()
 	} else {
 		logger, _ = zap.NewProduction()
@@ -59,6 +65,17 @@ func Execute() {
 	sugar := logger.Sugar()
 
 	zlog.SetLogger(sugar)
+
+	backends.SetDSN(settings.BackendDSN)
+
+	backends.BaseURL = settings.BaseURL
+	backends.SetPasswordSecret(settings.PwdSecret)
+	if settings.SMTPHost != "" {
+		backends.SetupSMTPHost(settings.SMTPHost, settings.SMTPPort)
+		if settings.SMTPSenderEmail != "" {
+			backends.SetupSMTPAuth(settings.SMTPSenderEmail, settings.SMTPSenderPassword)
+		}
+	}
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -1,10 +1,8 @@
 package backends
 
 import (
-	"log"
+	"os"
 	"testing"
-
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -12,8 +10,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	log.SetFlags(log.Ltime | log.Lshortfile)
-	settings.Parse()
+	SetDSN(os.Getenv("STAFFIO_BACKEND_DSN"))
 	svc = NewService()
 	svc.Ready()
 	m.Run()

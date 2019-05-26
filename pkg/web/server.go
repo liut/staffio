@@ -20,8 +20,15 @@ var (
 	debug = Debug("staffio:web")
 )
 
+type Config struct {
+	Root    string
+	FS      string
+	BaseURI string
+}
+
 type server struct {
 	root, fs string
+	cfg      Config
 	router   *gin.Engine
 	service  backends.Servicer
 	osvr     *osin.Server
@@ -38,7 +45,7 @@ func (s *server) InGroup(gn, uid string) bool {
 }
 
 // New returns current server instance
-func New(root, fs string) *server {
+func New(c Config) *server {
 	if svr != nil {
 		return svr
 	}
@@ -57,23 +64,23 @@ func New(root, fs string) *server {
 	}
 
 	svr = &server{
-		root:    root,
-		fs:      fs,
+		root:    c.Root,
+		fs:      c.FS,
+		cfg:     c,
 		router:  gin.New(),
 		service: service,
 		osvr:    osvr,
-		wxAuth:  exwechat.New(settings.WechatCorpID, settings.WechatPortalSecret),
+		wxAuth:  exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
 		checkin: exwechat.NewCAPI(),
 	}
 
-	if settings.IsDevelop() {
+	if settings.Current.InDevelop {
 		fmt.Printf("In Developing(Debug) mode, gin: %s\n", gin.Mode())
-		svr.router.Use(gin.Logger())
-		svr.router.Use(gin.Recovery())
+		svr.router.Use(gin.Logger(), gin.Recovery())
 	} else {
 		fmt.Printf("In Release mode, gin: %s\n", gin.Mode())
-		if settings.SentryDSN != "" {
-			raven.SetDSN(settings.SentryDSN)
+		if settings.Current.SentryDSN != "" {
+			raven.SetDSN(settings.Current.SentryDSN)
 			onlyCrashes := false
 			svr.router.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
 		}

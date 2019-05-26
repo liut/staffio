@@ -21,7 +21,7 @@ const (
 func (s *server) wechatOAuth2Start(c *gin.Context) {
 	origin := c.Request.Header.Get("Origin")
 	if len(origin) == 0 {
-		origin = settings.BaseURL
+		origin = settings.Current.BaseURL
 	}
 	callback := c.Request.FormValue("callback")
 	if len(callback) == 0 {
@@ -32,7 +32,7 @@ func (s *server) wechatOAuth2Start(c *gin.Context) {
 		wxuri string
 		inApp bool
 		qs    = fmt.Sprintf("appid=%s&agentid=%d&redirect_uri=%s/%s&state=%s",
-			s.wxAuth.CorpID(), settings.WechatPortalAgentID, origin, callback, state)
+			s.wxAuth.CorpID(), settings.Current.WechatPortalAgentID, origin, callback, state)
 	)
 
 	ua := c.Request.UserAgent()
@@ -82,7 +82,7 @@ func (s *server) wechatOAuth2Callback(c *gin.Context) {
 		return
 	}
 
-	ou, err := s.wxAuth.GetOAuth2User(settings.WechatPortalAgentID, code)
+	ou, err := s.wxAuth.GetOAuth2User(settings.Current.WechatPortalAgentID, code)
 	if err != nil {
 		c.AbortWithError(http.StatusServiceUnavailable, err)
 		return

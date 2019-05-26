@@ -52,7 +52,7 @@ func (s *server) Render(c *gin.Context, name string, data interface{}) (err erro
 			user, err = auth.UserFromRequest(c.Request)
 		}
 		m["currUser"] = user
-		m["checkEmail"] = settings.EmailCheck
+		m["checkEmail"] = settings.Current.EmailCheck
 		err = instance.Execute(c.Writer, m)
 	} else {
 		err = instance.Execute(c.Writer, data)
@@ -74,8 +74,8 @@ func (s *server) tpl(name string) *template.Template {
 		"isKeeper":   s.IsKeeper,
 	})
 	t = template.Must(t.ParseFiles(
-		filepath.Join(settings.Root, "templates/_base.html"),
-		filepath.Join(settings.Root, "templates", name),
+		filepath.Join(settings.Current.Root, "templates/_base.html"),
+		filepath.Join(settings.Current.Root, "templates", name),
 	))
 	cachedTemplates[name] = t
 

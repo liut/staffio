@@ -27,11 +27,29 @@ type Config struct {
 func NewConfig() Config {
 	return Config{
 		Addr:     envOr("LDAP_HOSTS", envOr("STAFFIO_LDAP_HOSTS", "localhost")),
-		Base:     envOr("LDAP_BASE_DN", envOr("STAFFIO_LDAP_BASE_DN", "dc=mydomain,dc=net")),
-		Domain:   envOr("LDAP_DOMAIN", envOr("STAFFIO_EMAIL_DOMAIN", "mydomain.net")),
+		Base:     envOr("LDAP_BASE", envOr("STAFFIO_LDAP_BASE", "dc=mydomain,dc=net")),
+		Domain:   envOr("LDAP_DOMAIN", envOr("STAFFIO_LDAP_DOMAIN", "mydomain.net")),
 		Bind:     envOr("LDAP_BIND_DN", envOr("STAFFIO_LDAP_BIND_DN", "")),
 		Passwd:   envOr("LDAP_PASSWD", envOr("STAFFIO_LDAP_PASS", "")),
 		PageSize: DefaultPageSize,
+	}
+}
+
+func (c *Config) CopyFrom(o Config) {
+	if o.Addr != "" && o.Addr != c.Addr {
+		c.Addr = o.Addr
+	}
+	if o.Base != "" && o.Base != c.Base {
+		c.Base = o.Base
+	}
+	if o.Domain != "" && o.Domain != c.Domain {
+		c.Domain = o.Domain
+	}
+	if o.Bind != "" && o.Bind != c.Bind {
+		c.Bind = o.Bind
+	}
+	if o.Passwd != "" && o.Passwd != c.Passwd {
+		c.Passwd = o.Passwd
 	}
 }
 

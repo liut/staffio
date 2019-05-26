@@ -11,13 +11,18 @@ import (
 
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
 	ErrInvalidResetToken = errors.New("invalid reset token or not found")
 	ErrMailNotReady      = errors.New("email system is not ready")
+
+	secret []byte
 )
+
+func SetPasswordSecret(s string) {
+	secret = []byte(s)
+}
 
 func (s *serviceImpl) getResetHash(uid string) ([]byte, error) {
 	_, err := s.Get(uid)
@@ -62,14 +67,12 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 		log.Printf("userLog ERR %s", err)
 	}
 	// Generate reset token that expires in 2 hours
-	secret := []byte(settings.PwdSecret)
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(staff, token)
 	return
 }
 
 func (s *serviceImpl) PasswordResetTokenVerify(token string) (uid string, err error) {
-	secret := []byte(settings.PwdSecret)
 	uid, err = passwordreset.VerifyToken(token, s.getResetHash, secret)
 	if err != nil {
 		log.Printf("passwordreset.VerifyToken %q ERR %s", token, err)
@@ -146,11 +149,6 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 	return &uv, err
 }
 
-func InitSMTP() {
-	SetupSMTPhost(settings.SMTP.Host, settings.SMTP.Port)
-	SetupSMTPAuth(settings.SMTP.SenderEmail, settings.SMTP.SenderPassword)
-}
-
 var (
 	smtpHost string
 	smtpPort = 587
@@ -158,9 +156,11 @@ var (
 	smtpPass string
 
 	mailSender = "no-reply"
+
+	BaseURL string
 )
 
-func SetupSMTPhost(host string, port int) {
+func SetupSMTPHost(host string, port int) {
 	smtpHost = host
 	smtpPort = port
 }
@@ -180,7 +180,7 @@ func sendResetEmail(staff *models.Staff, token string) error {
 	m.SetHeader("From", fmt.Sprintf("%s <%s>", mailSender, smtpUser))
 	m.SetHeader("To", staff.Email)
 	m.SetHeader("Subject", "Password reset request")
-	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), settings.BaseURL, token))
+	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), BaseURL, token))
 
 	logger().Infow("sending reset email", "email", staff.Email, "host", smtpHost)
 

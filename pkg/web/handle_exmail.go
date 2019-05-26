@@ -33,7 +33,7 @@ func (s *server) countNewMail(c *gin.Context) {
 
 func (s *server) loginToExmail(c *gin.Context) {
 	user := UserWithContext(c)
-	email := user.UID + "@" + settings.EmailDomain
+	email := user.UID + "@" + settings.Current.EmailDomain
 	url, err := exmail.GetLoginURL(email)
 	if err != nil {
 		c.AbortWithError(http.StatusForbidden, err)

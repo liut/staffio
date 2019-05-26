@@ -8,8 +8,6 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
-
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -18,6 +16,7 @@ var (
 	ErrNotFound = errors.New("Not Found")
 	valueError  = errors.New("value error")
 	dbc         *sqlx.DB
+	dbDSN       = "postgres://staffio@localhost/staffio?sslmode=disable"
 
 	ErrNoRows = sql.ErrNoRows
 )
@@ -43,9 +42,14 @@ type dbTxer interface {
 	Commit() error
 }
 
+func SetDSN(dsn string) {
+	dbDSN = dsn
+	openDb()
+}
+
 func openDb() *sqlx.DB {
 	log.Printf("using PG %s:%s", os.Getenv("PGHOST"), os.Getenv("PGPORT"))
-	db, err := sqlx.Open("postgres", settings.Backend.DSN)
+	db, err := sqlx.Open("postgres", dbDSN)
 	if err != nil {
 		log.Fatalf("open db error: %s", err)
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
 	"github.com/liut/staffio/pkg/models/weekly"
-	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -44,16 +43,24 @@ type serviceImpl struct {
 	weeklyStore *weeklyStore
 }
 
+type LDAPConfig = ldap.Config
+
+var ldapcfg *LDAPConfig
+
+func SetLDAP(c LDAPConfig) {
+	ldapcfg = &c
+}
+
 var _ Servicer = (*serviceImpl)(nil)
 
 // NewService return new Servicer
 func NewService() Servicer {
 	cfg := ldap.NewConfig()
-	cfg.Addr = settings.LDAP.Hosts
-	cfg.Base = settings.LDAP.Base
-	cfg.Domain = settings.EmailDomain
-	cfg.Bind = settings.LDAP.BindDN
-	cfg.Passwd = settings.LDAP.Password
+	if ldapcfg != nil {
+		cfg.CopyFrom(*ldapcfg)
+	}
+	logger().Infow("new ldap config", "addr", cfg.Addr, "base", cfg.Base, "domain", cfg.Domain)
+
 	store, err := ldap.NewStore(cfg)
 	if err != nil {
 		log.Fatalf("new service ERR %s", err)
