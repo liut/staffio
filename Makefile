@@ -29,7 +29,7 @@ clean:
 	echo "Cleaning dist"
 	rm -rf dist fe/build
 	rm -f $(NAME) $(NAME)-*
-	fm -f .fe-build
+	rm -f .fe-build
 
 dist/linux_amd64/$(NAME): $(SOURCES)
 	echo "Building $(NAME) of linux"
