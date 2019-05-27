@@ -22,17 +22,25 @@ type Servicer interface {
 	models.PasswordStore
 	models.GroupStore
 	cas.TicketStore
+
 	OSIN() OSINStore
 	Ready() error
 	CloseAll()
+
 	SaveStaff(staff *models.Staff) error
+
 	InGroup(gn, uid string) bool
+	InGroupAny(uid string, names ...string) bool
+
 	ProfileModify(uid, password string, staff *models.Staff) error
+
 	PasswordForgot(at common.AliasType, target, uid string) error
 	PasswordResetTokenVerify(token string) (uid string, err error)
 	PasswordResetWithToken(login, token, passwd string) (err error)
+
 	Team() weekly.TeamStore
 	Weekly() weekly.WeeklyStore
+
 	PoolStats() *PoolStats
 }
 

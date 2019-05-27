@@ -44,6 +44,10 @@ func (s *server) InGroup(gn, uid string) bool {
 	return s.service.InGroup(gn, uid)
 }
 
+func (s *server) InGroupAny(uid string, gn ...string) bool {
+	return s.service.InGroupAny(uid, gn...)
+}
+
 // New returns current server instance
 func New(c Config) *server {
 	if svr != nil {

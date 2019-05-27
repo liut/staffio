@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 
 	. "github.com/wealthworks/go-debug"
 
@@ -30,16 +29,16 @@ func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
 	isNew, err := s.Save(staff)
 	if err == nil {
 		if isNew {
-			log.Printf("new staff %v", staff)
+			logger().Infow("net staff", "staff", staff)
 			err = s.passwordForgotPrepare(staff)
 			if err != nil {
-				log.Printf("email of new user password send ERR %s", err)
+				logger().Infow("email of new user password send fail", "err", err)
 			} else {
-				log.Print("send email OK")
+				logger().Infow("send email OK")
 			}
 		}
 	} else {
-		log.Printf("SaveStaff %s ERR %s", staff.Uid, err)
+		logger().Warnw("save staff fail", "staff", staff, "err", err)
 	}
 	return err
 }
@@ -47,11 +46,22 @@ func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
 func (s *serviceImpl) InGroup(gname, uid string) bool {
 	g, err := s.GetGroup(gname)
 	if err != nil {
-		log.Printf("GetGroup %s ERR %s", gname, err)
+		logger().Infow("get group fail", "name", gname, "err", err)
 		return false
 	}
 	// log.Printf("check uid %s in %v", uid, g)
 	return g.Has(uid)
+}
+
+func (s *serviceImpl) InGroupAny(uid string, names ...string) bool {
+	for _, gn := range names {
+		g, err := s.GetGroup(gn)
+		if err == nil && g.Has(uid) {
+			return true
+		}
+	}
+	logger().Infow("inGroupAny fail", "uid", uid, "groups", names)
+	return false
 }
 
 func (s *serviceImpl) ProfileModify(uid, password string, staff *models.Staff) error {

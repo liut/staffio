@@ -20,13 +20,15 @@ var (
 type OSINStore = oauth.OSINStore
 
 type DbStorage struct {
-	refresh *sync.Map
-	isDebug bool
+	pageSize int
+	refresh  *sync.Map
+	isDebug  bool
 }
 
 func NewStorage() *DbStorage {
 	s := &DbStorage{
-		refresh: new(sync.Map),
+		pageSize: 20,
+		refresh:  new(sync.Map),
 	}
 
 	return s
@@ -201,7 +203,7 @@ func (s *DbStorage) GetClientWithID(id int) (c *oauth.Client, err error) {
 
 func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client, err error) {
 	if spec.Limit < 1 {
-		spec.Limit = 1
+		spec.Limit = s.pageSize
 	}
 	if spec.Page < 1 {
 		spec.Page = 1

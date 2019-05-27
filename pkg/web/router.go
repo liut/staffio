@@ -12,6 +12,10 @@ import (
 
 var (
 	base = "/"
+
+	gnAdmin = "keeper"
+	gnHR    = "hr" // human resource
+	gnDev   = "develop"
 )
 
 func logger() zlog.Logger {
@@ -52,7 +56,7 @@ func (s *server) StrapRouter() {
 	gr.GET("/info/:topic", s.oauth2Info)
 	gr.POST("/info/:topic", s.oauth2Info)
 
-	keeper := authed.Group("/dust", s.authAdminMiddleware())
+	keeper := authed.Group("/dust", s.authGroup(gnAdmin))
 	keeper.GET("/clients", s.clientsGet)
 	keeper.POST("/clients", s.clientsPost)
 	keeper.GET("/scopes", s.scopesForm)
@@ -98,25 +102,32 @@ func (s *server) StrapRouter() {
 		api.POST("/weekly/problem/update", s.weeklyProblemUpdate)
 		api.GET("/staffs", s.staffList)
 		api.GET("/teams", s.teamListByRole)
-		api.POST("/team/add", s.teamAdd)
-		api.POST("/team/member", s.teamMemberOp)
-		api.POST("/team/manager", s.teamManagerOp)
 
 		api.GET("/work/checkins", s.wechatCheckinList)
 
-		apiMan := api.Group("/", s.authAdminMiddleware())
-		apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
-		apiMan.POST("/weekly/report/ignore/add", s.weeklyIgnoreAdd)
-		apiMan.POST("/weekly/report/ignore/del", s.weeklyIgnoreRemove)
-		apiMan.GET("/weekly/report/ignores", s.weeklyIgnoreList)
-		apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
-		apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
-		apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
+		apiMan := api.Group("/", s.authGroup(gnAdmin, gnHR))
+		{
+			apiMan.POST("/team/add", s.teamAdd)
+			apiMan.POST("/team/member", s.teamMemberOp)
+			apiMan.POST("/team/manager", s.teamManagerOp)
+			apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
+			apiMan.POST("/weekly/report/ignore/add", s.weeklyIgnoreAdd)
+			apiMan.POST("/weekly/report/ignore/del", s.weeklyIgnoreRemove)
+			apiMan.GET("/weekly/report/ignores", s.weeklyIgnoreList)
+			apiMan.GET("/weekly/report/vacations", s.weeklyVacationList)
+			apiMan.POST("/weekly/report/vacation/mark", s.weeklyVacationAdd)
+			apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
 
-		apiMan.GET("/oauth/clients", s.clientsGet)
-		apiMan.POST("/oauth/clients", s.clientsPost)
+			apiMan.DELETE("/staff/:uid", s.staffDelete)
+		}
 
-		apiMan.GET("/service/stats", s.handleServiceStats)
+		apiDev := api.Group("/", s.authGroup(gnAdmin, gnDev))
+		{
+			apiDev.GET("/service/stats", s.handleServiceStats)
+			apiDev.GET("/oauth/clients", s.clientsGet)
+			apiDev.POST("/oauth/clients", s.clientsPost)
+		}
+
 	}
 
 	assets := newAssets(s.root, s.fs)
