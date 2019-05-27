@@ -5,9 +5,9 @@ ALTER TABLE oauth_client
 	ADD scopes jsonb NOT NULL  DEFAULT '[]'::jsonb;
 
 UPDATE oauth_client SET
-  grant_types = to_jsonb(string_to_array(allowed_grant_types, ',')),
-  response_types = to_jsonb(string_to_array(allowed_response_types, ',')),
-  scopes = to_jsonb(string_to_array(allowed_scopes, ','))
+  grant_types = to_json(string_to_array(allowed_grant_types, ','))::jsonb,
+  response_types = to_json(string_to_array(allowed_response_types, ','))::jsonb,
+  scopes = to_json(string_to_array(allowed_scopes, ','))::jsonb
 ;
 
 ALTER TABLE oauth_client
