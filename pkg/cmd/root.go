@@ -39,7 +39,12 @@ var RootCmd = &cobra.Command{
 	Long:  `Staffio main command.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.ParseFlags(args)
+		if v, err := cmd.Flags().GetBool("version"); err == nil && v {
+			fmt.Println(settings.Version)
+		}
+	},
 }
 
 var settings *config.Config
@@ -92,5 +97,5 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	// RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	RootCmd.Flags().BoolP("version", "v", false, "show version number")
 }
