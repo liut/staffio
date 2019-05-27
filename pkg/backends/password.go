@@ -3,7 +3,6 @@ package backends
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/dchest/passwordreset"
@@ -64,7 +63,7 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	}
 	err = WriteUserLog(staff.Uid, "password forgot", fmt.Sprintf("id %d, ch %d", uv.Id, uv.CodeHash))
 	if err != nil {
-		log.Printf("userLog ERR %s", err)
+		logger().Warnw("userLog fail", "uid", staff.Uid, "err", err)
 	}
 	// Generate reset token that expires in 2 hours
 	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
@@ -75,7 +74,7 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 func (s *serviceImpl) PasswordResetTokenVerify(token string) (uid string, err error) {
 	uid, err = passwordreset.VerifyToken(token, s.getResetHash, secret)
 	if err != nil {
-		log.Printf("passwordreset.VerifyToken %q ERR %s", token, err)
+		logger().Warnw("passwordreset.VerifyToken fail", "token", token, "err", err)
 	}
 	return
 }
@@ -97,7 +96,7 @@ func (s *serviceImpl) PasswordResetWithToken(login, token, passwd string) (err e
 			rs, de := db.Exec("DELETE FROM password_reset WHERE uid = $1", uid)
 			if de == nil {
 				ra, _ := rs.RowsAffected()
-				log.Printf("deleted %d", ra)
+				logger().Infow("deleted reset", "affect", ra)
 			}
 			return de
 		}
@@ -113,7 +112,7 @@ func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 			str := `DELETE FROM password_reset WHERE id = $1`
 			_, err = db.Exec(str, euv.Id)
 			if err != nil {
-				log.Printf("DELETE password_reset %s ERR %s", uv.Uid, err)
+				logger().Warnw("DELETE password_reset fail", "uid", uv.Uid, "err", err)
 				return err
 			}
 		}
@@ -123,14 +122,14 @@ func (s *serviceImpl) SaveVerify(uv *models.Verify) error {
 		var id int
 		err = db.Get(&id, str, uv.Type, uv.Target, uv.Uid, uv.CodeHash, uv.LifeSeconds)
 		if err == nil {
-			log.Printf("new password_reset id: %d of %s(%s)", id, uv.Uid, uv.Target)
+			logger().Infow("new password_reset", "id", id, "uid", uv.Uid, "target", uv.Target)
 			if id > 0 {
 				uv.Id = id
 			}
 
 			return nil
 		}
-		log.Printf("INSERT password_reset %s ERR %s", uv.Uid, err)
+		logger().Warnw("INSERT password_reset fail", "uid", uv.Uid, "err", err)
 		return err
 	}
 	return withTxQuery(qs)
@@ -144,7 +143,7 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 	}
 	err := withDbQuery(qs)
 	if err != nil {
-		log.Printf("query verify with uid %q ERR %s", uid, err)
+		logger().Warnw("query verify fail", "uid", uid, "err", err)
 	}
 	return &uv, err
 }
@@ -155,7 +154,7 @@ var (
 	smtpUser string
 	smtpPass string
 
-	mailSender = "no-reply"
+	MailSenderName = "Notification"
 
 	BaseURL string
 )
@@ -177,7 +176,7 @@ func sendResetEmail(staff *models.Staff, token string) error {
 	}
 
 	m := mail.NewMessage()
-	m.SetHeader("From", fmt.Sprintf("%s <%s>", mailSender, smtpUser))
+	m.SetHeader("From", fmt.Sprintf("%s <%s>", MailSenderName, smtpUser))
 	m.SetHeader("To", staff.Email)
 	m.SetHeader("Subject", "Password reset request")
 	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), BaseURL, token))
