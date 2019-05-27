@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 
@@ -59,17 +58,17 @@ var addstaffCmd = &cobra.Command{
 		}
 		isNew, err := svc.Save(staff)
 		if err != nil {
-			log.Printf("save %v ERR %s", staff, err)
+			logger().Warnw("save staff fail", "staff", staff, "err", err)
 			return
 		}
-		log.Printf("saved staff %v", staff)
+		logger().Infow("saved", "staff", staff)
 		if isNew && password != "" {
 			err = svc.PasswordReset(uid, password)
 			if err != nil {
-				log.Printf("reset %s password ERR %s", uid, err)
+				logger().Infow("reset password fail", "uid", uid, "err", err)
 				return
 			}
-			log.Printf("reset %s password OK", uid)
+			logger().Infow("reset password OK", "uid", uid)
 		}
 	},
 }

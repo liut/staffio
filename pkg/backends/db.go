@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/lib/pq"
-	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
@@ -16,14 +15,9 @@ var (
 	ErrNotFound = errors.New("Not Found")
 	valueError  = errors.New("value error")
 	dbc         *sqlx.DB
-	dbDSN       = "postgres://staffio@localhost/staffio?sslmode=disable"
+	dbDSN       string
 
 	ErrNoRows = sql.ErrNoRows
-)
-
-const (
-	ASCENDING  = 1
-	DESCENDING = -1
 )
 
 type dber interface {
@@ -42,16 +36,26 @@ type dbTxer interface {
 	Commit() error
 }
 
+func init() {
+	if s, exists := os.LookupEnv("STAFFIO_BACKEND_DSN"); exists && s != "" {
+		dbDSN = s
+	} else {
+		dbDSN = "postgres://staffio@localhost/staffio?sslmode=disable"
+	}
+}
+
 func SetDSN(dsn string) {
-	dbDSN = dsn
-	openDb()
+	if dsn != "" {
+		logger().Infow("set db dsn", "dsn", len(dsn))
+		dbDSN = dsn
+		openDb()
+	}
 }
 
 func openDb() *sqlx.DB {
-	log.Printf("using PG %s:%s", os.Getenv("PGHOST"), os.Getenv("PGPORT"))
 	db, err := sqlx.Open("postgres", dbDSN)
 	if err != nil {
-		log.Fatalf("open db error: %s", err)
+		logger().Errorw("open db fail", "err", err)
 	}
 
 	return db
@@ -61,7 +65,7 @@ func closeDb() {
 	if dbc != nil {
 		err := dbc.Close()
 		if err != nil {
-			log.Printf("closing db error: %s", err)
+			logger().Warnw("close db fail", "err", err)
 		}
 	}
 }
@@ -83,7 +87,7 @@ func withDbQuery(query func(db dber) error) error {
 	db := getDb()
 	// defer db.Close()
 	if err := query(db); err != nil {
-		log.Printf("db query ERR: %s", err)
+		logger().Warnw("db query fail", "err", err)
 		if err == sql.ErrNoRows {
 			return ErrNotFound
 		}
@@ -105,7 +109,7 @@ func withTxQuery(query func(tx dbTxer) error) error {
 
 	if err := query(tx); err != nil {
 		tx.Rollback()
-		log.Printf("tx query ERR: %s", err)
+		logger().Warnw("tx query fail", "err", err)
 		return dbError
 	}
 	tx.Commit()

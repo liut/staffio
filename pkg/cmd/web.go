@@ -92,7 +92,7 @@ func webRun() {
 	go func() {
 		// service connections
 		if err := srv.ListenAndServe(); err != nil {
-			log.Printf("listen: %s", err)
+			log.Fatalf("listen failed: %s", err)
 		}
 	}()
 

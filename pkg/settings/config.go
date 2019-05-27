@@ -9,7 +9,7 @@ type Config struct {
 	HTTPListen string `envconfig:"HTTP_LISTEN" default:"localhost:3030"`
 	BaseURL    string `envconfig:"BASEURL" default:"http://localhost:3030"`
 	PwdSecret  string `envconfig:"PASSWORD_SECRET"`
-	BackendDSN string `envconfig:"BACKEND_DSN" default:"postgres://staffio@localhost/staffio?sslmode=disable"`
+	BackendDSN string `envconfig:"BACKEND_DSN"`
 	SentryDSN  string `envconfig:"SENTRY_DSN"`
 
 	Root  string `default:"./"`
