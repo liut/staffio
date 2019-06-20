@@ -77,8 +77,9 @@ func (s *server) clientsPost(c *gin.Context) {
 		return
 
 	}
+	var inline inlineEdit
+	var param clientParam
 	if req.FormValue("pk") != "" {
-		var inline inlineEdit
 		err = c.Bind(&inline)
 		if err != nil {
 			apiError(c, 400, err)
@@ -104,10 +105,7 @@ func (s *server) clientsPost(c *gin.Context) {
 			apiError(c, 400, "invalid field")
 			return
 		}
-	}
-
-	var param clientParam
-	if err = c.Bind(&param); err == nil {
+	} else if err = c.Bind(&param); err == nil {
 		client, err = s.service.OSIN().GetClientWithID(param.ID)
 		if len(param.Name) > 0 && client.Name != param.Name {
 			client.Name = param.Name
