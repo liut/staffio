@@ -69,16 +69,25 @@ func (s *server) clientsPost(c *gin.Context) {
 		// log.Printf("new client: %v", client)
 		_, e := s.service.OSIN().GetClientWithCode(client.Code) // check exists
 		if e == nil {
-			logger().Warnw("client exists", "client", client, "err", e)
+			logger().Infow("client exists", "client", client)
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "duplicate client_id"}
 			c.JSON(http.StatusOK, res)
+			return
 		}
+		if err = s.service.OSIN().SaveClient(client); err != nil {
+			apiError(c, 1, err)
+			return
+		}
+		res["ok"] = true
+		res["id"] = client.ID
+		c.JSON(http.StatusOK, res)
 		return
-
 	}
-	var inline inlineEdit
-	var param clientParam
+	var (
+		inline inlineEdit
+		param  clientParam
+	)
 	if req.FormValue("pk") != "" {
 		err = c.Bind(&inline)
 		if err != nil {

@@ -87,10 +87,11 @@ func withDbQuery(query func(db dber) error) error {
 	db := getDb()
 	// defer db.Close()
 	if err := query(db); err != nil {
-		logger().Warnw("db query fail", "err", err)
 		if err == sql.ErrNoRows {
+			logger().Infow("db query fail", "err", err)
 			return ErrNotFound
 		}
+		logger().Warnw("db query fail", "err", err)
 		return dbError
 	}
 	return nil
