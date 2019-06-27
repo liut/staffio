@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liut/staffio/pkg/models/weekly"
+	"github.com/liut/staffio/pkg/models/team"
 )
 
 type teamStore struct{}
 
 // Get
-func (s *teamStore) Get(id int) (obj *weekly.Team, err error) {
-	obj = &weekly.Team{}
+func (s *teamStore) Get(id int) (obj *team.Team, err error) {
+	obj = &team.Team{}
 	err = withDbQuery(func(db dber) error {
 		return db.Get(obj,
 			"SELECT id, name, leaders, members, created FROM teams WHERE id = $1",
@@ -23,8 +23,8 @@ func (s *teamStore) Get(id int) (obj *weekly.Team, err error) {
 	return
 }
 
-func (s *teamStore) GetWithMember(uid string) (obj *weekly.Team, err error) {
-	obj = new(weekly.Team)
+func (s *teamStore) GetWithMember(uid string) (obj *team.Team, err error) {
+	obj = new(team.Team)
 	err = withDbQuery(func(db dber) error {
 		var teamID int
 		err := db.Get(&teamID, "SELECT team_id FROM team_member WHERE uid = $1", uid)
@@ -37,15 +37,15 @@ func (s *teamStore) GetWithMember(uid string) (obj *weekly.Team, err error) {
 }
 
 // 查询
-func (s *teamStore) All(role weekly.TeamRoleType) (data weekly.Teams, err error) {
+func (s *teamStore) All(role team.RoleType) (data team.Teams, err error) {
 
 	err = withDbQuery(func(db dber) error {
-		data = make(weekly.Teams, 0)
+		data = make(team.Teams, 0)
 		switch role {
-		case weekly.RoleMember:
+		case team.RoleMember:
 			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.uid as staff_uid
 				FROM teams t JOIN team_member tm ON tm.team_id = t.id`)
-		case weekly.RoleManager:
+		case team.RoleManager:
 			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.leader as staff_uid
 				FROM teams t JOIN team_leader tm ON tm.team_id = t.id`)
 		default:
@@ -56,7 +56,7 @@ func (s *teamStore) All(role weekly.TeamRoleType) (data weekly.Teams, err error)
 	return
 }
 
-func (s *teamStore) Store(t *weekly.Team) error {
+func (s *teamStore) Store(t *team.Team) error {
 	if t.Name == "" {
 		return ErrEmptyVal
 	}

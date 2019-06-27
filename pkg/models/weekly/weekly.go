@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// 查询周报参数
+// ReportsSpec 查询周报参数
 type ReportsSpec struct {
 	UID    string     `json:"uid"`
 	TeamID int        `json:"team_id"`
@@ -13,7 +13,8 @@ type ReportsSpec struct {
 	Sort   *ListSort  `json:"sort" valid:"required"` // weekly_report.id,work_group_id
 }
 
-type WeeklyStore interface {
+// Store 周报存取接口
+type Store interface {
 	// Get
 	Get(id int) (*Report, error)
 	// 查询

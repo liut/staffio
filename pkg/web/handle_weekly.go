@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/team"
 	"github.com/liut/staffio/pkg/models/weekly"
 )
 
@@ -333,7 +334,7 @@ func (s *server) teamListByRole(c *gin.Context) {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
-	data, err := s.service.Team().All(weekly.TeamRoleType(role))
+	data, err := s.service.Team().All(team.RoleType(role))
 	if err != nil {
 		apiError(c, ERROR_DB, err)
 		return
@@ -357,7 +358,7 @@ func (s *server) teamAdd(c *gin.Context) {
 		return
 	}
 
-	team := &weekly.Team{
+	team := &team.Team{
 		Name: param.Name,
 	}
 	if err := s.service.Team().Store(team); err != nil {
@@ -368,18 +369,18 @@ func (s *server) teamAdd(c *gin.Context) {
 }
 
 func (s *server) teamMemberOp(c *gin.Context) {
-	var param weekly.TeamOpParam
+	var param team.TeamOpParam
 	if err := c.Bind(&param); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
 	switch param.Op {
-	case weekly.TeamOpAdd:
+	case team.TeamOpAdd:
 		if err := s.service.Team().AddMember(param.TeamID, param.UIDs...); err != nil {
 			apiError(c, ERROR_DB, err)
 			return
 		}
-	case weekly.TeamOpRemove:
+	case team.TeamOpRemove:
 		if err := s.service.Team().RemoveMember(param.TeamID, param.UIDs...); err != nil {
 			apiError(c, ERROR_DB, err)
 			return
@@ -392,18 +393,18 @@ func (s *server) teamMemberOp(c *gin.Context) {
 }
 
 func (s *server) teamManagerOp(c *gin.Context) {
-	var param weekly.TeamOpParam
+	var param team.TeamOpParam
 	if err := c.Bind(&param); err != nil {
 		apiError(c, ERROR_PARAM, err)
 		return
 	}
 	switch param.Op {
-	case weekly.TeamOpAdd:
+	case team.TeamOpAdd:
 		if err := s.service.Team().AddManager(param.TeamID, param.UIDs[0]); err != nil {
 			apiError(c, ERROR_DB, err)
 			return
 		}
-	case weekly.TeamOpRemove:
+	case team.TeamOpRemove:
 		if err := s.service.Team().RemoveManager(param.TeamID, param.UIDs[0]); err != nil {
 			apiError(c, ERROR_DB, err)
 			return

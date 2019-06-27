@@ -32,7 +32,7 @@ import (
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/models/weekly"
+	"github.com/liut/staffio/pkg/models/team"
 )
 
 // wechatworkCmd represents the wechatwork command
@@ -99,7 +99,7 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 		if parent := departments.WithID(dept.ParentId); parent != nil {
 			name = nameReplacer.Replace(parent.Name) + "-" + dept.Name
 		}
-		var team = &weekly.Team{
+		var team = &team.Team{
 			ID:      dept.Id,
 			Name:    name,
 			Updated: time.Now(),

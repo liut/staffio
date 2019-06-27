@@ -7,6 +7,7 @@ import (
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/models/team"
 	"github.com/liut/staffio/pkg/models/weekly"
 )
 
@@ -38,8 +39,8 @@ type Servicer interface {
 	PasswordResetTokenVerify(token string) (uid string, err error)
 	PasswordResetWithToken(login, token, passwd string) (err error)
 
-	Team() weekly.TeamStore
-	Weekly() weekly.WeeklyStore
+	Team() team.Store
+	Weekly() weekly.Store
 
 	PoolStats() *PoolStats
 }
@@ -96,10 +97,10 @@ func (s *serviceImpl) CloseAll() {
 	s.osinStore.Close()
 }
 
-func (s *serviceImpl) Team() weekly.TeamStore {
+func (s *serviceImpl) Team() team.Store {
 	return s.teamStore
 }
 
-func (s *serviceImpl) Weekly() weekly.WeeklyStore {
+func (s *serviceImpl) Weekly() weekly.Store {
 	return s.weeklyStore
 }

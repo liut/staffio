@@ -193,7 +193,7 @@ func (ls *ldapSource) Authenticate(uid, passwd string) (staff *models.Staff, err
 	dn := ls.UDN(uid)
 	entry, err = ls.bind(uid, dn, passwd, false)
 	debug("authenticate(%q) %q ERR %v", dn, ls.Domain, err)
-	if err == ErrLogin && ls.Domain != "" && !strings.Contains(uid, "@") {
+	if err == ErrLogin && ls.isAD && ls.Domain != "" && !strings.Contains(uid, "@") {
 		dn = uid + "@" + ls.Domain
 		entry, err = ls.bind(uid, dn, passwd, true)
 	}

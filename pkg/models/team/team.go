@@ -1,4 +1,4 @@
-package weekly
+package team
 
 import (
 	"time"
@@ -8,10 +8,11 @@ import (
 
 type StringSlice = types.StringSlice
 
-type TeamRoleType int
+// RoleType ...
+type RoleType int
 
 const (
-	RoleNothing TeamRoleType = iota
+	RoleNothing RoleType = iota
 	RoleMember
 	RoleManager
 )
@@ -29,12 +30,12 @@ type TeamOpParam struct {
 	UIDs   []string   `json:"staff_uids" binding:"required" valid:"required"`
 }
 
-// TeamStore interface of team storage
-type TeamStore interface {
+// Store interface of team storage
+type Store interface {
 	// Get 取一个
 	Get(id int) (*Team, error)
 	// All 查询全部数据
-	All(role TeamRoleType) (data Teams, err error)
+	All(role RoleType) (data Teams, err error)
 	// Store 保存
 	Store(t *Team) error
 	// Add members
