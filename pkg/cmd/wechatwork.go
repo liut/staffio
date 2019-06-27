@@ -41,7 +41,7 @@ var wechatworkCmd = &cobra.Command{
 	Short: "Sync with wechat work",
 	Run:   wechatworkRun,
 }
-var nameReplacer = strings.NewReplacer("公司", "", "总部", "", "分公司", "")
+var nameReplacer = strings.NewReplacer("公司", "", "总部", "", "分公司", "", "项目组", "")
 
 func init() {
 	RootCmd.AddCommand(wechatworkCmd)
@@ -120,8 +120,8 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 			// fmt.Printf("%4s %10s  %v\n", val.UID, val.Name, val.DepartmentIds)
 		}
 
-		fmt.Printf("%4d  %10s   %v \n", team.ID, team.Name, team.Members)
-		if action[:4] == "sync" {
+		fmt.Printf("%4d  %12s   %v \n", team.ID, team.Name, team.Members)
+		if strings.HasPrefix(action, "sync") {
 			var leader string
 			if action == "sync-all" {
 				for _, staff := range staffs {

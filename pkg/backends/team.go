@@ -49,7 +49,7 @@ func (s *teamStore) All(role weekly.TeamRoleType) (data weekly.Teams, err error)
 			return db.Select(&data, `SELECT t.id, name, leaders, members, tm.created, tm.leader as staff_uid
 				FROM teams t JOIN team_leader tm ON tm.team_id = t.id`)
 		default:
-			return db.Select(&data, "SELECT id, name, leaders, members, created FROM teams")
+			return db.Select(&data, "SELECT id, name, leaders, members, created FROM teams ORDER BY id")
 		}
 
 	})
