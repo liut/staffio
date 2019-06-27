@@ -15,6 +15,7 @@ import (
 var (
 	ErrInvalidResetToken = errors.New("invalid reset token or not found")
 	ErrMailNotReady      = errors.New("email system is not ready")
+	ErrEmptyEmail        = errors.New("email is empty")
 
 	secret []byte
 )
@@ -55,6 +56,9 @@ func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (e
 func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	if smtpHost == "" {
 		return ErrMailNotReady
+	}
+	if staff.Email == "" {
+		return ErrEmptyEmail
 	}
 	uv := models.NewVerify(common.AtEmail, staff.Email, staff.Uid)
 	err = s.SaveVerify(uv)
