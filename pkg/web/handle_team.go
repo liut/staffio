@@ -9,11 +9,11 @@ import (
 )
 
 type teamAddParam struct {
-	Name string `json:"name" binding:"required" valid:"[1:128]"`
+	Name string `json:"name" form:"name" binding:"required" valid:"[1:128]"`
 }
 
 type teamDeleteParam struct {
-	ID int64 `json:"id" binding:"required" valid:"required"`
+	ID int `json:"id" form:"form" binding:"required" valid:"required"`
 }
 
 func (s *server) teamListByRole(c *gin.Context) {
@@ -50,6 +50,20 @@ func (s *server) teamAdd(c *gin.Context) {
 		Name: param.Name,
 	}
 	if err := s.service.Team().Store(team); err != nil {
+		apiError(c, ERROR_DB, err)
+		return
+	}
+	apiOk(c, true, 0)
+}
+
+func (s *server) teamDelete(c *gin.Context) {
+	var param teamDeleteParam
+	if err := c.Bind(&param); err != nil {
+		apiError(c, ERROR_PARAM, err)
+		return
+	}
+
+	if err := s.service.Team().Delete(param.ID); err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}

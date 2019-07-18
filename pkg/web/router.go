@@ -108,6 +108,7 @@ func (s *server) StrapRouter() {
 		apiMan := api.Group("/", s.authGroup(gnAdmin, gnHR))
 		{
 			apiMan.POST("/team/add", s.teamAdd)
+			apiMan.POST("/team/del", s.teamDelete)
 			apiMan.POST("/team/member", s.teamMemberOp)
 			apiMan.POST("/team/manager", s.teamManagerOp)
 			apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
