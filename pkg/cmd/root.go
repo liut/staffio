@@ -43,7 +43,10 @@ var RootCmd = &cobra.Command{
 		cmd.ParseFlags(args)
 		if v, err := cmd.Flags().GetBool("version"); err == nil && v {
 			fmt.Println(settings.Version)
+		} else {
+			cmd.Usage()
 		}
+
 	},
 }
 
