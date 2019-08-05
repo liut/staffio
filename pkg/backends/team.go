@@ -98,7 +98,14 @@ func (s *teamStore) Store(t *team.Team) error {
 
 func (s *teamStore) Delete(id int) error {
 	return withTxQuery(func(db dbTxer) (err error) {
-		_, err = db.Exec("DELETE FROM teams WHERE id = $1", id)
+		_, err = db.Exec("DELETE FROM team_leader WHERE team_id = $1", id)
+		if err == nil {
+			_, err = db.Exec("DELETE FROM team_member WHERE team_id = $1", id)
+			if err == nil {
+				_, err = db.Exec("DELETE FROM teams WHERE id = $1", id)
+			}
+		}
+
 		return
 	})
 }
