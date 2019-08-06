@@ -3,14 +3,8 @@ package backends
 import (
 	"fmt"
 
-	. "github.com/wealthworks/go-debug"
-
 	zlog "github.com/liut/staffio/pkg/log"
 	"github.com/liut/staffio/pkg/models"
-)
-
-var (
-	debug = Debug("staffio:backends")
 )
 
 func logger() zlog.Logger {

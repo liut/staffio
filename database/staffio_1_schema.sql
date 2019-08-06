@@ -77,34 +77,6 @@ CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
 CREATE SEQUENCE IF NOT EXISTS staff_id_seq START 1027;
 
 
-CREATE TABLE IF NOT EXISTS articles
-(
-	id serial,
-	title varchar(64) NOT NULL,
-	content text NOT NULL,
-	author varchar(64) NOT NULL,
-	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated timestamptz,
-	PRIMARY KEY (id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_article_created ON articles (created);
-
-
-CREATE TABLE IF NOT EXISTS links
-(
-	id serial,
-	title varchar(64) NOT NULL,
-	url varchar(128) NOT NULL UNIQUE,
-	author varchar(64) NOT NULL,
-	position smallint NOT NULL DEFAULT 0,
-	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_links_created ON links (created);
-CREATE INDEX IF NOT EXISTS idx_links_position ON links (position);
-
 
 CREATE TABLE IF NOT EXISTS password_reset (
 	id serial,
@@ -133,6 +105,18 @@ CREATE TABLE IF NOT EXISTS user_log (
 ) WITH (OIDS=FALSE);
 
 CREATE INDEX IF NOT EXISTS idx_user_log_uid ON user_log (uid);
+
+
+
+CREATE TABLE IF NOT EXISTS staff_watch (
+	id serial,
+	uid name NOT NULL , -- uid
+	watching name NOT NULL, -- watching uid
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE (uid, watching),
+	PRIMARY KEY (id)
+) WITH (OIDS=FALSE);
+
 
 
 END;

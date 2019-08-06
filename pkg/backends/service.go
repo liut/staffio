@@ -40,6 +40,7 @@ type Servicer interface {
 	PasswordResetWithToken(login, token, passwd string) (err error)
 
 	Team() team.Store
+	Watch() team.WatchStore
 	Weekly() weekly.Store
 
 	PoolStats() *PoolStats
@@ -49,6 +50,7 @@ type serviceImpl struct {
 	*ldap.LDAPStore
 	osinStore   *DbStorage
 	teamStore   *teamStore
+	watchStore  *watchStore
 	weeklyStore *weeklyStore
 }
 
@@ -79,6 +81,7 @@ func NewService() Servicer {
 		LDAPStore:   store,
 		osinStore:   NewStorage(),
 		teamStore:   &teamStore{},
+		watchStore:  &watchStore{},
 		weeklyStore: &weeklyStore{},
 	}
 
@@ -99,6 +102,10 @@ func (s *serviceImpl) CloseAll() {
 
 func (s *serviceImpl) Team() team.Store {
 	return s.teamStore
+}
+
+func (s *serviceImpl) Watch() team.WatchStore {
+	return s.watchStore
 }
 
 func (s *serviceImpl) Weekly() weekly.Store {

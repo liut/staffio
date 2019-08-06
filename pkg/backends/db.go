@@ -46,7 +46,7 @@ func init() {
 
 func SetDSN(dsn string) {
 	if dsn != "" {
-		logger().Infow("set db dsn", "dsn", len(dsn))
+		logger().Debugw("set db dsn", "dsn", dsn)
 		dbDSN = dsn
 		openDb()
 	}

@@ -69,6 +69,8 @@ type Staff struct {
 
 	Leader bool `json:"leader,omitempty" form:"-"` // temporary var
 	TeamID int  `json:"teamID,omitempty" form:"-"` // department id
+
+	Watchings []string `json:"watching,omitempty" form:"-"` // watchings
 }
 
 func (u *Staff) GetUID() string {
@@ -129,6 +131,19 @@ func (u *Staff) AvatarUri() string {
 func formatCN(gn, sn string) string {
 	r := strings.NewReplacer("<gn>", gn, "<sn>", sn)
 	return r.Replace(cnFormat)
+}
+
+// UIDs ...
+type UIDs []string
+
+// Has ...
+func (z UIDs) Has(uid string) bool {
+	for _, s := range z {
+		if s == uid {
+			return true
+		}
+	}
+	return false
 }
 
 type Staffs []*Staff

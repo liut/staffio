@@ -103,6 +103,10 @@ func (s *server) StrapRouter() {
 		api.GET("/staffs", s.staffList)
 		api.GET("/teams", s.teamListByRole)
 
+		api.GET("/watching", s.watching)
+		api.POST("/watch", s.watch)
+		api.POST("/unwatch", s.unwatch)
+
 		api.GET("/work/checkins", s.wechatCheckinList)
 
 		apiMan := api.Group("/", s.authGroup(gnAdmin, gnHR))

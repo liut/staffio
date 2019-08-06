@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -69,9 +68,9 @@ func (s *teamStore) Store(t *team.Team) error {
 			err = db.Get(&id, "INSERT INTO teams(name, leaders, members) VALUES($1, $2, $3) RETURNING id",
 				t.Name, t.Leaders, t.Members)
 			if err != nil {
-				log.Printf("insert new team ERR %s", err)
+				logger().Infow("insert new team fail", "err", err)
 			} else {
-				log.Printf("insert new team id %q#%d", t.Name, id)
+				logger().Infow("insert new team ok", "name", t.Name, "id", id)
 				t.ID = id
 			}
 
@@ -82,12 +81,13 @@ func (s *teamStore) Store(t *team.Team) error {
 				_, err = db.Exec(`UPDATE teams SET
 					(name, leaders, members, updated) = ($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4`,
 					t.Name, t.Leaders, t.Members, t.ID)
-				log.Printf("changed team %d %q %q", t.ID, t.Name, t.Leaders)
 			} else if err == ErrNoRows {
 				_, err = db.Exec("INSERT INTO teams(id, name, leaders, members) VALUES($1, $2, $3, $4)",
 					t.ID, t.Name, t.Leaders, t.Members)
 			}
-
+			if err != nil {
+				logger().Infow("store team fail", "team", t, "err", err)
+			}
 		}
 		if err == nil {
 			err = dbTeamAddMember(db, t.ID, t.Members)
@@ -144,9 +144,9 @@ func (s *teamStore) RemoveMember(id int, uids ...string) error {
 		_, err = db.Exec("DELETE FROM team_member WHERE team_id = $1 AND uid IN ("+strings.Join(arr, ",")+") ",
 			bind...)
 		if err != nil {
-			log.Printf("delete team(%d) members %v, ERR %s", id, uids, err)
+			logger().Infow("delete team member fail", "id", id, "uids", uids, "err", err)
 		} else {
-			log.Printf("delete team(%d) members %v done", id, uids)
+			logger().Infow("delete team member done", "id", id, "uids", uids)
 		}
 		return
 	})

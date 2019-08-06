@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -17,8 +16,7 @@ var (
 )
 
 func GetStaffFromWechatUser(user *exwechat.User) *models.Staff {
-
-	debug("got from exmail: %s", user)
+	logger().Debugw("got from exmail", "user", user)
 	sn, gn := models.SplitName(user.Name)
 	staff := &models.Staff{
 		Uid:          user.UID,
@@ -39,7 +37,7 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 		return nil, err
 	}
 
-	debug("got from exmail: %s", user)
+	logger().Debugw("got from exmail", "user", user)
 	sn, gn := models.SplitName(user.Name)
 
 	// log.Printf("got %q %q %q", user.Name, sn, gn)
@@ -69,7 +67,7 @@ func CheckMailUnseen(uid string) int {
 	email := GetEmailAddress(uid)
 	count, err := exmail.CountNewMail(email)
 	if err != nil {
-		log.Printf("check mail %s unseen ERR %s", uid, err)
+		logger().Infow("check mail fail", "uid", uid, "err", err)
 	}
 	return count
 }
@@ -78,7 +76,7 @@ func GetMailEntryUrl(uid string) string {
 	email := GetEmailAddress(uid)
 	str, err := exmail.GetLoginURL(email)
 	if err != nil {
-		log.Printf("get login url of %s, ERR %s", uid, err)
+		logger().Infow("get login url fail", "uid", uid, "err", err)
 	}
 	return str
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
-	. "github.com/wealthworks/go-debug"
 	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/backends"
@@ -16,8 +15,7 @@ import (
 )
 
 var (
-	svr   *server
-	debug = Debug("staffio:web")
+	svr *server
 )
 
 type Config struct {

@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	store := s.service.OSIN()
 
 	if ar := s.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
-		log.Printf("client: %v", ar.Client)
+		logger().Debugw("HandleAuthorizeRequest", "client", ar.Client)
 		if store.IsAuthorized(ar.Client.GetId(), user.UID) {
 			ar.UserData = user.UID
 			ar.Authorized = true
@@ -50,7 +49,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 				if r.PostForm.Get("remember") != "" {
 					err := store.SaveAuthorized(ar.Client.GetId(), user.UID)
 					if err != nil {
-						log.Printf("remember ERR %s", err)
+						logger().Infow("SaveAuthorized fail", "err", err)
 					}
 				}
 			} else {
@@ -62,13 +61,13 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	}
 
 	if resp.IsError && resp.InternalError != nil {
-		log.Printf("authorize ERROR: %s\n", resp.InternalError)
+		logger().Infow("authorize ERROR", "err", resp.InternalError)
 	}
 	// if !resp.IsError {
 	// 	resp.Output["uid"] = c.user.UID
 	// }
 
-	debug("oauthAuthorize resp: %v", resp)
+	logger().Debugw("oauthAuthorize", "resp", resp)
 	osin.OutputJSON(resp, c.Writer, r)
 }
 
@@ -85,7 +84,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 		err   error
 	)
 	if ar := s.osvr.HandleAccessRequest(resp, r); ar != nil {
-		debug("ar Code %s Scope %s", ar.Code, ar.Scope)
+		logger().Debugw("HandleAccessRequest", "code", ar.Code, "scope", ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
 			uid = ar.UserData.(string)
@@ -124,7 +123,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 	}
 
 	if resp.IsError && resp.InternalError != nil {
-		log.Printf("token ERROR: %s\n", resp.InternalError)
+		logger().Infow("token ERROR", "err", resp.InternalError)
 	}
 	if !resp.IsError {
 		if uid != "" {
@@ -137,7 +136,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 
 	}
 
-	debug("oauthToken resp: %v", resp)
+	logger().Debugw("oauthToken", "resp", resp)
 
 	osin.OutputJSON(resp, c.Writer, r)
 }
@@ -149,12 +148,12 @@ func (s *server) oauth2Info(c *gin.Context) {
 	r := c.Request
 
 	if ir := s.osvr.HandleInfoRequest(resp, r); ir != nil {
-		debug("ir Code %s Token %s", ir.Code, ir.AccessData.AccessToken)
+		logger().Debugw("HandleInfoRequest", "code", ir.Code, "accessToken", ir.AccessData.AccessToken)
 		var (
 			uid   string
 			topic = c.Param("topic")
 		)
-		log.Printf("topic %s", topic)
+		logger().Infow("param", "topic", topic)
 		uid = ir.AccessData.UserData.(string)
 		staff, err := s.service.Get(uid)
 		if err != nil {
@@ -190,7 +189,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 	}
 
 	if resp.IsError && resp.InternalError != nil {
-		log.Printf("info ERROR: %s\n", resp.InternalError)
+		logger().Infow("info ERROR", "err", resp.InternalError)
 	}
 
 	osin.OutputJSON(resp, c.Writer, r)
