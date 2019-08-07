@@ -100,6 +100,11 @@ func (s *server) weeklyReportList(c *gin.Context) {
 		return
 	}
 
+	user := UserWithContext(c)
+	if param.UID == "watching" {
+		param.UIDs = s.service.Watch().Gets(user.UID)
+		param.UID = ""
+	}
 	ret, total, err := s.service.Weekly().All(param)
 	if err != nil {
 		apiError(c, ERROR_DB, err)
