@@ -32,7 +32,7 @@ func (s *server) teamListByRole(c *gin.Context) {
 		return
 	}
 
-	staffs := s.service.All()
+	staffs := s.service.All(nil)
 	for i := 0; i < len(data); i++ {
 		for _, staff := range staffs {
 			if data[i].StaffUID == staff.Uid {

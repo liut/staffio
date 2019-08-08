@@ -28,6 +28,7 @@ func TestMain(m *testing.M) {
 
 func TestWatching(t *testing.T) {
 	uid := "eagle"
+	assert.NotNil(t, svc.Watch().Gets(uid).UIDs())
 	data := svc.Watch().Gets(uid)
 	assert.Empty(t, data)
 	target := "john"
@@ -35,7 +36,10 @@ func TestWatching(t *testing.T) {
 	err := svc.Watch().Watch(uid, target)
 	assert.NoError(t, err)
 	data = svc.Watch().Gets(uid)
-	assert.NotEmpty(t, data)
+	if assert.NotEmpty(t, data) {
+		assert.Equal(t, target, data[0].UID)
+	}
+
 	t.Logf("watching of %s: %v", uid, data)
 
 	err = svc.Watch().Unwatch(uid, target)

@@ -29,7 +29,7 @@ func (s *weeklyStore) Get(id int) (obj *weekly.Report, err error) {
 
 // 查询
 func (s *weeklyStore) All(spec weekly.ReportsSpec) (data weekly.Reports, total int, err error) {
-
+	logger().Debugw("weeklyStore.all", "spec", spec)
 	var where string
 	bind := []interface{}{}
 	if len(spec.UIDs) > 0 {

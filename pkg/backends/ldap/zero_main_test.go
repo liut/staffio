@@ -125,7 +125,10 @@ func TestStaff(t *testing.T) {
 	assert.Equal(t, cn, staff.CommonName)
 	assert.Equal(t, sn, staff.Surname)
 
-	data := store.All()
+	var spec = &models.Spec{
+		UIDs: models.UIDs{uid},
+	}
+	data := store.All(spec)
 	assert.NotZero(t, len(data))
 
 	err = store.PasswordReset(uid, password)

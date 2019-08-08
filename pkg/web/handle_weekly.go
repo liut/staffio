@@ -102,15 +102,17 @@ func (s *server) weeklyReportList(c *gin.Context) {
 
 	user := UserWithContext(c)
 	if param.UID == "watching" {
-		param.UIDs = s.service.Watch().Gets(user.UID)
-		param.UID = ""
+		param.UIDs = s.service.Watch().Gets(user.UID).UIDs()
+		if len(param.UIDs) > 0 {
+			param.TeamID = 0
+		}
 	}
 	ret, total, err := s.service.Weekly().All(param)
 	if err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
-	staffs := s.service.All()
+	staffs := s.service.All(nil)
 	for i := 0; i < len(ret); i++ {
 		staff := staffs.WithUid(ret[i].Uid)
 		if staff != nil {
@@ -342,7 +344,7 @@ func (s *server) staffList(c *gin.Context) {
 
 func (s *server) allStaffs(isFull bool) []*simpStaff {
 
-	staffs := s.service.All()
+	staffs := s.service.All(nil)
 	models.ByUid.Sort(staffs)
 	var ret = make([]*simpStaff, len(staffs))
 	for i, v := range staffs {

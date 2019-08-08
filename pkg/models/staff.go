@@ -106,15 +106,15 @@ func (u *Staff) GetCommonName() string {
 }
 
 func (u *Staff) AvatarUri() string {
-	if len(u.JpegPhoto) > 0 {
-		return "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(u.JpegPhoto)
-	}
+
 	if len(u.AvatarPath) > 0 {
 		s := u.AvatarPath
 		if strings.HasSuffix(s, "/") {
 			s = s + "0"
 		}
 		return "https://p.qlogo.cn" + avatarReplacer.Replace(s)
+	} else if len(u.JpegPhoto) > 0 {
+		return "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(u.JpegPhoto)
 	}
 	return ""
 }

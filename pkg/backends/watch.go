@@ -1,23 +1,36 @@
 package backends
 
 import (
+	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/team"
 )
 
 var _ team.WatchStore = (*watchStore)(nil)
 
 type watchStore struct {
+	ss models.StaffStore
 }
 
-func (s *watchStore) Gets(uid string) []string {
-	var data []string
+func (s *watchStore) Gets(uid string) team.Butts {
+	var data team.Butts
 
 	err := withDbQuery(func(db dber) error {
-		return db.Select(&data, "SELECT watching FROM staff_watch WHERE uid = $1", uid)
+		return db.Select(&data, "SELECT watching, created FROM staff_watch WHERE uid = $1", uid)
 	})
 
+	n := len(data)
 	if err != nil {
 		logger().Infow("watch gets fail", "err", err)
+	} else if n > 0 {
+		spec := &models.Spec{UIDs: data.UIDs()}
+		for _, staff := range s.ss.All(spec) {
+			for i := 0; i < n; i++ {
+				if staff.Uid == data[i].UID {
+					data[i].Name = staff.Name()
+					data[i].Avatar = staff.AvatarUri()
+				}
+			}
+		}
 	}
 
 	return data

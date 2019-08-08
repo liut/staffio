@@ -101,7 +101,7 @@ func (s *server) me(c *gin.Context) {
 	} else if team.Leaders.Contains(user.UID) {
 		user.Privileges = "leader"
 	}
-	user.Watchings = s.service.Watch().Gets(user.UID)
+	user.Watchings = s.service.Watch().Gets(user.UID).UIDs()
 	apiOk(c, user, 0)
 }
 

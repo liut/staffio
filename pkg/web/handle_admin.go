@@ -163,8 +163,8 @@ func (s *server) scopesForm(c *gin.Context) {
 }
 
 func (s *server) contactsTable(c *gin.Context) {
-
-	staffs := s.service.All()
+	var spec *models.Spec
+	staffs := s.service.All(spec)
 	models.ByUid.Sort(staffs)
 
 	s.Render(c, "contact.html", map[string]interface{}{

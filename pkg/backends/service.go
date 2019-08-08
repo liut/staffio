@@ -81,7 +81,7 @@ func NewService() Servicer {
 		LDAPStore:   store,
 		osinStore:   NewStorage(),
 		teamStore:   &teamStore{},
-		watchStore:  &watchStore{},
+		watchStore:  &watchStore{store},
 		weeklyStore: &weeklyStore{},
 	}
 

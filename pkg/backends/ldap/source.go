@@ -322,20 +322,31 @@ func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
 	return
 }
 
-func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
-	if limit < 1 {
-		limit = 1
-	}
+func (ls *ldapSource) List(spec *models.Spec) (staffs models.Staffs) {
 	var et *entryType
 	if ls.isAD {
 		et = etADuser
 	} else {
 		et = etPeople
 	}
+	filter := et.Filter
+	if len(spec.UIDs) > 0 {
+		var sb strings.Builder
+		sb.WriteString("(&" + et.Filter)
+		sb.WriteString("(|")
+		for _, uid := range spec.UIDs {
+			sb.WriteString("(uid=" + uid + ")")
+		}
+		sb.WriteString("))")
+		filter = sb.String()
+		debug("list filter %q", filter)
+	}
+	// TODO: other spec
+
 	search := ldap.NewSearchRequest(
 		ls.Base,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		et.Filter,
+		filter,
 		et.Attributes,
 		nil)
 
@@ -343,7 +354,7 @@ func (ls *ldapSource) ListPaged(limit int) (staffs models.Staffs) {
 		sr *ldap.SearchResult
 	)
 	err := ls.opWithMan(func(c ldap.Client) (err error) {
-		sr, err = c.SearchWithPaging(search, uint32(limit))
+		sr, err = c.SearchWithPaging(search, uint32(spec.Limit))
 		return
 	})
 	if err != nil {
