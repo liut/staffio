@@ -53,7 +53,7 @@ func (s *weeklyStore) All(spec weekly.ReportsSpec) (data weekly.Reports, total i
 	if err = withDbQuery(func(db dber) error {
 		where = sqlx.Rebind(sqlx.DOLLAR, where)
 		logger().Debugw("query weekly_report", "where", where, "bind", bind)
-		return db.Get(&total, "SELECT COUNT(r.id) FROM weekly_report r "+
+		return db.Get(&total, "SELECT COUNT(DISTINCT r.id) FROM weekly_report r "+
 			"LEFT JOIN team_member tm ON tm.uid = r.uid "+
 			where, bind...)
 	}); err != nil {
