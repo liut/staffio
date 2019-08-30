@@ -322,6 +322,8 @@ func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
 	return
 }
 
+// List search paged results
+// see also: https://tools.ietf.org/html/rfc2696
 func (ls *ldapSource) List(spec *models.Spec) (staffs models.Staffs) {
 	var et *entryType
 	if ls.isAD {

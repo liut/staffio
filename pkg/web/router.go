@@ -57,11 +57,14 @@ func (s *server) StrapRouter() {
 	gr.POST("/info/:topic", s.oauth2Info)
 
 	keeper := authed.Group("/dust", s.authGroup(gnAdmin))
-	keeper.GET("/clients", s.clientsGet)
-	keeper.POST("/clients", s.clientsPost)
-	keeper.GET("/scopes", s.scopesForm)
-	keeper.GET("/status/:topic", s.handleStatus)
-	keeper.GET("/groups", s.groupList)
+	{
+		keeper.GET("/clients", s.clientsGet)
+		keeper.POST("/clients", s.clientsPost)
+		keeper.GET("/scopes", s.scopesForm)
+		keeper.GET("/status/:topic", s.handleStatus)
+		keeper.GET("/groups", s.groupList)
+		keeper.POST("/group", s.groupStore)
+	}
 
 	gr.GET("/article/:id", s.articleView)
 	keeper.GET("/articles", s.articleForm)

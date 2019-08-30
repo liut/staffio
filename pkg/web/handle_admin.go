@@ -338,3 +338,18 @@ func (s *server) groupList(c *gin.Context) {
 		"ctx":    c,
 	})
 }
+
+func (s *server) groupStore(c *gin.Context) {
+	var group = new(models.Group)
+	if err := c.Bind(group); err != nil {
+		apiError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := s.service.SaveGroup(group); err != nil {
+		apiError(c, http.StatusServiceUnavailable, err)
+		return
+	}
+
+	apiOk(c, true, 0)
+}
