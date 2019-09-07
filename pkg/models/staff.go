@@ -17,22 +17,6 @@ const (
 )
 
 var (
-	// ProfileEditables deprecated
-	ProfileEditables = map[string]string{
-		"nickname":    "displayName",
-		"cn":          "cn",
-		"gn":          "givenName",
-		"sn":          "sn",
-		"email":       "mail",
-		"mobile":      "mobile",
-		"eid":         "employeeNumber",
-		"etitle":      "employeeType",
-		"birthday":    "dateOfBirth",
-		"gender":      "gender",
-		"avatarPath":  "avatarPath",
-		"description": "description",
-	}
-
 	cnFormat = "<gn> <sn>"
 
 	avatarReplacer = strings.NewReplacer("/0", "/60")
