@@ -3,7 +3,7 @@
 An OAuth2 server with management for enterprise employees.
 
 
-## features:
+## Features:
 
 * All employees in LDAP.
 * Login and general member settings.
@@ -12,7 +12,33 @@ An OAuth2 server with management for enterprise employees.
 * Client ID and Secret of all clients maintenance.
 * Simplified content management for aritcles and links.
 * A general OAuth2 authentication and authorization provider.
-* Directly CAS implement for v1 and V2.
+* Directly CAS implement for V1 and V2.
+
+
+## Objects
+
+### Staff
+- `uid`: Username, required
+- `cn`: Full Name
+- `gn`: FirstName
+- `sn`: LastName, required
+- `nickname`
+- `birthday`: YYYYmmdd
+- `gender`: f, m
+- `email`: Email
+- `mobile`: Cell phone number
+- `avatarPath`: Avatar URI
+- `description`:
+- `joinDate`: YYYYmmdd
+
+### Group
+- `name`:
+- `description`:
+- `members`: []uid
+
+### User (online)
+- uid: Username
+- name: DisplayName
 
 ## APIs of oauth2
 
@@ -25,6 +51,10 @@ An OAuth2 server with management for enterprise employees.
 ### Get Info
 > GET | POST /info/{topic}
 
+#### Info topic
+1. `me`: `{me: User}`
+2. `me+{groupName}`: `{me: User, group}`
+3. `grafana` or `generic`: `{struct for grafana}`
 
 ### APIs of <abbr title="Central Authentication Service">CAS</abbr>
 
@@ -88,20 +118,15 @@ echo "INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://loc
 ### checkout
 
 ````sh
-mkdir -p $GOPATH/src/github.com/liut
-cd $GOPATH/src/github.com/liut
-git clone https://github.com/liut/staffio.git
-cd $GOPATH/src/liut/staffio
-make dep
+
+go get -u github.com/liut/staffio
+cp -n .env.example .env
+
 ````
 
 ### environment
 
-```
-    cp -n .env.example .env
-```
-
-> `cat .env`
+> `cat .env.example`
 ```
 STAFFIO_HTTP_LISTEN=":3000"
 STAFFIO_LDAP_HOSTS=slapd.hostname
@@ -127,6 +152,7 @@ forego start
 ```sh
 make dist package
 scp dist/linux_amd64/staffio remote:/opt/staffio/bin/
+make fe-build
 rsync -rpt --delete templates htdocs remote:/opt/staffio/
 ```
 
