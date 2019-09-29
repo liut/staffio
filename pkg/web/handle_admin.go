@@ -333,6 +333,12 @@ func (s *server) staffDelete(c *gin.Context) {
 func (s *server) groupList(c *gin.Context) {
 
 	data, _ := s.service.AllGroup()
+
+	if strings.HasPrefix(c.Request.RequestURI, "/api/") || IsAjax(c.Request) {
+		apiOk(c, data, len(data))
+		return
+	}
+
 	s.Render(c, "group.html", map[string]interface{}{
 		"groups": data,
 		"ctx":    c,

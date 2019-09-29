@@ -131,6 +131,9 @@ func (s *server) StrapRouter() {
 
 		apiDev := api.Group("/", s.authGroup(gnAdmin, gnDev))
 		{
+			apiDev.GET("/groups", s.groupList)
+			apiDev.POST("/group", s.groupStore)
+
 			apiDev.GET("/service/stats", s.handleServiceStats)
 			apiDev.GET("/oauth/clients", s.clientsGet)
 			apiDev.POST("/oauth/clients", s.clientsPost)
