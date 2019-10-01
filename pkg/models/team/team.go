@@ -64,4 +64,14 @@ type Team struct {
 	StaffName string      `json:"staff_name,omitempty" db:"-"`
 }
 
+// Teams ...
 type Teams []Team
+
+// UIDs return slice of staff uids
+func (z Teams) UIDs() []string {
+	var arr = make([]string, len(z))
+	for i, t := range z {
+		arr[i] = t.StaffUID
+	}
+	return arr
+}

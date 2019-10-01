@@ -1,9 +1,18 @@
 package models
 
+// Spec param of searching
+type Spec struct {
+	Name   string   `json:"name,omitempty"`
+	Email  string   `json:"email"`
+	Mobile string   `json:"mobile"`
+	UIDs   []string `json:"uids,omitempty"`
+	Limit  int      `json:"limit,omitempty"`
+}
+
 // StaffStore Storage for Staff
 type StaffStore interface {
 	// All browse from store, like LDAP
-	All() Staffs
+	All(spec *Spec) Staffs
 	// Get with uid
 	Get(uid string) (*Staff, error)
 	// GetByDN with dn

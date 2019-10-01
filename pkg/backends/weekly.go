@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/liut/staffio/pkg/models/weekly"
 )
+
+var _ weekly.Store = (*weeklyStore)(nil)
 
 type weeklyStore struct {
 }
@@ -25,27 +29,35 @@ func (s *weeklyStore) Get(id int) (obj *weekly.Report, err error) {
 
 // 查询
 func (s *weeklyStore) All(spec weekly.ReportsSpec) (data weekly.Reports, total int, err error) {
-
+	logger().Debugw("weeklyStore.all", "spec", spec)
 	var where string
 	bind := []interface{}{}
-	if spec.TeamID > 0 {
-		where = " WHERE team_id = $1"
-		bind = append(bind, spec.TeamID)
-	}
-	if spec.UID != "" {
-		if where == "" {
-			where = " WHERE r.uid = $1"
-		} else {
-			where += " AND r.uid = $2"
-		}
+	if len(spec.UIDs) > 0 {
+		var args []interface{}
+		where, args, err = sqlx.In("WHERE r.uid IN (?)", spec.UIDs)
+		bind = append(bind, args...)
+	} else if spec.UID != "" {
+		where = " WHERE r.uid = ?"
 		bind = append(bind, spec.UID)
 	}
 
+	if spec.TeamID > 0 {
+		if where == "" {
+			where = " WHERE team_id = ?"
+		} else {
+			where += " AND team_id = ?"
+		}
+		bind = append(bind, spec.TeamID)
+	}
+
 	if err = withDbQuery(func(db dber) error {
-		return db.Get(&total, "SELECT COUNT(r.id) FROM weekly_report r "+
+		where = sqlx.Rebind(sqlx.DOLLAR, where)
+		logger().Debugw("query weekly_report", "where", where, "bind", bind)
+		return db.Get(&total, "SELECT COUNT(DISTINCT r.id) FROM weekly_report r "+
 			"LEFT JOIN team_member tm ON tm.uid = r.uid "+
 			where, bind...)
 	}); err != nil {
+		logger().Infow("query weekly report fail", "where", where, "err", err)
 		return
 	}
 

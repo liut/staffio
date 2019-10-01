@@ -86,9 +86,15 @@ func (s *LDAPStore) GetByDN(dn string) (staff *models.Staff, err error) {
 	return
 }
 
-func (s *LDAPStore) All() (staffs models.Staffs) {
+func (s *LDAPStore) All(spec *models.Spec) (staffs models.Staffs) {
+	if spec == nil {
+		spec = new(models.Spec)
+	}
+	if spec.Limit == 0 {
+		spec.Limit = s.pageSize
+	}
 	for _, ls := range s.sources {
-		staffs = ls.ListPaged(s.pageSize)
+		staffs = ls.List(spec)
 	}
 	return
 }

@@ -8,6 +8,7 @@ import (
 // ReportsSpec 查询周报参数
 type ReportsSpec struct {
 	UID    string     `json:"uid"`
+	UIDs   []string   `json:"uids"`
 	TeamID int        `json:"team_id"`
 	Pager  *ListPager `json:"pager" valid:"required"`
 	Sort   *ListSort  `json:"sort" valid:"required"` // weekly_report.id,work_group_id

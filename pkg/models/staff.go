@@ -17,22 +17,6 @@ const (
 )
 
 var (
-	// ProfileEditables deprecated
-	ProfileEditables = map[string]string{
-		"nickname":    "displayName",
-		"cn":          "cn",
-		"gn":          "givenName",
-		"sn":          "sn",
-		"email":       "mail",
-		"mobile":      "mobile",
-		"eid":         "employeeNumber",
-		"etitle":      "employeeType",
-		"birthday":    "dateOfBirth",
-		"gender":      "gender",
-		"avatarPath":  "avatarPath",
-		"description": "description",
-	}
-
 	cnFormat = "<gn> <sn>"
 
 	avatarReplacer = strings.NewReplacer("/0", "/60")
@@ -69,6 +53,8 @@ type Staff struct {
 
 	Leader bool `json:"leader,omitempty" form:"-"` // temporary var
 	TeamID int  `json:"teamID,omitempty" form:"-"` // department id
+
+	Watchings []string `json:"watching,omitempty" form:"-"` // watchings
 }
 
 func (u *Staff) GetUID() string {
@@ -104,15 +90,15 @@ func (u *Staff) GetCommonName() string {
 }
 
 func (u *Staff) AvatarUri() string {
-	if len(u.JpegPhoto) > 0 {
-		return "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(u.JpegPhoto)
-	}
+
 	if len(u.AvatarPath) > 0 {
 		s := u.AvatarPath
 		if strings.HasSuffix(s, "/") {
 			s = s + "0"
 		}
 		return "https://p.qlogo.cn" + avatarReplacer.Replace(s)
+	} else if len(u.JpegPhoto) > 0 {
+		return "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(u.JpegPhoto)
 	}
 	return ""
 }
@@ -129,6 +115,19 @@ func (u *Staff) AvatarUri() string {
 func formatCN(gn, sn string) string {
 	r := strings.NewReplacer("<gn>", gn, "<sn>", sn)
 	return r.Replace(cnFormat)
+}
+
+// UIDs ...
+type UIDs []string
+
+// Has ...
+func (z UIDs) Has(uid string) bool {
+	for _, s := range z {
+		if s == uid {
+			return true
+		}
+	}
+	return false
 }
 
 type Staffs []*Staff

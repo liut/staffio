@@ -13,7 +13,8 @@ import (
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/models/weekly"
+	"github.com/liut/staffio/pkg/models/team"
+	// "github.com/liut/staffio/pkg/models/weekly"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -25,24 +26,25 @@ var (
 )
 
 func init() {
-	flag.StringVar(&action, "act", "", "action: list | sync | sync-all")
+	flag.StringVar(&action, "act", "", "action: list | query | sync | sync-all")
 	flag.StringVar(&uid, "uid", "", "query uid")
 }
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	settings.Parse()
-	// backends.Prepare()
+
+	flag.Parse()
+
 	if action == "" {
 		flag.PrintDefaults()
 		return
 	}
 
-	backends.InitSMTP()
+	log.Printf("action: %q", action)
 
-	log.Printf("action: %s", action)
+	// backends.InitSMTP()
 
-	wechat := exwechat.New(settings.WechatCorpID, settings.WechatContactSecret)
+	wechat := exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	if action == "query" {
 		if len(uid) > 0 {
 			user, err := wechat.GetUser(uid)
@@ -76,7 +78,7 @@ func main() {
 		if parent := departments.WithID(dept.ParentId); parent != nil {
 			name = nameReplacer.Replace(parent.Name) + "-" + dept.Name
 		}
-		var team = &weekly.Team{
+		var team = &team.Team{
 			ID:      dept.Id,
 			Name:    name,
 			Updated: time.Now(),

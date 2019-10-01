@@ -163,8 +163,8 @@ func (s *server) scopesForm(c *gin.Context) {
 }
 
 func (s *server) contactsTable(c *gin.Context) {
-
-	staffs := s.service.All()
+	var spec *models.Spec
+	staffs := s.service.All(spec)
 	models.ByUid.Sort(staffs)
 
 	s.Render(c, "contact.html", map[string]interface{}{
@@ -333,8 +333,29 @@ func (s *server) staffDelete(c *gin.Context) {
 func (s *server) groupList(c *gin.Context) {
 
 	data, _ := s.service.AllGroup()
+
+	if strings.HasPrefix(c.Request.RequestURI, "/api/") || IsAjax(c.Request) {
+		apiOk(c, data, len(data))
+		return
+	}
+
 	s.Render(c, "group.html", map[string]interface{}{
 		"groups": data,
 		"ctx":    c,
 	})
+}
+
+func (s *server) groupStore(c *gin.Context) {
+	var group = new(models.Group)
+	if err := c.Bind(group); err != nil {
+		apiError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := s.service.SaveGroup(group); err != nil {
+		apiError(c, http.StatusServiceUnavailable, err)
+		return
+	}
+
+	apiOk(c, true, 0)
 }

@@ -16,11 +16,12 @@ var (
 
 // User 在线用户
 type User struct {
-	UID        string `json:"uid" msg:"u"`
-	Name       string `json:"name" msg:"n"`
-	Privileges string `json:"privileges,omitempty" msg:"p"`
-	LastHit    int64  `json:"hit,omitempty" msg:"h"`
-	TeamID     int    `json:"tid,omitempty" msg:"t"`
+	UID        string   `json:"uid" msg:"u"`
+	Name       string   `json:"name" msg:"n"`
+	Privileges string   `json:"privileges,omitempty" msg:"p"`
+	LastHit    int64    `json:"hit,omitempty" msg:"h"`
+	TeamID     int      `json:"tid,omitempty" msg:"t"`
+	Watchings  []string `json:"watching,omitempty" msg:"w"`
 }
 
 func (u *User) IsExpired() bool {

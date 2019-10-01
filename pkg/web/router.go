@@ -57,11 +57,14 @@ func (s *server) StrapRouter() {
 	gr.POST("/info/:topic", s.oauth2Info)
 
 	keeper := authed.Group("/dust", s.authGroup(gnAdmin))
-	keeper.GET("/clients", s.clientsGet)
-	keeper.POST("/clients", s.clientsPost)
-	keeper.GET("/scopes", s.scopesForm)
-	keeper.GET("/status/:topic", s.handleStatus)
-	keeper.GET("/groups", s.groupList)
+	{
+		keeper.GET("/clients", s.clientsGet)
+		keeper.POST("/clients", s.clientsPost)
+		keeper.GET("/scopes", s.scopesForm)
+		keeper.GET("/status/:topic", s.handleStatus)
+		keeper.GET("/groups", s.groupList)
+		keeper.POST("/group", s.groupStore)
+	}
 
 	gr.GET("/article/:id", s.articleView)
 	keeper.GET("/articles", s.articleForm)
@@ -103,11 +106,16 @@ func (s *server) StrapRouter() {
 		api.GET("/staffs", s.staffList)
 		api.GET("/teams", s.teamListByRole)
 
+		api.GET("/watching", s.watching)
+		api.POST("/watch", s.watch)
+		api.POST("/unwatch", s.unwatch)
+
 		api.GET("/work/checkins", s.wechatCheckinList)
 
 		apiMan := api.Group("/", s.authGroup(gnAdmin, gnHR))
 		{
 			apiMan.POST("/team/add", s.teamAdd)
+			apiMan.POST("/team/del", s.teamDelete)
 			apiMan.POST("/team/member", s.teamMemberOp)
 			apiMan.POST("/team/manager", s.teamManagerOp)
 			apiMan.POST("/weekly/report/stat", s.weeklyReportStat)
@@ -123,6 +131,9 @@ func (s *server) StrapRouter() {
 
 		apiDev := api.Group("/", s.authGroup(gnAdmin, gnDev))
 		{
+			apiDev.GET("/groups", s.groupList)
+			apiDev.POST("/group", s.groupStore)
+
 			apiDev.GET("/service/stats", s.handleServiceStats)
 			apiDev.GET("/oauth/clients", s.clientsGet)
 			apiDev.POST("/oauth/clients", s.clientsPost)

@@ -17,10 +17,12 @@ import (
 
 // Config LDAP config
 type Config struct {
-	Addr, Base   string
-	Bind, Passwd string
-	Domain       string
-	PageSize     int
+	Addr     string `json:"addr"`
+	Base     string `json:"base"`
+	Bind     string `json:"bind"`
+	Passwd   string `json:"-"`
+	Domain   string `json:"domain"`
+	PageSize int    `json:"-"`
 }
 
 // NewConfig return default Config from Environment

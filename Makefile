@@ -96,9 +96,14 @@ gofmt:
 		exit 1; \
 	fi
 
+test-db: vet
+	mkdir -p tests
+	@$(WITH_ENV) go test -v -cover -coverprofile tests/cover_db.out ./pkg/backends
+	@go tool cover -html=tests/cover_db.out -o tests/cover_db.out.html
+
 test-ldap: vet
 	mkdir -p tests
-	@DEBUG=staffio:ldap go test -v -cover -coverprofile tests/cover_ldap.out ./pkg/backends/ldap
+	@$(WITH_ENV) DEBUG=staffio:ldap go test -v -cover -coverprofile tests/cover_ldap.out ./pkg/backends/ldap
 	@go tool cover -html=tests/cover_ldap.out -o tests/cover_ldap.out.html
 
 

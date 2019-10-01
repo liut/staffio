@@ -1,13 +1,11 @@
 package web
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/models/team"
 	"github.com/liut/staffio/pkg/models/weekly"
 )
 
@@ -37,14 +35,6 @@ type weeklyReportStatusParam struct {
 	Week   int           `json:"week" `
 	Weeks  []int         `json:"weeks" `
 	Status weekly.Status `json:"status" `
-}
-
-type teamAddParam struct {
-	Name string `json:"name" binding:"required" valid:"[1:128]"`
-}
-
-type teamDeleteParam struct {
-	ID int64 `json:"id" binding:"required" valid:"required"`
 }
 
 func (s *server) weeklyReportAdd(c *gin.Context) {
@@ -110,12 +100,19 @@ func (s *server) weeklyReportList(c *gin.Context) {
 		return
 	}
 
+	user := UserWithContext(c)
+	if param.UID == "watching" {
+		param.UIDs = s.service.Watch().Gets(user.UID).UIDs()
+		if len(param.UIDs) > 0 {
+			param.TeamID = 0
+		}
+	}
 	ret, total, err := s.service.Weekly().All(param)
 	if err != nil {
 		apiError(c, ERROR_DB, err)
 		return
 	}
-	staffs := s.service.All()
+	staffs := s.service.All(nil)
 	for i := 0; i < len(ret); i++ {
 		staff := staffs.WithUid(ret[i].Uid)
 		if staff != nil {
@@ -328,94 +325,6 @@ func (s *server) weeklyStatusRemove(c *gin.Context) {
 	apiOk(c, nil, 0)
 }
 
-func (s *server) teamListByRole(c *gin.Context) {
-	role, err := strconv.Atoi(c.Request.FormValue("role"))
-	if err != nil {
-		apiError(c, ERROR_PARAM, err)
-		return
-	}
-	data, err := s.service.Team().All(team.RoleType(role))
-	if err != nil {
-		apiError(c, ERROR_DB, err)
-		return
-	}
-
-	staffs := s.service.All()
-	for i := 0; i < len(data); i++ {
-		for _, staff := range staffs {
-			if data[i].StaffUID == staff.Uid {
-				data[i].StaffName = staff.GetCommonName()
-			}
-		}
-	}
-	apiOk(c, data, 0)
-}
-
-func (s *server) teamAdd(c *gin.Context) {
-	var param teamAddParam
-	if err := c.Bind(&param); err != nil {
-		apiError(c, ERROR_PARAM, err)
-		return
-	}
-
-	team := &team.Team{
-		Name: param.Name,
-	}
-	if err := s.service.Team().Store(team); err != nil {
-		apiError(c, ERROR_DB, err)
-		return
-	}
-	apiOk(c, true, 0)
-}
-
-func (s *server) teamMemberOp(c *gin.Context) {
-	var param team.TeamOpParam
-	if err := c.Bind(&param); err != nil {
-		apiError(c, ERROR_PARAM, err)
-		return
-	}
-	switch param.Op {
-	case team.TeamOpAdd:
-		if err := s.service.Team().AddMember(param.TeamID, param.UIDs...); err != nil {
-			apiError(c, ERROR_DB, err)
-			return
-		}
-	case team.TeamOpRemove:
-		if err := s.service.Team().RemoveMember(param.TeamID, param.UIDs...); err != nil {
-			apiError(c, ERROR_DB, err)
-			return
-		}
-	default:
-		apiError(c, ERROR_PARAM, "unknown operate")
-		return
-	}
-	apiOk(c, true, 0)
-}
-
-func (s *server) teamManagerOp(c *gin.Context) {
-	var param team.TeamOpParam
-	if err := c.Bind(&param); err != nil {
-		apiError(c, ERROR_PARAM, err)
-		return
-	}
-	switch param.Op {
-	case team.TeamOpAdd:
-		if err := s.service.Team().AddManager(param.TeamID, param.UIDs[0]); err != nil {
-			apiError(c, ERROR_DB, err)
-			return
-		}
-	case team.TeamOpRemove:
-		if err := s.service.Team().RemoveManager(param.TeamID, param.UIDs[0]); err != nil {
-			apiError(c, ERROR_DB, err)
-			return
-		}
-	default:
-		apiError(c, ERROR_PARAM, "unknown operate")
-		return
-	}
-	apiOk(c, true, 0)
-}
-
 type simpStaff struct {
 	ID     int    `json:"id,omitempty"`
 	Uid    string `json:"uid"`
@@ -435,7 +344,7 @@ func (s *server) staffList(c *gin.Context) {
 
 func (s *server) allStaffs(isFull bool) []*simpStaff {
 
-	staffs := s.service.All()
+	staffs := s.service.All(nil)
 	models.ByUid.Sort(staffs)
 	var ret = make([]*simpStaff, len(staffs))
 	for i, v := range staffs {
