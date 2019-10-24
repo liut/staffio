@@ -163,7 +163,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 			resp.Output["uid"] = uid
 			if strings.HasPrefix(topic, "me") {
 				resp.Output["me"] = staff
-				if len(topic) > 2 {
+				if len(topic) > 3 {
 					arr := strings.Split(topic[2:], "+")
 					if len(arr) > 0 {
 						gm := make(map[string]interface{})
@@ -171,6 +171,16 @@ func (s *server) oauth2Info(c *gin.Context) {
 							gm[gn] = s.InGroup(gn, uid)
 						}
 						resp.Output["group"] = gm
+					} else if topic[2] == '|' {
+						if arr = strings.Split(topic[3:], "|"); len(arr) > 0 {
+							var roles []string
+							for _, gn := range arr {
+								if s.InGroup(gn, uid) {
+									roles = append(roles, gn)
+								}
+							}
+							resp.Output["group"] = roles
+						}
 					}
 				}
 

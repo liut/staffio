@@ -8,8 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	auth "github.com/liut/simpauth"
+
 	"github.com/liut/staffio/pkg/settings"
-	"github.com/liut/staffio/pkg/web/auth"
 )
 
 var (

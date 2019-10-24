@@ -6,8 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	auth "github.com/liut/simpauth"
+
 	"github.com/liut/staffio/pkg/models"
-	"github.com/liut/staffio/pkg/web/auth"
 )
 
 const (
@@ -17,7 +18,10 @@ const (
 type User = auth.User
 
 func UserFromStaff(staff *models.Staff) *auth.User {
-	return auth.FromStaff(staff)
+	return &auth.User{
+		UID:  staff.Uid,
+		Name: staff.GetName(),
+	}
 }
 
 func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
