@@ -3,15 +3,6 @@ package ldap
 import (
 	"log"
 	"strings"
-
-	"github.com/liut/staffio/pkg/models"
-)
-
-var (
-	_ models.Authenticator = (*LDAPStore)(nil)
-	_ models.StaffStore    = (*LDAPStore)(nil)
-	_ models.PasswordStore = (*LDAPStore)(nil)
-	_ models.GroupStore    = (*LDAPStore)(nil)
 )
 
 type LDAPStore struct {
@@ -52,7 +43,7 @@ func (s *LDAPStore) Close() {
 }
 
 // Authenticate verify uid and password from one of sources, return valid DN and error
-func (s *LDAPStore) Authenticate(uid, passwd string) (staff *models.Staff, err error) {
+func (s *LDAPStore) Authenticate(uid, passwd string) (staff *People, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.Authenticate(uid, passwd)
 		if err == nil {
@@ -64,9 +55,9 @@ func (s *LDAPStore) Authenticate(uid, passwd string) (staff *models.Staff, err e
 	return
 }
 
-func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
+func (s *LDAPStore) Get(uid string) (staff *People, err error) {
 	for _, ls := range s.sources {
-		staff, err = ls.GetStaff(uid)
+		staff, err = ls.GetPeople(uid)
 		if err == nil {
 			return
 		}
@@ -75,7 +66,7 @@ func (s *LDAPStore) Get(uid string) (staff *models.Staff, err error) {
 	return
 }
 
-func (s *LDAPStore) GetByDN(dn string) (staff *models.Staff, err error) {
+func (s *LDAPStore) GetByDN(dn string) (staff *People, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.GetByDN(dn)
 		if err == nil {
@@ -86,9 +77,9 @@ func (s *LDAPStore) GetByDN(dn string) (staff *models.Staff, err error) {
 	return
 }
 
-func (s *LDAPStore) All(spec *models.Spec) (staffs models.Staffs) {
+func (s *LDAPStore) All(spec *Spec) (staffs Peoples) {
 	if spec == nil {
-		spec = new(models.Spec)
+		spec = new(Spec)
 	}
 	if spec.Limit == 0 {
 		spec.Limit = s.pageSize
@@ -99,7 +90,7 @@ func (s *LDAPStore) All(spec *models.Spec) (staffs models.Staffs) {
 	return
 }
 
-func (s *LDAPStore) Save(staff *models.Staff) (isNew bool, err error) {
+func (s *LDAPStore) Save(staff *People) (isNew bool, err error) {
 	for _, ls := range s.sources {
 		isNew, err = ls.storeStaff(staff)
 		if err != nil {

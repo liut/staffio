@@ -346,7 +346,7 @@ func (s *server) groupList(c *gin.Context) {
 }
 
 func (s *server) groupStore(c *gin.Context) {
-	var group = new(models.Group)
+	var group = new(backends.Group)
 	if err := c.Bind(group); err != nil {
 		apiError(c, http.StatusBadRequest, err)
 		return

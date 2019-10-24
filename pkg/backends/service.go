@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/liut/staffio/pkg/backends/ldap"
+	"github.com/liut/staffio/pkg/backends/schemas"
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
@@ -17,11 +18,22 @@ var (
 
 type PoolStats = ldap.PoolStats
 
+type Group = ldap.Group
+type Spec = ldap.Spec
+
+// GroupStore Storage for Group
+type GroupStore interface {
+	AllGroup() ([]Group, error)
+	GetGroup(name string) (*Group, error)
+	SaveGroup(group *Group) error
+	EraseGroup(name string) error
+}
+
 type Servicer interface {
-	models.Authenticator
-	models.StaffStore
-	models.PasswordStore
-	models.GroupStore
+	schemas.Authenticator
+	schemas.PeopleStore
+	schemas.PasswordStore
+	GroupStore
 	cas.TicketStore
 
 	OSIN() OSINStore

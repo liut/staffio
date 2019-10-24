@@ -15,10 +15,14 @@ import (
 	. "github.com/wealthworks/go-debug"
 
 	"github.com/liut/staffio/pkg/backends/ldap/pool"
-	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/backends/schemas"
 )
 
 type PoolStats = pool.Stats
+type Group = schemas.Group
+type People = schemas.People
+type Peoples = schemas.Peoples
+type Spec = schemas.Spec
 
 // Basic LDAP authentication service
 type ldapSource struct {
@@ -188,7 +192,7 @@ func ldapEntryGet(c ldap.Client, dn, filter string, attrs ...string) (*ldap.Entr
 }
 
 // Authenticate
-func (ls *ldapSource) Authenticate(uid, passwd string) (staff *models.Staff, err error) {
+func (ls *ldapSource) Authenticate(uid, passwd string) (staff *People, err error) {
 	var entry *ldap.Entry
 	dn := ls.UDN(uid)
 	entry, err = ls.bind(uid, dn, passwd, false)
@@ -198,7 +202,7 @@ func (ls *ldapSource) Authenticate(uid, passwd string) (staff *models.Staff, err
 		entry, err = ls.bind(uid, dn, passwd, true)
 	}
 	if err == nil {
-		staff = entryToUser(entry)
+		staff = entryToPeople(entry)
 	}
 	return
 }
@@ -268,25 +272,25 @@ func (ls *ldapSource) opWithDN(dn, passwd string, op opFunc) error {
 	return err
 }
 
-func (ls *ldapSource) Group(cn string) (*ldap.Entry, error) {
+func (ls *ldapSource) getGroupEntry(cn string) (*ldap.Entry, error) {
 	if ls.isAD {
 		if cn == groupAdminDefault {
 			cn = groupAdminAD
 		}
-		return ls.Entry(etADgroup.DN(cn, ls.Base), etADgroup.Filter, etADgroup.Attributes...)
+		return ls.getEntry(etADgroup.DN(cn, ls.Base), etADgroup.Filter, etADgroup.Attributes...)
 	}
-	return ls.Entry(etGroup.DN(cn, ls.Base), etGroup.Filter, etGroup.Attributes...)
+	return ls.getEntry(etGroup.DN(cn, ls.Base), etGroup.Filter, etGroup.Attributes...)
 }
 
-func (ls *ldapSource) People(uid string) (*ldap.Entry, error) {
+func (ls *ldapSource) getPeopleEntry(uid string) (*ldap.Entry, error) {
 	if ls.isAD {
-		return ls.Entry(etADuser.DN(uid, ls.Base), etADuser.Filter, etADuser.Attributes...)
+		return ls.getEntry(etADuser.DN(uid, ls.Base), etADuser.Filter, etADuser.Attributes...)
 	}
-	return ls.Entry(etPeople.DN(uid, ls.Base), etPeople.Filter, etPeople.Attributes...)
+	return ls.getEntry(etPeople.DN(uid, ls.Base), etPeople.Filter, etPeople.Attributes...)
 }
 
 // Entry return a special entry with dn and filter
-func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, error) {
+func (ls *ldapSource) getEntry(dn, filter string, attrs ...string) (*ldap.Entry, error) {
 	var entry *ldap.Entry
 	err := ls.opWithMan(func(c ldap.Client) (err error) {
 		entry, err = ldapEntryGet(c, dn, filter, attrs...)
@@ -295,19 +299,19 @@ func (ls *ldapSource) Entry(dn, filter string, attrs ...string) (*ldap.Entry, er
 	return entry, err
 }
 
-// GetStaff : search an LDAP source if an entry (with uid) is valide and in the specific filter
-func (ls *ldapSource) GetStaff(uid string) (staff *models.Staff, err error) {
+// GetPeople : search an LDAP source if an entry (with uid) is valide and in the specific filter
+func (ls *ldapSource) GetPeople(uid string) (staff *People, err error) {
 	var entry *ldap.Entry
-	entry, err = ls.People(uid)
+	entry, err = ls.getPeopleEntry(uid)
 	if err != nil {
-		log.Printf("GetStaff(%s) ERR %s", uid, err)
+		log.Printf("GetPeople(%s) ERR %s", uid, err)
 		return nil, err
 	}
 
-	return entryToUser(entry), nil
+	return entryToPeople(entry), nil
 }
 
-func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
+func (ls *ldapSource) GetByDN(dn string) (staff *People, err error) {
 	var et *entryType
 	if ls.isAD {
 		et = etADuser
@@ -315,16 +319,16 @@ func (ls *ldapSource) GetByDN(dn string) (staff *models.Staff, err error) {
 		et = etPeople
 	}
 	var entry *ldap.Entry
-	entry, err = ls.Entry(dn, et.Filter, et.Attributes...)
+	entry, err = ls.getEntry(dn, et.Filter, et.Attributes...)
 	if err == nil {
-		staff = entryToUser(entry)
+		staff = entryToPeople(entry)
 	}
 	return
 }
 
 // List search paged results
 // see also: https://tools.ietf.org/html/rfc2696
-func (ls *ldapSource) List(spec *models.Spec) (staffs models.Staffs) {
+func (ls *ldapSource) List(spec *Spec) (data Peoples) {
 	var et *entryType
 	if ls.isAD {
 		et = etADuser
@@ -365,19 +369,19 @@ func (ls *ldapSource) List(spec *models.Spec) (staffs models.Staffs) {
 	}
 
 	if len(sr.Entries) > 0 {
-		staffs = make(models.Staffs, len(sr.Entries))
+		data = make(Peoples, len(sr.Entries))
 		for i, entry := range sr.Entries {
-			staffs[i] = entryToUser(entry)
+			data[i] = *entryToPeople(entry)
 		}
 	}
 
 	return
 }
 
-func entryToUser(entry *ldap.Entry) (u *models.Staff) {
-	u = &models.Staff{
+func entryToPeople(entry *ldap.Entry) (u *People) {
+	u = &People{
 		DN:           entry.DN,
-		Uid:          entry.GetAttributeValue("uid"),
+		UID:          entry.GetAttributeValue("uid"),
 		Surname:      entry.GetAttributeValue("sn"),
 		GivenName:    entry.GetAttributeValue("givenName"),
 		CommonName:   entry.GetAttributeValue("cn"),
@@ -391,13 +395,16 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 		JoinDate:     entry.GetAttributeValue("dateOfJoin"),
 		IDCN:         entry.GetAttributeValue("idcnNumber"),
 	}
-	if str := entry.GetAttributeValue("sAMAccountName"); str != "" && u.Uid == "" {
-		u.Uid = str
+	if str := entry.GetAttributeValue("sAMAccountName"); str != "" && u.UID == "" {
+		u.UID = str
 	}
 	if str := entry.GetAttributeValue("userPrincipalName"); str != "" && u.Email == "" {
 		u.Email = str
 	}
-	(&u.Gender).UnmarshalText(entry.GetRawAttributeValue("gender"))
+	if str := entry.GetAttributeValue("gender"); str != "" && u.Email == "" {
+		u.Gender = str
+	}
+
 	var err error
 	if str := entry.GetAttributeValue("employeeNumber"); str != "" {
 		u.EmployeeNumber, err = strconv.Atoi(str)
@@ -405,6 +412,7 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 			log.Printf("invalid employee number %q, ERR %s", str, err)
 		}
 	}
+
 	var t time.Time
 	if str := entry.GetAttributeValue("createdTime"); str != "" {
 		t, err = time.Parse(TimeLayout, str)
@@ -421,19 +429,20 @@ func entryToUser(entry *ldap.Entry) (u *models.Staff) {
 			u.Created = &t
 		}
 	}
+
 	if str := entry.GetAttributeValue("modifiedTime"); str != "" {
 		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		} else {
-			u.Updated = &t
+			u.Modified = &t
 		}
 	} else if str := entry.GetAttributeValue("modifyTimestamp"); str != "" {
 		t, err = time.Parse(TimeLayout, str)
 		if err != nil {
 			log.Printf("invalid time %s, ERR %s", str, err)
 		} else {
-			u.Updated = &t
+			u.Modified = &t
 		}
 	}
 	if blob := entry.GetRawAttributeValue("jpegPhoto"); len(blob) > 0 {

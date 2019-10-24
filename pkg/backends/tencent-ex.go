@@ -18,15 +18,16 @@ var (
 func GetStaffFromWechatUser(user *exwechat.User) *models.Staff {
 	logger().Debugw("got from exmail", "user", user)
 	sn, gn := models.SplitName(user.Name)
+
 	staff := &models.Staff{
-		Uid:          user.UID,
+		UID:          user.UID,
 		Email:        user.Email,
 		CommonName:   user.Name,
 		Surname:      sn,
 		GivenName:    gn,
 		EmployeeType: user.Title,
 		Mobile:       user.Mobile,
-		Gender:       models.Gender(user.Gender),
+		Gender:       models.Gender(user.Gender).String(),
 	}
 	return staff
 }
@@ -44,14 +45,14 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 	eid, _ := strconv.Atoi(user.ExtId)
 
 	staff := &models.Staff{
-		Uid:          strings.Split(user.Alias, "@")[0],
+		UID:          strings.Split(user.Alias, "@")[0],
 		Email:        user.Alias,
 		CommonName:   user.Name,
 		Surname:      sn,
 		GivenName:    gn,
 		EmployeeType: user.Title,
 		Mobile:       user.Mobile,
-		Gender:       models.Gender(user.Gender),
+		Gender:       models.Gender(user.Gender).String(),
 	}
 	if eid > 0 {
 		staff.EmployeeNumber = eid

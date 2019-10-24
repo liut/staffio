@@ -19,7 +19,7 @@ type User = auth.User
 
 func UserFromStaff(staff *models.Staff) *auth.User {
 	return &auth.User{
-		UID:  staff.Uid,
+		UID:  staff.UID,
 		Name: staff.GetName(),
 	}
 }

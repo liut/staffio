@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/liut/staffio/pkg/backends"
-	"github.com/liut/staffio/pkg/models"
 )
 
 // groupCmd represents the group command
@@ -50,7 +49,7 @@ var groupCmd = &cobra.Command{
 
 		if uid, _ := cmd.Flags().GetString("add-member"); uid != "" {
 			if err == backends.ErrStoreNotFound {
-				group = &models.Group{
+				group = &backends.Group{
 					Name:    name,
 					Members: []string{uid},
 				}

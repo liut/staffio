@@ -64,7 +64,7 @@ func (s *server) loginPost(c *gin.Context) {
 	referer := param.Referer
 	res["ok"] = true
 	if param.Service != "" {
-		st := cas.NewTicket("ST", param.Service, staff.Uid, true)
+		st := cas.NewTicket("ST", param.Service, staff.UID, true)
 		err = s.service.SaveTicket(st)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)

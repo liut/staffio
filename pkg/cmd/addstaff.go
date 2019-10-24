@@ -52,7 +52,7 @@ var addstaffCmd = &cobra.Command{
 		}
 		svc := backends.NewService()
 		staff := &models.Staff{
-			Uid:        uid,
+			UID:        uid,
 			CommonName: cn,
 			Surname:    sn,
 		}

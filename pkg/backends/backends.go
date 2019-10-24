@@ -59,8 +59,8 @@ func (s *serviceImpl) InGroupAny(uid string, names ...string) bool {
 }
 
 func (s *serviceImpl) ProfileModify(uid, password string, staff *models.Staff) error {
-	if uid != staff.Uid {
-		return fmt.Errorf("mismatch uid %s and %s", uid, staff.Uid)
+	if uid != staff.UID {
+		return fmt.Errorf("mismatch uid %s and %s", uid, staff.UID)
 	}
 	return s.ModifyBySelf(uid, password, staff)
 }

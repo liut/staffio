@@ -6,15 +6,13 @@ import (
 	"time"
 
 	"github.com/go-ldap/ldap"
-
-	"github.com/liut/staffio/pkg/models"
 )
 
-func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
+func (ls *ldapSource) storeStaff(staff *People) (isNew bool, err error) {
 	err = ls.opWithMan(func(c ldap.Client) (err error) {
-		dn := ls.UDN(staff.Uid)
+		dn := ls.UDN(staff.UID)
 		var entry *ldap.Entry
-		entry, err = ldapEntryGet(c, ls.UDN(staff.Uid), etPeople.Filter, etPeople.Attributes...)
+		entry, err = ldapEntryGet(c, ls.UDN(staff.UID), etPeople.Filter, etPeople.Attributes...)
 		if err == nil {
 			// :update
 			mr := makeModifyRequest(dn, entry, staff)
@@ -40,7 +38,7 @@ func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 			}
 			return
 		}
-		log.Printf("storeStaff %s ERR %s", staff.Uid, err)
+		log.Printf("storeStaff %s ERR %s", staff.UID, err)
 
 		return
 	})
@@ -48,10 +46,10 @@ func (ls *ldapSource) storeStaff(staff *models.Staff) (isNew bool, err error) {
 	return
 }
 
-func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
+func makeAddRequest(dn string, staff *People) *ldap.AddRequest {
 	ar := ldap.NewAddRequest(dn, nil)
 	ar.Attribute("objectClass", objectClassPeople)
-	ar.Attribute("uid", []string{staff.Uid})
+	ar.Attribute("uid", []string{staff.UID})
 	ar.Attribute("cn", []string{staff.GetCommonName()})
 	if staff.Surname != "" {
 		ar.Attribute("sn", []string{staff.Surname})
@@ -77,8 +75,8 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 	if staff.EmployeeType != "" {
 		ar.Attribute("employeeType", []string{staff.EmployeeType})
 	}
-	if staff.Gender != models.Unknown {
-		ar.Attribute("gender", []string{staff.Gender.String()[0:1]})
+	if staff.Gender != "" {
+		ar.Attribute("gender", []string{staff.Gender[0:1]})
 	}
 	if staff.Birthday != "" {
 		ar.Attribute("dateOfBirth", []string{staff.Birthday})
@@ -100,7 +98,7 @@ func makeAddRequest(dn string, staff *models.Staff) *ldap.AddRequest {
 	return ar
 }
 
-func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.ModifyRequest {
+func makeModifyRequest(dn string, entry *ldap.Entry, staff *People) *ldap.ModifyRequest {
 	mr := ldap.NewModifyRequest(dn, nil)
 	mr.Replace("objectClass", objectClassPeople)
 	if staff.Surname != entry.GetAttributeValue("sn") {
@@ -124,8 +122,8 @@ func makeModifyRequest(dn string, entry *ldap.Entry, staff *models.Staff) *ldap.
 	if len(staff.AvatarPath) > 0 && staff.AvatarPath != entry.GetAttributeValue("avatarPath") {
 		mr.Replace("avatarPath", []string{staff.AvatarPath})
 	}
-	if staff.Gender != models.Unknown {
-		mr.Replace("gender", []string{staff.Gender.String()[0:1]})
+	if staff.Gender != "" {
+		mr.Replace("gender", []string{staff.Gender[0:1]})
 	}
 	if len(staff.Birthday) > 0 && staff.Birthday != entry.GetAttributeValue("dateOfBirth") {
 		mr.Replace("dateOfBirth", []string{staff.Birthday})

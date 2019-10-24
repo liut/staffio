@@ -60,17 +60,17 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	if staff.Email == "" {
 		return ErrEmptyEmail
 	}
-	uv := models.NewVerify(common.AtEmail, staff.Email, staff.Uid)
+	uv := models.NewVerify(common.AtEmail, staff.Email, staff.UID)
 	err = s.SaveVerify(uv)
 	if err != nil {
 		return
 	}
-	err = WriteUserLog(staff.Uid, "password forgot", fmt.Sprintf("id %d, ch %d", uv.Id, uv.CodeHash))
+	err = WriteUserLog(staff.UID, "password forgot", fmt.Sprintf("id %d, ch %d", uv.Id, uv.CodeHash))
 	if err != nil {
-		logger().Warnw("userLog fail", "uid", staff.Uid, "err", err)
+		logger().Warnw("userLog fail", "uid", staff.UID, "err", err)
 	}
 	// Generate reset token that expires in 2 hours
-	token := passwordreset.NewToken(staff.Uid, 2*time.Hour, uv.CodeHashBytes(), secret)
+	token := passwordreset.NewToken(staff.UID, 2*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(staff, token)
 	return
 }

@@ -5,11 +5,9 @@ import (
 	"log"
 
 	"github.com/go-ldap/ldap"
-
-	"github.com/liut/staffio/pkg/models"
 )
 
-func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err error) {
+func (s *LDAPStore) ModifyBySelf(uid, password string, staff *People) (err error) {
 	for _, ls := range s.sources {
 		err = ls.Modify(uid, password, staff)
 		if err != nil {
@@ -19,7 +17,7 @@ func (s *LDAPStore) ModifyBySelf(uid, password string, staff *models.Staff) (err
 	return
 }
 
-func (ls *ldapSource) Modify(uid, password string, staff *models.Staff) error {
+func (ls *ldapSource) Modify(uid, password string, staff *People) error {
 
 	debug("modify self %s staff: %v", uid, staff)
 

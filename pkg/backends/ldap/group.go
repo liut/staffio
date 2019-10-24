@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/go-ldap/ldap"
-
-	"github.com/liut/staffio/pkg/models"
 )
 
 const (
@@ -18,7 +16,7 @@ var (
 	groupLimit = 20
 )
 
-func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
+func (s *LDAPStore) AllGroup() (data []Group, err error) {
 	for _, ls := range s.sources {
 		data, err = ls.SearchGroup("")
 		if err == nil {
@@ -28,11 +26,11 @@ func (s *LDAPStore) AllGroup() (data []models.Group, err error) {
 	return
 }
 
-func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
+func (s *LDAPStore) GetGroup(name string) (group *Group, err error) {
 	// debug("Search group %s", name)
 	for _, ls := range s.sources {
 		var entry *ldap.Entry
-		entry, err = ls.Group(name)
+		entry, err = ls.getGroupEntry(name)
 		if err == nil {
 			group = entryToGroup(entry)
 			return
@@ -46,7 +44,7 @@ func (s *LDAPStore) GetGroup(name string) (group *models.Group, err error) {
 	return
 }
 
-func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) {
+func (ls *ldapSource) SearchGroup(name string) (data []Group, err error) {
 	var (
 		dn string
 	)
@@ -80,7 +78,7 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 	}
 
 	if len(sr.Entries) > 0 {
-		data = make([]models.Group, len(sr.Entries))
+		data = make([]Group, len(sr.Entries))
 		for i, entry := range sr.Entries {
 			g := entryToGroup(entry)
 			data[i] = *g
@@ -90,8 +88,8 @@ func (ls *ldapSource) SearchGroup(name string) (data []models.Group, err error) 
 	return
 }
 
-func entryToGroup(entry *ldap.Entry) (g *models.Group) {
-	g = new(models.Group)
+func entryToGroup(entry *ldap.Entry) (g *Group) {
+	g = new(Group)
 	for _, attr := range entry.Attributes {
 		if attr.Name == "cn" || attr.Name == "name" {
 			g.Name = attr.Values[0]
@@ -106,7 +104,7 @@ func entryToGroup(entry *ldap.Entry) (g *models.Group) {
 	return
 }
 
-func (s *LDAPStore) SaveGroup(group *models.Group) error {
+func (s *LDAPStore) SaveGroup(group *Group) error {
 	for _, ls := range s.sources {
 		err := ls.saveGroup(group)
 		if err != nil {
@@ -117,7 +115,7 @@ func (s *LDAPStore) SaveGroup(group *models.Group) error {
 	return nil
 }
 
-func (ls *ldapSource) saveGroup(group *models.Group) error {
+func (ls *ldapSource) saveGroup(group *Group) error {
 	if ls.isAD {
 		return ErrUnsupport
 	}

@@ -173,7 +173,7 @@ func TestGroup(t *testing.T) {
 	_, err = store.GetGroup("noexist")
 	assert.Error(t, err)
 
-	group := &models.Group{
+	group := &Group{
 		Name:    "testgroup",
 		Members: []string{"doe"},
 	}
