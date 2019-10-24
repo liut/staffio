@@ -8,10 +8,11 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/openshift/osin"
 
+	auth "github.com/liut/simpauth"
+
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
-	"github.com/liut/staffio/pkg/web/auth"
 )
 
 func (s *server) loginForm(c *gin.Context) {
@@ -97,9 +98,10 @@ func (s *server) me(c *gin.Context) {
 		log.Printf("get team with member %s ERR %s", user.UID, err)
 	}
 	if s.IsKeeper(user.UID) {
-		user.Privileges = "admin"
-	} else if team.Leaders.Contains(user.UID) {
-		user.Privileges = "leader"
+		user.Roles = append(user.Roles, "admin")
+	}
+	if team.Leaders.Contains(user.UID) {
+		user.Roles = append(user.Roles, "leader")
 	}
 	user.Watchings = s.service.Watch().Gets(user.UID).UIDs()
 	apiOk(c, user, 0)
