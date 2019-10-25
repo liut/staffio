@@ -12,6 +12,7 @@ var (
 	avatarReplacer = strings.NewReplacer("/0", "/60")
 )
 
+// SetNameFormat ...
 func SetNameFormat(s string) {
 	cnFormat = s
 }
@@ -43,14 +44,17 @@ type People struct {
 
 }
 
+// GetUID ...
 func (u *People) GetUID() string {
 	return u.UID
 }
 
+// GetName ...
 func (u *People) GetName() string {
 	return u.Name()
 }
 
+// Name return nickname or commonName or fullname or uid
 func (u *People) Name() string {
 	if u.Nickname != "" {
 		return u.Nickname
@@ -67,6 +71,7 @@ func (u *People) Name() string {
 	return u.UID
 }
 
+// GetCommonName ...
 func (u *People) GetCommonName() string {
 	if u.CommonName != "" {
 		return u.CommonName

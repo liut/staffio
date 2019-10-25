@@ -6,9 +6,10 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-func (s *LDAPStore) Delete(uid string) (err error) {
+// Delete ...
+func (s *Store) Delete(uid string) (err error) {
 	for _, ls := range s.sources {
-		err = ls.DeleteStaff(uid)
+		err = ls.DeletePeople(uid)
 		if err != nil {
 			return
 		}
@@ -16,9 +17,9 @@ func (s *LDAPStore) Delete(uid string) (err error) {
 	return
 }
 
-func (ls *ldapSource) DeleteStaff(uid string) (err error) {
+func (ls *ldapSource) DeletePeople(uid string) (err error) {
 	if err = ls.Delete(ls.UDN(uid)); err != nil {
-		log.Printf("DeleteStaff %q Err: %s", uid, err)
+		log.Printf("DeletePeople %q Err: %s", uid, err)
 	}
 
 	return

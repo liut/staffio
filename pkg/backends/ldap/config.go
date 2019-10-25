@@ -37,6 +37,7 @@ func NewConfig() Config {
 	}
 }
 
+// CopyFrom ...
 func (c *Config) CopyFrom(o Config) {
 	if o.Addr != "" && o.Addr != c.Addr {
 		c.Addr = o.Addr
@@ -61,7 +62,8 @@ type entryType struct {
 	Attributes []string
 }
 
-func NewEentryType(pk, oc string, attrs ...string) (et *entryType) {
+// newEentryType ...
+func newEentryType(pk, oc string, attrs ...string) (et *entryType) {
 	et = &entryType{
 		PK:         pk,
 		OC:         oc,
@@ -75,6 +77,7 @@ func NewEentryType(pk, oc string, attrs ...string) (et *entryType) {
 	return
 }
 
+// DN ...
 func (et *entryType) DN(name, base string) string {
 	switch et {
 	case etGroup:
@@ -111,10 +114,12 @@ func (et *entryType) prepareTo(name string, ar attributer) {
 	}
 }
 
+// DN ...
 func DN(pk, name, parent string) string {
 	return fmt.Sprintf("%s=%s,%s", pk, name, parent)
 }
 
+// consts
 const (
 	TimeLayout = "20060102150405Z"
 	DateLayout = "20060102"
@@ -124,16 +129,16 @@ const (
 )
 
 var (
-	etBase   = NewEentryType("dc", "", "dc", "o", "instanceType")
-	etParent = NewEentryType("ou", "organizationalUnit", "ou")
-	etGroup  = NewEentryType("cn", "groupOfNames", "cn", "member")
-	etPeople = NewEentryType("uid", "inetOrgPerson",
+	etBase   = newEentryType("dc", "", "dc", "o", "instanceType")
+	etParent = newEentryType("ou", "organizationalUnit", "ou")
+	etGroup  = newEentryType("cn", "groupOfNames", "cn", "member")
+	etPeople = newEentryType("uid", "inetOrgPerson",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"createdTime", "modifiedTime", "createTimestamp", "modifyTimestamp", "jpegPhoto",
 		"avatarPath", "dateOfBirth", "gender", "employeeNumber", "employeeType", "title")
 
-	etADgroup = NewEentryType("cn", "group", "cn", "member", "name", "description", "instanceType")
-	etADuser  = NewEentryType("cn", "user", "name", "sAMAccountName", "userPrincipalName",
+	etADgroup = newEentryType("cn", "group", "cn", "member", "name", "description", "instanceType")
+	etADuser  = newEentryType("cn", "user", "name", "sAMAccountName", "userPrincipalName",
 		"uid", "gn", "sn", "cn", "displayName", "mail", "mobile", "description",
 		"employeeNumber", "employeeType", "title", "jpegPhoto", "logonCount")
 

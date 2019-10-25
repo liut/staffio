@@ -18,10 +18,19 @@ import (
 	"github.com/liut/staffio/pkg/backends/schemas"
 )
 
+// PoolStats ...
 type PoolStats = pool.Stats
+
+// Group ...
 type Group = schemas.Group
+
+// People ...
 type People = schemas.People
+
+// Peoples ...
 type Peoples = schemas.Peoples
+
+// Spec ...
 type Spec = schemas.Spec
 
 // Basic LDAP authentication service
@@ -35,6 +44,7 @@ type ldapSource struct {
 	isAD   bool
 }
 
+// vars
 var (
 	ErrEmptyAddr = errors.New("ldap addr is empty")
 	ErrEmptyBase = errors.New("ldap base is empty")

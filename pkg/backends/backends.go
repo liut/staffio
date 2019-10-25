@@ -14,11 +14,11 @@ func logger() zlog.Logger {
 // save staff
 func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
 	if staff.EmployeeNumber < 1 {
-		newId, err := NextStaffID()
+		newID, err := NextStaffID()
 		if err != nil {
 			return err
 		}
-		staff.EmployeeNumber = newId
+		staff.EmployeeNumber = newID
 	}
 	isNew, err := s.Save(staff)
 	if err == nil {
@@ -65,7 +65,7 @@ func (s *serviceImpl) ProfileModify(uid, password string, staff *models.Staff) e
 	return s.ModifyBySelf(uid, password, staff)
 }
 
-// 返回下一个员工ID
+// NextStaffID 返回下一个员工ID
 func NextStaffID() (eid int, err error) {
 	err = withDbQuery(func(db dber) error {
 		return db.Get(&eid, "SELECT nextval('staff_id_seq')")

@@ -16,7 +16,8 @@ var (
 	groupLimit = 20
 )
 
-func (s *LDAPStore) AllGroup() (data []Group, err error) {
+// AllGroup ...
+func (s *Store) AllGroup() (data []Group, err error) {
 	for _, ls := range s.sources {
 		data, err = ls.SearchGroup("")
 		if err == nil {
@@ -26,7 +27,8 @@ func (s *LDAPStore) AllGroup() (data []Group, err error) {
 	return
 }
 
-func (s *LDAPStore) GetGroup(name string) (group *Group, err error) {
+// GetGroup ...
+func (s *Store) GetGroup(name string) (group *Group, err error) {
 	// debug("Search group %s", name)
 	for _, ls := range s.sources {
 		var entry *ldap.Entry
@@ -44,6 +46,7 @@ func (s *LDAPStore) GetGroup(name string) (group *Group, err error) {
 	return
 }
 
+// SearchGroup ...
 func (ls *ldapSource) SearchGroup(name string) (data []Group, err error) {
 	var (
 		dn string
@@ -104,7 +107,8 @@ func entryToGroup(entry *ldap.Entry) (g *Group) {
 	return
 }
 
-func (s *LDAPStore) SaveGroup(group *Group) error {
+// SaveGroup ...
+func (s *Store) SaveGroup(group *Group) error {
 	for _, ls := range s.sources {
 		err := ls.saveGroup(group)
 		if err != nil {
@@ -144,7 +148,8 @@ func (ls *ldapSource) saveGroup(group *Group) error {
 	return err
 }
 
-func (s *LDAPStore) EraseGroup(name string) error {
+// EraseGroup ...
+func (s *Store) EraseGroup(name string) error {
 	for _, ls := range s.sources {
 		err := ls.eraseGroup(name)
 		if err != nil {

@@ -5,16 +5,18 @@ import (
 	"strings"
 )
 
-type LDAPStore struct {
+// Store ..
+type Store struct {
 	sources  []*ldapSource
 	pageSize int
 }
 
-func NewStore(cfg Config) (*LDAPStore, error) {
+// NewStore ...
+func NewStore(cfg Config) (*Store, error) {
 	if cfg.Base == "" {
 		return nil, ErrEmptyBase
 	}
-	store := &LDAPStore{
+	store := &Store{
 		pageSize: cfg.PageSize,
 	}
 	for _, addr := range strings.Split(cfg.Addr, ",") {
@@ -36,14 +38,15 @@ func NewStore(cfg Config) (*LDAPStore, error) {
 	return store, nil
 }
 
-func (s *LDAPStore) Close() {
+// Close ...
+func (s *Store) Close() {
 	for _, ls := range s.sources {
 		ls.Close()
 	}
 }
 
 // Authenticate verify uid and password from one of sources, return valid DN and error
-func (s *LDAPStore) Authenticate(uid, passwd string) (staff *People, err error) {
+func (s *Store) Authenticate(uid, passwd string) (staff *People, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.Authenticate(uid, passwd)
 		if err == nil {
@@ -55,7 +58,8 @@ func (s *LDAPStore) Authenticate(uid, passwd string) (staff *People, err error) 
 	return
 }
 
-func (s *LDAPStore) Get(uid string) (staff *People, err error) {
+// Get return People with uid
+func (s *Store) Get(uid string) (staff *People, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.GetPeople(uid)
 		if err == nil {
@@ -66,7 +70,8 @@ func (s *LDAPStore) Get(uid string) (staff *People, err error) {
 	return
 }
 
-func (s *LDAPStore) GetByDN(dn string) (staff *People, err error) {
+// GetByDN ...
+func (s *Store) GetByDN(dn string) (staff *People, err error) {
 	for _, ls := range s.sources {
 		staff, err = ls.GetByDN(dn)
 		if err == nil {
@@ -77,7 +82,8 @@ func (s *LDAPStore) GetByDN(dn string) (staff *People, err error) {
 	return
 }
 
-func (s *LDAPStore) All(spec *Spec) (staffs Peoples) {
+// All ...
+func (s *Store) All(spec *Spec) (staffs Peoples) {
 	if spec == nil {
 		spec = new(Spec)
 	}
@@ -90,18 +96,20 @@ func (s *LDAPStore) All(spec *Spec) (staffs Peoples) {
 	return
 }
 
-func (s *LDAPStore) Save(staff *People) (isNew bool, err error) {
+// Save ...
+func (s *Store) Save(staff *People) (isNew bool, err error) {
 	for _, ls := range s.sources {
-		isNew, err = ls.storeStaff(staff)
+		isNew, err = ls.savePeople(staff)
 		if err != nil {
-			log.Printf("storeStaff at %s ERR: %s", ls.Addr, err)
+			log.Printf("savePeople at %s ERR: %s", ls.Addr, err)
 			return
 		}
 	}
 	return
 }
 
-func (s *LDAPStore) Ready() error {
+// Ready ...
+func (s *Store) Ready() error {
 	for _, ls := range s.sources {
 		err := ls.Ready("base", "groups", "people")
 		if err != nil {
@@ -111,7 +119,8 @@ func (s *LDAPStore) Ready() error {
 	return nil
 }
 
-func (s *LDAPStore) PoolStats() *PoolStats {
+// PoolStats ...
+func (s *Store) PoolStats() *PoolStats {
 	var pss PoolStats
 	for _, ls := range s.sources {
 		s := ls.cp.Stats()

@@ -7,7 +7,8 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-func (s *LDAPStore) ModifyBySelf(uid, password string, staff *People) (err error) {
+// ModifyBySelf ...
+func (s *Store) ModifyBySelf(uid, password string, staff *People) (err error) {
 	for _, ls := range s.sources {
 		err = ls.Modify(uid, password, staff)
 		if err != nil {

@@ -10,8 +10,11 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-var ErrClosed = errors.New("client is closed")
-var ErrPoolTimeout = errors.New("connection pool timeout")
+// vars
+var (
+	ErrClosed      = errors.New("client is closed")
+	ErrPoolTimeout = errors.New("connection pool timeout")
+)
 
 var timers = sync.Pool{
 	New: func() interface{} {
@@ -32,6 +35,7 @@ type Stats struct {
 	StaleConns uint32 `json:"staleConns"` // number of stale connections removed from the pool
 }
 
+// Pooler ...
 type Pooler interface {
 	Get() (*Conn, error)
 	Put(c *Conn)
@@ -44,6 +48,7 @@ type Pooler interface {
 	Close() error
 }
 
+// Options ...
 type Options struct {
 	Factory func() (ldap.Client, error)
 	OnClose func(*Conn) error
@@ -56,6 +61,7 @@ type Options struct {
 	IdleCheckFrequency time.Duration
 }
 
+// ConnPool ...
 type ConnPool struct {
 	opt *Options
 
@@ -79,6 +85,7 @@ type ConnPool struct {
 
 var _ Pooler = (*ConnPool)(nil)
 
+// NewPool ...
 func NewPool(opt *Options) *ConnPool {
 	p := &ConnPool{
 		opt: opt,
@@ -280,6 +287,7 @@ func (p *ConnPool) popIdle() *Conn {
 	return cn
 }
 
+// Put ...
 func (p *ConnPool) Put(cn *Conn) {
 	if !cn.pooled {
 		p.Remove(cn)
@@ -293,12 +301,14 @@ func (p *ConnPool) Put(cn *Conn) {
 	p.freeTurn()
 }
 
+// Remove ...
 func (p *ConnPool) Remove(cn *Conn) {
 	p.removeConn(cn)
 	p.freeTurn()
 	p.closeConn(cn)
 }
 
+// CloseConn ...
 func (p *ConnPool) CloseConn(cn *Conn) {
 	p.removeConn(cn)
 	p.closeConn(cn)
@@ -342,6 +352,7 @@ func (p *ConnPool) IdleLen() int {
 	return n
 }
 
+// Stats ...
 func (p *ConnPool) Stats() *Stats {
 	idleLen := p.IdleLen()
 	return &Stats{
@@ -359,6 +370,7 @@ func (p *ConnPool) closed() bool {
 	return atomic.LoadUint32(&p._closed) == 1
 }
 
+// Filter ...
 func (p *ConnPool) Filter(fn func(*Conn) bool) {
 	p.connsMu.Lock()
 	for _, cn := range p.conns {
@@ -369,6 +381,7 @@ func (p *ConnPool) Filter(fn func(*Conn) bool) {
 	p.connsMu.Unlock()
 }
 
+// Close ...
 func (p *ConnPool) Close() error {
 	if !atomic.CompareAndSwapUint32(&p._closed, 0, 1) {
 		return ErrClosed
@@ -402,7 +415,7 @@ func (p *ConnPool) reapStaleConn() *Conn {
 	return cn
 }
 
-func (p *ConnPool) ReapStaleConns() (int, error) {
+func (p *ConnPool) reapStaleConns() (int, error) {
 	var n int
 	for {
 		p.getTurn()
@@ -435,9 +448,9 @@ func (p *ConnPool) reaper(frequency time.Duration) {
 		if p.closed() {
 			break
 		}
-		n, err := p.ReapStaleConns()
+		n, err := p.reapStaleConns()
 		if err != nil {
-			log.Printf("ReapStaleConns failed: %s", err)
+			log.Printf("reapStaleConns failed: %s", err)
 			continue
 		}
 		atomic.AddUint32(&p.stats.StaleConns, uint32(n))

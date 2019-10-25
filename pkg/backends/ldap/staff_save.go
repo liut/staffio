@@ -8,7 +8,7 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-func (ls *ldapSource) storeStaff(staff *People) (isNew bool, err error) {
+func (ls *ldapSource) savePeople(staff *People) (isNew bool, err error) {
 	err = ls.opWithMan(func(c ldap.Client) (err error) {
 		dn := ls.UDN(staff.UID)
 		var entry *ldap.Entry
@@ -38,7 +38,7 @@ func (ls *ldapSource) storeStaff(staff *People) (isNew bool, err error) {
 			}
 			return
 		}
-		log.Printf("storeStaff %s ERR %s", staff.UID, err)
+		log.Printf("savePeople %s ERR %s", staff.UID, err)
 
 		return
 	})

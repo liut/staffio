@@ -12,7 +12,7 @@ var (
 	EmptyGroup = &Group{"", "", make([]string, 0)}
 )
 
-// Has
+// Has ..
 func (g *Group) Has(member string) bool {
 	for _, m := range g.Members {
 		if m == member {

@@ -12,28 +12,26 @@ import (
 	"github.com/liut/staffio/pkg/models/weekly"
 )
 
+// vars
 var (
 	ErrStoreNotFound = ldap.ErrNotFound
 )
 
+// PoolStats ...
 type PoolStats = ldap.PoolStats
 
-type Group = ldap.Group
-type Spec = ldap.Spec
+// Group ...
+type Group = schemas.Group
 
-// GroupStore Storage for Group
-type GroupStore interface {
-	AllGroup() ([]Group, error)
-	GetGroup(name string) (*Group, error)
-	SaveGroup(group *Group) error
-	EraseGroup(name string) error
-}
+// Spec ...
+type Spec = schemas.Spec
 
+// Servicer ...
 type Servicer interface {
 	schemas.Authenticator
 	schemas.PeopleStore
 	schemas.PasswordStore
-	GroupStore
+	schemas.GroupStore
 	cas.TicketStore
 
 	OSIN() OSINStore
@@ -59,17 +57,19 @@ type Servicer interface {
 }
 
 type serviceImpl struct {
-	*ldap.LDAPStore
+	*ldap.Store
 	osinStore   *DbStorage
 	teamStore   *teamStore
 	watchStore  *watchStore
 	weeklyStore *weeklyStore
 }
 
+// LDAPConfig ...
 type LDAPConfig = ldap.Config
 
 var ldapcfg *LDAPConfig
 
+// SetLDAP ...
 func SetLDAP(c LDAPConfig) {
 	ldapcfg = &c
 }
@@ -90,7 +90,7 @@ func NewService() Servicer {
 	}
 	// LDAP is a special store
 	return &serviceImpl{
-		LDAPStore:   store,
+		Store:       store,
 		osinStore:   NewStorage(),
 		teamStore:   &teamStore{},
 		watchStore:  &watchStore{store},
@@ -100,7 +100,7 @@ func NewService() Servicer {
 }
 
 func (s *serviceImpl) Ready() error {
-	return s.LDAPStore.Ready()
+	return s.Store.Ready()
 }
 
 func (s *serviceImpl) OSIN() OSINStore {
@@ -108,7 +108,7 @@ func (s *serviceImpl) OSIN() OSINStore {
 }
 
 func (s *serviceImpl) CloseAll() {
-	s.LDAPStore.Close()
+	s.Store.Close()
 	s.osinStore.Close()
 }
 

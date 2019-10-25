@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/backends/schemas"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	store *LDAPStore
+	store *Store
 )
 
 func TestMain(m *testing.M) {
@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 
 func TestStoreFailed(t *testing.T) {
 	var err error
-	var _s *LDAPStore
+	var _s *Store
 	_, err = NewStore(Config{})
 	assert.Error(t, err)
 	assert.EqualError(t, err, ErrEmptyBase.Error())
@@ -66,7 +66,7 @@ func TestStoreFailed(t *testing.T) {
 	_s.Close()
 }
 
-func TestStaffError(t *testing.T) {
+func TestPeopleError(t *testing.T) {
 	var err error
 	_, err = store.Get("noexist")
 	assert.Error(t, err)
@@ -75,9 +75,9 @@ func TestStaffError(t *testing.T) {
 	err = store.Delete("noexist")
 	assert.Error(t, err)
 
-	_, err = store.Save(&models.Staff{})
+	_, err = store.Save(&People{})
 	assert.Error(t, err)
-	_, err = store.Save(&models.Staff{Uid: "six"})
+	_, err = store.Save(&People{UID: "six"})
 	assert.Error(t, err)
 
 	_, err = store.Authenticate("baduid", "badPwd")
@@ -85,15 +85,15 @@ func TestStaffError(t *testing.T) {
 	assert.EqualError(t, err, ErrLogin.Error())
 }
 
-func TestStaff(t *testing.T) {
+func TestPeople(t *testing.T) {
 	var err error
 	uid := "doe"
 	cn := "doe"
 	sn := "doe"
 	password := "secret"
-	staff := &models.Staff{
+	staff := &People{
 		// required fields
-		Uid:        uid,
+		UID:        uid,
 		CommonName: cn,
 		Surname:    sn,
 
@@ -104,7 +104,7 @@ func TestStaff(t *testing.T) {
 		Email:          "fawn@deer.cc",
 		Nickname:       "tiny",
 		Birthday:       "20120304",
-		Gender:         models.Male,
+		Gender:         "m",
 		Mobile:         "13012341234",
 		JoinDate:       time.Now().Format(DateLayout),
 		EmployeeNumber: 001,
@@ -125,8 +125,8 @@ func TestStaff(t *testing.T) {
 	assert.Equal(t, cn, staff.CommonName)
 	assert.Equal(t, sn, staff.Surname)
 
-	var spec = &models.Spec{
-		UIDs: models.UIDs{uid},
+	var spec = &Spec{
+		UIDs: schemas.UIDs{uid},
 	}
 	data := store.All(spec)
 	assert.NotZero(t, len(data))
@@ -134,7 +134,7 @@ func TestStaff(t *testing.T) {
 	err = store.PasswordReset(uid, password)
 	assert.NoError(t, err)
 
-	var _s *models.Staff
+	var _s *People
 	_s, err = store.Authenticate(uid, password)
 	assert.NoError(t, err)
 	assert.NotNil(t, _s)
@@ -151,7 +151,7 @@ func TestStaff(t *testing.T) {
 	staff.Email = "fawn2@deer.cc"
 	staff.Nickname = "tiny2"
 	staff.Birthday = "20120305"
-	staff.Gender = models.Female
+	staff.Gender = "f"
 	staff.Mobile = "13012345678"
 	staff.EmployeeNumber = 002
 	staff.EmployeeType = "Chief Engineer"

@@ -6,7 +6,8 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
-func (s *LDAPStore) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
+// PasswordChange ...
+func (s *Store) PasswordChange(uid, oldPasswd, newPasswd string) (err error) {
 	for _, ls := range s.sources {
 		err = ls.PasswordChange(uid, oldPasswd, newPasswd)
 		if err != nil {
@@ -34,7 +35,8 @@ func (ls *ldapSource) PasswordChange(uid, oldPasswd, newPasswd string) error {
 	return err
 }
 
-func (s *LDAPStore) PasswordReset(uid, passwd string) (err error) {
+// PasswordReset ...
+func (s *Store) PasswordReset(uid, passwd string) (err error) {
 	for _, ls := range s.sources {
 		err = ls.PasswordReset(uid, passwd)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/go-ldap/ldap"
 )
 
+// Conn ...
 type Conn struct {
 	ldap.Client
 
@@ -15,6 +16,7 @@ type Conn struct {
 	usedAt    atomic.Value
 }
 
+// NewConn ...
 func NewConn(client ldap.Client) *Conn {
 	cn := &Conn{
 		Client:    client,
@@ -24,14 +26,17 @@ func NewConn(client ldap.Client) *Conn {
 	return cn
 }
 
+// UsedAt ...
 func (cn *Conn) UsedAt() time.Time {
 	return cn.usedAt.Load().(time.Time)
 }
 
+// SetUsedAt ...
 func (cn *Conn) SetUsedAt(tm time.Time) {
 	cn.usedAt.Store(tm)
 }
 
+// // Close ...
 // func (cn *Conn) Close() error {
 // 	cn.Client.Close()
 // 	return nil
