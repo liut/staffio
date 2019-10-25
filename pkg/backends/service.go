@@ -3,8 +3,8 @@ package backends
 import (
 	"log"
 
-	"github.com/liut/staffio/pkg/backends/ldap"
-	"github.com/liut/staffio/pkg/backends/schemas"
+	"github.com/liut/staffio-backend/ldap"
+	"github.com/liut/staffio-backend/schema"
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
@@ -21,17 +21,17 @@ var (
 type PoolStats = ldap.PoolStats
 
 // Group ...
-type Group = schemas.Group
+type Group = schema.Group
 
 // Spec ...
-type Spec = schemas.Spec
+type Spec = schema.Spec
 
 // Servicer ...
 type Servicer interface {
-	schemas.Authenticator
-	schemas.PeopleStore
-	schemas.PasswordStore
-	schemas.GroupStore
+	schema.Authenticator
+	schema.PeopleStore
+	schema.PasswordStore
+	schema.GroupStore
 	cas.TicketStore
 
 	OSIN() OSINStore

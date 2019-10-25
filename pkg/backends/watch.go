@@ -1,14 +1,14 @@
 package backends
 
 import (
-	"github.com/liut/staffio/pkg/backends/schemas"
+	"github.com/liut/staffio-backend/schema"
 	"github.com/liut/staffio/pkg/models/team"
 )
 
 var _ team.WatchStore = (*watchStore)(nil)
 
 type watchStore struct {
-	ss schemas.PeopleStore
+	ss schema.PeopleStore
 }
 
 func (s *watchStore) Gets(uid string) team.Butts {
@@ -22,7 +22,7 @@ func (s *watchStore) Gets(uid string) team.Butts {
 	if err != nil {
 		logger().Infow("watch gets fail", "err", err)
 	} else if n > 0 {
-		spec := &schemas.Spec{UIDs: data.UIDs()}
+		spec := &schema.Spec{UIDs: data.UIDs()}
 		for _, staff := range s.ss.All(spec) {
 			for i := 0; i < n; i++ {
 				if staff.UID == data[i].UID {

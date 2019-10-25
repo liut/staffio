@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/liut/staffio/pkg/backends/schemas"
+	"github.com/liut/staffio-backend/schema"
 	"github.com/liut/staffio/pkg/common"
 )
 
@@ -13,6 +13,6 @@ const (
 	Female  = common.Female
 )
 
-type Staff = schemas.People
-type Staffs = schemas.Peoples
-type Spec = schemas.Spec
+type Staff = schema.People
+type Staffs = schema.Peoples
+type Spec = schema.Spec

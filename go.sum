@@ -18,8 +18,6 @@ github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73 h1:dC6mPFx+I6Kkj
 github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73/go.mod h1:iqneQ2Df3omzIVTkIfn7c1acsVnMGiSLn4XF5Blh3Yg=
 github.com/gin-gonic/gin v1.3.0 h1:kCmZyPklC0gVdL728E6Aj20uYBJV93nj/TkwBTKhFbs=
 github.com/gin-gonic/gin v1.3.0/go.mod h1:7cKuhb5qV2ggCFctp2fJQ+ErvciLZrIeoOSOm6mUr7Y=
-github.com/go-ldap/ldap v3.0.3+incompatible h1:HTeSZO8hWMS1Rgb2Ziku6b8a7qRIZZMHjsvuZyatzwk=
-github.com/go-ldap/ldap v3.0.3+incompatible/go.mod h1:qfd9rJvER9Q0/D/Sqn1DfHRoBp40uXYvFoEVrNEPqRc=
 github.com/go-osin/session v2.1.0+incompatible h1:NL/TJyVHXFgVEexAbCa8hplGQW4Z4B/8IjzjAxGpdaA=
 github.com/go-osin/session v2.1.0+incompatible/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
 github.com/go-sql-driver/mysql v1.4.0 h1:7LxgVwFb2hIQtMm87NdgAVfXjnt4OePseqT1tKx+opk=
@@ -46,6 +44,8 @@ github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7 h1:in4y/f05PXJJO6ov43q
 github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/simpauth v0.0.1 h1:8yK8XuuiwV2KwxtXa967UiNzDZHecWxF/hzMcbUb3HY=
 github.com/liut/simpauth v0.0.1/go.mod h1:/PRdSN5nPTVPvUK+xLKxWTSZeM81KBG6nWy0ojpam9U=
+github.com/liut/staffio-backend v0.1.1 h1:YeSssVd1Fn3uIJ8U1pKjzI7XWXnhBFfLGX1+lb3QumY=
+github.com/liut/staffio-backend v0.1.1/go.mod h1:wVKogq+of8Wzkxuqx2zQrko/KU6aciK1Q0Bk4uwS1UY=
 github.com/mattn/go-isatty v0.0.9 h1:d5US/mDsogSGW37IV293h//ZFaeajb69h+EHFsv2xGg=
 github.com/mattn/go-isatty v0.0.9/go.mod h1:YNRxwqDuOph6SZLI9vUUz6OYw3QyUt7WiY2yME+cCiQ=
 github.com/mattn/go-sqlite3 v1.9.0 h1:pDRiWfl+++eC2FEFRy6jXmQlvp4Yh3z1MJKg4UeYM/4=
@@ -77,6 +77,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
+github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/tinylib/msgp v1.1.0 h1:9fQd+ICuRIu/ue4vxJZu6/LzxN0HwMds2nq/0cFvxHU=
 github.com/tinylib/msgp v1.1.0/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
@@ -85,8 +87,8 @@ github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
 github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6 h1:CJD2eRjYAflS5HQwsfIZufU0gHL/hqKQdokPyGgaaLU=
 github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6/go.mod h1:wxUt8XLtSuRF8qyowX+1R1Ku4lkAPyLvknQHpG2h0sc=
-github.com/wealthworks/go-debug v0.0.0-20141022193016-ff4a55a20a86 h1:c/DgL+ukZxfKpWtqA01wAsIG7wWqnhz2f6NJ/rgEIs8=
-github.com/wealthworks/go-debug v0.0.0-20141022193016-ff4a55a20a86/go.mod h1:o3tAXqGwARw9npAANK32Rus0NnUafnBCgfe5YY00D8o=
+github.com/wealthworks/go-debug v2.0.0+incompatible h1:K1GBCtyXJoKU2/yFtliEhQSIAF4C4hGjIV7P/nStbsM=
+github.com/wealthworks/go-debug v2.0.0+incompatible/go.mod h1:o3tAXqGwARw9npAANK32Rus0NnUafnBCgfe5YY00D8o=
 github.com/wealthworks/go-tencent-api v0.1.0 h1:CR6sNGNkI2oduv6v9GsM2ldIJ8hgP7DdgV1aNZtWZkw=
 github.com/wealthworks/go-tencent-api v0.1.0/go.mod h1:U//eIqOK89bZAaYCYVU02VActdGttVR1VXw0b0uK8xE=
 github.com/wealthworks/go-utils v0.0.0-20170614083745-eeb719fe278f h1:uuGjZduQDtjBcrc3/KYnpyZaauw1MY6giDDapjPNq/A=
@@ -119,6 +121,8 @@ gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXa
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
 gopkg.in/go-playground/validator.v8 v8.18.2 h1:lFB4DoMU6B626w8ny76MV7VX6W2VHct2GVOI3xgiMrQ=
 gopkg.in/go-playground/validator.v8 v8.18.2/go.mod h1:RX2a/7Ha8BgOhfk7j780h4/u/RRjR0eouCJSH80/M2Y=
+gopkg.in/ldap.v3 v3.1.0 h1:DIDWEjI7vQWREh0S8X5/NFPCZ3MCVd55LmXKPW4XLGE=
+gopkg.in/ldap.v3 v3.1.0/go.mod h1:dQjCc0R0kfyFjIlWNMH1DORwUASZyDxo2Ry1B51dXaQ=
 gopkg.in/mail.v2 v2.3.1 h1:WYFn/oANrAGP2C0dcV6/pbkPzv8yGzqTjPmTeO7qoXk=
 gopkg.in/mail.v2 v2.3.1/go.mod h1:htwXN1Qh09vZJ1NVKxQqHPBaCBbzKhp5GzuJEA4VJWw=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
