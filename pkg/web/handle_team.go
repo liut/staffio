@@ -35,7 +35,7 @@ func (s *server) teamListByRole(c *gin.Context) {
 	staffs := s.service.All(nil)
 	for i := 0; i < len(data); i++ {
 		for _, staff := range staffs {
-			if data[i].StaffUID == staff.Uid {
+			if data[i].StaffUID == staff.UID {
 				data[i].StaffName = staff.GetCommonName()
 			}
 		}

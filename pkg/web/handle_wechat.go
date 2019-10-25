@@ -19,7 +19,8 @@ const (
 )
 
 func (s *server) wechatOAuth2Start(c *gin.Context) {
-	origin := c.Request.Header.Get("Origin")
+	// origin := c.Request.Header.Get("Origin")
+	origin := ""
 	if len(origin) == 0 {
 		origin = settings.Current.BaseURL
 	}
@@ -63,23 +64,25 @@ func (s *server) wechatOAuth2Callback(c *gin.Context) {
 	// }
 	code := c.Request.FormValue("code")
 	if len(code) == 0 {
+		logger().Infow("empty code")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	state := c.Request.FormValue("state")
 	if len(state) == 0 {
+		logger().Infow("empty state")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	sess := ginSession(c)
 	vState := sess.Get(cKeyStateWX)
 	if vState == nil {
-		log.Printf("state %s is expired", state)
+		logger().Infow("state is expired", "state", state)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	if s := vState.(string); s != state {
-		log.Printf("mismatch state %s=%s", state, s)
+		logger().Infow("mismatch state", "state", state, "str", s)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

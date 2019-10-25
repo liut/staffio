@@ -13,7 +13,7 @@ const (
 	sessionExpiration       = 60 * 30
 )
 
-// 清理过期的数据
+// Cleanup 清理过期的数据
 func Cleanup() (err error) {
 	now := time.Now()
 

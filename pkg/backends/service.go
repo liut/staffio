@@ -3,7 +3,8 @@ package backends
 import (
 	"log"
 
-	"github.com/liut/staffio/pkg/backends/ldap"
+	"github.com/liut/staffio-backend/ldap"
+	"github.com/liut/staffio-backend/schema"
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
@@ -11,17 +12,26 @@ import (
 	"github.com/liut/staffio/pkg/models/weekly"
 )
 
+// vars
 var (
 	ErrStoreNotFound = ldap.ErrNotFound
 )
 
+// PoolStats ...
 type PoolStats = ldap.PoolStats
 
+// Group ...
+type Group = schema.Group
+
+// Spec ...
+type Spec = schema.Spec
+
+// Servicer ...
 type Servicer interface {
-	models.Authenticator
-	models.StaffStore
-	models.PasswordStore
-	models.GroupStore
+	schema.Authenticator
+	schema.PeopleStore
+	schema.PasswordStore
+	schema.GroupStore
 	cas.TicketStore
 
 	OSIN() OSINStore
@@ -47,17 +57,19 @@ type Servicer interface {
 }
 
 type serviceImpl struct {
-	*ldap.LDAPStore
+	*ldap.Store
 	osinStore   *DbStorage
 	teamStore   *teamStore
 	watchStore  *watchStore
 	weeklyStore *weeklyStore
 }
 
+// LDAPConfig ...
 type LDAPConfig = ldap.Config
 
 var ldapcfg *LDAPConfig
 
+// SetLDAP ...
 func SetLDAP(c LDAPConfig) {
 	ldapcfg = &c
 }
@@ -78,7 +90,7 @@ func NewService() Servicer {
 	}
 	// LDAP is a special store
 	return &serviceImpl{
-		LDAPStore:   store,
+		Store:       store,
 		osinStore:   NewStorage(),
 		teamStore:   &teamStore{},
 		watchStore:  &watchStore{store},
@@ -88,7 +100,7 @@ func NewService() Servicer {
 }
 
 func (s *serviceImpl) Ready() error {
-	return s.LDAPStore.Ready()
+	return s.Store.Ready()
 }
 
 func (s *serviceImpl) OSIN() OSINStore {
@@ -96,7 +108,7 @@ func (s *serviceImpl) OSIN() OSINStore {
 }
 
 func (s *serviceImpl) CloseAll() {
-	s.LDAPStore.Close()
+	s.Store.Close()
 	s.osinStore.Close()
 }
 

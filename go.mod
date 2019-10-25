@@ -11,7 +11,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73
 	github.com/gin-gonic/gin v1.3.0
-	github.com/go-ldap/ldap v3.0.3+incompatible
 	github.com/go-osin/session v2.1.0+incompatible
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -21,6 +20,7 @@ require (
 	github.com/lib/pq v1.1.1
 	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
 	github.com/liut/simpauth v0.0.1
+	github.com/liut/staffio-backend v0.1.1
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/openshift/osin v1.0.1
@@ -31,11 +31,10 @@ require (
 	github.com/russross/blackfriday v1.5.2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
-	github.com/wealthworks/go-debug v0.0.0-20141022193016-ff4a55a20a86
 	github.com/wealthworks/go-tencent-api v0.1.0
 	github.com/wealthworks/go-utils v0.0.0-20170614083745-eeb719fe278f
 	go.uber.org/atomic v1.4.0 // indirect
@@ -45,9 +44,7 @@ require (
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
-	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 	gopkg.in/mail.v2 v2.3.1
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

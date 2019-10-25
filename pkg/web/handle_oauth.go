@@ -107,7 +107,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 				break
 			}
 			ar.Authorized = true
-			ar.UserData = staff.Uid
+			ar.UserData = staff.UID
 			user = UserFromStaff(staff)
 
 		case osin.CLIENT_CREDENTIALS:
@@ -188,8 +188,8 @@ func (s *server) oauth2Info(c *gin.Context) {
 				resp.Output["staff"] = staff
 			} else if topic == "grafana" || topic == "generic" {
 				resp.Output["name"] = staff.GetName()
-				resp.Output["login"] = staff.Uid
-				resp.Output["username"] = staff.Uid
+				resp.Output["login"] = staff.UID
+				resp.Output["username"] = staff.UID
 				resp.Output["email"] = staff.Email
 				resp.Output["attributes"] = map[string][]string{} // TODO: fill attributes
 			}

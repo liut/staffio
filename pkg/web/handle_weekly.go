@@ -114,10 +114,10 @@ func (s *server) weeklyReportList(c *gin.Context) {
 	}
 	staffs := s.service.All(nil)
 	for i := 0; i < len(ret); i++ {
-		staff := staffs.WithUid(ret[i].Uid)
+		staff := staffs.WithUID(ret[i].Uid)
 		if staff != nil {
 			ret[i].Name = staff.GetCommonName()
-			ret[i].Avatar = staff.AvatarUri()
+			ret[i].Avatar = staff.AvatarURI()
 		}
 	}
 	apiOk(c, ret, total)
@@ -349,7 +349,7 @@ func (s *server) allStaffs(isFull bool) []*simpStaff {
 	var ret = make([]*simpStaff, len(staffs))
 	for i, v := range staffs {
 		ss := &simpStaff{
-			Uid:     v.Uid,
+			Uid:     v.UID,
 			Name:    v.GetCommonName(),
 			Created: v.Created,
 		}
@@ -357,7 +357,7 @@ func (s *server) allStaffs(isFull bool) []*simpStaff {
 			ss.ID = v.EmployeeNumber
 			ss.Email = v.Email
 			ss.Mobile = v.Mobile
-			ss.Avatar = v.AvatarUri()
+			ss.Avatar = v.AvatarURI()
 		}
 		ret[i] = ss
 	}

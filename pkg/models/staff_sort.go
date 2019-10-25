@@ -6,7 +6,7 @@ import (
 
 var (
 	ByUid = By(func(p1, p2 *Staff) bool {
-		return p1.Uid < p2.Uid
+		return p1.UID < p2.UID
 	})
 )
 
@@ -14,7 +14,7 @@ var (
 type By func(p1, p2 *Staff) bool
 
 // Sort is a method on the function type, By, that sorts the argument slice according to the function.
-func (by By) Sort(staffs []*Staff) {
+func (by By) Sort(staffs Staffs) {
 	ps := &staffSorter{
 		staffs: staffs,
 		by:     by, // The Sort method's receiver is the function (closure) that defines the sort order.
@@ -23,7 +23,7 @@ func (by By) Sort(staffs []*Staff) {
 }
 
 type staffSorter struct {
-	staffs []*Staff
+	staffs Staffs
 	by     func(p1, p2 *Staff) bool // Closure used in the Less method.
 }
 
@@ -39,5 +39,5 @@ func (s *staffSorter) Swap(i, j int) {
 
 // Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
 func (s *staffSorter) Less(i, j int) bool {
-	return s.by(s.staffs[i], s.staffs[j])
+	return s.by(&s.staffs[i], &s.staffs[j])
 }

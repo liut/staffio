@@ -43,6 +43,12 @@ var wechatworkCmd = &cobra.Command{
 }
 var nameReplacer = strings.NewReplacer("公司", "", "总部", "", "分公司", "", "项目组", "")
 
+type wStaff struct {
+	models.Staff
+	Leader bool `json:"leader,omitempty" form:"-"` // temporary var
+	TeamID int  `json:"teamID,omitempty" form:"-"` // department id
+}
+
 func init() {
 	RootCmd.AddCommand(wechatworkCmd)
 
@@ -104,7 +110,7 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 			Name:    name,
 			Updated: time.Now(),
 		}
-		var staffs []*models.Staff
+		var staffs []*wStaff
 		for _, val := range users {
 			if !val.IsActived() || !val.IsEnabled() {
 				log.Infow("invalid user status", "user", val.Name, "status", val.Status, "enabled", val.Enabled)
@@ -113,7 +119,7 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 			team.Members = append(team.Members, val.UID)
 			staff := userToStaff(&val)
 			if val.IsLeader == 1 {
-				team.Leaders = append(team.Leaders, staff.Uid)
+				team.Leaders = append(team.Leaders, staff.UID)
 			}
 			// fmt.Println(staff)
 			staffs = append(staffs, staff)
@@ -126,19 +132,19 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 			if action == "sync-all" {
 				for _, staff := range staffs {
 					if staff.Leader {
-						err = svc.Team().AddManager(dept.Id, staff.Uid)
+						err = svc.Team().AddManager(dept.Id, staff.UID)
 						if err != nil {
-							log.Infow("add manager fail", "uid", staff.Uid, "id", dept.Id, "err", err)
+							log.Infow("add manager fail", "uid", staff.UID, "id", dept.Id, "err", err)
 						}
-						leader = staff.Uid
+						leader = staff.UID
 					}
-					if err = svc.SaveStaff(staff); err != nil {
+					if err = svc.SaveStaff(&staff.Staff); err != nil {
 						fmt.Printf("save staff %v ERR %s\n", staff, err)
 						if err != backends.ErrEmptyEmail {
 							return
 						}
 					}
-					fmt.Printf("save staff %s(%s) %q OK\n", staff.CommonName, staff.Uid, leader)
+					fmt.Printf("save staff %s(%s) %q OK\n", staff.CommonName, staff.UID, leader)
 				}
 			}
 			err = svc.Team().Store(team)
@@ -153,15 +159,17 @@ func wechatworkRun(cmd *cobra.Command, args []string) {
 	}
 }
 
-func userToStaff(user *exwechat.User) *models.Staff {
-	staff := &models.Staff{
-		Uid:          strings.ToLower(user.UID),
-		CommonName:   user.Name,
-		Email:        user.Email,
-		Mobile:       user.Mobile,
-		Gender:       models.Gender(user.Gender),
-		EmployeeType: user.Title,
-		Leader:       user.IsLeader == 1,
+func userToStaff(user *exwechat.User) *wStaff {
+	staff := &wStaff{
+		Staff: models.Staff{
+			UID:          strings.ToLower(user.UID),
+			CommonName:   user.Name,
+			Email:        user.Email,
+			Mobile:       user.Mobile,
+			Gender:       models.Gender(user.Gender).String(),
+			EmployeeType: user.Title,
+		},
+		Leader: user.IsLeader == 1,
 	}
 	staff.Surname, staff.GivenName = models.SplitName(user.Name)
 	if user.Avatar != "" {
