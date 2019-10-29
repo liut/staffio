@@ -44,8 +44,8 @@ github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7 h1:in4y/f05PXJJO6ov43q
 github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/simpauth v0.0.1 h1:8yK8XuuiwV2KwxtXa967UiNzDZHecWxF/hzMcbUb3HY=
 github.com/liut/simpauth v0.0.1/go.mod h1:/PRdSN5nPTVPvUK+xLKxWTSZeM81KBG6nWy0ojpam9U=
-github.com/liut/staffio-backend v0.1.1 h1:YeSssVd1Fn3uIJ8U1pKjzI7XWXnhBFfLGX1+lb3QumY=
-github.com/liut/staffio-backend v0.1.1/go.mod h1:wVKogq+of8Wzkxuqx2zQrko/KU6aciK1Q0Bk4uwS1UY=
+github.com/liut/staffio-backend v0.1.2 h1:yEae0YltddiD7uCiCdDSRfv0PMzUk758hdCY0YnQ4no=
+github.com/liut/staffio-backend v0.1.2/go.mod h1:wVKogq+of8Wzkxuqx2zQrko/KU6aciK1Q0Bk4uwS1UY=
 github.com/mattn/go-isatty v0.0.9 h1:d5US/mDsogSGW37IV293h//ZFaeajb69h+EHFsv2xGg=
 github.com/mattn/go-isatty v0.0.9/go.mod h1:YNRxwqDuOph6SZLI9vUUz6OYw3QyUt7WiY2yME+cCiQ=
 github.com/mattn/go-sqlite3 v1.9.0 h1:pDRiWfl+++eC2FEFRy6jXmQlvp4Yh3z1MJKg4UeYM/4=

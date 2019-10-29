@@ -20,7 +20,7 @@ require (
 	github.com/lib/pq v1.1.1
 	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
 	github.com/liut/simpauth v0.0.1
-	github.com/liut/staffio-backend v0.1.1
+	github.com/liut/staffio-backend v0.1.2
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/openshift/osin v1.0.1

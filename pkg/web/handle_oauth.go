@@ -78,7 +78,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 	r := c.Request
 
 	var (
-		uid   string = ""
+		uid   string
 		user  *User
 		staff *models.Staff
 		err   error
@@ -136,7 +136,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 
 	}
 
-	logger().Debugw("oauthToken", "resp", resp)
+	logger().Infow("oauthToken", "resp", resp)
 
 	osin.OutputJSON(resp, c.Writer, r)
 }
@@ -163,24 +163,29 @@ func (s *server) oauth2Info(c *gin.Context) {
 			resp.Output["uid"] = uid
 			if strings.HasPrefix(topic, "me") {
 				resp.Output["me"] = staff
-				if len(topic) > 3 {
-					arr := strings.Split(topic[2:], "+")
-					if len(arr) > 0 {
+				if len(topic) > 3 && topic[2] == '+' {
+					if arr := strings.Split(topic[3:], "+"); len(arr) > 0 {
+						logger().Infow("search groups", "arr", arr)
 						gm := make(map[string]interface{})
 						for _, gn := range arr {
+							if gn == "" {
+								continue
+							}
 							gm[gn] = s.InGroup(gn, uid)
 						}
+						logger().Infow("result", "gm", gm)
 						resp.Output["group"] = gm
-					} else if topic[2] == '|' {
-						if arr = strings.Split(topic[3:], "|"); len(arr) > 0 {
-							var roles []string
-							for _, gn := range arr {
-								if s.InGroup(gn, uid) {
-									roles = append(roles, gn)
-								}
+					}
+				} else if len(topic) > 3 && topic[2] == '|' {
+					if arr := strings.Split(topic[3:], "|"); len(arr) > 0 {
+						var roles []string
+						for _, gn := range arr {
+							if s.InGroup(gn, uid) {
+								roles = append(roles, gn)
 							}
-							resp.Output["group"] = roles
 						}
+						logger().Infow("result", "roles", roles)
+						resp.Output["group"] = roles
 					}
 				}
 
