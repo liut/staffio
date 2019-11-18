@@ -51,6 +51,11 @@ var addstaffCmd = &cobra.Command{
 			sn = cn
 		}
 		svc := backends.NewService()
+		// check ready
+		if err := svc.Ready(); err != nil {
+			panic(err)
+		}
+
 		staff := &models.Staff{
 			UID:        uid,
 			CommonName: cn,

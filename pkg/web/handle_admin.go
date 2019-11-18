@@ -352,6 +352,8 @@ func (s *server) groupStore(c *gin.Context) {
 		return
 	}
 
+	logger().Infow("groupStore", "group", group)
+
 	if err := s.service.SaveGroup(group); err != nil {
 		apiError(c, http.StatusServiceUnavailable, err)
 		return
