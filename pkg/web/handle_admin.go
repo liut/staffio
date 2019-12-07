@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -110,7 +109,7 @@ func (s *server) clientsPost(c *gin.Context) {
 		case "redirect_uri":
 			client.RedirectURI = inline.Value
 		default:
-			log.Printf("invalid filed: %s", inline.Field)
+			logger().Infow("invalid", "field", inline.Field)
 			apiError(c, 400, "invalid field")
 			return
 		}
@@ -189,6 +188,7 @@ func (s *server) staffForm(c *gin.Context) {
 		inEdit = true
 		staff, err = s.service.Get(uid)
 		if err != nil {
+			logger().Infow("get fail", "uid", uid, "err", err)
 			return
 		}
 		// log.Print(staff, uint8(staff.Gender))
@@ -218,12 +218,12 @@ func (s *server) staffPost(c *gin.Context) {
 	if uid == "" || uid == "new" {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
-	} else {
-		estaff, err = s.service.Get(uid)
-		if err != nil {
-			log.Printf("GetStaff err %s", err)
-			estaff = nil
-		}
+	}
+
+	estaff, err = s.service.Get(uid)
+	if err != nil {
+		logger().Infow("get fail", "uid", uid, "err", err)
+		estaff = nil
 	}
 
 	if strings.HasPrefix(op, "fetch-ex") && uid != "" {
@@ -239,7 +239,7 @@ func (s *server) staffPost(c *gin.Context) {
 			staff, err = backends.GetStaffFromExmail(email)
 			if err != nil {
 				c.AbortWithError(http.StatusNotFound, err)
-				log.Printf("GetStaff err %s", err)
+				logger().Infow("get fail", "uid", uid, "err", err)
 				return
 			}
 		}
@@ -277,7 +277,7 @@ func (s *server) staffPost(c *gin.Context) {
 		staff = new(models.Staff)
 		err = fb.Bind(req, staff)
 		if err != nil {
-			log.Printf("bind %v: %s", staff, err)
+			logger().Infow("bind fail", "staff", staff, "err", err)
 			return
 		}
 
@@ -315,13 +315,14 @@ func (s *server) staffDelete(c *gin.Context) {
 
 	_, err := s.service.Get(uid)
 	if err != nil {
-		log.Printf("GetStaff err %s", err)
 		c.AbortWithError(http.StatusNotFound, err)
+		logger().Infow("get fail", "uid", uid, "err", err)
 		return
 	}
 	err = s.service.Delete(uid)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+		logger().Infow("delete fail", "uid", uid, "err", err)
 		return
 	}
 

@@ -8,8 +8,8 @@
     <div class="form-group">
         <label class="col-xs-3 control-label">Login (Unique)</label>
         <div class="col-xs-4">
-            <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.Uid }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
-            {{ .staff.Uid }} (eid <span id="eid">{{ .staff.EmployeeNumber }}</span>)
+            <input type="text" class="form-control" name="uid" id="uid" value="{{ .staff.UID }}" placeholder="Login" required {{ if .inEdit }}readonly{{ end }} />
+            {{ .staff.UID }} (eid <span id="eid">{{ .staff.EmployeeNumber }}</span>)
         </div>
         <div class="col-xs-2">
             {{if .exmail }}<a class="btn btn-default btnFetch" href="javascript:void(0);" id="fetchExmail" title="fetch from exmail"><i class="glyphicon glyphicon-envelope"></i></a>{{ end }}
