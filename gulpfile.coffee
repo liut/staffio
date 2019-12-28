@@ -35,7 +35,7 @@ paths =
   ],
   fonts: [
     './node_modules/bootstrap/fonts/*',
-    './node_modules/font-awesome-stylus/fonts/*',
+    './node_modules/font-awesome-stylus/fonts/fontawesome-webfont.*',
   ],
   images: [
     './node_modules/x-editable/dist/bootstrap3-editable/img/*.*'

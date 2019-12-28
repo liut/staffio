@@ -9,17 +9,19 @@ NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
 SOURCES=$(shell find client cmd pkg templates -type f \( -name "*.go" ! -name "*_test.go" \) -print )
 UIFILES=$(shell find fe/{css,scripts} -type f \( -name "*.styl" -o -name "*.js" \) -print )
+STATICS=$(shell find htdocs -type f -print )
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 
 main:
 	echo "Building $(NAME)"
-	go build -ldflags "$(LDFLAGS)" .
+	go build -ldflags "$(LDFLAGS) -w" .
 
 all: vet dist package
 
 dep:
 	go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
+	go get github.com/liut/staticfiles
 
 vet:
 	echo "Checking ./pkg/..."
@@ -55,28 +57,28 @@ fetch-exmail: # deprecated
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
-.PHONY: fetch-exmail
+.PHONY: $@
 
 wechat-work:
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
-.PHONY: wechat-work
+.PHONY: $@
 
 demo: # deprecated
 	echo "Building $@"
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
-.PHONY: demo
+.PHONY: $@
 
 gen-key: # deprecated
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/gen-key
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/gen-key
-.PHONY: gen-key
+.PHONY: $@
 
 fe-deps:
 	npm install
-.PHONY: fe-deps
+.PHONY: $@
 
 .fe-build: $(UIFILES)
 	./node_modules/.bin/gulp clean build
@@ -84,10 +86,10 @@ fe-deps:
 
 fe-build: .fe-build
 
-statik: .fe-build
+static:.fe-build $(STATICS)
 	echo 'packing UI files into static'
-	statik -src htdocs -dest ./pkg/web
-.PHONY: statik
+	staticfiles --package static -o pkg/web/static/files.go ./htdocs
+.PHONY: $@
 
 gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \

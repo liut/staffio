@@ -141,8 +141,7 @@ func (s *server) StrapRouter() {
 
 	}
 
-	assets := newAssets(s.root, s.fs)
-	assets.Base = base
+	assets := newAssets(s.fs)
 	ah := gin.WrapH(assets.GetHandler())
 	s.router.GET("/static/*filepath", ah)
 	s.router.GET("/favicon.ico", ah)

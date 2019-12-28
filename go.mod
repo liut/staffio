@@ -27,7 +27,6 @@ require (
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
-	github.com/rakyll/statik v0.1.6
 	github.com/russross/blackfriday v1.5.2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
