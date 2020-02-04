@@ -65,6 +65,12 @@ wechat-work:
 	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
 .PHONY: $@
 
+syncutil:
+	echo "Building $@"
+	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
+	mkdir -p dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin_amd64/$(NAME)-$@ $(ROOF)/cmd/$@
+.PHONY: $@
+
 demo: # deprecated
 	echo "Building $@"
 	go build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
