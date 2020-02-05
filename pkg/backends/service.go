@@ -123,3 +123,31 @@ func (s *serviceImpl) Watch() team.WatchStore {
 func (s *serviceImpl) Weekly() weekly.Store {
 	return s.weeklyStore
 }
+
+// StoreTeamAndStaffs ...
+func StoreTeamAndStaffs(svc Servicer, team *team.Team, staffs models.Staffs) (err error) {
+	if staffs != nil {
+		for _, staff := range staffs {
+			if err = svc.SaveStaff(&staff); err != nil {
+				logger().Infow("save staff fail", "staff", staff, "err", err)
+				return
+			}
+			logger().Debugw("bulk save staff ok", "cn", staff.CommonName, "uid", staff.UID)
+		}
+	}
+	err = svc.Team().Store(team)
+	if err != nil {
+		logger().Infow("bulk save team fail", "name", team.Name, "err", err)
+		return
+	}
+
+	logger().Infow("bulk team saved OK", "name", team.Name, "leaders", team.Leaders)
+	for _, leader := range team.Leaders {
+		err = svc.Team().AddManager(team.ID, leader)
+		if err != nil {
+			logger().Infow("bulk add manager fail", "leader", leader, "teamID", team.ID, "err", err)
+		}
+	}
+
+	return
+}

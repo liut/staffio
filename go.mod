@@ -34,7 +34,7 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
-	github.com/wealthworks/go-tencent-api v0.1.0
+	github.com/wealthworks/go-tencent-api v0.1.1
 	github.com/wealthworks/go-utils v0.0.0-20170614083745-eeb719fe278f
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
