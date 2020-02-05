@@ -1,4 +1,4 @@
-package backends
+package qqexmail
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/wealthworks/go-tencent-api/exmail"
-	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/models"
 )
@@ -14,23 +13,6 @@ import (
 var (
 	EmailDomain string
 )
-
-func GetStaffFromWechatUser(user *exwechat.User) *models.Staff {
-	logger().Debugw("got from exmail", "user", user)
-	sn, gn := models.SplitName(user.Name)
-
-	staff := &models.Staff{
-		UID:          user.UID,
-		Email:        user.Email,
-		CommonName:   user.Name,
-		Surname:      sn,
-		GivenName:    gn,
-		EmployeeType: user.Title,
-		Mobile:       user.Mobile,
-		Gender:       models.Gender(user.Gender).String(),
-	}
-	return staff
-}
 
 func GetStaffFromExmail(email string) (*models.Staff, error) {
 	user, err := exmail.GetUser(email)
@@ -42,7 +24,6 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 	sn, gn := models.SplitName(user.Name)
 
 	// log.Printf("got %q %q %q", user.Name, sn, gn)
-	eid, _ := strconv.Atoi(user.ExtId)
 
 	staff := &models.Staff{
 		UID:          strings.Split(user.Alias, "@")[0],
@@ -54,6 +35,7 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 		Mobile:       user.Mobile,
 		Gender:       models.Gender(user.Gender).String(),
 	}
+	eid, _ := strconv.Atoi(user.ExtId)
 	if eid > 0 {
 		staff.EmployeeNumber = eid
 	}

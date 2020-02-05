@@ -9,6 +9,8 @@ import (
 	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/backends/qqexmail"
+	"github.com/liut/staffio/pkg/backends/wechatwork"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
@@ -233,10 +235,10 @@ func (s *server) staffPost(c *gin.Context) {
 				c.AbortWithError(404, err)
 				return
 			}
-			staff = backends.GetStaffFromWechatUser(exuser)
+			staff = wechatwork.UserToStaff(exuser)
 		} else {
 			email := uid + "@" + settings.Current.EmailDomain
-			staff, err = backends.GetStaffFromExmail(email)
+			staff, err = qqexmail.GetStaffFromExmail(email)
 			if err != nil {
 				c.AbortWithError(http.StatusNotFound, err)
 				logger().Infow("get fail", "uid", uid, "err", err)
