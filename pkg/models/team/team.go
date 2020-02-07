@@ -56,6 +56,8 @@ type Store interface {
 type Team struct {
 	ID        int         `json:"id"`
 	Name      string      `json:"name"`
+	OrigName  string      `json:"orgname,omitempty" db:"-"`
+	EngName   string      `json:"engname,omitempty" db:"-"`
 	ParentID  int         `json:"parentID,omitempty" db:"parent_id"`
 	Leaders   StringSlice `json:"leaders,omitempty"`
 	Members   StringSlice `json:"members"`
@@ -63,6 +65,7 @@ type Team struct {
 	Updated   *time.Time  `json:"updated,omitempty" db:"updated,omitempty"`
 	StaffUID  string      `json:"staff_uid,omitempty" db:"staff_uid"`
 	StaffName string      `json:"staff_name,omitempty" db:"-"`
+	OrderNo   int         `json:"orderNo,omitempty" db:"-"`
 }
 
 // Teams ...

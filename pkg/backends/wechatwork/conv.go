@@ -48,7 +48,9 @@ func DepartmentToTeam(dept *exwechat.Department, all exwechat.Departments) *team
 	var team = &team.Team{
 		ID:       dept.Id,
 		Name:     dept.Name,
+		OrigName: dept.Name,
 		ParentID: dept.ParentId,
+		OrderNo:  dept.Order,
 	}
 
 	if all != nil {
