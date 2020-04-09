@@ -27,6 +27,8 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
+	larklog "github.com/fhyx/lark-api-go/log"
+
 	"github.com/liut/staffio/pkg/backends"
 	zlog "github.com/liut/staffio/pkg/log"
 	config "github.com/liut/staffio/pkg/settings"
@@ -74,17 +76,12 @@ func Execute() {
 	sugar := logger.Sugar()
 
 	zlog.SetLogger(sugar)
+	larklog.SetLogger(sugar)
 
 	backends.SetDSN(settings.BackendDSN)
 
 	backends.BaseURL = settings.BaseURL
 	backends.SetPasswordSecret(settings.PwdSecret)
-	if settings.SMTPHost != "" {
-		backends.SetupSMTPHost(settings.SMTPHost, settings.SMTPPort)
-		if settings.SMTPSenderEmail != "" {
-			backends.SetupSMTPAuth(settings.SMTPSenderEmail, settings.SMTPSenderPassword)
-		}
-	}
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

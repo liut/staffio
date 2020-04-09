@@ -20,12 +20,13 @@ type Config struct {
 	EmailDomain string `envconfig:"EMAIL_DOMAIN"`
 	EmailCheck  bool   `envconfig:"EMAIL_CHECK"`
 
-	SMTPEnabled        bool   `envconfig:"SMTP_ENABLED"`
-	SMTPHost           string `envconfig:"SMTP_HOST"`
-	SMTPPort           int    `envconfig:"SMTP_PORT" default:"465"`
-	SMTPSenderName     string `envconfig:"SMTP_SENDER_NAME"`
-	SMTPSenderEmail    string `envconfig:"SMTP_SENDER_EMAIL"`
-	SMTPSenderPassword string `envconfig:"SMTP_SENDER_PASSWORD"`
+	MailEnabled        bool   `envconfig:"SMTP_ENABLED"`
+	MailHost           string `envconfig:"SMTP_HOST"`
+	MailPort           int    `envconfig:"SMTP_PORT" default:"465"`
+	MailSenderName     string `envconfig:"SMTP_SENDER_NAME" default:"notify"`
+	MailSenderEmail    string `envconfig:"SMTP_SENDER_EMAIL"`
+	MailSenderPassword string `envconfig:"SMTP_SENDER_PASSWORD"`
+	MailTLSEnabled     bool   `envconfig:"SMTP_TLS" default:"true"`
 
 	// LDAPHosts    string `envconfig:"LDAP_HOSTS" default:"localhost"`
 	// LDAPBase     string `envconfig:"LDAP_BASE"`
@@ -37,6 +38,10 @@ type Config struct {
 	WechatContactSecret string `envconfig:"wechat_contact_secret"`
 	WechatPortalSecret  string `envconfig:"wechat_portal_secret"`
 	WechatPortalAgentID int    `envconfig:"wechat_portal_agentid"`
+
+	LarkAppID      string `envconfig:"lark_app_id"`
+	LarkAppSecret  string `envconfig:"lark_app_secret"`
+	LarkEncryptKey string `envconfig:"LARK_ENCRYPT_KEY"`
 
 	InDevelop bool   `envconfig:"-"`
 	Version   string `envconfig:"-"`

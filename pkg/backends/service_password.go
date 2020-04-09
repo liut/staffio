@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"time"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/settings"
 )
 
 var (
@@ -54,9 +56,6 @@ func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (e
 }
 
 func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
-	if smtpHost == "" {
-		return ErrMailNotReady
-	}
 	if staff.Email == "" {
 		return ErrEmptyEmail
 	}
@@ -147,47 +146,42 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 	}
 	err := withDbQuery(qs)
 	if err != nil {
-		logger().Warnw("query verify fail", "uid", uid, "err", err)
+		logger().Infow("query verify fail", "uid", uid, "err", err)
 	}
 	return &uv, err
 }
 
 var (
-	smtpHost string
-	smtpPort = 587
-	smtpUser string
-	smtpPass string
-
-	MailSenderName = "Notification"
-
 	BaseURL string
 )
 
-func SetupSMTPHost(host string, port int) {
-	smtpHost = host
-	smtpPort = port
-}
-
-func SetupSMTPAuth(from, password string) {
-	smtpUser = from
-	smtpPass = password
-}
-
 func sendResetEmail(staff *models.Staff, token string) error {
-	if smtpHost == "" {
-		logger().Warnw("smtp host is empty")
+	var (
+		smtpHost = settings.Current.MailHost
+		smtpPort = settings.Current.MailPort
+		smtpUser = settings.Current.MailSenderEmail
+		smtpPass = settings.Current.MailSenderPassword
+	)
+
+	if !settings.Current.MailEnabled || smtpHost == "" {
+		logger().Warnw("mail disabled or host is empty")
 		return ErrMailNotReady
 	}
 
 	m := mail.NewMessage()
-	m.SetHeader("From", fmt.Sprintf("%s <%s>", MailSenderName, smtpUser))
+	m.SetHeader("From", fmt.Sprintf("%s <%s>", settings.Current.MailSenderName, smtpUser))
 	m.SetHeader("To", staff.Email)
 	m.SetHeader("Subject", "Password reset request")
 	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), BaseURL, token))
 
-	logger().Infow("sending reset email", "email", staff.Email, "host", smtpHost)
+	logger().Infow("sending reset email", "email", staff.Email, "host", smtpHost, "port", smtpPort, "sender", smtpUser)
 
 	d := mail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
+
+	if settings.Current.MailTLSEnabled {
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		logger().Infow("enable tls")
+	}
 
 	if err := d.DialAndSend(m); err != nil {
 		logger().Warnw("send reset email failed", "host", smtpHost, "err", err)
