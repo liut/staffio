@@ -66,18 +66,22 @@ func (s *server) StrapRouter() {
 		keeper.POST("/group", s.groupStore)
 	}
 
-	gr.GET("/article/:id", s.articleView)
-	keeper.GET("/articles", s.articleForm)
-	keeper.POST("/articles", s.articlePost)
+	{ // contents
+		gr.GET("/article/:id", s.articleView)
+		keeper.GET("/articles", s.articleForm)
+		keeper.POST("/articles", s.articlePost)
 
-	keeper.GET("/links", s.linksForm)
-	keeper.POST("/links", s.linksPost)
+		keeper.GET("/links", s.linksForm)
+		keeper.POST("/links", s.linksPost)
+	}
 
-	gr.GET("/cas/logout", casLogout)
-	gr.GET("/validate", s.casValidateV1)
-	gr.GET("/serviceValidate", s.casValidateV2)
+	{ // CAS
+		gr.GET("/cas/logout", casLogout)
+		gr.GET("/validate", s.casValidateV1)
+		gr.GET("/serviceValidate", s.casValidateV2)
+	}
 
-	gr.GET("/", s.welcome)
+	gr.GET("/", s.welcome) // home
 
 	{ // apis for unauth
 		gr.GET("/api/me", s.me)
@@ -90,6 +94,11 @@ func (s *server) StrapRouter() {
 		gr.POST("/api/auth/wechat", s.wechatOAuth2Start)
 		gr.GET("/api/auth/wechat/callback", s.wechatOAuth2Callback) // deprecated
 		gr.POST("/api/auth/wechat/callback", s.wechatOAuth2Callback)
+		// feishu lark
+		gr.POST("/api/auth/feishu", s.larkOAuth2Start)
+		gr.GET("/api/auth/feishu/callback", s.larkOAuth2Callback)
+		gr.POST("/api/auth/feishu/callback", s.larkOAuth2Callback)
+		gr.POST("/api/third/feishu/event/callback", s.larkEventCallback)
 	}
 
 	api := gr.Group("/api", AuthUserMiddleware(false))

@@ -7,6 +7,8 @@ require (
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e // indirect
 	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/fhyx/lark-api-go v0.0.0-20200301164426-82041fd45a02
+	github.com/fhyx/welink-api-go v0.0.0-20200207113908-e65240a15193
 	github.com/getsentry/raven-go v0.2.0
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73
@@ -20,9 +22,11 @@ require (
 	github.com/lib/pq v1.1.1
 	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
 	github.com/liut/simpauth v0.0.1
-	github.com/liut/staffio-backend v0.1.2
+	github.com/liut/staffio-backend v0.1.3
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
+	github.com/mozillazg/go-slugify v0.2.0
+	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/openshift/osin v1.0.1
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
