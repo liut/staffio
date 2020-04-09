@@ -13,3 +13,11 @@
 	or
 
     docker run -e LDAP_ORGANIZATION="LCGC Inc." -e LDAP_BASE_DN="dc=mydomain,dc=net" -e LDAP_ADMIN_PASSWORD="mysecret" -d -p 389:389 -p 636:636 --name ldap liut7/staffio-ldap:2.4.44
+
+## write schema into slapd config (local only)
+
+```sh
+
+sudo ./sbin/slapd-config schema write staffio < schema/staffio.schema
+
+```
