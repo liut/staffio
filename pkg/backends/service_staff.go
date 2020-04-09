@@ -3,13 +3,9 @@ package backends
 import (
 	"fmt"
 
-	zlog "github.com/liut/staffio/pkg/log"
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/models/team"
 )
-
-func logger() zlog.Logger {
-	return zlog.GetLogger()
-}
 
 // save staff
 func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
@@ -79,4 +75,32 @@ func WriteUserLog(uid, subject, message string) error {
 		return err
 	}
 	return withDbQuery(qs)
+}
+
+// StoreTeamAndStaffs ...
+func StoreTeamAndStaffs(svc Servicer, team *team.Team, staffs models.Staffs) (err error) {
+	if staffs != nil {
+		for _, staff := range staffs {
+			if err = svc.SaveStaff(&staff); err != nil {
+				logger().Infow("save staff fail", "staff", staff, "err", err)
+				return
+			}
+			logger().Debugw("bulk save staff ok", "cn", staff.CommonName, "uid", staff.UID)
+		}
+	}
+	err = svc.Team().Store(team)
+	if err != nil {
+		logger().Infow("bulk save team fail", "name", team.Name, "err", err)
+		return
+	}
+
+	logger().Infow("bulk team saved OK", "name", team.Name, "leaders", team.Leaders)
+	for _, leader := range team.Leaders {
+		err = svc.Team().AddManager(team.ID, leader)
+		if err != nil {
+			logger().Infow("bulk add manager fail", "leader", leader, "teamID", team.ID, "err", err)
+		}
+	}
+
+	return
 }

@@ -182,7 +182,7 @@ func (s *server) weeklyReportStat(c *gin.Context) {
 	for _, staff := range all {
 		var isIgnore bool
 		for _, ig := range ignores {
-			if ig.Uid == staff.Uid {
+			if ig.Uid == staff.UID {
 				// 		ig.Name = staff.Name
 				isIgnore = true
 				continue
@@ -192,7 +192,7 @@ func (s *server) weeklyReportStat(c *gin.Context) {
 			continue
 		}
 		ret.All = append(ret.All, &weekly.ReportUser{
-			Uid:     staff.Uid,
+			Uid:     staff.UID,
 			Name:    staff.Name,
 			Created: staff.Created,
 		})
@@ -326,12 +326,14 @@ func (s *server) weeklyStatusRemove(c *gin.Context) {
 }
 
 type simpStaff struct {
-	ID     int    `json:"id,omitempty"`
-	Uid    string `json:"uid"`
-	Name   string `json:"name"`
-	Email  string `json:"email,omitempty"`
-	Mobile string `json:"mobile,omitempty"`
-	Avatar string `json:"avatar,omitempty"`
+	EID       int    `json:"id,omitempty"`
+	UID       string `json:"uid"`
+	Name      string `json:"name"`
+	GivenName string `json:"gn,omitempty"`
+	Surname   string `json:"sn,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Mobile    string `json:"mobile,omitempty"`
+	Avatar    string `json:"avatar,omitempty"`
 
 	Created *time.Time `json:"created,omitempty"`
 }
@@ -349,12 +351,14 @@ func (s *server) allStaffs(isFull bool) []*simpStaff {
 	var ret = make([]*simpStaff, len(staffs))
 	for i, v := range staffs {
 		ss := &simpStaff{
-			Uid:     v.UID,
+			UID:     v.UID,
 			Name:    v.GetCommonName(),
 			Created: v.Created,
 		}
 		if isFull {
-			ss.ID = v.EmployeeNumber
+			ss.GivenName = v.GivenName
+			ss.Surname = v.Surname
+			ss.EID = v.EmployeeNumber
 			ss.Email = v.Email
 			ss.Mobile = v.Mobile
 			ss.Avatar = v.AvatarURI()

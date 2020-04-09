@@ -1,24 +1,26 @@
 
 -- sync from wxqiye(exwechat)
 CREATE TABLE IF NOT EXISTS "department" (
-  id SERIAL,
-  name VARCHAR(90) NOT NULL,
-  parent_id int NOT NULL DEFAULT 0,
-  position int NOT NULL DEFAULT 0,
-  created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated timestamptz ,
-  UNIQUE (parent_id, name),
-  PRIMARY KEY (id)
+	id SERIAL,
+	name VARCHAR(90) NOT NULL,
+	parent_id int NOT NULL DEFAULT 0,
+	position int NOT NULL DEFAULT 0,
+	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated timestamptz ,
+	UNIQUE (parent_id, name),
+	PRIMARY KEY (id)
 );
 
 
 CREATE TABLE IF NOT EXISTS teams (
 	id serial,
-	name VARCHAR(120) NOT NULL UNIQUE,
+	name VARCHAR(120) NOT NULL ,
+	parent_id int NOT NULL DEFAULT 0,
 	leaders jsonb NOT NULL DEFAULT '[]'::jsonb, -- leader uid
 	members jsonb NOT NULL DEFAULT '[]'::jsonb,
 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE (parent_id, name),
 	PRIMARY KEY (id)
 );
 

@@ -8,14 +8,14 @@ import (
 	"github.com/openshift/osin"
 	"github.com/wealthworks/go-tencent-api/exmail"
 
-	"github.com/liut/staffio/pkg/backends"
+	"github.com/liut/staffio/pkg/backends/qqexmail"
 	"github.com/liut/staffio/pkg/settings"
 )
 
 func (s *server) countNewMail(c *gin.Context) {
 	user := UserWithContext(c)
 	// log.Printf("user %q", user.UID)
-	email := backends.GetEmailAddress(user.UID)
+	email := qqexmail.GetEmailAddress(user.UID)
 	res := make(osin.ResponseData)
 	res["email"] = email
 

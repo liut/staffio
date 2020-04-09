@@ -36,6 +36,10 @@ access to *\
 
 	echo '' >> $CONF
 
+	echo 'loglevel 0x40 0x100' >> $CONF
+
+	echo '' >> $CONF
+
 	ETC_HOSTS=$(cat /etc/hosts | sed "/$HOSTNAME/d")
 	echo "0.0.0.0 $HOSTNAME" > /etc/hosts
 	echo "$ETC_HOSTS" >> /etc/hosts

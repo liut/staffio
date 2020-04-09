@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
+
+	"github.com/fhyx/lark-api-go/lark"
 	"github.com/wealthworks/go-tencent-api/exwechat"
 
 	"github.com/liut/staffio/pkg/backends"
@@ -32,6 +34,7 @@ type server struct {
 	osvr     *osin.Server
 	wxAuth   *exwechat.API
 	checkin  *exwechat.CAPI
+	larkAPI  *lark.API
 }
 
 func (s *server) IsKeeper(uid string) bool {
@@ -74,6 +77,7 @@ func New(c Config) *server {
 		osvr:    osvr,
 		wxAuth:  exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
 		checkin: exwechat.NewCAPI(),
+		larkAPI: lark.New(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
 	}
 
 	if settings.Current.InDevelop {

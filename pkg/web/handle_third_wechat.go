@@ -18,6 +18,10 @@ const (
 	cKeyStateWX = "wxState"
 )
 
+func inAPPWXWork(req *http.Request) bool {
+	return strings.Contains(req.UserAgent(), "wxwork/") //  'wxwork/' | 'MicroMessenger/'
+}
+
 func (s *server) wechatOAuth2Start(c *gin.Context) {
 	// origin := c.Request.Header.Get("Origin")
 	origin := ""
@@ -30,28 +34,27 @@ func (s *server) wechatOAuth2Start(c *gin.Context) {
 	}
 	state := random.GenString(stateLength)
 	var (
-		wxuri string
+		uri   string
 		inApp bool
 	)
-
-	ua := c.Request.UserAgent()
-	if strings.Contains(ua, "wxwork/") { //  'wxwork/' | 'MicroMessenger/'
-		inApp = true
+	inApp = inAPPWXWork(c.Request)
+	if inApp {
+		ua := c.Request.UserAgent()
 		qs := fmt.Sprintf("appid=%s&redirect_uri=%s/%s&response_type=code&scope=snsapi_base&state=%s",
 			s.wxAuth.CorpID(), origin, callback, state)
-		wxuri = fmt.Sprintf("%s/connect/oauth2/authorize?%s#wechat_redirect", wxPrefix, qs) // 扫码也会最终也会经过这个地址
-		logger().Infow("auth from wxwork", "ua", ua, "wxuri", wxuri)
+		uri = fmt.Sprintf("%s/connect/oauth2/authorize?%s#wechat_redirect", wxPrefix, qs) // 扫码也会最终也会经过这个地址
+		logger().Infow("auth from wxwork", "ua", ua, "uri", uri)
 	} else {
 		qs := fmt.Sprintf("appid=%s&agentid=%d&redirect_uri=%s/%s&state=%s",
 			s.wxAuth.CorpID(), settings.Current.WechatPortalAgentID, origin, callback, state)
-		wxuri = fmt.Sprintf("%s/wwopen/sso/qrConnect?%s", wxPrefix, qs)
+		uri = fmt.Sprintf("%s/wwopen/sso/qrConnect?%s", wxPrefix, qs)
 	}
 	sess := ginSession(c)
 	sess.Set(cKeyStateWX, state)
 	SessionSave(sess, c.Writer)
 	apiOk(c, gin.H{
 		"inapp": inApp,
-		"wxuri": wxuri,
+		"wxuri": uri,
 	}, 0)
 }
 

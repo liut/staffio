@@ -6,12 +6,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-osin/session"
+	scodec "github.com/go-osin/session/codec"
+	"github.com/ugorji/go/codec"
 )
 
 var (
 	once       sync.Once
 	sessionKey = "gin-session"
 )
+
+var (
+	// MsgPack is a Codec that uses the `ugorji/go/codec` package.
+	MsgPack = scodec.Codec{msgPackMarshal, msgPackUnmarshal}
+)
+
+func msgPackMarshal(v interface{}) (out []byte, err error) {
+	var h codec.Handle = new(codec.MsgpackHandle)
+	err = codec.NewEncoderBytes(&out, h).Encode(v)
+	return
+}
+
+func msgPackUnmarshal(in []byte, v interface{}) error {
+	var h codec.Handle = new(codec.MsgpackHandle)
+	return codec.NewDecoderBytes(in, h).Decode(v)
+}
 
 func SetupSessionStore(store session.Store) {
 	session.Global.Close()

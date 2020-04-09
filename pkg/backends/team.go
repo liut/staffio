@@ -65,8 +65,8 @@ func (s *teamStore) Store(t *team.Team) error {
 			if err = db.Get(&id, "SELECT id FROM teams WHERE name = $1", t.Name); err == nil {
 				return
 			}
-			err = db.Get(&id, "INSERT INTO teams(name, leaders, members) VALUES($1, $2, $3) RETURNING id",
-				t.Name, t.Leaders, t.Members)
+			err = db.Get(&id, "INSERT INTO teams(name, parent_id, leaders, members) VALUES($1, $2, $3, $4) RETURNING id",
+				t.Name, t.ParentID, t.Leaders, t.Members)
 			if err != nil {
 				logger().Infow("insert new team fail", "err", err)
 			} else {
@@ -79,11 +79,12 @@ func (s *teamStore) Store(t *team.Team) error {
 			err = db.Get(&created, "SELECT created FROM teams WHERE id = $1", t.ID)
 			if err == nil {
 				_, err = db.Exec(`UPDATE teams SET
-					(name, leaders, members, updated) = ($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4`,
-					t.Name, t.Leaders, t.Members, t.ID)
+					(name, parent_id, leaders, members, updated) = ($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $5`,
+					t.Name, t.ParentID, t.Leaders, t.Members, t.ID)
 			} else if err == ErrNoRows {
-				_, err = db.Exec("INSERT INTO teams(id, name, leaders, members) VALUES($1, $2, $3, $4)",
-					t.ID, t.Name, t.Leaders, t.Members)
+				db.Exec("DELETE FROM teams WHERE parent_id = $1 AND name = $2", t.ParentID, t.Name)
+				_, err = db.Exec("INSERT INTO teams(id, name, parent_id, leaders, members) VALUES($1, $2, $3, $4, $5)",
+					t.ID, t.Name, t.ParentID, t.Leaders, t.Members)
 			}
 			if err != nil {
 				logger().Infow("store team fail", "team", t, "err", err)

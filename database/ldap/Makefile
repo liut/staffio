@@ -1,5 +1,5 @@
 IMAGE = liut7/staffio-ldap
-VERSION = 2.4.47-r2
+VERSION = 2.4.48-r0
 
 org = "Example Inc."
 base_dn = "dc=example,dc=org"
