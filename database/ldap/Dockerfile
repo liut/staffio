@@ -1,9 +1,9 @@
-FROM alpine:3.9
+FROM alpine:3.10
 
 RUN apk add --update \
 	bash \
 	openldap \
-	openldap-back-mdb \
+	openldap-backend-all \
 	openldap-clients \
 	openldap-passwd-pbkdf2 \
 	openssl \
