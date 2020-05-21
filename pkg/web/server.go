@@ -77,10 +77,10 @@ func New(c Config) *server {
 		osvr:    osvr,
 		wxAuth:  exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
 		checkin: exwechat.NewCAPI(),
-		larkAPI: lark.New(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
+		larkAPI: lark.NewAPI(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
 	}
 
-	if settings.Current.InDevelop {
+	if settings.IsDevelop() {
 		fmt.Printf("In Developing(Debug) mode, gin: %s\n", gin.Mode())
 		svr.router.Use(gin.Logger(), gin.Recovery())
 	} else {
