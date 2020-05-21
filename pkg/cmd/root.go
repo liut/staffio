@@ -44,7 +44,7 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.ParseFlags(args)
 		if v, err := cmd.Flags().GetBool("version"); err == nil && v {
-			fmt.Println(settings.Version)
+			fmt.Println(config.Version())
 		} else {
 			cmd.Usage()
 		}

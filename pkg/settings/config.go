@@ -9,18 +9,22 @@ type Config struct {
 	HTTPListen string `envconfig:"HTTP_LISTEN" default:"localhost:3030"`
 	BaseURL    string `envconfig:"BASEURL" default:"http://localhost:3030"`
 	PwdSecret  string `envconfig:"PASSWORD_SECRET"`
-	BackendDSN string `envconfig:"BACKEND_DSN"`
+	BackendDSN string `envconfig:"BACKEND_DSN" default:"postgres://staffio@localhost/staffio?sslmode=disable"`
 	SentryDSN  string `envconfig:"SENTRY_DSN"`
 
+	RedisAddrs    []string `envconfig:"REDIS_ADDRS" `         // host:port,host:port
+	RedisDB       int      `envconfig:"REDIS_DB" default:"1"` // Redis DB 1
+	RedisPassword string   `envconfig:"REDIS_PASSWROD"`
+
 	Root  string `default:"./"`
-	Debug bool
+	Debug bool   `default:"false"`
 
 	TokenGenKey string `envconfig:"tokengen_key"`
 
 	EmailDomain string `envconfig:"EMAIL_DOMAIN"`
-	EmailCheck  bool   `envconfig:"EMAIL_CHECK"`
+	EmailCheck  bool   `envconfig:"EMAIL_CHECK" default:"false"`
 
-	MailEnabled        bool   `envconfig:"SMTP_ENABLED"`
+	MailEnabled        bool   `envconfig:"SMTP_ENABLED" default:"false"`
 	MailHost           string `envconfig:"SMTP_HOST"`
 	MailPort           int    `envconfig:"SMTP_PORT" default:"465"`
 	MailSenderName     string `envconfig:"SMTP_SENDER_NAME" default:"notify"`
@@ -28,11 +32,11 @@ type Config struct {
 	MailSenderPassword string `envconfig:"SMTP_SENDER_PASSWORD"`
 	MailTLSEnabled     bool   `envconfig:"SMTP_TLS" default:"true"`
 
-	// LDAPHosts    string `envconfig:"LDAP_HOSTS" default:"localhost"`
-	// LDAPBase     string `envconfig:"LDAP_BASE"`
-	// LDAPDomain   string `envconfig:"LDAP_DOMAIN"`
-	// LDAPBindDN   string `envconfig:"LDAP_BIND_DN"`
-	// LDAPPassword string `envconfig:"LDAP_PASSWD"`
+	LDAPHosts    string `envconfig:"LDAP_HOSTS" default:"localhost:389"`
+	LDAPBase     string `envconfig:"LDAP_BASE"`
+	LDAPDomain   string `envconfig:"LDAP_DOMAIN"` // used for AD
+	LDAPBindDN   string `envconfig:"LDAP_BIND_DN"`
+	LDAPPassword string `envconfig:"LDAP_PASSWD"`
 
 	WechatCorpID        string `envconfig:"wechat_corpid"`
 	WechatContactSecret string `envconfig:"wechat_contact_secret"`
@@ -42,11 +46,9 @@ type Config struct {
 	LarkAppID      string `envconfig:"lark_app_id"`
 	LarkAppSecret  string `envconfig:"lark_app_secret"`
 	LarkEncryptKey string `envconfig:"LARK_ENCRYPT_KEY"`
-
-	InDevelop bool   `envconfig:"-"`
-	Version   string `envconfig:"-"`
 }
 
+// Current ...
 var Current *Config
 
 func init() {
@@ -55,6 +57,9 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	Current.InDevelop = IsDevelop()
-	Current.Version = buildVersion
+}
+
+// Usage print envs for config
+func Usage() error {
+	return envconfig.Usage(NAME, Current)
 }

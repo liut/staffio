@@ -33,6 +33,7 @@ import (
 	"github.com/wealthworks/go-utils/reaper"
 
 	"github.com/liut/staffio/pkg/backends"
+	config "github.com/liut/staffio/pkg/settings"
 	"github.com/liut/staffio/pkg/web"
 )
 
@@ -80,7 +81,7 @@ func webRun() {
 	ws := web.New(cfg)
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version, settings.HTTPListen, settings.Root)
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", config.Version(), settings.HTTPListen, settings.Root)
 
 	srv := &http.Server{
 		Addr:         settings.HTTPListen,
