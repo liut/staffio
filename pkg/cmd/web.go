@@ -54,14 +54,6 @@ var webRoot string
 func init() {
 	RootCmd.AddCommand(webCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// webCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	webCmd.Flags().StringVar(&webFS, "fs", "bind", "file system [bind | local]")
 	webCmd.Flags().StringVar(&webRoot, "root", "./", "app root directory")
 }

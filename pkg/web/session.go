@@ -33,7 +33,7 @@ var (
 
 var (
 	// MsgPack is a Codec that uses the `ugorji/go/codec` package.
-	MsgPack = scodec.Codec{msgPackMarshal, msgPackUnmarshal}
+	MsgPack = scodec.Codec{Marshal: msgPackMarshal, Unmarshal: msgPackUnmarshal}
 )
 
 func msgPackMarshal(v interface{}) (out []byte, err error) {

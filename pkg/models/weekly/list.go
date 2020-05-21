@@ -5,15 +5,15 @@ import (
 )
 
 type SortField struct {
-	Field   string `json:"field" valid:"/^[a-z_\.]+$/"`
-	Reverse bool   `json:"reverse" valid:"required"`
+	Field   string `json:"field" `
+	Reverse bool   `json:"reverse" `
 }
 
 type ListSort []*SortField
 
 type ListPager struct {
-	Size   int `json:"size" valid:"required"`
-	Offset int `json:"offset" valid:"required"`
+	Size   int `json:"size" `
+	Offset int `json:"offset" `
 }
 
 func (this *ListPager) Sql() string {
