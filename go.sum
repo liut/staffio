@@ -10,8 +10,6 @@ github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d h1:TcIupehdAG
 github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d/go.mod h1:+DvfQth62fJm5CJ2ivtsS6uDY9dBorAWj2O1MvJrHIo=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
-github.com/fhyx/lark-api-go v0.0.0-20200301164426-82041fd45a02 h1:QFyk8z3+g0ufm8/ogqwiQtzY0Sdj8f88M9f3EJVWsyA=
-github.com/fhyx/lark-api-go v0.0.0-20200301164426-82041fd45a02/go.mod h1:OIIAbjBQsI4DSZ80Dxj42Y3TBySZnv7bYhEEgpwwpP4=
 github.com/fhyx/lark-api-go v0.0.0-20200501180702-dd1bbbefc28f h1:Vn5bjTAXT9/Z3dHlouOi43ZA0z9Ja118bPqq0ofcV44=
 github.com/fhyx/lark-api-go v0.0.0-20200501180702-dd1bbbefc28f/go.mod h1:OIIAbjBQsI4DSZ80Dxj42Y3TBySZnv7bYhEEgpwwpP4=
 github.com/fhyx/welink-api-go v0.0.0-20200207113908-e65240a15193 h1:aq+aySjqrHy8zDiXMXpA1I4NyqHOPVgQ2YJ1ZqpeTnk=
@@ -27,6 +25,9 @@ github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73 h1:dC6mPFx+I6Kkj
 github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73/go.mod h1:iqneQ2Df3omzIVTkIfn7c1acsVnMGiSLn4XF5Blh3Yg=
 github.com/gin-gonic/gin v1.3.0 h1:kCmZyPklC0gVdL728E6Aj20uYBJV93nj/TkwBTKhFbs=
 github.com/gin-gonic/gin v1.3.0/go.mod h1:7cKuhb5qV2ggCFctp2fJQ+ErvciLZrIeoOSOm6mUr7Y=
+github.com/go-asn1-ber/asn1-ber v1.3.1/go.mod h1:hEBeB/ic+5LoWskz+yKT7vGhhPYkProFKoKdwZRWMe0=
+github.com/go-ldap/ldap/v3 v3.1.10 h1:7WsKqasmPThNvdl0Q5GPpbTDD/ZD98CfuawrMIuh7qQ=
+github.com/go-ldap/ldap/v3 v3.1.10/go.mod h1:5Zun81jBTabRaI8lzN7E1JjyEl1g6zI6u9pd8luAK4Q=
 github.com/go-osin/session v2.3.0+incompatible h1:yjtrN3xwBG4IIj/8h68Tp9f51OH3vIn66zw99QloM6Q=
 github.com/go-osin/session v2.3.0+incompatible/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
 github.com/go-redis/cache v6.4.0+incompatible/go.mod h1:XNnMdvlNjcZvHjsscEozHAeOeSE5riG9Fj54meG4WT4=
@@ -67,8 +68,8 @@ github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7 h1:in4y/f05PXJJO6ov43q
 github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/simpauth v0.1.3 h1:KG67k3vqHw9bt5I24g/FkPRBeevHOhC5SYdBp3sjP0A=
 github.com/liut/simpauth v0.1.3/go.mod h1:/PRdSN5nPTVPvUK+xLKxWTSZeM81KBG6nWy0ojpam9U=
-github.com/liut/staffio-backend v0.1.3 h1:4Hwgpf5Q1uHsOITs7To9aT9drzFwxS2pJr0ciL+ayWU=
-github.com/liut/staffio-backend v0.1.3/go.mod h1:wVKogq+of8Wzkxuqx2zQrko/KU6aciK1Q0Bk4uwS1UY=
+github.com/liut/staffio-backend v0.2.0 h1:NQCEamPSgMsgagCdCNdPZU9hjphkh/BR/BHzgxK8n8U=
+github.com/liut/staffio-backend v0.2.0/go.mod h1:oSU+Uu17C2WKOmVrezm3OD0UU8hNJuxcTZEBY9EWEKg=
 github.com/mattn/go-isatty v0.0.9 h1:d5US/mDsogSGW37IV293h//ZFaeajb69h+EHFsv2xGg=
 github.com/mattn/go-isatty v0.0.9/go.mod h1:YNRxwqDuOph6SZLI9vUUz6OYw3QyUt7WiY2yME+cCiQ=
 github.com/mattn/go-sqlite3 v1.9.0 h1:pDRiWfl+++eC2FEFRy6jXmQlvp4Yh3z1MJKg4UeYM/4=
@@ -167,8 +168,6 @@ google.golang.org/protobuf v1.23.0 h1:4MY060fB1DLGMB/7MBTLnwQUY6+F09GEiz6SsrNqyz
 google.golang.org/protobuf v1.23.0/go.mod h1:EGpADcykh3NcUnDUJcl1+ZksZNG86OlYog2l/sGQquU=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc h1:2gGKlE2+asNV9m7xrywl36YYNnBG5ZQ0r/BOOxqPpmk=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc/go.mod h1:m7x9LTH6d71AHyAX77c9yqWCCa3UKHcVEj9y7hAtKDk=
-gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d h1:TxyelI5cVkbREznMhfzycHdkp5cLA7DpE+GKjSslYhM=
-gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d/go.mod h1:cuepJuh7vyXfUyUwEgHQXw849cJrilpS5NeIjOWESAw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
@@ -176,8 +175,6 @@ gopkg.in/go-playground/assert.v1 v1.2.1 h1:xoYuJVE7KT85PYWrN730RguIQO0ePzVRfFMXa
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
 gopkg.in/go-playground/validator.v8 v8.18.2 h1:lFB4DoMU6B626w8ny76MV7VX6W2VHct2GVOI3xgiMrQ=
 gopkg.in/go-playground/validator.v8 v8.18.2/go.mod h1:RX2a/7Ha8BgOhfk7j780h4/u/RRjR0eouCJSH80/M2Y=
-gopkg.in/ldap.v3 v3.1.0 h1:DIDWEjI7vQWREh0S8X5/NFPCZ3MCVd55LmXKPW4XLGE=
-gopkg.in/ldap.v3 v3.1.0/go.mod h1:dQjCc0R0kfyFjIlWNMH1DORwUASZyDxo2Ry1B51dXaQ=
 gopkg.in/mail.v2 v2.3.1 h1:WYFn/oANrAGP2C0dcV6/pbkPzv8yGzqTjPmTeO7qoXk=
 gopkg.in/mail.v2 v2.3.1/go.mod h1:htwXN1Qh09vZJ1NVKxQqHPBaCBbzKhp5GzuJEA4VJWw=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
