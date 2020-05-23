@@ -20,21 +20,22 @@ var (
 	svr *server
 )
 
+// Config ...
 type Config struct {
+	Addr    string
 	Root    string
 	FS      string
 	BaseURI string
 }
 
 type server struct {
-	root, fs string
-	cfg      Config
-	router   *gin.Engine
-	service  backends.Servicer
-	osvr     *osin.Server
-	wxAuth   *exwechat.API
-	checkin  *exwechat.CAPI
-	larkAPI  *lark.API
+	cfg     Config
+	router  *gin.Engine
+	service backends.Servicer
+	osvr    *osin.Server
+	wxAuth  *exwechat.API
+	checkin *exwechat.CAPI
+	larkAPI *lark.API
 }
 
 func (s *server) IsKeeper(uid string) bool {
@@ -69,8 +70,6 @@ func New(c Config) *server {
 	}
 
 	svr = &server{
-		root:    c.Root,
-		fs:      c.FS,
 		cfg:     c,
 		router:  gin.New(),
 		service: service,

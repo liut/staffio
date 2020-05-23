@@ -150,7 +150,7 @@ func (s *server) StrapRouter() {
 
 	}
 
-	ah := gin.WrapH(staticHandler(s.fs))
+	ah := gin.WrapH(staticHandler(s.cfg.FS))
 	s.router.GET("/static/*filepath", ah)
 	s.router.GET("/favicon.ico", ah)
 	s.router.GET("/robots.txt", ah)
