@@ -1,12 +1,50 @@
 dn: cn=staffio,cn=schema,cn=config
 objectClass: olcSchemaConfig
 cn: staffio
-olcAttributeTypes: {0}( 2.26.1325376000.1.1 NAME 'dateOfBirth' EQUALITY numericStringMatch SUBSTR numericStringSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{8} SINGLE-VALUE )
-olcAttributeTypes: {1}( 2.26.1325376000.1.2 NAME 'gender' EQUALITY caseIgnoreIA5Match SUBSTR caseIgnoreIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{1} SINGLE-VALUE )
-olcAttributeTypes: {2}( 2.26.1325376000.1.3 NAME 'avatarPath' EQUALITY caseIgnoreIA5Match SUBSTR caseIgnoreIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{255}  )
-olcAttributeTypes: {3}( 2.26.1325376000.1.4 NAME 'createdTime' EQUALITY generalizedTimeMatch ORDERING generalizedTimeOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 SINGLE-VALUE )
-olcAttributeTypes: {4}( 2.26.1325376000.1.5 NAME 'modifiedTime' EQUALITY generalizedTimeMatch ORDERING generalizedTimeOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 SINGLE-VALUE )
-olcAttributeTypes: {5}( 2.26.1325376000.1.6 NAME 'idcnNumber' EQUALITY caseIgnoreIA5Match SUBSTR caseIgnoreIA5SubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{20} SINGLE-VALUE )
-olcAttributeTypes: {6}( 2.26.1325376000.1.7 NAME 'dateOfJoin' EQUALITY numericStringMatch SUBSTR numericStringSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{8} SINGLE-VALUE )
-olcAttributeTypes: {7}( 2.26.1325376000.1.8 NAME ('meta' 'metaJSON')  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{1024}  )
-olcObjectClasses: {0}( 2.26.1325376000.1.17 NAME 'staffioPerson' DESC 'Person Extention of Staffio' AUXILIARY MAY ( dateOfBirth $ gender $ avatarPath $ createdTime $ modifiedTime $ metaJSON ) )
+olcAttributeTypes: {0}( 2.26.1325376000.1.1
+    NAME 'dateOfBirth'
+    DESC 'birth date as a string like 19870526'
+    EQUALITY numericStringMatch
+    SUBSTR numericStringSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{8} SINGLE-VALUE )
+olcAttributeTypes: {1}( 2.26.1325376000.1.2
+    NAME 'gender'
+    DESC 'male female or unknown, allowed values are M F U'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.44{1} SINGLE-VALUE )
+olcAttributeTypes: {2}( 2.26.1325376000.1.3
+    NAME 'avatarPath'
+    DESC 'path or URI of head image'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26{1023}  )
+olcAttributeTypes: {3}( 2.26.1325376000.1.4
+    NAME 'createdTime'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 SINGLE-VALUE )
+olcAttributeTypes: {4}( 2.26.1325376000.1.5
+    NAME 'modifiedTime'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 SINGLE-VALUE )
+olcAttributeTypes: {5}( 2.26.1325376000.1.6
+    NAME 'idcnNumber'
+    DESC 'identity number of china'
+    EQUALITY numericStringMatch
+    SUBSTR numericStringSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{20} SINGLE-VALUE )
+olcAttributeTypes: {6}( 2.26.1325376000.1.7
+    NAME 'dateOfJoin'
+    EQUALITY numericStringMatch
+    SUBSTR numericStringSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{8} SINGLE-VALUE )
+olcAttributeTypes: {7}( 2.26.1325376000.1.8
+    NAME 'metaJSON'
+    DESC 'stored meta into JSON string'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64512}  )
+olcObjectClasses: {0}( 2.26.1325376000.1.17
+    NAME 'staffioPerson'
+    DESC 'Person Extention of Staffio'
+    AUXILIARY
+    MAY ( dateOfBirth $ gender $ avatarPath $ createdTime $ modifiedTime $ metaJSON ) )
