@@ -24,7 +24,7 @@ require (
 	github.com/lib/pq v1.5.1
 	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
 	github.com/liut/simpauth v0.1.3
-	github.com/liut/staffio-backend v0.2.0
+	github.com/liut/staffio-backend v0.2.1
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/mozillazg/go-slugify v0.2.0

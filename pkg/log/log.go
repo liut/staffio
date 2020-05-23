@@ -1,7 +1,10 @@
 package log
 
 import (
+	"fmt"
 	syslog "log"
+
+	zlog "github.com/liut/staffio-backend/log"
 )
 
 type logger struct{}
@@ -17,6 +20,7 @@ func init() {
 func SetLogger(logger Logger) {
 	if logger != nil {
 		Default = logger
+		zlog.SetLogger(logger)
 	}
 }
 
@@ -25,19 +29,19 @@ func GetLogger() Logger {
 }
 
 func (z *logger) Debugw(msg string, keysAndValues ...interface{}) {
-	syslog.Print(msg, keysAndValues)
+	syslog.Output(2, fmt.Sprint("DEBUG: "+msg, keysAndValues))
 }
 
 func (z *logger) Infow(msg string, keysAndValues ...interface{}) {
-	syslog.Print(msg, keysAndValues)
+	syslog.Output(2, fmt.Sprint("INFO: "+msg, keysAndValues))
 }
 
 func (z *logger) Warnw(msg string, keysAndValues ...interface{}) {
-	syslog.Print(msg, keysAndValues)
+	syslog.Output(2, fmt.Sprint("WARN: "+msg, keysAndValues))
 }
 
 func (z *logger) Errorw(msg string, keysAndValues ...interface{}) {
-	syslog.Print(msg, keysAndValues)
+	syslog.Output(2, fmt.Sprint("ERROR: "+msg, keysAndValues))
 }
 
 func (z *logger) Fatalw(msg string, keysAndValues ...interface{}) {
