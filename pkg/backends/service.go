@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/liut/staffio-backend/ldap"
-	"github.com/liut/staffio-backend/schema"
+	schema "github.com/liut/staffio-backend/model"
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
