@@ -1,5 +1,5 @@
 IMAGE = liut7/staffio-ldap
-VERSION = 2.4.48-r0
+VERSION = 2.4.48-r1
 
 org = "Example Inc."
 base_dn = "dc=example,dc=org"
@@ -9,6 +9,7 @@ password = "mysecret"
 
 build:
 	docker build -t $(IMAGE):$(VERSION) .
+	docker tag  $(IMAGE):$(VERSION) $(IMAGE):2.4
 
 run:
 	docker run -e LDAP_ORGANIZATION=$(org) \
