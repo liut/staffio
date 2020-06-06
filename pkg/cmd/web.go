@@ -29,8 +29,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/liut/keeper/utils/reaper"
 	"github.com/spf13/cobra"
-	"github.com/wealthworks/go-utils/reaper"
 
 	"github.com/liut/staffio/pkg/backends"
 	config "github.com/liut/staffio/pkg/settings"

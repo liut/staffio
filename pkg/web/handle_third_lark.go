@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/fhyx/lark-api-go/lark"
+	"fhyx.online/lark-api-go/lark"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/random"

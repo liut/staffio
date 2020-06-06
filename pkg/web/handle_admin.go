@@ -198,7 +198,7 @@ func (s *server) staffForm(c *gin.Context) {
 	}
 	data["inEdit"] = inEdit
 	data["exmail"] = settings.Current.EmailCheck
-	data["exwechat"] = settings.Current.WechatCorpID != ""
+	data["wxwork"] = settings.Current.WechatCorpID != ""
 	s.Render(c, "staff_edit.html", data)
 }
 

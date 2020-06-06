@@ -3,12 +3,13 @@ module github.com/liut/staffio
 go 1.12
 
 require (
+	fhyx.online/lark-api-go v0.0.0-20200606133305-8f311fca705f
+	fhyx.online/tencent-api-go v0.0.0-20200606143651-b3ba4d0de932
+	fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3 // indirect
 	github.com/certifi/gocertifi v0.0.0-20190905060710-a5e0173ced67 // indirect
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e // indirect
 	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/fhyx/lark-api-go v0.0.0-20200501180702-dd1bbbefc28f
-	github.com/fhyx/welink-api-go v0.0.0-20200207113908-e65240a15193
 	github.com/getsentry/raven-go v0.2.0
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73
@@ -22,7 +23,7 @@ require (
 	github.com/json-iterator/go v1.1.7 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.5.1
-	github.com/liut/keeper v0.0.0-20170829034538-0c18b3ae34f7
+	github.com/liut/keeper v0.0.0-20200606142300-00badb3e6be4
 	github.com/liut/simpauth v0.1.3
 	github.com/liut/staffio-backend v0.2.3
 	github.com/mattn/go-isatty v0.0.9 // indirect
@@ -43,8 +44,6 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	github.com/wealthworks/go-debug v2.0.0+incompatible // indirect
-	github.com/wealthworks/go-tencent-api v0.1.1
-	github.com/wealthworks/go-utils v0.0.0-20170614083745-eeb719fe278f
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0

@@ -4,10 +4,10 @@ import (
 	"flag"
 	"log"
 
+	"fhyx.online/tencent-api-go/exmail"
+	"fhyx.online/tencent-api-go/wxwork"
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/settings"
-	"github.com/wealthworks/go-tencent-api/exmail"
-	"github.com/wealthworks/go-tencent-api/exwechat"
 )
 
 var (
@@ -35,7 +35,7 @@ func main() {
 		return
 	}
 
-	wechat := exwechat.NewAPI()
+	wechat := wxwork.NewAPI()
 	user, err := wechat.GetUser(*uid)
 	if err != nil {
 		log.Print(err)
