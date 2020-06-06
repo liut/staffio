@@ -92,11 +92,10 @@ docker run --name staffio-db -p 54322:5432 \
 # staffio main server
 docker run --name staffio -p 3030:3030 \
 	-e STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
-	-e STAFFIO_LDAP_HOSTS=slapd \
+	-e STAFFIO_LDAP_HOSTS='ldap://slapd' \
 	-e STAFFIO_LDAP_BASE="dc=example,dc=org" \
 	-e STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org" \
 	-e STAFFIO_LDAP_PASS='mypassword' \
-	-e DEBUG='staffio:backends,staffio:ldap' \
 	--link staffio-db --link staffio-ldap:slapd \
 	-d liut7/staffio:latest web
 
