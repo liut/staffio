@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wealthworks/go-tencent-api/exmail"
+	"fhyx.online/tencent-api-go/exmail"
 
 	"github.com/liut/staffio/pkg/models"
 )

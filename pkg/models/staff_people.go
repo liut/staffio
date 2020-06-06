@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/liut/staffio-backend/schema"
+	schema "github.com/liut/staffio-backend/model"
 	"github.com/liut/staffio/pkg/common"
 )
 

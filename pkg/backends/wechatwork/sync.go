@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/wealthworks/go-tencent-api/exwechat"
+	"fhyx.online/tencent-api-go/wxwork"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
@@ -13,25 +13,25 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-type User = exwechat.User
-type Department = exwechat.Department
-type Departments = exwechat.Departments
+type User = wxwork.User
+type Department = wxwork.Department
+type Departments = wxwork.Departments
 
 // Syncer ...
 type Syncer struct {
-	DeptFn    func(dept *exwechat.Department, idx int)
+	DeptFn    func(dept *wxwork.Department, idx int)
 	BulkFn    func(svc backends.Servicer, t *team.Team, staffs models.Staffs) error
 	WithTeam  bool
 	WithStaff bool
 	Output    bool
 
-	api *exwechat.API
+	api *wxwork.API
 }
 
 // SyncDepartment ...
 func SyncDepartment(action, uid string) {
 	s := &Syncer{WithTeam: strings.HasPrefix(action, "sync"), WithStaff: action == "sync-all"}
-	s.api = exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
+	s.api = wxwork.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	s.BulkFn = backends.StoreTeamAndStaffs
 
 	if action == "query" {
@@ -57,7 +57,7 @@ func SyncDepartment(action, uid string) {
 // RunIt ...
 func (s *Syncer) RunIt() error {
 	if s.api == nil {
-		s.api = exwechat.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
+		s.api = wxwork.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	}
 
 	departments, err := s.api.ListDepartment(1)

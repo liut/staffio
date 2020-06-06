@@ -8,9 +8,9 @@ import (
 	"github.com/mozillazg/go-slugify"
 	"go.uber.org/zap"
 
-	"github.com/fhyx/welink-api-go/gender"
-	wlog "github.com/fhyx/welink-api-go/log"
-	"github.com/fhyx/welink-api-go/welink"
+	"fhyx.online/welink-api-go/gender"
+	wlog "fhyx.online/welink-api-go/log"
+	"fhyx.online/welink-api-go/welink"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/backends/wechatwork"

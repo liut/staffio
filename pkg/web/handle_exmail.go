@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"fhyx.online/tencent-api-go/exmail"
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
-	"github.com/wealthworks/go-tencent-api/exmail"
 
 	"github.com/liut/staffio/pkg/backends/qqexmail"
 	"github.com/liut/staffio/pkg/settings"

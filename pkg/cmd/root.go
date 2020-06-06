@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	larklog "github.com/fhyx/lark-api-go/log"
+	larklog "fhyx.online/lark-api-go/log"
 
 	"github.com/liut/staffio/pkg/backends"
 	zlog "github.com/liut/staffio/pkg/log"

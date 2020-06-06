@@ -1,5 +1,5 @@
 
--- sync from wxqiye(exwechat)
+-- sync from wxqiye(wxwork)
 CREATE TABLE IF NOT EXISTS "department" (
 	id SERIAL,
 	name VARCHAR(90) NOT NULL,

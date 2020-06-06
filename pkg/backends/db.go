@@ -3,8 +3,11 @@ package backends
 import (
 	"database/sql"
 	"errors"
-	_ "github.com/lib/pq"
 	"os"
+	"sync"
+	"time"
+
+	_ "github.com/lib/pq" // ok
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,6 +19,10 @@ var (
 	valueError  = errors.New("value error")
 	dbc         *sqlx.DB
 	dbDSN       string
+
+	once         sync.Once
+	quitC        chan struct{}
+	pingInterval = 90 * time.Second
 
 	ErrNoRows = sql.ErrNoRows
 )
@@ -42,6 +49,8 @@ func init() {
 	} else {
 		dbDSN = "postgres://staffio@localhost/staffio?sslmode=disable"
 	}
+
+	quitC = make(chan struct{})
 }
 
 func SetDSN(dsn string) {
@@ -72,15 +81,45 @@ func closeDb() {
 
 func getDb() *sqlx.DB {
 	if dbc == nil {
-		dbc = openDb()
-		return dbc
-	}
-
-	if err := dbc.Ping(); err != nil {
-		dbc = openDb()
+		once.Do(func() {
+			dbc = openDb()
+			go reap(pingInterval, pingDb, quitC)
+		})
 	}
 
 	return dbc
+}
+
+func pingDb() error {
+	err := dbc.Ping()
+	if err != nil {
+		logger().Infow("ping db fail", "err", err)
+		dbc = openDb()
+	}
+	return err
+}
+
+// reap with special action at set intervals.
+func reap(interval time.Duration, cf func() error, quit <-chan struct{}) {
+	logger().Infow("starting reaper", "interval", interval)
+	ticker := time.NewTicker(interval)
+
+	defer func() {
+		ticker.Stop()
+	}()
+
+	for {
+		select {
+		case <-quit:
+			// Handle the quit signal.
+			return
+		case <-ticker.C:
+			// Execute function of clean.
+			if err := cf(); err != nil {
+				logger().Infow("reap fail", "err", err)
+			}
+		}
+	}
 }
 
 func withDbQuery(query func(db dber) error) error {

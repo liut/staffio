@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/wealthworks/go-tencent-api/exwechat"
+	"fhyx.online/tencent-api-go/wxwork"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/team"
@@ -13,7 +13,7 @@ import (
 var nameReplacer = strings.NewReplacer("公司", "", "总部", "", "分公司", "", "项目组", "")
 
 // UserToStaff ...
-func UserToStaff(user *exwechat.User) *models.Staff {
+func UserToStaff(user *wxwork.User) *models.Staff {
 	staff := &models.Staff{
 		UID:          strings.ToLower(user.UID),
 		CommonName:   user.Name,
@@ -44,7 +44,7 @@ func UserToStaff(user *exwechat.User) *models.Staff {
 }
 
 // DepartmentToTeam ...
-func DepartmentToTeam(dept *exwechat.Department, all exwechat.Departments) *team.Team {
+func DepartmentToTeam(dept *wxwork.Department, all wxwork.Departments) *team.Team {
 	var team = &team.Team{
 		ID:       dept.Id,
 		Name:     dept.Name,

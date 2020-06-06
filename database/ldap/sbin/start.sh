@@ -33,6 +33,9 @@ access to *\
 	echo 'index   cn          eq' >> $CONF
 	echo 'index   sn          eq' >> $CONF
 	echo 'index   mail        eq' >> $CONF
+	echo 'index   mobile      eq' >> $CONF
+	echo 'index   entryCSN      eq' >> $CONF
+	echo 'index   entryUUID      eq' >> $CONF
 
 	echo '' >> $CONF
 
