@@ -9,8 +9,8 @@ import (
 	"github.com/liut/staffio/pkg/models/types"
 )
 
-// GenClientID ...
-func GenClientID() string {
+// GenNewIID ...
+func GenNewIID() string {
 	now := time.Now()
 	iid := types.IID(now.UnixNano())
 	return iid.String()
@@ -18,7 +18,7 @@ func GenClientID() string {
 
 // GenNewClient ...
 func GenNewClient(name, redirectURI string) *oauth.Client {
-	id := GenClientID()
+	id := GenNewIID()
 	secret, err := password.Generate(28, 10, 0, false, false)
 	if err != nil {
 		logger().Infow("password generate fail", "err", err)

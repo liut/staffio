@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/openshift/osin"
-	"github.com/pborman/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,7 +38,7 @@ func TestAuthorizeOperations(t *testing.T) {
 	for _, authorize := range []*osin.AuthorizeData{
 		{
 			Client:      client,
-			Code:        uuid.New(),
+			Code:        GenNewIID(),
 			ExpiresIn:   int32(600),
 			Scope:       "scope",
 			RedirectUri: "http://localhost/",
@@ -78,7 +77,7 @@ func TestStoreFailsOnInvalidUserData(t *testing.T) {
 	// client.Meta = clientMetaEmpty
 	authorize := &osin.AuthorizeData{
 		Client:      client,
-		Code:        uuid.New(),
+		Code:        GenNewIID(),
 		ExpiresIn:   int32(60),
 		Scope:       "scope",
 		RedirectUri: "http://localhost/",
@@ -90,8 +89,8 @@ func TestStoreFailsOnInvalidUserData(t *testing.T) {
 		Client:        client,
 		AuthorizeData: authorize,
 		AccessData:    nil,
-		AccessToken:   uuid.New(),
-		RefreshToken:  uuid.New(),
+		AccessToken:   GenNewIID(),
+		RefreshToken:  GenNewIID(),
 		ExpiresIn:     int32(60),
 		Scope:         "scope",
 		RedirectUri:   "https://localhost/",
@@ -107,7 +106,7 @@ func TestAccessOperations(t *testing.T) {
 	client := NewClient("3", "secret", "http://localhost/")
 	authorize := &osin.AuthorizeData{
 		Client:      client,
-		Code:        uuid.New(),
+		Code:        GenNewIID(),
 		ExpiresIn:   int32(60),
 		Scope:       "scope",
 		RedirectUri: "http://localhost/",
@@ -119,8 +118,8 @@ func TestAccessOperations(t *testing.T) {
 		Client:        client,
 		AuthorizeData: authorize,
 		AccessData:    nil,
-		AccessToken:   uuid.New(),
-		RefreshToken:  uuid.New(),
+		AccessToken:   GenNewIID(),
+		RefreshToken:  GenNewIID(),
 		ExpiresIn:     int32(60),
 		Scope:         "scope",
 		RedirectUri:   "https://localhost/",
@@ -131,8 +130,8 @@ func TestAccessOperations(t *testing.T) {
 		Client:        client,
 		AuthorizeData: authorize,
 		AccessData:    nestedAccess,
-		AccessToken:   uuid.New(),
-		RefreshToken:  uuid.New(),
+		AccessToken:   GenNewIID(),
+		RefreshToken:  GenNewIID(),
 		ExpiresIn:     int32(60),
 		Scope:         "scope",
 		RedirectUri:   "https://localhost/",
@@ -189,7 +188,7 @@ func TestRefreshOperations(t *testing.T) {
 				Client: client,
 				AuthorizeData: &osin.AuthorizeData{
 					Client:      client,
-					Code:        uuid.New(),
+					Code:        GenNewIID(),
 					ExpiresIn:   int32(60),
 					Scope:       "scope",
 					RedirectUri: "http://localhost/",
@@ -198,8 +197,8 @@ func TestRefreshOperations(t *testing.T) {
 					UserData:    userDataMock,
 				},
 				AccessData:   nil,
-				AccessToken:  uuid.New(),
-				RefreshToken: uuid.New(),
+				AccessToken:  GenNewIID(),
+				RefreshToken: GenNewIID(),
 				ExpiresIn:    int32(60),
 				Scope:        "scope",
 				RedirectUri:  "https://localhost/",
