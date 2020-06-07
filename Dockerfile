@@ -23,7 +23,7 @@ RUN apk add --update \
 ENV PGHOST="staffio-db" \
     STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
     STAFFIO_HTTP_LISTEN=":3030" \
-    STAFFIO_LDAP_HOSTS="slapd" \
+    STAFFIO_LDAP_HOSTS="ldap://slapd" \
     STAFFIO_LDAP_BASE="dc=example,dc=org" \
     STAFFIO_LDAP_BIND_DN="cn=admin,dc=example,dc=org" \
     STAFFIO_LDAP_PASS='mypassword' \
