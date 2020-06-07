@@ -78,6 +78,11 @@ func execSQLfile(db dber, name string) error {
 	return nil
 }
 
+func TestCleanup(t *testing.T) {
+	err := Cleanup()
+	assert.NoError(t, err)
+}
+
 func TestWatching(t *testing.T) {
 	uid := "eagle"
 	assert.NotNil(t, svc.Watch().Gets(uid).UIDs())
