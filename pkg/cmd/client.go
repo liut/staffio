@@ -38,7 +38,7 @@ var clientCmd = &cobra.Command{
 Client add or revoke or list
 
 add client:
-	--add code --name name --secret secret [--uri return URI]
+	--add name --secret secret [--uri return URI]
 revoke client:
 	--revoke code
 list:
@@ -51,35 +51,16 @@ func init() {
 	RootCmd.AddCommand(clientCmd)
 
 	clientCmd.Flags().Bool("list", false, "List clients")
-	clientCmd.Flags().String("add", "", "A client Code(ID)")
-	clientCmd.Flags().String("name", "", "The client name")
-	clientCmd.Flags().String("secret", "", "The client secret")
-	clientCmd.Flags().String("uri", "", "The client return URI")
+	clientCmd.Flags().String("add", "", "client name")
+	clientCmd.Flags().String("uri", "", "client return URI")
 	clientCmd.Flags().String("revoke", "", "A client Code(ID)")
 	clientCmd.Flags().Int("limit", 5, "list limit")
 }
 
 func clientRun(cmd *cobra.Command, args []string) {
-	log.Printf("args %v", args)
-
-	code, _ := cmd.Flags().GetString("add")
-	name, _ := cmd.Flags().GetString("name")
-	secret, _ := cmd.Flags().GetString("secret")
+	name, _ := cmd.Flags().GetString("add")
 	uri, _ := cmd.Flags().GetString("uri")
 	service := backends.NewService()
-	if code != "" && name != "" && secret != "" {
-		client := oauth.NewClient(name, code, secret, uri)
-		_, e := service.OSIN().GetClientWithCode(code) // check exists
-		if e == nil {
-			log.Printf("client %q already exist", code)
-			return
-		}
-		if err := service.OSIN().SaveClient(client); err != nil {
-			log.Printf("save client failed, error %s", err)
-			return
-		}
-		fmt.Printf("save client %q (%q) done\n", client.Name, client.Code)
-	}
 
 	if revoke, err := cmd.Flags().GetString("revoke"); err == nil && revoke != "" {
 		if err = service.OSIN().RemoveClient(revoke); err != nil {
@@ -101,8 +82,18 @@ func clientRun(cmd *cobra.Command, args []string) {
 			return
 		}
 		for _, c := range data {
-			fmt.Printf("client % 19q (code %q)\n", c.Name, c.Code)
+			fmt.Printf("client % 19q (id %q, secret %q)\n", c.GetName(), c.GetId(), c.GetSecret())
 		}
+	}
+
+	if name != "" {
+		client := backends.GenNewClient(name, uri)
+		fmt.Printf("generate new client %s, id %s, secret %s \n", client.GetName(), client.GetId(), client.GetSecret())
+		if err := service.OSIN().SaveClient(client); err != nil {
+			log.Printf("save client failed, error %s", err)
+			return
+		}
+		fmt.Print("save client done\n")
 	}
 
 }

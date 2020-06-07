@@ -101,7 +101,7 @@ func pingDb() error {
 
 // reap with special action at set intervals.
 func reap(interval time.Duration, cf func() error, quit <-chan struct{}) {
-	logger().Infow("starting reaper", "interval", interval)
+	logger().Debugw("starting reaper", "interval", interval)
 	ticker := time.NewTicker(interval)
 
 	defer func() {
@@ -163,4 +163,12 @@ func inArray(k string, fields []string) bool {
 		}
 	}
 	return false
+}
+
+func envOr(key, dft string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		return dft
+	}
+	return v
 }

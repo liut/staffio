@@ -4,15 +4,15 @@ import (
 	"github.com/openshift/osin"
 )
 
+// OSINStore ...
 type OSINStore interface {
 	osin.Storage
 
+	LoadClient(id string) (*Client, error)
 	LoadClients(spec *ClientSpec) ([]Client, error)
 	CountClients() uint
-	GetClientWithCode(code string) (*Client, error)
-	GetClientWithID(id int) (*Client, error)
 	SaveClient(client *Client) error
-	RemoveClient(code string) error
+	RemoveClient(id string) error
 
 	LoadScopes() (scopes []Scope, err error)
 	IsAuthorized(clientID, username string) bool

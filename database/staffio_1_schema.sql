@@ -3,27 +3,24 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS oauth_client
 (
-	id serial,
-	code varchar(80) NOT NULL, -- client_id
-	name varchar(120) NOT NULL,
+	id varchar(80) NOT NULL, -- client_id
 	secret varchar(40) NOT NULL,
 	redirect_uri varchar(255) NOT NULL DEFAULT '',
-	userdata jsonb NOT NULL DEFAULT '{}'::jsonb,
+	meta jsonb NOT NULL DEFAULT '{}'::jsonb,
 	created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	grant_types jsonb NOT NULL DEFAULT '[]'::jsonb,
-	response_types jsonb NOT NULL DEFAULT '[]'::jsonb,
-	scopes jsonb NOT NULL DEFAULT '[]'::jsonb,
-	UNIQUE (code),
 	PRIMARY KEY (id)
 );
+CREATE INDEX IF NOT EXISTS idx_client_created ON oauth_client (created);
 
 CREATE TABLE IF NOT EXISTS oauth_access_token
 (
 	id serial,
 	client_id varchar(120) NOT NULL,
-	username varchar(120) NOT NULL DEFAULT '',
+	authorize_code varchar(140) NOT NULL,
 	access_token varchar(240) NOT NULL,
 	refresh_token varchar(240) NOT NULL DEFAULT '',
+	previous varchar(240) NOT NULL DEFAULT '',
+	userdata jsonb NOT NULL DEFAULT '{}'::jsonb,
 	expires_in int NOT NULL DEFAULT 86400,
 	scopes varchar(255) NOT NULL DEFAULT '',
 	is_frozen BOOLEAN NOT NULL DEFAULT false,
@@ -40,7 +37,7 @@ CREATE TABLE IF NOT EXISTS oauth_authorization_code
 	id serial,
 	code varchar(140) NOT NULL,
 	client_id varchar(120) NOT NULL,
-	username varchar(120) NOT NULL DEFAULT '',
+	userdata jsonb NOT NULL DEFAULT '{}'::jsonb,
 	redirect_uri varchar(255) NOT NULL DEFAULT '',
 	expires_in int NOT NULL DEFAULT 86400,
 	scopes varchar(255) NOT NULL DEFAULT '',
@@ -67,7 +64,7 @@ CREATE TABLE IF NOT EXISTS oauth_scope
 CREATE TABLE IF NOT EXISTS oauth_client_user_authorized
 (
 	id serial,
-	client_id varchar(120) NOT NULL,
+	client_id varchar(80) NOT NULL,
 	username varchar(120) NOT NULL DEFAULT '',
 	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE (client_id, username),
@@ -78,7 +75,8 @@ CREATE SEQUENCE IF NOT EXISTS staff_id_seq START 1027;
 
 
 
-CREATE TABLE IF NOT EXISTS password_reset (
+CREATE TABLE IF NOT EXISTS password_reset
+(
 	id serial,
 	uid name NOT NULL , -- uid
 	type_id smallint NOT NULL, -- 2=email/3=phone
@@ -115,7 +113,7 @@ CREATE TABLE IF NOT EXISTS staff_watch (
 	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE (uid, watching),
 	PRIMARY KEY (id)
-) WITH (OIDS=FALSE);
+);
 
 
 

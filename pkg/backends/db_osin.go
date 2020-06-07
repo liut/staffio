@@ -11,13 +11,23 @@ import (
 	"github.com/liut/staffio/pkg/models/oauth"
 )
 
+// vars
 var (
 	clientsSortableFields = []string{"id", "created"}
 
 	_ OSINStore = (*DbStorage)(nil)
+
+	ToJSONKV = oauth.ToJSONKV
 )
 
+type JSONKV = oauth.JSONKV
+type Client = oauth.Client
+type ClientSpec = oauth.ClientSpec
 type OSINStore = oauth.OSINStore
+
+func NewClient(id, secret, redirectURI string) *Client {
+	return oauth.NewClient(id, secret, redirectURI)
+}
 
 type DbStorage struct {
 	pageSize int
@@ -41,24 +51,19 @@ func (s *DbStorage) Clone() osin.Storage {
 func (s *DbStorage) Close() {
 }
 
-func (s *DbStorage) GetClient(id string) (osin.Client, error) {
-	c, err := s.GetClientWithCode(id)
-	if err == nil {
-		return c, nil
-	}
-	logger().Infow("Client not found", "id", id, "err", err)
-	return nil, fmt.Errorf("Client %q not found", id)
-}
-
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
+	extra, err := ToJSONKV(data.UserData)
+	if err != nil {
+		return err
+	}
 	qs := func(tx dbTxer) error {
 		sql := `INSERT INTO
-		 oauth_authorization_code(code, client_id, username, redirect_uri, expires_in, scopes, created)
+		 oauth_authorization_code(code, client_id, userdata, redirect_uri, expires_in, scopes, created)
 		 VALUES($1, $2, $3, $4, $5, $6, $7);`
-		r, err := tx.Exec(sql, data.Code, data.Client.GetId(), data.UserData.(string),
+		r, err := tx.Exec(sql, data.Code, data.Client.GetId(), extra,
 			data.RedirectUri, data.ExpiresIn, data.Scope, data.CreatedAt)
 		if err != nil {
-			logger().Infow("save authorizeData fail", "code", data.Code, "err", err)
+			logger().Infow("save authorizeData fail", "code", data.Code, "userData", data.UserData, "err", err)
 			return err
 		}
 
@@ -71,20 +76,20 @@ func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 
 func (s *DbStorage) LoadAuthorize(code string) (*osin.AuthorizeData, error) {
 	var (
-		client_id string
-		username  string
-		err       error
+		clientID string
+		userdata JSONKV
+		err      error
 	)
 	a := &osin.AuthorizeData{Code: code}
 	qs := func(db dber) error {
-		return db.QueryRow(`SELECT client_id, username, redirect_uri, expires_in, scopes, created
+		return db.QueryRow(`SELECT client_id, userdata, redirect_uri, expires_in, scopes, created
 		 FROM oauth_authorization_code WHERE code = $1`,
-			code).Scan(&client_id, &username, &a.RedirectUri, &a.ExpiresIn, &a.Scope, &a.CreatedAt)
+			code).Scan(&clientID, &userdata, &a.RedirectUri, &a.ExpiresIn, &a.Scope, &a.CreatedAt)
 	}
 	err = withDbQuery(qs)
 	if err == nil {
-		a.UserData = username
-		a.Client, err = s.GetClientWithCode(client_id)
+		a.UserData = userdata
+		a.Client, err = s.GetClient(clientID)
 	}
 	if err != nil {
 		logger().Infow("load authorization fail", "code", code, "err", err)
@@ -114,17 +119,58 @@ func (s *DbStorage) RemoveAuthorize(code string) error {
 	return withTxQuery(qs)
 }
 
-func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
+func (s *DbStorage) SaveAccess(data *osin.AccessData) (err error) {
+	_, err = s.LoadAccess(data.AccessToken)
+	if err == nil {
+		return
+	}
+	if err != ErrNotFound {
+		logger().Infow("load access fail", "accessToken", data.AccessToken, "err", err)
+		return
+	}
+	prev := ""
+	authorizeData := &osin.AuthorizeData{}
+
+	if data.AccessData != nil {
+		prev = data.AccessData.AccessToken
+	}
+
+	if data.AuthorizeData != nil {
+		authorizeData = data.AuthorizeData
+	}
+
+	var (
+		extra JSONKV
+	)
+	if extra, err = ToJSONKV(data.UserData); err != nil {
+		logger().Infow("access.userdata fail", "userdata", data.UserData, "err", err)
+		return
+	}
+	if data.Client == nil {
+		return valueError
+	}
 	qs := func(tx dbTxer) error {
-		str := `INSERT INTO
-		 oauth_access_token(client_id, username, access_token, refresh_token, expires_in, scopes, created)
-		 VALUES($1, $2, $3, $4, $5, $6, $7);`
-		_, err := tx.Exec(str, data.Client.GetId(), data.UserData.(string),
-			data.AccessToken, data.RefreshToken, data.ExpiresIn, data.Scope, data.CreatedAt)
+		r, err := tx.Exec(`INSERT INTO oauth_access_token (
+			client_id, authorize_code, previous, access_token, refresh_token, expires_in, scopes, created, userdata)
+			    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			data.Client.GetId(), authorizeData.Code, prev, data.AccessToken, data.RefreshToken,
+			data.ExpiresIn, data.Scope, data.CreatedAt, extra)
 		if err != nil {
 			logger().Infow("save accessData fail", "data", data, "err", err)
 			return err
 		}
+		logger().Infow("save accessData ok", "data", data, "r", r)
+
+		// debug("save AccessData token %s OK %v", data.AccessToken, r)
+		// str := `INSERT INTO
+		//  oauth_access_token(client_id, userdata, access_token, refresh_token, expires_in, scopes, created)
+		//  VALUES($1, $2, $3, $4, $5, $6, $7);`
+		// _, err := tx.Exec(str, data.Client.GetId(), data.UserData,
+		// 	data.AccessToken, data.RefreshToken, data.ExpiresIn, data.Scope, data.CreatedAt)
+		// if err != nil {
+		// 	logger().Infow("save accessData fail", "data", data, "err", err)
+		// 	return err
+		// }
 
 		if data.RefreshToken != "" {
 			s.refresh.Store(data.RefreshToken, data.AccessToken)
@@ -136,23 +182,28 @@ func (s *DbStorage) SaveAccess(data *osin.AccessData) error {
 
 func (s *DbStorage) LoadAccess(code string) (*osin.AccessData, error) {
 	var (
-		client_id string
-		username  string
-		err       error
-		is_frozen bool
-		id        int
+		clientID, authorizeCode, prevAccessToken string
+		userdata                                 JSONKV
+		err                                      error
+		isFrozen                                 bool
+		id                                       int
 	)
 	a := &osin.AccessData{AccessToken: code}
 	qs := func(db dber) error {
-		return db.QueryRow(`SELECT id, client_id, username, refresh_token, expires_in, scopes, is_frozen, created
+		return db.QueryRow(`SELECT id, client_id, userdata, refresh_token, authorize_code, previous, expires_in, scopes, is_frozen, created
 		 FROM oauth_access_token WHERE access_token = $1`,
-			code).Scan(&id, &client_id, &username, &a.RefreshToken, &a.ExpiresIn, &a.Scope, &is_frozen, &a.CreatedAt)
+			code).Scan(&id, &clientID, &userdata, &a.RefreshToken, &authorizeCode, &prevAccessToken, &a.ExpiresIn, &a.Scope, &isFrozen, &a.CreatedAt)
 	}
 	err = withDbQuery(qs)
-	if err == nil {
-		a.UserData = username
-		a.Client, err = s.GetClientWithCode(client_id)
+	if err != nil {
+		logger().Infow("loadAccess fail", "code", code, "err", err)
+		return nil, err
 	}
+	a.UserData = userdata
+	a.Client, err = s.GetClient(clientID)
+	a.AuthorizeData, _ = s.LoadAuthorize(authorizeCode)
+	prevAccess, _ := s.LoadAccess(prevAccessToken)
+	a.AccessData = prevAccess
 	if err != nil {
 		logger().Warnw("load access fail", "code", code, "err", err)
 		return nil, err
@@ -177,7 +228,7 @@ func (s *DbStorage) LoadRefresh(code string) (*osin.AccessData, error) {
 	if v, ok := s.refresh.Load(code); ok {
 		return s.LoadAccess(v.(string))
 	}
-	return nil, fmt.Errorf("RefreshToken %q not found", code)
+	return nil, ErrNotFound
 }
 
 func (s *DbStorage) RemoveRefresh(code string) error {
@@ -185,20 +236,20 @@ func (s *DbStorage) RemoveRefresh(code string) error {
 	return nil
 }
 
-func (s *DbStorage) GetClientWithCode(code string) (c *oauth.Client, err error) {
-	c = new(oauth.Client)
-	err = withDbQuery(func(db dber) error {
-		return db.Get(c, "SELECT * FROM oauth_client WHERE code = $1", code)
-	})
-	return
-}
-
-func (s *DbStorage) GetClientWithID(id int) (c *oauth.Client, err error) {
+func (s *DbStorage) GetClient(id string) (c osin.Client, err error) {
 	c = new(oauth.Client)
 	err = withDbQuery(func(db dber) error {
 		return db.Get(c, "SELECT * FROM oauth_client WHERE id = $1", id)
 	})
 	return
+}
+
+func (s *DbStorage) LoadClient(id string) (*Client, error) {
+	c, err := s.GetClient(id)
+	if err != nil {
+		return nil, err
+	}
+	return c.(*Client), nil
 }
 
 func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client, err error) {
@@ -243,15 +294,15 @@ func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client,
 
 	str = fmt.Sprintf("%s LIMIT %d OFFSET %d", str, spec.Limit, (spec.Page-1)*spec.Limit)
 
-	clients = make([]oauth.Client, 0)
+	clients = []oauth.Client{}
 	err = withDbQuery(func(db dber) error {
 		return db.Select(&clients, str)
 	})
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	return clients, nil
+	return
 }
 
 func (s *DbStorage) CountClients() (total uint) {
@@ -263,29 +314,23 @@ func (s *DbStorage) CountClients() (total uint) {
 }
 
 func (s *DbStorage) SaveClient(client *oauth.Client) error {
-	if client.Name == "" || client.Code == "" || client.Secret == "" {
+	if client.ID == "" || client.Secret == "" {
 		return valueError
 	}
 	qs := func(tx dbTxer) error {
-		var err error
-		if client.ID > 0 {
-			str := `UPDATE oauth_client SET name = $1, code = $2, secret = $3, redirect_uri = $4
-			 WHERE id = $5`
-			_, err = tx.Exec(str, client.Name, client.Code, client.Secret, client.RedirectURI, client.ID)
-			logger().Infow("UPDATE client result", "err", err)
-		} else {
-			str := `INSERT INTO
-		 oauth_client(name, code, secret, redirect_uri, grant_types, scopes, created)
-		 VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
-			err = tx.QueryRow(str,
-				client.Name,
-				client.Code,
-				client.Secret,
-				client.RedirectURI,
-				client.AllowedGrantTypes,
-				client.AllowedScopes,
-				client.CreatedAt).Scan(&client.ID)
-		}
+		str := `INSERT INTO oauth_client(id, secret, redirect_uri, meta)
+		 VALUES($1, $2, $3, $4) ON CONFLICT (id) DO UPDATE
+		 SET secret = $5, redirect_uri = $6, meta = $7 RETURNING created`
+		err := tx.QueryRow(str,
+			client.ID,
+			client.Secret,
+			client.RedirectURI,
+			client.Meta,
+			client.Secret,
+			client.RedirectURI,
+			client.Meta).
+			Scan(&client.CreatedAt)
+
 		if err != nil {
 			logger().Warnw("save client failed ", "client", client, "err", err)
 		}
@@ -294,11 +339,11 @@ func (s *DbStorage) SaveClient(client *oauth.Client) error {
 	return withTxQuery(qs)
 }
 
-func (s *DbStorage) RemoveClient(code string) error {
+func (s *DbStorage) RemoveClient(id string) error {
 	return withTxQuery(func(tx dbTxer) error {
-		_, err := tx.Exec("DELETE FROM oauth_client WHERE code = $1", code)
+		_, err := tx.Exec("DELETE FROM oauth_client WHERE id = $1", id)
 		if err != nil {
-			logger().Warnw("remove client failed ", "code", code, "err", err)
+			logger().Warnw("remove client failed ", "id", id, "err", err)
 		}
 		return err
 	})

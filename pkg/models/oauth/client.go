@@ -1,58 +1,90 @@
 package oauth
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/liut/staffio/pkg/models/types"
 )
 
+// StringSlice ...
 type StringSlice = types.StringSlice
 
-// Client of oauth2 app
+var (
+	defaultGrantTypes    = []string{"authorization_code", "password", "refresh_token"}
+	defaultResponseTypes = []string{"code", "token"}
+	defaultScopes        = []string{"basic"}
+	defaultClientMeta    = ClientMeta{
+		Name:          "",
+		GrantTypes:    defaultGrantTypes,
+		ResponseTypes: defaultResponseTypes,
+		Scopes:        defaultScopes,
+	}
+)
+
+// Client of oauth2
 type Client struct {
-	ID                   uint        `json:"id,omitempty"`
-	Name                 string      `json:"name"`
-	Code                 string      `json:"code,omitempty"`
-	Secret               string      `json:"secret,omitempty"`
-	RedirectURI          string      `json:"redirect_uri" db:"redirect_uri"`
-	UserData             interface{} `json:"-" db:"userdata"`
-	CreatedAt            time.Time   `json:"created,omitempty" db:"created"`
-	AllowedGrantTypes    StringSlice `json:"grant_types,omitempty" db:"grant_types" `
-	AllowedResponseTypes StringSlice `json:"response_types,omitempty" db:"response_types"`
-	AllowedScopes        StringSlice `json:"scopes,omitempty" db:"scopes"`
+	ID          string     `json:"id" db:"id" ` // pk
+	Secret      string     `json:"secret" db:"secret"`
+	RedirectURI string     `json:"redirectURI" db:"redirect_uri" `
+	Meta        ClientMeta `json:"meta,omitempty" db:"meta" `       // jsonb
+	CreatedAt   time.Time  `json:"created,omitempty" db:"created" ` // time.Now()
 }
 
-// GetId osin.Client.GetId
+func (c *Client) String() string {
+	return fmt.Sprintf("Client{ID: \"%s\" redirectURI: %q meta: %v}", c.ID, c.RedirectURI, c.Meta)
+}
+
+// GetId oauth.Client
 func (c *Client) GetId() string {
-	return c.Code
+	return c.ID
 }
 
-// GetSecret osin.Client.GetSecret
+// GetSecret oauth.Client
 func (c *Client) GetSecret() string {
 	return c.Secret
 }
 
-// GetRedirectUri osin.Client.GetRedirectUri
+// GetRedirectUri oauth.Client
 func (c *Client) GetRedirectUri() string {
 	return c.RedirectURI
 }
 
-// GetUserData osin.Client.GetUserData
+// GetUserData oauth.Client
 func (c *Client) GetUserData() interface{} {
-	return c.UserData
+	return c.Meta
+}
+
+// GetName ...
+func (c *Client) GetName() string {
+	return c.Meta.Name
+}
+
+// GetGrantTypes ...
+func (c *Client) GetGrantTypes() []string {
+	return c.Meta.GrantTypes
+}
+
+// GetResponseTypes ...
+func (c *Client) GetResponseTypes() []string {
+	return c.Meta.ResponseTypes
+}
+
+// GetScopes ...
+func (c *Client) GetScopes() []string {
+	return c.Meta.Scopes
 }
 
 // NewClient build a client
-func NewClient(name, code, secret, redirectURI string) *Client {
-	return &Client{
-		Name:              name,
-		Code:              code,
-		Secret:            secret,
-		RedirectURI:       redirectURI,
-		CreatedAt:         time.Now(),
-		AllowedGrantTypes: []string{"authorization_code", "refresh_token"},
-		AllowedScopes:     []string{"basic"},
+func NewClient(id, secret, redirectURI string) (c *Client) {
+	c = &Client{
+		ID:          id,
+		Secret:      secret,
+		RedirectURI: redirectURI,
+		CreatedAt:   time.Now(),
+		Meta:        defaultClientMeta,
 	}
+	return
 }
 
 // ClientSpec 查询参数
