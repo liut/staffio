@@ -12,6 +12,7 @@ type OSINStore interface {
 	GetClientWithCode(code string) (*Client, error)
 	GetClientWithID(id int) (*Client, error)
 	SaveClient(client *Client) error
+	RemoveClient(code string) error
 
 	LoadScopes() (scopes []Scope, err error)
 	IsAuthorized(clientID, username string) bool

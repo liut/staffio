@@ -263,7 +263,7 @@ func (s *DbStorage) CountClients() (total uint) {
 }
 
 func (s *DbStorage) SaveClient(client *oauth.Client) error {
-	if client.Name == "" || client.Code == "" || client.Secret == "" || client.RedirectURI == "" {
+	if client.Name == "" || client.Code == "" || client.Secret == "" {
 		return valueError
 	}
 	qs := func(tx dbTxer) error {
@@ -292,6 +292,16 @@ func (s *DbStorage) SaveClient(client *oauth.Client) error {
 		return err
 	}
 	return withTxQuery(qs)
+}
+
+func (s *DbStorage) RemoveClient(code string) error {
+	return withTxQuery(func(tx dbTxer) error {
+		_, err := tx.Exec("DELETE FROM oauth_client WHERE code = $1", code)
+		if err != nil {
+			logger().Warnw("remove client failed ", "code", code, "err", err)
+		}
+		return err
+	})
 }
 
 func (s *DbStorage) LoadScopes() (scopes []oauth.Scope, err error) {
