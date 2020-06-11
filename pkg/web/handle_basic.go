@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/openshift/osin"
 
-	auth "github.com/liut/simpauth"
-
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
@@ -86,7 +84,7 @@ func (s *server) loginPost(c *gin.Context) {
 
 // for staff/verify
 func (s *server) me(c *gin.Context) {
-	user, err := auth.UserFromRequest(c.Request)
+	user, err := authzr.UserFromRequest(c.Request)
 	if err != nil {
 		apiError(c, 1, nil)
 		return
@@ -108,7 +106,7 @@ func (s *server) me(c *gin.Context) {
 }
 
 func (s *server) logout(c *gin.Context) {
-	auth.Signout(c.Writer)
+	authzr.Signout(c.Writer)
 	DeleteTGC(c)
 	if IsAjax(c.Request) {
 		apiOk(c, true, 0)

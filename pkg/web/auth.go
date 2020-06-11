@@ -27,8 +27,6 @@ func init() {
 // consts
 const (
 	kAuthUser = "user"
-
-	cookieName = "staff"
 )
 
 type User = auth.User
