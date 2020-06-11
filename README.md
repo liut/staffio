@@ -114,6 +114,7 @@ docker exec staffio staffio client --list
 ## for testing database
 echo "CREATE DATABASE staffiotest WITH OWNER = staffio ENCODING = 'UTF8';" | docker exec -i staffio-db psql -Upostgres
 echo "GRANT ALL PRIVILEGES ON DATABASE staffiotest to staffio;" | docker exec -i staffio-db psql -Upostgres
+
 ````
 
 

@@ -15,7 +15,7 @@ ALTER TABLE oauth_client
   DROP scopes
 ;
 
-ALTER TABLE oauth_client ALTER id SET DATA TYPE varchar(80);
+ALTER TABLE oauth_client ALTER id SET DATA TYPE varchar(30);
 UPDATE oauth_client SET id = code;
 ALTER TABLE oauth_client DROP code;
 ALTER TABLE oauth_client ALTER id DROP DEFAULT;

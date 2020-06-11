@@ -9,8 +9,8 @@
         第三方应用授权
     </h3>
     <p>
-        <!-- You have been sent here by <strong>{{ .client.Name }}</strong>.  {{ .client.Name }} would like to access the following data: -->
-		来自 <strong>{{ .client.Name }}</strong> 的应用需要您的授权，它可能会访问如下数据:
+        <!-- You have been sent here by <strong>{{ .client.GetName }}</strong>.  {{ .client.GetName }} would like to access the following data: -->
+		来自 <strong>{{ .client.GetName }}</strong> 的应用需要您的授权，它可能会访问如下数据:
     </p>
     <!-- <ul>
         <li>friends</li>
@@ -33,7 +33,7 @@
         <li>其他不可告人的目的</li>
     </ul>
     <p>
-    <!-- Click the button below to complete the authorize request and grant an <code>{{ if eq .response_type "code" }} Authoriation Code{{ else }}Access Token{{ end }}</code> to {{ .client.Name }}. -->
+    <!-- Click the button below to complete the authorize request and grant an <code>{{ if eq .response_type "code" }} Authoriation Code{{ else }}Access Token{{ end }}</code> to {{ .client.GetName }}. -->
     点击下面的按钮进行操作
     </p>
     <ul class="list-inline">

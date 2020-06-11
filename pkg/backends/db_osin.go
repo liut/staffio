@@ -361,24 +361,24 @@ func (s *DbStorage) LoadScopes() (scopes []oauth.Scope, err error) {
 	return scopes, nil
 }
 
-func (s *DbStorage) IsAuthorized(clientId, username string) bool {
+func (s *DbStorage) IsAuthorized(clientID, username string) bool {
 	var (
 		created time.Time
 	)
 	if err := withDbQuery(func(db dber) error {
 		return db.QueryRow("SELECT created FROM oauth_client_user_authorized WHERE client_id = $1 AND username = $2",
-			clientId, username).Scan(&created)
+			clientID, username).Scan(&created)
 	}); err != nil {
-		logger().Warnw("load isAuthorized fail", "clientId", clientId, "err", err)
+		logger().Infow("load isAuthorized fail", "clientID", clientID, "username", username, "err", err)
 		return false
 	}
 	return true
 }
 
-func (s *DbStorage) SaveAuthorized(clientId, username string) error {
+func (s *DbStorage) SaveAuthorized(clientID, username string) error {
 	return withDbQuery(func(db dber) error {
 		_, err := db.Exec("INSERT INTO oauth_client_user_authorized(client_id, username) VALUES($1, $2) ",
-			clientId, username)
+			clientID, username)
 		return err
 	})
 }

@@ -24,7 +24,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.5.1
 	github.com/liut/keeper v0.0.0-20200606142300-00badb3e6be4
-	github.com/liut/simpauth v0.1.3
+	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2

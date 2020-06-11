@@ -28,6 +28,13 @@ type Config struct {
 	BaseURI string
 }
 
+type slogger struct {
+}
+
+func (s *slogger) Printf(format string, v ...interface{}) {
+	logger().Debugw(fmt.Sprintf(format, v...))
+}
+
 type server struct {
 	cfg     Config
 	router  *gin.Engine
@@ -68,6 +75,7 @@ func New(c Config) *server {
 	if err != nil {
 		panic(err)
 	}
+	osvr.Logger = &slogger{}
 
 	svr = &server{
 		cfg:     c,

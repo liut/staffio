@@ -3,7 +3,7 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS oauth_client
 (
-	id varchar(80) NOT NULL, -- client_id
+	id varchar(30) NOT NULL,     -- client_id
 	secret varchar(40) NOT NULL,
 	redirect_uri varchar(255) NOT NULL DEFAULT '',
 	meta jsonb NOT NULL DEFAULT '{}'::jsonb,

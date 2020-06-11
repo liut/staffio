@@ -3,23 +3,6 @@ package oauth
 import (
 	"fmt"
 	"time"
-
-	"github.com/liut/staffio/pkg/models/types"
-)
-
-// StringSlice ...
-type StringSlice = types.StringSlice
-
-var (
-	defaultGrantTypes    = []string{"authorization_code", "password", "refresh_token"}
-	defaultResponseTypes = []string{"code", "token"}
-	defaultScopes        = []string{"basic"}
-	defaultClientMeta    = ClientMeta{
-		Name:          "",
-		GrantTypes:    defaultGrantTypes,
-		ResponseTypes: defaultResponseTypes,
-		Scopes:        defaultScopes,
-	}
 )
 
 // Client of oauth2
