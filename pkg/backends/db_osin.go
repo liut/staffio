@@ -54,6 +54,7 @@ func (s *DbStorage) Close() {
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
 	extra, err := ToJSONKV(data.UserData)
 	if err != nil {
+		logger().Infow("userData to json fail", "data", data, "err", err)
 		return err
 	}
 	qs := func(tx dbTxer) error {

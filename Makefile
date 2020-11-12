@@ -13,10 +13,11 @@ STATICS=$(shell find htdocs -type f -print )
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 GO=$(shell which go)
+GOMOD=$(shell echo "$${GO111MODULE:-auto}")
 
 main:
-	echo "Building $(NAME)"
-	$(GO) build -ldflags "$(LDFLAGS) -w" .
+	echo "Building $(NAME) with GOMOD=$(GOMOD)"
+	GO111MODULE=$(GOMOD) $(GO) build -ldflags "$(LDFLAGS) -w" .
 
 all: vet dist package
 
@@ -25,7 +26,7 @@ dep:
 	$(GO) get github.com/liut/staticfiles
 
 vet:
-	echo "Checking ./pkg/..."
+	echo "Checking with GOMOD=$(GOMOD) ./pkg/... "
 	$(GO) vet -all ./pkg/...
 
 clean:
@@ -35,16 +36,16 @@ clean:
 	rm -f .fe-build
 
 dist/linux_amd64/$(NAME): $(SOURCES)
-	echo "Building $(NAME) of linux"
-	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GOOS=linux GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
+	echo "Building $(NAME) of linux with GOMOD=$(GOMOD)"
+	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GO111MODULE=$(GOMOD) GOOS=linux GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 
 dist/darwin_amd64/$(NAME): $(SOURCES)
-	echo "Building $(NAME) of darwin"
-	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GOOS=darwin GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -w" $(ROOF)
+	echo "Building $(NAME) of darwin with GOMOD=$(GOMOD)"
+	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GO111MODULE=$(GOMOD) GOOS=darwin GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -w" $(ROOF)
 
 dist/windows_amd64/$(NAME): $(SOURCES)
-	echo "Building $(NAME) of windows"
-	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
+	echo "Building $(NAME) of windows with GOMOD=$(GOMOD)"
+	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GO111MODULE=$(GOMOD) GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 
 dist: vet dist/linux_amd64/$(NAME) dist/darwin_amd64/$(NAME) dist/windows_amd64/$(NAME)
 

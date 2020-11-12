@@ -31,7 +31,7 @@ type Syncer struct {
 // SyncDepartment ...
 func SyncDepartment(action, uid string) {
 	s := &Syncer{WithTeam: strings.HasPrefix(action, "sync"), WithStaff: action == "sync-all"}
-	s.api = wxwork.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
+	s.api = wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	s.BulkFn = backends.StoreTeamAndStaffs
 
 	if action == "query" {
@@ -57,10 +57,10 @@ func SyncDepartment(action, uid string) {
 // RunIt ...
 func (s *Syncer) RunIt() error {
 	if s.api == nil {
-		s.api = wxwork.New(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
+		s.api = wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	}
 
-	departments, err := s.api.ListDepartment(1)
+	departments, err := s.api.ListDepartment("1")
 	if err != nil {
 		logger().Infow("list department fail", "err", err)
 		return err
@@ -70,7 +70,7 @@ func (s *Syncer) RunIt() error {
 	svc := backends.NewService()
 	for i, dept := range departments {
 		if s.Output {
-			fmt.Printf("%4d %4d %14s 	%8d\n", dept.Id, dept.ParentId, dept.Name, dept.Order)
+			fmt.Printf("%4d %4d %14s 	%8d\n", dept.ID, dept.ParentID, dept.Name, dept.Order)
 		}
 
 		if s.DeptFn != nil {
@@ -80,12 +80,13 @@ func (s *Syncer) RunIt() error {
 		var staffs models.Staffs
 
 		if s.WithStaff {
-			users, err := s.api.ListUser(dept.Id, false)
+			lr := wxwork.ListReq{DeptID: fmt.Sprint(dept.ID)}
+			res, err := s.api.ListUser(lr)
 			if err != nil {
 				logger().Infow("list user fail", "err", err)
 				return err
 			}
-			for _, val := range users {
+			for _, val := range res.Users() {
 				if !val.IsActived() || !val.IsEnabled() {
 					logger().Infow("user actived?", "name", val.Name, "status", val.Status, "enabled", val.Enabled)
 					continue

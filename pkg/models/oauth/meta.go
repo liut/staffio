@@ -21,8 +21,10 @@ func ToJSONKV(src interface{}) (JSONKV, error) {
 		return s, nil
 	case map[string]interface{}:
 		return JSONKV(s), nil
+	case string:
+		return JSONKV{"_": s}, nil
 	}
-	return nil, ErrInvalidJSON
+	return JSONKV{}, ErrInvalidJSON
 }
 
 // WithKey ...
@@ -52,4 +54,14 @@ func (m *JSONKV) Scan(value interface{}) (err error) {
 // Value implements the driver.Valuer interface.
 func (m JSONKV) Value() (driver.Value, error) {
 	return json.Marshal(m)
+}
+
+// StringFromMeta ...
+func StringFromMeta(kv interface{}, key string) string {
+	if m, err := ToJSONKV(kv); err == nil {
+		if v, ok := m[key]; ok {
+			return v.(string)
+		}
+	}
+	return ""
 }

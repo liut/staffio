@@ -44,11 +44,7 @@ type dbTxer interface {
 }
 
 func init() {
-	if s, exists := os.LookupEnv("STAFFIO_BACKEND_DSN"); exists && s != "" {
-		dbDSN = s
-	} else {
-		dbDSN = "postgres://staffio@localhost/staffio?sslmode=disable"
-	}
+	dbDSN = envOr("STAFFIO_BACKEND_DSN", "postgres://staffio@localhost/staffio?sslmode=disable")
 
 	quitC = make(chan struct{})
 }

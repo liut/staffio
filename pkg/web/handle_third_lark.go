@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 
 	"fhyx.online/lark-api-go/lark"
 
@@ -26,8 +27,7 @@ func inAPPLark(req *http.Request) bool {
 }
 
 func (s *server) larkOAuth2Start(c *gin.Context) {
-	// origin := c.Request.Header.Get("Origin")
-	origin := ""
+	origin := c.Request.Header.Get("Origin")
 	if len(origin) == 0 {
 		origin = settings.Current.BaseURL
 	}
@@ -80,7 +80,7 @@ func (s *server) larkOAuth2Callback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	if s := vState.(string); s != state {
+	if s, err := cast.ToStringE(vState); err != nil || s != state {
 		logger().Infow("mismatch state", "state", state, "str", s)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return

@@ -82,7 +82,7 @@ func New(c Config) *server {
 		router:  gin.New(),
 		service: service,
 		osvr:    osvr,
-		wxAuth:  wxwork.New(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
+		wxAuth:  wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
 		checkin: wxwork.NewCAPI(),
 		larkAPI: lark.NewAPI(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
 	}

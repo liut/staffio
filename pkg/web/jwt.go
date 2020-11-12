@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/openshift/osin"
 
+	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -19,7 +20,7 @@ func (c *AccessTokenGenJWT) GenerateAccessToken(data *osin.AccessData, generater
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"cid": data.Client.GetId(),
 		"exp": data.ExpireAt().Unix(),
-		"sub": data.UserData.(string),
+		"sub": oauth.StringFromMeta(data.UserData, "uid"),
 	})
 
 	accesstoken, err = token.SignedString(c.Key)
