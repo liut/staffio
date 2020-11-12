@@ -1,9 +1,7 @@
-fhyx.online/lark-api-go v0.0.0-20200606133305-8f311fca705f h1:3VyOUyixk+yIhOPVbLLuwpu/2XjhX8WuKkcVf4BQ+T8=
-fhyx.online/lark-api-go v0.0.0-20200606133305-8f311fca705f/go.mod h1:ozVQU4ZavWPfTXHY0GzTsFlkqKVdu6WWVilOB4Ox/H0=
-fhyx.online/lark-api-go v0.0.0-20200612082307-74a07f793822 h1:/qH1nfRZgKdqFQCwqEDGUbz/KYnAUZTgb0iSzhRZL9U=
-fhyx.online/lark-api-go v0.0.0-20200612082307-74a07f793822/go.mod h1:ozVQU4ZavWPfTXHY0GzTsFlkqKVdu6WWVilOB4Ox/H0=
-fhyx.online/tencent-api-go v0.0.0-20200606143651-b3ba4d0de932 h1:IpDqANB8GN23JyVSwPo6BJCoa+xj3sAnY29WZ6NgTGo=
-fhyx.online/tencent-api-go v0.0.0-20200606143651-b3ba4d0de932/go.mod h1:IQoqh2jCBv80er8XqrZ375FdtSUK4lhcJfGIirSCz+4=
+fhyx.online/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec h1:Cr2uo7yq9pTiK+Uvu7+ihzhq1xMjB9kgw1uCXf9FeNk=
+fhyx.online/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec/go.mod h1:ozVQU4ZavWPfTXHY0GzTsFlkqKVdu6WWVilOB4Ox/H0=
+fhyx.online/tencent-api-go v0.0.0-20200703090401-52bd605dcf7d h1:9xC7iUtyyYup1Jvx4lkYGgl6bHyUMfAdMmGT3rMlV2o=
+fhyx.online/tencent-api-go v0.0.0-20200703090401-52bd605dcf7d/go.mod h1:IQoqh2jCBv80er8XqrZ375FdtSUK4lhcJfGIirSCz+4=
 fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3 h1:IqwjcINRqoBjLBMrxhbTfiwWAse6sVcqEFrya54Abus=
 fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3/go.mod h1:Jp3X3C4RSp4vWAFOLh1mCcdPFGKMgMvP3NfTlz76z74=
 github.com/certifi/gocertifi v0.0.0-20190905060710-a5e0173ced67/go.mod h1:GJKEexRPVJrBSOjoqN5VNOIKJ5Q3RViH6eu3puDRwx4=
@@ -54,10 +52,6 @@ github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.5.1 h1:Jn6HYxiYrtQ92CopqJLvfPCJUrrruw1+1cn0jM9dKrI=
 github.com/lib/pq v1.5.1/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
-github.com/liut/keeper v0.0.0-20200606142300-00badb3e6be4 h1:FAWnn35vEPdHJihFP10k5fQJJmidFz+VychW6MD1HcA=
-github.com/liut/keeper v0.0.0-20200606142300-00badb3e6be4/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
-github.com/liut/keeper v0.0.0-20200612060555-d37de23999bd h1:fQVWZLtWpqeIetwYX0f075tSWMNHBoX5Q/3bsxB57Lo=
-github.com/liut/keeper v0.0.0-20200612060555-d37de23999bd/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/keeper v0.0.0-20200616143926-a8ea7548f770 h1:3hux/w6FbmNGhLL0h0qtPqoyvi4+VLhOA1XVq0FIeh0=
 github.com/liut/keeper v0.0.0-20200616143926-a8ea7548f770/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/simpauth v0.1.7 h1:QZMND0BuW9le0OcmxMqCKPdp+tcv2j1yqnFp+uaQZQE=
@@ -90,10 +84,13 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/sethvargo/go-password v0.1.3 h1:18KkbGDkw8SuzeohAbWqBLNSfRQblVwEHOLbPa0PvWM=
 github.com/sethvargo/go-password v0.1.3/go.mod h1:2tyaaoHK/AlXwh5WWQDYjqQbHcq4cjPj5qb/ciYvu/Q=
+github.com/spf13/cast v1.3.1 h1:nFm6S0SMdyzrzcmThSipiEubIDy8WEXKNZ0UOgiRpng=
+github.com/spf13/cast v1.3.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/cobra v0.0.3/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
 github.com/spf13/pflag v1.0.3 h1:zPAT6CGy6wXeQ7NtTnaTerfKOsV6V6F8agHXFiazDkg=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
@@ -103,7 +100,6 @@ github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVM
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
 github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6/go.mod h1:wxUt8XLtSuRF8qyowX+1R1Ku4lkAPyLvknQHpG2h0sc=
-github.com/wealthworks/go-debug v2.0.0+incompatible/go.mod h1:o3tAXqGwARw9npAANK32Rus0NnUafnBCgfe5YY00D8o=
 go.uber.org/atomic v1.4.0 h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/multierr v1.1.0 h1:HoEmRHQPVSqub6w2z2d2EOVs2fjyFRGyofhKuyDq0QI=
