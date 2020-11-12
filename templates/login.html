@@ -39,7 +39,11 @@
 {{ define "tail" }}
 
   <script type="text/javascript">
-  var lastUid = localStorage['lastUid'];
+    var lastUid = localStorage['lastUid'];
+    function disableInput(ok) {
+      $(':input.form-control,button[type=submit]').prop('disabled', ok?true:false);
+      $('button[type=submit]').text(ok?'Waiting':'Submit')
+    }
       jQuery(document).ready(function () {
         $("#username").val(lastUid);
         $('#form1')
@@ -93,32 +97,53 @@
             // Get the BootstrapValidator instance
             var bv = $form.data('bootstrapValidator');
 
-            // Use Ajax to submit form data
-            $.post($form.attr('action'), $form.serialize(), function(res) {
-                // console.log(res);
-                if (!!res.ok) {
-                  localStorage['lastUid'] = $("#username").val()
-                  Dust.alert('成功', 'OK', function(){
-                    bv.resetForm(true);
-                    // $("#form1").get(0).reset();
-                    var ref = '/';
-                    if (typeof res.referer == 'string') {
-                      ref = res.referer;
-                    }
-                    if (ref == "") ref = "/";
-                    location.href = ref;
-                  });
-                } else if (typeof res.error != "undefined") {
-                  var error = res.error
-                  if (typeof error.field === "string") {
-                    bv.updateMessage(error.field, 'callback', error.message);
-                    bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
-                    // Dust.alert(error.message);
-                  }
-                } else {
-                  alertAjaxResult(res);
+            var data = $form.serialize()
+            disableInput(true);
+
+            function fail(res) {
+              disableInput(false);
+              if (typeof res.error != "undefined") {
+                var error = res.error
+                if (typeof error.field === "string") {
+                  bv.updateMessage(error.field, 'callback', error.message);
+                  bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
+                  // Dust.alert(error.message);
                 }
-            }, 'json');
+              } else {
+                alertAjaxResult(res);
+              }
+            }
+
+            function done(res) {
+              // console.log(res);
+              if (!!res.ok) {
+                localStorage['lastUid'] = $("#username").val();
+                bv.updateMessage('password', 'callback', 'Ok');
+                bv.updateStatus('password', bv.STATUS_VALID, 'callback');
+                var timer;
+                timer = setTimeout(function(){
+                  bv.resetForm(true);
+                  // $("#form1").get(0).reset();
+                  var ref = '/';
+                  if (typeof res.referer == 'string') {
+                    ref = res.referer;
+                  }
+                  if (ref == "") ref = "/";
+                  clearTimeout(timer)
+                  location.href = ref;
+                }, 500);
+              } else {
+                // console.log(res);
+                fail(res)
+              }
+            }
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), data, done, 'json').fail( function(e) {
+              console.log(e);
+              res = e.responseJSON
+              fail(res)
+            });
             // console.log(bv)
         });
 

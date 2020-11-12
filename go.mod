@@ -3,9 +3,9 @@ module github.com/liut/staffio
 go 1.12
 
 require (
-	fhyx.online/lark-api-go v0.0.0-20200606133305-8f311fca705f
-	fhyx.online/tencent-api-go v0.0.0-20200606143651-b3ba4d0de932
-	fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3 // indirect
+	fhyx.online/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec
+	fhyx.online/tencent-api-go v0.0.0-20200703090401-52bd605dcf7d
+	fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3
 	github.com/certifi/gocertifi v0.0.0-20190905060710-a5e0173ced67 // indirect
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e // indirect
 	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
@@ -23,8 +23,8 @@ require (
 	github.com/json-iterator/go v1.1.7 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.5.1
-	github.com/liut/keeper v0.0.0-20200606142300-00badb3e6be4
-	github.com/liut/simpauth v0.1.3
+	github.com/liut/keeper v0.0.0-20200616143926-a8ea7548f770
+	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
@@ -36,6 +36,7 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/russross/blackfriday v1.5.2
+	github.com/sethvargo/go-password v0.1.3
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stretchr/testify v1.4.0

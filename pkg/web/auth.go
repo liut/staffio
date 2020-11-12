@@ -9,8 +9,22 @@ import (
 	auth "github.com/liut/simpauth"
 
 	"github.com/liut/staffio/pkg/models"
+	"github.com/liut/staffio/pkg/settings"
 )
 
+var (
+	authzr auth.Authorizer
+)
+
+func init() {
+	authzr = auth.New(auth.WithURI("/login"), auth.WithCookie(
+		settings.Current.CookieName,
+		settings.Current.CookiePath,
+		settings.Current.CookieDomain,
+	), auth.WithMaxAge(settings.Current.CookieMaxAge))
+}
+
+// consts
 const (
 	kAuthUser = "user"
 )
@@ -26,7 +40,7 @@ func UserFromStaff(staff *models.Staff) *auth.User {
 
 func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, err := auth.UserFromRequest(c.Request)
+		user, err := authzr.UserFromRequest(c.Request)
 		if err != nil {
 			log.Printf("user from request ERR %s", err)
 			if redirect {
@@ -81,6 +95,6 @@ func signinStaffGin(c *gin.Context, staff *models.Staff) {
 	log.Printf("login ok %v", user)
 	sess := ginSession(c)
 	sess.Set(kAuthUser, user)
-	user.Signin(c.Writer)
+	authzr.Signin(user, c.Writer)
 	SessionSave(sess, c.Writer)
 }

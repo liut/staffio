@@ -8,8 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	auth "github.com/liut/simpauth"
-
 	"github.com/liut/staffio/pkg/settings"
 )
 
@@ -50,7 +48,7 @@ func (s *server) Render(c *gin.Context, name string, data interface{}) (err erro
 		if exist {
 			user = v.(*User)
 		} else {
-			user, err = auth.UserFromRequest(c.Request)
+			user, err = authzr.UserFromRequest(c.Request)
 		}
 		m["currUser"] = user
 		m["checkEmail"] = settings.Current.EmailCheck

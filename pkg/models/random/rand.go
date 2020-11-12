@@ -13,7 +13,7 @@ const (
 	idxMax  = 63 / idxBits   // # of letter indices fitting in 63 bits
 )
 
-// Generate string without number
+// GenString generate string without number
 func GenString(n int) string {
 	b := make([]byte, n)
 	src := rand.NewSource(time.Now().UnixNano())
@@ -33,7 +33,7 @@ func GenString(n int) string {
 	return string(b)
 }
 
-// Generate string with number
+// GenCode generate string with number
 func GenCode() string {
 	r := rand.New(rand.NewSource(int64(time.Now().Nanosecond())))
 	d := r.Intn(999999)

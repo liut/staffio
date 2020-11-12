@@ -1,5 +1,6 @@
 package oauth
 
+// Scope ...
 type Scope struct {
 	Name        string `json:"name"`
 	Label       string `json:"label"`

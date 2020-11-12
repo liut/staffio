@@ -44,11 +44,7 @@ type dbTxer interface {
 }
 
 func init() {
-	if s, exists := os.LookupEnv("STAFFIO_BACKEND_DSN"); exists && s != "" {
-		dbDSN = s
-	} else {
-		dbDSN = "postgres://staffio@localhost/staffio?sslmode=disable"
-	}
+	dbDSN = envOr("STAFFIO_BACKEND_DSN", "postgres://staffio@localhost/staffio?sslmode=disable")
 
 	quitC = make(chan struct{})
 }
@@ -101,7 +97,7 @@ func pingDb() error {
 
 // reap with special action at set intervals.
 func reap(interval time.Duration, cf func() error, quit <-chan struct{}) {
-	logger().Infow("starting reaper", "interval", interval)
+	logger().Debugw("starting reaper", "interval", interval)
 	ticker := time.NewTicker(interval)
 
 	defer func() {
@@ -163,4 +159,12 @@ func inArray(k string, fields []string) bool {
 		}
 	}
 	return false
+}
+
+func envOr(key, dft string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		return dft
+	}
+	return v
 }

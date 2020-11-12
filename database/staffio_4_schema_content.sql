@@ -38,4 +38,4 @@ CREATE TABLE IF NOT EXISTS comments
 	to_uid name NOT NULL DEFAULT '',
 	created timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
-)
+);

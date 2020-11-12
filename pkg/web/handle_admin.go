@@ -45,11 +45,10 @@ type inlineEdit struct {
 }
 
 type clientParam struct {
-	ID          int    `form:"id" json:"id" binding:"required"`
-	Name        string `form:"name" json:"name"`
-	Code        string `form:"code" json:"code"`
+	ID          string `form:"id" json:"id" binding:"required"`
 	Secret      string `form:"secret" json:"secret"`
 	RedirectURI string `form:"redirect_uri" json:"redirect_uri"`
+	Name        string `form:"name" json:"name"`
 }
 
 func (s *server) clientsPost(c *gin.Context) {
@@ -62,20 +61,7 @@ func (s *server) clientsPost(c *gin.Context) {
 
 	if req.FormValue("op") == "new" {
 		// create new client
-		client = oauth.NewClient(
-			req.PostFormValue("name"),
-			req.PostFormValue("code"),
-			req.PostFormValue("secret"),
-			req.PostFormValue("redirect_uri"))
-		// log.Printf("new client: %v", client)
-		_, e := s.service.OSIN().GetClientWithCode(client.Code) // check exists
-		if e == nil {
-			logger().Infow("client exists", "client", client)
-			res["ok"] = false
-			res["error"] = map[string]string{"message": "duplicate client_id"}
-			c.JSON(http.StatusOK, res)
-			return
-		}
+		client = backends.GenNewClient(req.PostFormValue("name"), req.PostFormValue("redirect_uri"))
 		if err = s.service.OSIN().SaveClient(client); err != nil {
 			apiError(c, 1, err)
 			return
@@ -95,7 +81,7 @@ func (s *server) clientsPost(c *gin.Context) {
 			apiError(c, 400, err)
 			return
 		}
-		client, err = s.service.OSIN().GetClientWithCode(inline.PK)
+		client, err = s.service.OSIN().LoadClient(inline.PK)
 		if err != nil {
 			logger().Warnw("get client ERR ", "inline", inline, "err", err)
 			res["ok"] = false
@@ -105,7 +91,7 @@ func (s *server) clientsPost(c *gin.Context) {
 		}
 		switch inline.Field {
 		case "name":
-			client.Name = inline.Value
+			client.Meta.Name = inline.Value
 		case "secret":
 			client.Secret = inline.Value
 		case "redirect_uri":
@@ -116,9 +102,9 @@ func (s *server) clientsPost(c *gin.Context) {
 			return
 		}
 	} else if err = c.Bind(&param); err == nil {
-		client, err = s.service.OSIN().GetClientWithID(param.ID)
-		if len(param.Name) > 0 && client.Name != param.Name {
-			client.Name = param.Name
+		client, err = s.service.OSIN().LoadClient(param.ID)
+		if len(param.Name) > 0 && client.Meta.Name != param.Name {
+			client.Meta.Name = param.Name
 		}
 		if len(param.Secret) > 0 && client.Secret != param.Secret {
 			client.Secret = param.Secret

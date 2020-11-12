@@ -12,6 +12,11 @@ type Config struct {
 	BackendDSN string `envconfig:"BACKEND_DSN" default:"postgres://staffio@localhost/staffio?sslmode=disable"`
 	SentryDSN  string `envconfig:"SENTRY_DSN"`
 
+	CookieName   string `envconfig:"Cookie_Name" default:"staff"`
+	CookiePath   string `envconfig:"Cookie_Path" default:"/"`
+	CookieDomain string `envconfig:"Cookie_Domain"`
+	CookieMaxAge int    `envconfig:"Cookie_MaxAge"`
+
 	RedisAddrs    []string `envconfig:"REDIS_ADDRS" `         // host:port,host:port
 	RedisDB       int      `envconfig:"REDIS_DB" default:"1"` // Redis DB 1
 	RedisPassword string   `envconfig:"REDIS_PASSWROD"`

@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/liut/keeper/utils/reaper"
@@ -92,7 +93,7 @@ func webRun() {
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt, os.Kill)
+	signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
 	<-quit
 	log.Print("Shutdown Server ...")
 

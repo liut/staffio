@@ -17,17 +17,18 @@
           </tr>
           {{ range .clients }}
           <tr>
-              <td><span class="editable" data-name="name" data-type="text" data-pk="{{ .Code }}" data-title="Enter name">{{ .Name }}</span></td>
-              <td>{{ .Code }}</td>
-              <td><span class="editable" data-name="secret" data-type="text" data-pk="{{ .Code }}" data-title="Enter a new secret">{{ .Secret }}</span></td>
-              <td><span class="editable" data-name="redirect_uri" data-type="url" data-pk="{{ .Code }}" data-title="Enter a new url">{{ .RedirectURI }}</span></td>
-              <td>{{ .AllowedGrantTypes }}</td>
-              <td>{{ .AllowedResponseTypes }}</td>
-              <td>{{ .AllowedScopes }}</td>
+              <td><span class="editable" data-name="name" data-type="text" data-pk="{{ .ID }}" data-title="Enter name">{{ .GetName }}</span></td>
+              <td>{{ .ID }}</td>
+              <td><span class="editable" data-name="secret" data-type="text" data-pk="{{ .ID }}" data-title="Enter a new secret">{{ .Secret }}</span></td>
+              <td><span class="editable" data-name="redirect_uri" data-type="url" data-pk="{{ .ID }}" data-title="Enter a new url">{{ .RedirectURI }}</span></td>
+              <td>{{ .GetGrantTypes }}</td>
+              <td>{{ .GetResponseTypes }}</td>
+              <td>{{ .GetScopes }}</td>
               <td class="pretty" title="{{ .CreatedAt }}">{{ .CreatedAt }}</td>
           </tr>
           {{ end }}
       </table>
+
 <h4>Creating new client:</h4>
 <div class="row">
 <div class="col-xs-10 col-md-6">
@@ -38,14 +39,14 @@
                 <td width="40%">Name</td>
                 <td><a href="#" class="myeditable" id="new_name" data-type="text" data-name="name" data-original-title="Enter name"></a></td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td>Client ID (Unique)</td>
                 <td><a href="#" class="myeditable" id="new_code" data-type="select" data-name="code" data-original-title="Enter Client ID"></a></td>
             </tr>
             <tr>
                 <td>Client Secret</td>
                 <td><a href="#" class="myeditable" id="new_secret" data-type="select" data-name="secret" data-original-title="Enter Client Secret"></a></td>
-            </tr>
+            </tr> -->
             <tr>
                 <td>Redirect URI</td>
                 <td><a href="#" class="myeditable" data-type="url" data-name="redirect_uri" data-original-title="Enter a URL for client"></a></td>

@@ -106,8 +106,14 @@ docker exec staffio staffio group -g keeper -a eagle
 # now can open http://localhost:3030/ in browser
 
 # add a oauth2 client (optional)
-# demo client
-echo "INSERT INTO oauth_client VALUES(1, '1234', 'Demo', 'aabbccdd', 'http://localhost:3000/appauth', '{}', now());" | docker exec -i staffio-db psql -Ustaffio staffio
+docker exec staffio staffio client --add demo --uri http://localhost:3000
+
+# list clients
+docker exec staffio staffio client --list
+
+## for testing database
+echo "CREATE DATABASE staffiotest WITH OWNER = staffio ENCODING = 'UTF8';" | docker exec -i staffio-db psql -Upostgres
+echo "GRANT ALL PRIVILEGES ON DATABASE staffiotest to staffio;" | docker exec -i staffio-db psql -Upostgres
 
 ````
 

@@ -9,6 +9,7 @@ import (
 	"github.com/russross/blackfriday"
 )
 
+// Article ...
 type Article struct {
 	Id      int       `sql:"id,pk" json:"id" form:"id"`
 	Title   string    `sql:"title,notnull" json:"title" form:"title" binding:"required"`

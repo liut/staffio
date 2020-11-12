@@ -82,13 +82,16 @@ func SaveArticle(a *content.Article) error {
 			log.Printf("UPDATE article ERR %s", err)
 			return err
 		}
-		str := `INSERT INTO articles(title, content, author) VALUES($1, $2, $3)`
-		_, err := db.Exec(str, a.Title, a.Content, a.Author)
-		if err == nil {
-			return nil
+		var id int
+		str := `INSERT INTO articles(title, content, author) VALUES($1, $2, $3) RETURNING id`
+		err := db.QueryRow(str, a.Title, a.Content, a.Author).Scan(&id)
+		if err != nil {
+			logger().Infow("INSERT article failed", "err", err)
+			return err
 		}
-		log.Printf("INSERT article ERR %s", err)
-		return err
+		logger().Infow("new article", "id", id)
+		a.Id = id
+		return nil
 	}
 	return withTxQuery(qs)
 }
@@ -111,7 +114,11 @@ func SaveLink(l *content.Link) error {
 		if l.Id > 0 {
 			_, err = db.Exec("UPDATE links SET title = $1, url = $2, position = $3 WHERE id = $4", l.Title, string(l.Url), l.Position, l.Id)
 		} else {
-			_, err = db.Exec("INSERT INTO links(title, url, author) VALUES($1, $2, $3)", l.Title, string(l.Url), l.Author)
+			var id int
+			err = db.QueryRow("INSERT INTO links(title, url, author) VALUES($1, $2, $3) RETURNING id", l.Title, string(l.Url), l.Author).Scan(&id)
+			if err == nil {
+				l.Id = id
+			}
 		}
 		return
 	}

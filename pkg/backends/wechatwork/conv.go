@@ -46,15 +46,15 @@ func UserToStaff(user *wxwork.User) *models.Staff {
 // DepartmentToTeam ...
 func DepartmentToTeam(dept *wxwork.Department, all wxwork.Departments) *team.Team {
 	var team = &team.Team{
-		ID:       dept.Id,
+		ID:       dept.ID,
 		Name:     dept.Name,
 		OrigName: dept.Name,
-		ParentID: dept.ParentId,
+		ParentID: dept.ParentID,
 		OrderNo:  dept.Order,
 	}
 
 	if all != nil {
-		if parent := all.WithID(dept.ParentId); parent != nil {
+		if parent := all.WithID(dept.ParentID); parent != nil {
 			team.Name = nameReplacer.Replace(parent.Name) + "-" + dept.Name
 		}
 	}

@@ -22,7 +22,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	if ar := s.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
 		logger().Debugw("HandleAuthorizeRequest", "client", ar.Client)
 		if store.IsAuthorized(ar.Client.GetId(), user.UID) {
-			ar.UserData = user.UID
+			ar.UserData = oauth.JSONKV{"uid": user.UID}
 			ar.Authorized = true
 			s.osvr.FinishAuthorizeRequest(resp, r, ar)
 		} else {
@@ -43,7 +43,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 			}
 
 			if r.PostForm.Get("authorize") == "1" {
-				ar.UserData = user.UID
+				ar.UserData = oauth.JSONKV{"uid": user.UID}
 				ar.Authorized = true
 				s.osvr.FinishAuthorizeRequest(resp, r, ar)
 				if r.PostForm.Get("remember") != "" {
@@ -87,7 +87,11 @@ func (s *server) oauth2Token(c *gin.Context) {
 		logger().Debugw("HandleAccessRequest", "code", ar.Code, "scope", ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
-			uid = ar.UserData.(string)
+			kv, _ := oauth.ToJSONKV(ar.UserData)
+			if v, ok := kv["uid"]; ok {
+				uid = v.(string)
+			}
+
 			staff, err = s.service.Get(uid)
 			if err != nil {
 				resp.SetError("get_user_error", "staff not found")
@@ -97,7 +101,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 			}
 			ar.Authorized = true
 		case osin.REFRESH_TOKEN:
-			ar.UserData = ""
+			ar.UserData = nil
 			// TODO: load refresh
 			ar.Authorized = true
 		case osin.PASSWORD:
@@ -107,14 +111,14 @@ func (s *server) oauth2Token(c *gin.Context) {
 				break
 			}
 			ar.Authorized = true
-			ar.UserData = staff.UID
+			ar.UserData = oauth.JSONKV{"uid": staff.UID}
 			user = UserFromStaff(staff)
 
 		case osin.CLIENT_CREDENTIALS:
-			ar.UserData = ""
+			ar.UserData = nil
 			ar.Authorized = true
 		case osin.ASSERTION:
-			ar.UserData = ""
+			ar.UserData = nil
 			if ar.AssertionType == "urn:osin.example.complete" && ar.Assertion == "osin.data" {
 				ar.Authorized = true
 			}
@@ -154,7 +158,10 @@ func (s *server) oauth2Info(c *gin.Context) {
 			topic = c.Param("topic")
 		)
 		logger().Infow("param", "topic", topic)
-		uid = ir.AccessData.UserData.(string)
+		kv, _ := oauth.ToJSONKV(ir.AccessData.UserData)
+		if v, ok := kv["uid"]; ok {
+			uid = v.(string)
+		}
 		staff, err := s.service.Get(uid)
 		if err != nil {
 			resp.SetError("get_user_error", "staff not found")
