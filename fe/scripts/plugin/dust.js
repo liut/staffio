@@ -204,7 +204,9 @@ function alertAjaxResult(res, callback)
 	try{
 		log(res, typeof res, typeof res.meta);
 	} catch(e){}
-	var title = (!!res.ok || !!res.meta.ok) ? '操作成功！' : '操作失败！！', msg = '', data = res.data;
+	var hasOk = typeof res.ok !== 'undefined';
+	var hasMeta = typeof res.meta !== 'undefined';
+	var title = (hasOk && res.ok || hasMeta && res.meta.ok) ? '操作成功！' : '操作失败！！', msg = '', data = res.data;
 
 	if (typeof res.data != "undefined") {
 		if ($.isArray(data)) {

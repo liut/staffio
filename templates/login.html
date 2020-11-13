@@ -110,7 +110,7 @@
                   // Dust.alert(error.message);
                 }
               } else {
-                alertAjaxResult(res);
+                console.log('res:', res);
               }
             }
 
@@ -139,10 +139,12 @@
             }
 
             // Use Ajax to submit form data
-            $.post($form.attr('action'), data, done, 'json').fail( function(e) {
-              console.log(e);
-              res = e.responseJSON
-              fail(res)
+            $.post($form.attr('action'), data, done, 'json').fail( function(xhr, status) {
+              console.log( 'xhr:', xhr, 'status:', status )
+              if (typeof xhr.responseJSON !== 'undefined') {
+                  fail( xhr.responseJSON );
+              }
+
             });
             // console.log(bv)
         });

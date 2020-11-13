@@ -11,6 +11,7 @@ del        = require 'del'
 concat     = require 'gulp-concat'
 cleanCSS   = require 'gulp-clean-css'
 
+
 paths =
   scripts: [
     './fe/*/*.js',
@@ -45,8 +46,6 @@ paths =
   release: './htdocs/static'
 
 
-gulp.task 'build', ['fonts', 'build:scripts', 'build:stylesheets', 'build:images']
-
 # Fonts
 gulp.task 'fonts', () ->
   gulp.src(paths.fonts)
@@ -59,7 +58,7 @@ gulp.task 'build:pwstrength', () ->
     .pipe gulp.dest('./fe/scripts/plugin')
 
 
-gulp.task 'build:scripts', ['build:pwstrength'], () ->
+gulp.task 'build:scripts', gulp.series ['build:pwstrength'], () ->
   gulp.src(paths.scripts, { sourcemaps: true })
     .pipe browserify({transform: 'babelify'})
     .pipe buffer()
@@ -91,9 +90,11 @@ gulp.task 'build:images', () ->
     .pipe gulp.dest(paths.release + '/img')
 
 
-gulp.task 'watch', ['build'], () ->
-  gulp.watch(paths.scripts, ['build:scripts'])
-  gulp.watch(paths.stylesheets, ['build:stylesheets'])
+gulp.task 'build', gulp.parallel ['fonts', 'build:scripts', 'build:stylesheets', 'build:images']
+
+gulp.task 'watch', gulp.series ['build'], () ->
+  gulp.watch paths.scripts, gulp.series ['build:scripts']
+  gulp.watch paths.stylesheets, gulp.series ['build:stylesheets']
 
 
 gulp.task 'clean', (cb) ->
