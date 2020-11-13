@@ -8,7 +8,7 @@
       <div class="form-group has-feedback">
         <label for="username" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10 col-md-8">
-          <input type="text" class="form-control" name="username" id="username" placeholder="Username" pattern="^[a-z][a-z0-9@_-]{2,}$" minlength="3" maxlength="24" data-bv-trigger="keyup" data-bv-notempty-message="用户名不能为空" data-bv-regexp-message="用户名只能使用英文" data-remote-error="用户名或密码错误" required autofocus>
+          <input type="text" class="form-control" name="username" id="username" placeholder="Username" pattern="^[a-z][a-z0-9@_-]{2,}$" minlength="3" maxlength="24" data-bv-trigger="keyup" data-bv-notempty-message="用户名不能为空" data-bv-regexp-message="用户名只能使用英文" data-remote-error="用户名或密码错误" required>
           <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
           <div class="help-block with-errors"></div>
         </div>
@@ -16,7 +16,7 @@
       <div class="form-group">
         <label for="password" class="col-sm-2 control-label">Password</label>
         <div class="col-sm-10 col-md-8">
-          <input type="password" class="form-control" name="password" id="password" placeholder="Password" data-bv-notempty-message="密码不能为空" data-remote-error="用户名或密码错误" required>
+          <input type="password" class="form-control" name="password" id="password" placeholder="Password" data-bv-notempty-message="密码不能为空" data-remote-error="用户名或密码错误" required >
         </div>
       </div>
       <div class="form-group has-feedback">
@@ -108,6 +108,7 @@
                   bv.updateMessage(error.field, 'callback', error.message);
                   bv.updateStatus(error.field, bv.STATUS_INVALID, 'callback');
                   // Dust.alert(error.message);
+                  $('input[name='+error.field+']', $form).focus();
                 }
               } else {
                 console.log('res:', res);
