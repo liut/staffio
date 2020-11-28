@@ -163,13 +163,14 @@ rsync -rpt --delete templates htdocs remote:/opt/staffio/
 
 ### add staff
 ```sh
-forego run ./staffio addstaff -u eagle -p mysecret -n eagle --sn eagle
+forego run ./staffio addstaff -u eric -p AF1984 -n George --sn Blair
 ```
 
 ## Plan
 
 * <del>Peoples and groups sync with WxWork</del>
 * <del>Signin with WxWork</del>
-* Notification system
+* Notification
 * Export for backup
 * Batch import or restore from backup
+* I18n

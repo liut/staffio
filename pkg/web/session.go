@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-osin/session"
@@ -15,7 +14,7 @@ import (
 
 func init() {
 	if len(settings.Current.RedisAddrs) > 0 {
-		SetupSessionStore(redicache.NewStoreOptions(&redicache.StoreOptions{
+		setupSessionStore(redicache.NewStoreOptions(&redicache.StoreOptions{
 			Codec:     &MsgPack,
 			Addrs:     settings.Current.RedisAddrs,
 			DB:        settings.Current.RedisDB,
@@ -27,7 +26,6 @@ func init() {
 }
 
 var (
-	once       sync.Once
 	sessionKey = "gin-session"
 )
 
@@ -47,7 +45,7 @@ func msgPackUnmarshal(in []byte, v interface{}) error {
 	return codec.NewDecoderBytes(in, h).Decode(v)
 }
 
-func SetupSessionStore(store session.Store) {
+func setupSessionStore(store session.Store) {
 	session.Global.Close()
 	session.Global = session.NewCookieManagerOptions(store, &session.CookieMngrOptions{
 		SessIDCookieName: "st_sess",

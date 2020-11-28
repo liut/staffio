@@ -11,17 +11,16 @@ require (
 	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/raven-go v0.2.0
-	github.com/gin-gonic/contrib v0.0.0-20190302003538-54ff787f7c73
+	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-osin/session v2.3.0+incompatible
 	github.com/go-redis/cache v6.4.0+incompatible // indirect
 	github.com/go-redis/redis v6.15.8+incompatible // indirect
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.8.0
-	github.com/liut/keeper v0.0.0-20200616143926-a8ea7548f770
+	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
 	github.com/microcosm-cc/bluemonday v1.0.2
@@ -34,8 +33,7 @@ require (
 	github.com/russross/blackfriday v1.5.2
 	github.com/sethvargo/go-password v0.1.3
 	github.com/spf13/cast v1.3.1
-	github.com/spf13/cobra v0.0.3
-	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/spf13/cobra v0.0.7
 	github.com/stretchr/testify v1.4.0
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7

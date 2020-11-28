@@ -137,9 +137,11 @@
                     $("input[name=etype]").val(staff.etype)
                 }
 
-            },'json').fail(function(res) {
-                // console.log( res )
-                alertAjaxResult( res );
+            },'json').fail(function(xhr, status) {
+                console.log( 'xhr:', xhr, 'status:', status )
+                if (typeof xhr.responseJSON !== 'undefined') {
+                    alertAjaxResult( xhr.responseJSON );
+                }
               })
         })
 
@@ -182,6 +184,7 @@
                     // Dust.alert(error.message);
                   }
                 } else {
+                  console.log( 'res:', res )
                   alertAjaxResult(res);
                 }
             }, 'json');
