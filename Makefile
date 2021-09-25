@@ -27,7 +27,7 @@ dep:
 
 vet:
 	echo "Checking with GOMOD=$(GOMOD) ./pkg/... "
-	$(GO) vet -all ./pkg/...
+	GO111MODULE=$(GOMOD) $(GO) vet -all ./pkg/...
 
 clean:
 	echo "Cleaning dist"
