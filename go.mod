@@ -9,13 +9,13 @@ require (
 	github.com/certifi/gocertifi v0.0.0-20190905060710-a5e0173ced67 // indirect
 	github.com/dchest/authcookie v0.0.0-20190824115100-f900d2294c8e // indirect
 	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/raven-go v0.2.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.3
 	github.com/go-osin/session v2.3.0+incompatible
 	github.com/go-redis/cache v6.4.0+incompatible // indirect
 	github.com/go-redis/redis v6.15.8+incompatible // indirect
+	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
