@@ -23,7 +23,7 @@ require (
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
-	github.com/microcosm-cc/bluemonday v1.0.2
+	github.com/microcosm-cc/bluemonday v1.0.15
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
@@ -40,7 +40,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	go.uber.org/zap v1.13.0
-	golang.org/x/text v0.3.2
+	golang.org/x/text v0.3.6
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/mail.v2 v2.3.1
