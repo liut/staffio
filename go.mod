@@ -1,6 +1,6 @@
 module github.com/liut/staffio
 
-go 1.12
+go 1.16
 
 require (
 	fhyx.online/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec
@@ -40,6 +40,7 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	go.uber.org/zap v1.13.0
+	golang.org/x/text v0.3.2
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/mail.v2 v2.3.1

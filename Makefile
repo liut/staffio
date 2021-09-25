@@ -55,6 +55,9 @@ package: dist
 	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
 	tar -cvJf $(NAME)-templates-$(TAG).tar.xz templates
 
+generate:
+	$(GO) generate ./...
+
 fetch-exmail: # deprecated
 	echo "Building $@"
 	mkdir -p dist/linux_amd64 && GOOS=linux GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS)" -o dist/linux_amd64/$(NAME)-$@ $(ROOF)/cmd/$@

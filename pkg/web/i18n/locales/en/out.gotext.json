@@ -1,0 +1,204 @@
+{
+    "language": "en",
+    "messages": [
+        {
+            "id": "System error",
+            "message": "System error",
+            "translation": "System error",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The system is currently in read-only mode.",
+            "message": "The system is currently in read-only mode.",
+            "translation": "The system is currently in read-only mode.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Required parameters",
+            "message": "Required parameters",
+            "translation": "Required parameters",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Invalid parameters",
+            "message": "Invalid parameters",
+            "translation": "Invalid parameters",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Incorrect username or password",
+            "message": "Incorrect username or password",
+            "translation": "Incorrect username or password",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "You must be authenticated to see this resource",
+            "message": "You must be authenticated to see this resource",
+            "translation": "You must be authenticated to see this resource",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Failed to send verifaction code",
+            "message": "Failed to send verifaction code",
+            "translation": "Failed to send verifaction code",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Failed to Register",
+            "message": "Failed to Register",
+            "translation": "Failed to Register",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "No such mobile number",
+            "message": "No such mobile number",
+            "translation": "No such mobile number",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Doesn't seem like a valid name?",
+            "message": "Doesn't seem like a valid name?",
+            "translation": "Doesn't seem like a valid name?",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Are you sure this is the email address?",
+            "message": "Are you sure this is the email address?",
+            "translation": "Are you sure this is the email address?",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Are you sure this is a cell phone number?",
+            "message": "Are you sure this is a cell phone number?",
+            "translation": "Are you sure this is a cell phone number?",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "This user already exists, please sign in.",
+            "message": "This user already exists, please sign in.",
+            "translation": "This user already exists, please sign in.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Unbinding failed, at least one phone and email address required",
+            "message": "Unbinding failed, at least one phone and email address required",
+            "translation": "Unbinding failed, at least one phone and email address required",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "This mobile already used.",
+            "message": "This mobile already used.",
+            "translation": "This mobile already used.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The verification code is incorrect.",
+            "message": "The verification code is incorrect.",
+            "translation": "The verification code is incorrect.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Expired token",
+            "message": "Expired token",
+            "translation": "Expired token",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Invalid token",
+            "message": "Invalid token",
+            "translation": "Invalid token",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The original password is incorrect.",
+            "message": "The original password is incorrect.",
+            "translation": "The original password is incorrect.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Password cannot be empty",
+            "message": "Password cannot be empty",
+            "translation": "Password cannot be empty",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Your password is too simple.",
+            "message": "Your password is too simple.",
+            "translation": "Your password is too simple.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "The new phone number is the same as the old one.",
+            "message": "The new phone number is the same as the old one.",
+            "translation": "The new phone number is the same as the old one.",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Expired or lost third-party information",
+            "message": "Expired or lost third-party information",
+            "translation": "Expired or lost third-party information",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Failure to bind third party information",
+            "message": "Failure to bind third party information",
+            "translation": "Failure to bind third party information",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Two-step authentication not enabled",
+            "message": "Two-step authentication not enabled",
+            "translation": "Two-step authentication not enabled",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Two-step authentication code entered incorrectly",
+            "message": "Two-step authentication code entered incorrectly",
+            "translation": "Two-step authentication code entered incorrectly",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Error:Field validation for '{Field}' failed",
+            "message": "Error:Field validation for '{Field}' failed",
+            "translation": "Error:Field validation for '{Field}' failed",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "Field",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "fe.Field()"
+                }
+            ],
+            "fuzzy": true
+        }
+    ]
+}

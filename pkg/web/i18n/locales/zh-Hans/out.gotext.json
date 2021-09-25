@@ -1,0 +1,150 @@
+{
+    "language": "zh-Hans",
+    "messages": [
+        {
+            "id": "System error",
+            "message": "System error",
+            "translation": "系统错误"
+        },
+        {
+            "id": "The system is currently in read-only mode.",
+            "message": "The system is currently in read-only mode.",
+            "translation": "😓抱歉，系统正在升级维护，暂停注册和变更等功能"
+        },
+        {
+            "id": "Required parameters",
+            "message": "Required parameters",
+            "translation": "需要参数"
+        },
+        {
+            "id": "Invalid parameters",
+            "message": "Invalid parameters",
+            "translation": "参数无效"
+        },
+        {
+            "id": "Incorrect username or password",
+            "message": "Incorrect username or password",
+            "translation": "😓用户名或密码错误！"
+        },
+        {
+            "id": "You must be authenticated to see this resource",
+            "message": "You must be authenticated to see this resource",
+            "translation": "请先登录"
+        },
+        {
+            "id": "Failed to send verifaction code",
+            "message": "Failed to send verifaction code",
+            "translation": "发送验证码失败"
+        },
+        {
+            "id": "Failed to Register",
+            "message": "Failed to Register",
+            "translation": "注册失败"
+        },
+        {
+            "id": "No such mobile number",
+            "message": "No such mobile number",
+            "translation": "😓没有这个手机号！"
+        },
+        {
+            "id": "Doesn't seem like a valid name?",
+            "message": "Doesn't seem like a valid name?",
+            "translation": "🤔貌似不像合法的名称?"
+        },
+        {
+            "id": "Are you sure this is the email address?",
+            "message": "Are you sure this is the email address?",
+            "translation": "🤔您确认这是邮箱地址?"
+        },
+        {
+            "id": "Are you sure this is a cell phone number?",
+            "message": "Are you sure this is a cell phone number?",
+            "translation": "🤔您确认这是手机号码?"
+        },
+        {
+            "id": "This user already exists, please sign in.",
+            "message": "This user already exists, please sign in.",
+            "translation": "😓此用户已存在，请直接登录"
+        },
+        {
+            "id": "Unbinding failed, at least one phone and email address required",
+            "message": "Unbinding failed, at least one phone and email address required",
+            "translation": "解绑失败，手机和邮箱地址至少需要一个"
+        },
+        {
+            "id": "This mobile already used.",
+            "message": "This mobile already used.",
+            "translation": "😓此手机号已存在"
+        },
+        {
+            "id": "The verification code is incorrect.",
+            "message": "The verification code is incorrect.",
+            "translation": "😓验证码不正确"
+        },
+        {
+            "id": "Expired token",
+            "message": "Expired token",
+            "translation": "😓登录身份已过期"
+        },
+        {
+            "id": "Invalid token",
+            "message": "Invalid token",
+            "translation": "😓登录身份无效或已过期"
+        },
+        {
+            "id": "The original password is incorrect.",
+            "message": "The original password is incorrect.",
+            "translation": "😓原密码不正确"
+        },
+        {
+            "id": "Password cannot be empty",
+            "message": "Password cannot be empty",
+            "translation": "😓密码不能为空"
+        },
+        {
+            "id": "Your password is too simple.",
+            "message": "Your password is too simple.",
+            "translation": "😓您的密码太简单了"
+        },
+        {
+            "id": "The new phone number is the same as the old one.",
+            "message": "The new phone number is the same as the old one.",
+            "translation": "😓新手机号和旧的一样唉"
+        },
+        {
+            "id": "Expired or lost third-party information",
+            "message": "Expired or lost third-party information",
+            "translation": "第三方信息过期或丢失"
+        },
+        {
+            "id": "Failure to bind third party information",
+            "message": "Failure to bind third party information",
+            "translation": "绑定第三方信息失败"
+        },
+        {
+            "id": "Two-step authentication not enabled",
+            "message": "Two-step authentication not enabled",
+            "translation": "两步认证未开启"
+        },
+        {
+            "id": "Two-step authentication code entered incorrectly",
+            "message": "Two-step authentication code entered incorrectly",
+            "translation": "两步认证验证码输入有误"
+        },
+        {
+            "id": "Error:Field validation for '{Field}' failed",
+            "message": "Error:Field validation for '{Field}' failed",
+            "translation": "输入有误: '{Field}' 为必填字段",
+            "placeholders": [
+                {
+                    "id": "Field",
+                    "string": "%[1]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "fe.Field()"
+                }
+            ]
+        }
+    ]
+}
