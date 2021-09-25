@@ -38,7 +38,8 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19 h1:J2LPEOcQmWaooBnBtUDV9KHFEnP5LYTZY03GiQ0oQBw=
 github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19/go.mod h1:iqneQ2Df3omzIVTkIfn7c1acsVnMGiSLn4XF5Blh3Yg=
-github.com/gin-gonic/gin v1.5.0/go.mod h1:Nd6IXA8m5kNZdNEHMBd93KT+mdY3+bewLgRvmCsR2Do=
+github.com/gin-gonic/gin v1.7.3 h1:aMBzLJ/GMEYmv1UWs2FFTcPISLrQH2mRgL9Glz8xows=
+github.com/gin-gonic/gin v1.7.3/go.mod h1:jD2toBW3GZUr5UMcdrwQA10I7RuaFOl/SGeDjXkfUtY=
 github.com/go-asn1-ber/asn1-ber v1.3.1/go.mod h1:hEBeB/ic+5LoWskz+yKT7vGhhPYkProFKoKdwZRWMe0=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-ldap/ldap/v3 v3.1.10 h1:7WsKqasmPThNvdl0Q5GPpbTDD/ZD98CfuawrMIuh7qQ=
