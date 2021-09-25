@@ -90,9 +90,10 @@ func webRun() {
 		}
 	}()
 
+	// TODO: redesign it
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 2)
 	signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
 	<-quit
 	log.Print("Shutdown Server ...")
