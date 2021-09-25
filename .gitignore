@@ -57,6 +57,7 @@ Temporary Items
 
 
 .env
+/tmp/
 /staffio
 /staffio-*
 dist/
