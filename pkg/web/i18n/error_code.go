@@ -1,27 +1,27 @@
 package i18n
 
-//go:generate stringer -type=ErrorValue -trimprefix=ErrorValue -output errors_string.go
+//go:generate stringer -type=ErrorCode -trimprefix=ErrorCode -output error_string.go
 
-// ErrorValue ...
-type ErrorValue int
+// ErrorCode ...
+type ErrorCode int
 
 // consts of error value
 const (
-	ErrOK             ErrorValue = iota // ok
-	ErrSystemError                      // system error
-	ErrSystemFailed                     // system faild
-	ErrSystemPause                      // system pause
-	ErrSystemReadonly                   // system readonly
-
+	ErrOK             ErrorCode = iota // ok
+	ErrSystemError                     // system error
+	ErrSystemFailed                    // system faild
+	ErrSystemPause                     // system pause
+	ErrSystemReadonly                  // system readonly
 	_
-
+	_
+	_
 	ErrNotFound      // 404
 	ErrForbiddedn    // 403
 	ErrParamRequired // need some param or value input
 	ErrParamInvalid  // invalid param
-
 	_
-
+	_
+	_
 	ErrLoginFailed    // Incorrect username or password
 	ErrAuthRequired   // 401 need login
 	ErrVerifySend     // old error (1402, "😓发送验证码失败")
@@ -41,21 +41,21 @@ const (
 	ErrMultiOnline    // old error (1414, "🤔您似乎已经登录了")
 	ErrEqualOldMobile // old error (1417, "😓新手机号和旧的一样唉")
 	ErrAliasTooFew    // 有一些必需的别名不能解绑
-
 	_
-
+	_
+	_
 	ErrEnableTwoFactor // old error (1420, "😓两步认证未开启，请先开启两步认证")
 	ErrTwoFactorCode   // old error (1421, "😓两步认证验证码输入有误")
-
 	_
-
+	_
+	_
 	ErrSNSInfoLost   // 第三方(绑定)信息因过期而丢失
 	ErrSNSBindFailed // 绑定第三方信息失败
 
 )
 
 // ErrorString return locale string with message printer
-func (ev ErrorValue) ErrorString(p *Printer) string {
+func (ev ErrorCode) ErrorString(p *Printer) string {
 	switch ev {
 	case ErrSystemError:
 		return p.Sprintf("System error")
@@ -114,10 +114,10 @@ func (ev ErrorValue) ErrorString(p *Printer) string {
 }
 
 // Code ...
-func (ev ErrorValue) Code() int {
+func (ev ErrorCode) Code() int {
 	return int(ev)
 }
 
-func (ev ErrorValue) Error() string {
+func (ev ErrorCode) Error() string {
 	return ev.String()
 }

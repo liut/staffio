@@ -11,6 +11,8 @@ import (
 	"github.com/liut/staffio/pkg/common"
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/cas"
+	"github.com/liut/staffio/pkg/web/apis"
+	"github.com/liut/staffio/pkg/web/i18n"
 )
 
 func (s *server) loginForm(c *gin.Context) {
@@ -35,10 +37,7 @@ func (s *server) loginPost(c *gin.Context) {
 	var param loginParam
 	res := make(osin.ResponseData)
 	if err := c.Bind(&param); err != nil {
-		res["ok"] = false
-		res["error"] = err.Error()
-		res["status"] = ERROR_PARAM
-		c.JSON(400, res)
+		apis.Fail(c, 400, err)
 		return
 	}
 	// req := c.Request
@@ -49,11 +48,7 @@ func (s *server) loginPost(c *gin.Context) {
 		err   error
 	)
 	if staff, err = s.service.Authenticate(param.Username, param.Password); err != nil {
-		res["ok"] = false
-		res["error"] = map[string]string{"message": "Invalid Username/Password", "field": "password"}
-		res["status"] = ERROR_PARAM
-		res["message"] = "Invalid Username/Password"
-		c.JSON(http.StatusOK, res)
+		apis.Fail(c, 401, i18n.ErrLoginFailed, "password")
 		return
 	}
 

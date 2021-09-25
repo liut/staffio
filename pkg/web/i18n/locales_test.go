@@ -17,7 +17,7 @@ func TestLocale(t *testing.T) {
 }
 
 func TestErrorMessage(t *testing.T) {
-	ers := []ErrorValue{ErrSystemError, ErrSystemReadonly, ErrParamRequired, ErrParamInvalid,
+	ers := []ErrorCode{ErrSystemError, ErrSystemReadonly, ErrParamRequired, ErrParamInvalid,
 		ErrLoginFailed, ErrAuthRequired, ErrVerifySend,
 		ErrRegistFaild, ErrNoneMobile, ErrBadAlias, ErrBadEmail, ErrBadMobile,
 		ErrAliasTaken, ErrMobileTaken, ErrBadVerifyCode, ErrTokenExpired, ErrTokenInvalid,
@@ -40,7 +40,7 @@ func TestErrorMessage(t *testing.T) {
 
 func TestTag(t *testing.T) {
 	tag, _ := language.MatchStrings(matcher, "zh-hans", "zh-CN")
-	ers := []ErrorValue{ErrLoginFailed, ErrRegistFaild}
+	ers := []ErrorCode{ErrLoginFailed, ErrRegistFaild}
 	for _, e := range ers {
 		assert.NotEqual(t, e.String(), e.ErrorString(message.NewPrinter(tag)))
 	}
@@ -51,7 +51,7 @@ func TestRequest(t *testing.T) {
 	req.Header.Set("Accept-Language", "zh-TW,zh-CN;q=0.9,zh;q=0.8,en;q=0.7,en-US;q=0.6")
 
 	// tag := GetTag(req)
-	ers := []ErrorValue{ErrLoginFailed, ErrRegistFaild}
+	ers := []ErrorCode{ErrLoginFailed, ErrRegistFaild}
 	for _, e := range ers {
 		assert.NotEqual(t, e.String(), e.ErrorString(GetPrinter(req)))
 	}

@@ -27,22 +27,12 @@ func Out(c *gin.Context, code int, args ...interface{}) {
 
 // Fail response fail with code, err, field
 func Fail(c *gin.Context, code int, args ...interface{}) {
-	res := gin.H{"status": code, "ok": false} // status is deprecated
-	if len(args) > 0 {
-		var msg string
-		if str, ok := args[0].(string); ok {
-			msg = str
-		} else if err, ok := args[0].(error); ok {
-			msg = err.Error()
-		} else {
-			msg = http.StatusText(code)
-		}
-		res["message"] = msg
-		if len(args) > 1 {
-			res["field"] = args[1]
-		}
+	if len(args) == 0 {
+		c.AbortWithStatus(code)
+		return
 	}
-
+	var res respFail
+	res.Error = GetError(c.Request, code, args[0], args[1:]...)
 	c.AbortWithStatusJSON(code, res)
 }
 
@@ -58,14 +48,9 @@ type respDone struct {
 }
 
 // 出现错误，返回相关的错误码和消息文本
-type respError struct {
-	Ok     bool    `json:"ok" description:"操作失败"`
-	Code   int     `json:"code" description:"错误代码"`
-	Errors []Error `json:"errors" description:"错误集"`
-}
-
-func (re *respError) GetCode() int {
-	return re.Code
+type respFail struct {
+	Ok    bool  `json:"ok" description:"操作失败"`
+	Error Error `json:"error" description:"错误集"`
 }
 
 // IError ...
@@ -87,6 +72,37 @@ type FieldError interface {
 	Field() string
 }
 
+func GetError(r *http.Request, code int, err interface{}, args ...interface{}) Error {
+	var field string
+	if len(args) > 0 {
+		if v, ok := args[0].(string); ok {
+			field = v
+		}
+	}
+	switch e := err.(type) {
+	case Error:
+		e.Field = field
+		return e
+	case *Error:
+		e.Field = field
+		return *e
+	case i18n.ErrorCode:
+		return Error{Code: e.Code(), Message: e.ErrorString(i18n.GetPrinter(r)), Field: field}
+	case string:
+		return Error{Code: code, Message: e, Field: field}
+	case error:
+		return Error{Code: code, Message: e.Error(), Field: field}
+	case interface{ GetMessage() string }:
+		return Error{Code: code, Message: e.GetMessage(), Field: field}
+	default:
+		if code >= 100 && code < 600 {
+			return Error{Code: code, Message: http.StatusText(code), Field: field}
+		}
+		return Error{Code: code, Message: "unkown error", Field: field}
+	}
+}
+
+// deprecated
 func getErrors(r *http.Request, code int, err interface{}, args ...string) (errors []Error) {
 	var field string
 	if len(args) > 0 {
@@ -97,7 +113,7 @@ func getErrors(r *http.Request, code int, err interface{}, args ...string) (erro
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
 	case *Error:
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
-	case i18n.ErrorValue:
+	case i18n.ErrorCode:
 		return append(errors, Error{Code: e.Code(), Message: e.ErrorString(i18n.GetPrinter(r)), Field: field})
 	case FieldError:
 		return append(errors, Error{Message: i18n.GetFieldErrorString(i18n.GetPrinter(r), e), Field: e.Field()})
