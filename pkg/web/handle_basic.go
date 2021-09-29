@@ -37,10 +37,10 @@ func (s *server) loginForm(c *gin.Context) {
 // @Summary login
 // @Description login
 // @ID api-1-login-post
-// @Accept  json,mpfd,x-www-form-urlencoded
+// @Accept  x-www-form-urlencoded,mpfd,json
 // @Produce  json
-// @Param username form string true "Username"
-// @Param password form string true "Password"
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
 // @Success 200 {object} apis.RespDone
 // @Failure 400 {object} apis.RespFail
 // @Failure 401 {object} apis.RespFail

@@ -27,9 +27,9 @@ var doc = `{
             "post": {
                 "description": "login",
                 "consumes": [
-                    "application/json",
+                    "application/x-www-form-urlencoded",
                     "multipart/form-data",
-                    "application/x-www-form-urlencoded"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -41,14 +41,14 @@ var doc = `{
                         "type": "string",
                         "description": "Username",
                         "name": "username",
-                        "in": "form",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "Password",
                         "name": "password",
-                        "in": "form",
+                        "in": "formData",
                         "required": true
                     }
                 ],

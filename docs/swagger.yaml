@@ -31,19 +31,19 @@ paths:
   /api/login:
     post:
       consumes:
-      - application/json
-      - multipart/form-data
       - application/x-www-form-urlencoded
+      - multipart/form-data
+      - application/json
       description: login
       operationId: api-1-login-post
       parameters:
       - description: Username
-        in: form
+        in: formData
         name: username
         required: true
         type: string
       - description: Password
-        in: form
+        in: formData
         name: password
         required: true
         type: string
