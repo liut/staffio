@@ -1,0 +1,70 @@
+definitions:
+  apis.Error:
+    properties:
+      code:
+        type: integer
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  apis.RespDone:
+    properties:
+      data:
+        description: main data
+      extra:
+        description: extra data
+      ok:
+        description: OK
+        type: boolean
+    type: object
+  apis.RespFail:
+    properties:
+      error:
+        $ref: '#/definitions/apis.Error'
+      ok:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      description: login
+      operationId: api-1-login-post
+      parameters:
+      - description: Username
+        in: form
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: form
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.RespDone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+      summary: login
+swagger: "2.0"
