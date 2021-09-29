@@ -33,6 +33,19 @@ func (s *server) loginForm(c *gin.Context) {
 	})
 }
 
+// loginPost ...
+// @Summary login
+// @Description login
+// @ID api-1-login-post
+// @Accept  x-www-form-urlencoded,mpfd,json
+// @Produce  json
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200 {object} apis.RespDone
+// @Failure 400 {object} apis.RespFail
+// @Failure 401 {object} apis.RespFail
+// @Failure 500 {object} apis.RespFail
+// @Router /api/login [post]
 func (s *server) loginPost(c *gin.Context) {
 	var param loginParam
 	res := make(osin.ResponseData)

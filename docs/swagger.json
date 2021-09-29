@@ -1,0 +1,107 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "description": "login",
+                "consumes": [
+                    "application/x-www-form-urlencoded",
+                    "multipart/form-data",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "login",
+                "operationId": "api-1-login-post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.RespDone"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/apis.RespFail"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apis.RespFail"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apis.RespFail"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "apis.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "field": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.RespDone": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "main data"
+                },
+                "extra": {
+                    "description": "extra data"
+                },
+                "ok": {
+                    "description": "OK",
+                    "type": "boolean"
+                }
+            }
+        },
+        "apis.RespFail": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/apis.Error"
+                },
+                "ok": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

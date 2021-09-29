@@ -31,24 +31,25 @@ func Fail(c *gin.Context, code int, args ...interface{}) {
 		c.AbortWithStatus(code)
 		return
 	}
-	var res respFail
+	var res RespFail
 	res.Error = GetError(c.Request, code, args[0], args[1:]...)
 	c.AbortWithStatusJSON(code, res)
 }
 
+// respOK ...
 type respOK struct {
 	Ok bool `json:"ok,required" description:"操作成功"`
 }
 
-// respDone 操作成功返回的结构
-type respDone struct {
-	Ok    bool        `json:"ok,required" description:"操作成功"`
-	Data  interface{} `json:"data,omitempty"`
-	Total interface{} `json:"total,omitempty"`
+// RespDone 操作成功返回的结构
+type RespDone struct {
+	Ok    bool        `json:"ok,required" description:"操作成功"` // OK
+	Data  interface{} `json:"data,omitempty"`                 // main data
+	Extra interface{} `json:"extra,omitempty"`                // extra data
 }
 
-// 出现错误，返回相关的错误码和消息文本
-type respFail struct {
+// RespFail 出现错误，返回相关的错误码和消息文本
+type RespFail struct {
 	Ok    bool  `json:"ok" description:"操作失败"`
 	Error Error `json:"error" description:"错误集"`
 }
