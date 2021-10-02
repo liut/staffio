@@ -24,6 +24,8 @@ require (
 	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
 	github.com/microcosm-cc/bluemonday v1.0.15
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
@@ -34,12 +36,14 @@ require (
 	github.com/sethvargo/go-password v0.1.3
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v0.0.7
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.7.0
+	github.com/swaggo/swag v1.7.3
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	go.uber.org/zap v1.13.0
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/text v0.3.6
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

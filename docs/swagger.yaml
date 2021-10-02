@@ -67,4 +67,141 @@ paths:
           schema:
             $ref: '#/definitions/apis.RespFail'
       summary: login
+  /api/password:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      - multipart/form-data
+      - application/json
+      description: change password
+      operationId: api-1-password-post
+      parameters:
+      - description: Old Password
+        in: formData
+        name: old_password
+        required: true
+        type: string
+      - description: New Password
+        in: formData
+        name: new_password
+        required: true
+        type: string
+      - description: Confirm Password
+        in: formData
+        name: password_confirm
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.RespDone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+      summary: Change password
+  /api/password/forgot:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      - multipart/form-data
+      - application/json
+      description: forgot password
+      operationId: api-1-password-forgot-post
+      parameters:
+      - description: Login name
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Mobile number
+        in: formData
+        name: mobile
+        required: true
+        type: string
+      - description: Email address
+        in: formData
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.RespDone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+      summary: Forgot password
+  /api/password/reset:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      - multipart/form-data
+      - application/json
+      description: reset password, form:rt, json:token
+      operationId: api-1-password-reset-post
+      parameters:
+      - description: Login name
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Confirm Password
+        in: formData
+        name: password_confirm
+        required: true
+        type: string
+      - description: Token
+        in: formData
+        name: rt
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.RespDone'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apis.RespFail'
+      summary: Reset password
 swagger: "2.0"
