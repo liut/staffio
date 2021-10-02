@@ -34,6 +34,7 @@ func (s *server) loginForm(c *gin.Context) {
 }
 
 // loginPost ...
+// @Tag staffio
 // @Summary login
 // @Description login
 // @ID api-1-login-post
@@ -129,6 +130,21 @@ func (s *server) passwordForm(c *gin.Context) {
 	})
 }
 
+// passwordChange ...
+// @Tag staffio
+// @Summary Change password
+// @Description change password
+// @ID api-1-password-post
+// @Accept  x-www-form-urlencoded,mpfd,json
+// @Produce  json
+// @Param old_password formData string true "Old Password"
+// @Param new_password formData string true "New Password"
+// @Param password_confirm formData string true "Confirm Password"
+// @Success 200 {object} apis.RespDone
+// @Failure 400 {object} apis.RespFail
+// @Failure 401 {object} apis.RespFail
+// @Failure 500 {object} apis.RespFail
+// @Router /api/password [post]
 func (s *server) passwordChange(c *gin.Context) {
 	var param passwordParam
 	res := make(osin.ResponseData)
@@ -166,6 +182,21 @@ func (s *server) passwordForgotForm(c *gin.Context) {
 	})
 }
 
+// passwordForgot ...
+// @Tag staffio
+// @Summary Forgot password
+// @Description forgot password
+// @ID api-1-password-forgot-post
+// @Accept  x-www-form-urlencoded,mpfd,json
+// @Produce  json
+// @Param username formData string true "Login name"
+// @Param mobile formData string true "Mobile number"
+// @Param email formData string true "Email address"
+// @Success 200 {object} apis.RespDone
+// @Failure 400 {object} apis.RespFail
+// @Failure 401 {object} apis.RespFail
+// @Failure 500 {object} apis.RespFail
+// @Router /api/password/forgot [post]
 func (s *server) passwordForgot(c *gin.Context) {
 	var param forgotParam
 	res := make(osin.ResponseData)
@@ -230,6 +261,22 @@ func (s *server) passwordResetForm(c *gin.Context) {
 	})
 }
 
+// passwordReset ...
+// @Tag staffio
+// @Summary Reset password
+// @Description reset password, form:rt, json:token
+// @ID api-1-password-reset-post
+// @Accept  x-www-form-urlencoded,mpfd,json
+// @Produce  json
+// @Param username formData string true "Login name"
+// @Param password formData string true "Password"
+// @Param password_confirm formData string true "Confirm Password"
+// @Param rt formData string true "Token"
+// @Success 200 {object} apis.RespDone
+// @Failure 400 {object} apis.RespFail
+// @Failure 401 {object} apis.RespFail
+// @Failure 500 {object} apis.RespFail
+// @Router /api/password/reset [post]
 func (s *server) passwordReset(c *gin.Context) {
 	var param resetParam
 	res := make(osin.ResponseData)
