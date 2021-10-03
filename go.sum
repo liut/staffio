@@ -72,8 +72,8 @@ github.com/go-openapi/spec v0.20.3/go.mod h1:gG4F8wdEDN+YPBMVnzE85Rbhf+Th2DTvA9n
 github.com/go-openapi/swag v0.19.5/go.mod h1:POnQmlKehdgb5mhVOsnJFsivZCEZ/vjK9gh66Z9tfKk=
 github.com/go-openapi/swag v0.19.14 h1:gm3vOOXfiuw5i9p5N9xJvfjvuofpyvLA9Wr6QfK5Fng=
 github.com/go-openapi/swag v0.19.14/go.mod h1:QYRuS/SOXUCsnplDa677K7+DxSOj6IPNl/eQntq43wQ=
-github.com/go-osin/session v2.3.0+incompatible h1:yjtrN3xwBG4IIj/8h68Tp9f51OH3vIn66zw99QloM6Q=
-github.com/go-osin/session v2.3.0+incompatible/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
+github.com/go-osin/session v1.3.2 h1:M3mT82CRTKz0QtEfCQh1+FZyjnjjRGxxu/RfaI6N3o4=
+github.com/go-osin/session v1.3.2/go.mod h1:qvYxQCpqDcev/KHK/8r/9G6b+QGMt2dToemR7j8DwYY=
 github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.13.0 h1:HyWk6mgj5qFqCT5fjGBuRArbVDfE4hi8+e8ceBS/t7Q=
