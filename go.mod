@@ -12,14 +12,13 @@ require (
 	github.com/getsentry/raven-go v0.2.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.3
-	github.com/go-osin/session v1.3.2
-	github.com/go-redis/cache v6.4.0+incompatible // indirect
-	github.com/go-redis/redis v6.15.8+incompatible // indirect
+	github.com/go-osin/session v1.3.4
 	github.com/golang-jwt/jwt/v4 v4.1.0
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.8.0
+	github.com/lib/pq v1.10.3
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.3
@@ -28,7 +27,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/mozillazg/go-unidecode v0.1.1 // indirect
-	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/openshift/osin v1.0.1
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -40,7 +38,6 @@ require (
 	github.com/swaggo/swag v1.7.3
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
-	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect

@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-osin/session"
 	scodec "github.com/go-osin/session/codec"
-	"github.com/go-osin/session/redicache"
+	"github.com/go-osin/session/pqstore"
 	"github.com/ugorji/go/codec"
 
 	"github.com/liut/staffio/pkg/settings"
@@ -14,12 +14,9 @@ import (
 
 func init() {
 	if len(settings.Current.RedisAddrs) > 0 {
-		setupSessionStore(redicache.NewStoreOptions(&redicache.StoreOptions{
-			Codec:     &MsgPack,
-			Addrs:     settings.Current.RedisAddrs,
-			DB:        settings.Current.RedisDB,
-			Password:  settings.Current.RedisPassword,
-			KeyPrefix: "staffio-sess-",
+		setupSessionStore(pqstore.NewStoreOptions(&pqstore.StoreOptions{
+			Codec: &MsgPack,
+			DSN:   settings.Current.BackendDSN,
 		}))
 	}
 
