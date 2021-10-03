@@ -1,6 +1,6 @@
 # Staffio
 
-An OAuth2 server with management for enterprise employees.
+An OAuth2 server that provides managed services for enterprise employees.
 
 
 ## Features:
