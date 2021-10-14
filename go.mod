@@ -21,7 +21,7 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.7
-	github.com/liut/staffio-backend v0.2.3
+	github.com/liut/staffio-backend v0.2.4
 	github.com/microcosm-cc/bluemonday v1.0.15
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
-	go.uber.org/zap v1.13.0
+	go.uber.org/zap v1.15.0
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/text v0.3.6
 	google.golang.org/appengine v1.4.0 // indirect
