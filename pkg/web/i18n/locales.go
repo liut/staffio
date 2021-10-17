@@ -43,11 +43,23 @@ func GetPrinter(r *http.Request) *message.Printer {
 	return message.NewPrinter(GetTag(r))
 }
 
+// Field ...
+type Field string
+
+func (f Field) Field() string {
+	return string(f)
+}
+
+func (f Field) ErrorReq(r *http.Request) string {
+	return GetPrinter(r).Sprintf("Error:Field validation for '%s' failed ", f)
+}
+
 type fieldError interface {
+	ErrorReq(r *http.Request) string
 	Field() string
 }
 
-// GetFieldErrorString ...
+// GetFieldErrorString ... deprecated
 func GetFieldErrorString(p *Printer, fe fieldError) string {
 	return p.Sprintf("Error:Field validation for '%s' failed ", fe.Field())
 }

@@ -66,15 +66,15 @@ type Error struct {
 	Field   string `json:"field,omitempty" description:"错误字段,可选,多用于表单校验"`
 }
 
-// IErrorReq ...
-type IErrorReq interface {
+// ICodeErrorReq ...
+type ICodeErrorReq interface {
 	Code() int
 	ErrorReq(r *http.Request) string
 }
 
-// FieldError ...
-type FieldError interface {
-	Error() string
+// IFieldErrorReq ...
+type IFieldErrorReq interface {
+	ErrorReq(r *http.Request) string
 	Field() string
 }
 
@@ -92,8 +92,10 @@ func GetError(r *http.Request, code int, err interface{}, args ...interface{}) E
 	case *Error:
 		e.Field = field
 		return *e
-	case IErrorReq:
+	case ICodeErrorReq:
 		return Error{Code: e.Code(), Message: e.ErrorReq(r), Field: field}
+	case IFieldErrorReq:
+		return Error{Code: code, Message: e.ErrorReq(r), Field: e.Field()}
 	case string:
 		return Error{Code: code, Message: e, Field: field}
 	case error:
@@ -119,13 +121,13 @@ func getErrors(r *http.Request, code int, err interface{}, args ...string) (erro
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
 	case *Error:
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
-	case IErrorReq:
+	case ICodeErrorReq:
 		return append(errors, Error{Code: e.Code(), Message: e.ErrorReq(r), Field: field})
-	case FieldError:
-		return append(errors, Error{Message: e.Error(), Field: e.Field()})
-	case []FieldError:
+	case IFieldErrorReq:
+		return append(errors, Error{Message: e.ErrorReq(r), Field: e.Field()})
+	case []IFieldErrorReq:
 		for _, _e := range e {
-			errors = append(errors, Error{Message: _e.Error(), Field: _e.Field()})
+			errors = append(errors, Error{Message: _e.ErrorReq(r), Field: _e.Field()})
 		}
 		return
 	case string:
