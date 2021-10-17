@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/liut/staffio/pkg/web/i18n"
 )
 
 // Ok ...
@@ -68,8 +66,15 @@ type Error struct {
 	Field   string `json:"field,omitempty" description:"错误字段,可选,多用于表单校验"`
 }
 
+// IErrorReq ...
+type IErrorReq interface {
+	Code() int
+	ErrorReq(r *http.Request) string
+}
+
 // FieldError ...
 type FieldError interface {
+	Error() string
 	Field() string
 }
 
@@ -87,8 +92,8 @@ func GetError(r *http.Request, code int, err interface{}, args ...interface{}) E
 	case *Error:
 		e.Field = field
 		return *e
-	case i18n.ErrorCode:
-		return Error{Code: e.Code(), Message: e.ErrorString(i18n.GetPrinter(r)), Field: field}
+	case IErrorReq:
+		return Error{Code: e.Code(), Message: e.ErrorReq(r), Field: field}
 	case string:
 		return Error{Code: code, Message: e, Field: field}
 	case error:
@@ -114,13 +119,13 @@ func getErrors(r *http.Request, code int, err interface{}, args ...string) (erro
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
 	case *Error:
 		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
-	case i18n.ErrorCode:
-		return append(errors, Error{Code: e.Code(), Message: e.ErrorString(i18n.GetPrinter(r)), Field: field})
+	case IErrorReq:
+		return append(errors, Error{Code: e.Code(), Message: e.ErrorReq(r), Field: field})
 	case FieldError:
-		return append(errors, Error{Message: i18n.GetFieldErrorString(i18n.GetPrinter(r), e), Field: e.Field()})
+		return append(errors, Error{Message: e.Error(), Field: e.Field()})
 	case []FieldError:
 		for _, _e := range e {
-			errors = append(errors, Error{Message: i18n.GetFieldErrorString(i18n.GetPrinter(r), _e), Field: _e.Field()})
+			errors = append(errors, Error{Message: _e.Error(), Field: _e.Field()})
 		}
 		return
 	case string:

@@ -32,7 +32,7 @@ func TestErrorMessage(t *testing.T) {
 		assert.NotZero(t, e.Code())
 		assert.NotEmpty(t, e.Error())
 		for _, p := range printers {
-			assert.NotEqual(t, e.String(), e.ErrorString(p))
+			assert.NotEqual(t, e.String(), e.ErrorP(p))
 		}
 
 	}
@@ -42,7 +42,7 @@ func TestTag(t *testing.T) {
 	tag, _ := language.MatchStrings(matcher, "zh-hans", "zh-CN")
 	ers := []ErrorCode{ErrLoginFailed, ErrRegistFaild}
 	for _, e := range ers {
-		assert.NotEqual(t, e.String(), e.ErrorString(message.NewPrinter(tag)))
+		assert.NotEqual(t, e.String(), e.ErrorP(message.NewPrinter(tag)))
 	}
 }
 
@@ -53,6 +53,6 @@ func TestRequest(t *testing.T) {
 	// tag := GetTag(req)
 	ers := []ErrorCode{ErrLoginFailed, ErrRegistFaild}
 	for _, e := range ers {
-		assert.NotEqual(t, e.String(), e.ErrorString(GetPrinter(req)))
+		assert.NotEqual(t, e.String(), e.ErrorP(GetPrinter(req)))
 	}
 }

@@ -1,5 +1,9 @@
 package i18n
 
+import (
+	"net/http"
+)
+
 //go:generate stringer -type=ErrorCode -trimprefix=ErrorCode -output error_string.go
 
 // ErrorCode ...
@@ -54,9 +58,9 @@ const (
 
 )
 
-// ErrorString return locale string with message printer
-func (ev ErrorCode) ErrorString(p *Printer) string {
-	switch ev {
+// ErrorP return locale string with message printer
+func (ec ErrorCode) ErrorP(p *Printer) string {
+	switch ec {
 	case ErrSystemError:
 		return p.Sprintf("System error")
 	case ErrSystemReadonly:
@@ -110,14 +114,20 @@ func (ev ErrorCode) ErrorString(p *Printer) string {
 	case ErrTwoFactorCode:
 		return p.Sprintf("Two-step authentication code entered incorrectly")
 	}
-	return ev.String()
+	return ec.String()
 }
 
 // Code ...
-func (ev ErrorCode) Code() int {
-	return int(ev)
+func (ec ErrorCode) Code() int {
+	return int(ec)
 }
 
-func (ev ErrorCode) Error() string {
-	return ev.String()
+// Error as error
+func (ec ErrorCode) Error() string {
+	return ec.String()
+}
+
+// ErrorReq return locale message with http request
+func (ec ErrorCode) ErrorReq(r *http.Request) string {
+	return ec.ErrorP(GetPrinter(r))
 }
