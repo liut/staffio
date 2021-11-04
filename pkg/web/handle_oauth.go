@@ -2,13 +2,30 @@ package web
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/oauth"
+	"github.com/liut/staffio/pkg/settings"
 )
+
+func (s *server) oauth2AuthorizeFirst(c *gin.Context, ar *osin.AuthorizeRequest) {
+	scopes, err := s.service.OSIN().LoadScopes()
+	if err != nil {
+		c.AbortWithError(404, err)
+		return
+	}
+	s.Render(c, "authorize.html", map[string]interface{}{
+		"link":          c.Request.RequestURI,
+		"response_type": ar.Type,
+		"scopes":        scopes,
+		"client":        ar.Client.(*oauth.Client),
+		"ctx":           c,
+	})
+}
 
 // Authorization code endpoint
 func (s *server) oauth2Authorize(c *gin.Context) {
@@ -21,41 +38,36 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 
 	if ar := s.osvr.HandleAuthorizeRequest(resp, r); ar != nil {
 		logger().Debugw("HandleAuthorizeRequest", "client", ar.Client)
-		if store.IsAuthorized(ar.Client.GetId(), user.UID) {
-			ar.UserData = oauth.JSONKV{"uid": user.UID}
-			ar.Authorized = true
-			s.osvr.FinishAuthorizeRequest(resp, r, ar)
-		} else {
-			if r.Method == "GET" {
-				scopes, err := store.LoadScopes()
-				if err != nil {
-					c.AbortWithError(404, err)
-					return
-				}
-				s.Render(c, "authorize.html", map[string]interface{}{
-					"link":          r.RequestURI,
-					"response_type": ar.Type,
-					"scopes":        scopes,
-					"client":        ar.Client.(*oauth.Client),
-					"ctx":           c,
-				})
-				return
-			}
+		isAuthorized := store.IsAuthorized(ar.Client.GetId(), user.UID)
+		if !isAuthorized && r.Method == "GET" {
+			s.oauth2AuthorizeFirst(c, ar)
+			return
+		}
 
-			if r.PostForm.Get("authorize") == "1" {
-				ar.UserData = oauth.JSONKV{"uid": user.UID}
-				ar.Authorized = true
-				s.osvr.FinishAuthorizeRequest(resp, r, ar)
-				if r.PostForm.Get("remember") != "" {
-					err := store.SaveAuthorized(ar.Client.GetId(), user.UID)
-					if err != nil {
-						logger().Infow("SaveAuthorized fail", "err", err)
-					}
-				}
+		if c.PostForm("authorize") == "1" {
+			isAuthorized = true
+		}
+
+		if isAuthorized {
+
+			// These values would be tied to the end user authorizing the client.
+			err := s.oauth2UserData(c, ar, user)
+			if err != nil {
+				resp.SetError("get_user_error", "staff not found")
+				resp.InternalError = err
 			} else {
-				resp.SetRedirect("/")
+				ar.Authorized = true
 			}
 
+			s.osvr.FinishAuthorizeRequest(resp, r, ar)
+			if r.PostForm.Get("remember") != "" {
+				err := store.SaveAuthorized(ar.Client.GetId(), user.UID)
+				if err != nil {
+					logger().Infow("SaveAuthorized fail", "err", err)
+				}
+			}
+		} else {
+			resp.SetRedirect("/")
 		}
 
 	}
@@ -69,6 +81,55 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 
 	logger().Debugw("oauthAuthorize", "resp", resp)
 	osin.OutputJSON(resp, c.Writer, r)
+}
+
+func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
+	user *User) error {
+
+	staff, err := s.service.Get(user.UID)
+	if err != nil {
+		return err
+	}
+	scopes := make(map[string]bool)
+	for _, s := range strings.Fields(ar.Scope) {
+		scopes[s] = true
+	}
+	// If the "openid" connect scope is specified, attach an ID Token to the
+	// authorization response.
+	//
+	// The ID Token will be serialized and signed during the code for token exchange.
+	if scopes["openid"] {
+		now := time.Now()
+		idToken := IDToken{
+			Issuer:     settings.Current.BaseURL,
+			UserID:     staff.UID,
+			ClientID:   ar.Client.GetId(),
+			Expiration: now.Add(time.Hour).Unix(),
+			IssuedAt:   now.Unix(),
+			Nonce:      c.Query("nonce"),
+		}
+
+		if scopes["profile"] {
+			idToken.Name = staff.Name()
+			idToken.GivenName = staff.GivenName
+			idToken.FamilyName = staff.Surname
+			idToken.BirthDate = staff.Birthday
+			idToken.Nickname = staff.Nickname
+			idToken.Locale = staff.OrgDepartment
+		}
+
+		if scopes["email"] {
+			t := true
+			idToken.Email = staff.Email
+			idToken.EmailVerified = &t
+		}
+		// NOTE: The storage must be able to encode and decode this object.
+		ar.UserData = &idToken
+	} else {
+		ar.UserData = oauth.JSONKV{"uid": user.UID}
+	}
+
+	return nil
 }
 
 // Access token endpoint
