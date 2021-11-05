@@ -104,6 +104,10 @@ func New(c Config) *server {
 	return svr
 }
 
+func (s *server) HandleFunc(relativePath string, hf http.HandlerFunc) {
+	s.router.Any(relativePath, gin.WrapF(hf))
+}
+
 func (s *server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// TODO: refactory
 	s.router.ServeHTTP(w, req)

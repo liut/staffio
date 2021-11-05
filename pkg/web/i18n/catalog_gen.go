@@ -40,11 +40,13 @@ func init() {
 }
 
 var messageKeyToIndex = map[string]int{
-	"Are you sure this is a cell phone number?": 11,
-	"Are you sure this is the email address?":   10,
-	"Doesn't seem like a valid name?":           9,
-	"Error:Field validation for '%s' failed ":   26,
-	"Expired or lost third-party information":   22,
+	"Are you sure this is a cell phone number?":                       11,
+	"Are you sure this is the email address?":                         10,
+	"Basic Information":                                               27,
+	"Doesn't seem like a valid name?":                                 9,
+	"Email address":                                                   28,
+	"Error:Field validation for '%s' failed ":                         26,
+	"Expired or lost third-party information":                         22,
 	"Expired token":                                                   16,
 	"Failed to Register":                                              7,
 	"Failed to send verifaction code":                                 6,
@@ -53,7 +55,13 @@ var messageKeyToIndex = map[string]int{
 	"Invalid parameters":                                              3,
 	"Invalid token":                                                   17,
 	"No such mobile number":                                           8,
+	"OpenID Connect":                                                  29,
 	"Password cannot be empty":                                        19,
+	"Personal Information":                                            30,
+	"Read your Email address":                                         32,
+	"Read your GivenName, Surname, BirthDate, etc.":                   34,
+	"Read your ID Token after authenticated":                          33,
+	"Read your Uid (login name) and Nickname":                         31,
 	"Required parameters":                                             2,
 	"System error":                                                    0,
 	"The new phone number is the same as the old one.":                21,
@@ -69,7 +77,8 @@ var messageKeyToIndex = map[string]int{
 	"Your password is too simple.":                                    20,
 }
 
-var enIndex = []uint32{ // 28 elements
+var enIndex = []uint32{ // 36 elements
+	// Entry 0 - 1F
 	0x00000000, 0x0000000d, 0x00000038, 0x0000004c,
 	0x0000005f, 0x0000007e, 0x000000ad, 0x000000cd,
 	0x000000e0, 0x000000f6, 0x00000116, 0x0000013e,
@@ -77,9 +86,12 @@ var enIndex = []uint32{ // 28 elements
 	0x00000210, 0x0000021e, 0x0000022c, 0x00000250,
 	0x00000269, 0x00000286, 0x000002b7, 0x000002df,
 	0x00000307, 0x0000032b, 0x0000035c, 0x0000038b,
-} // Size: 136 bytes
+	0x0000039d, 0x000003ab, 0x000003ba, 0x000003cf,
+	// Entry 20 - 3F
+	0x000003f7, 0x0000040f, 0x00000436, 0x00000464,
+} // Size: 168 bytes
 
-const enData string = "" + // Size: 907 bytes
+const enData string = "" + // Size: 1124 bytes
 	"\x02System error\x02The system is currently in read-only mode.\x02Requir" +
 	"ed parameters\x02Invalid parameters\x02Incorrect username or password" +
 	"\x02You must be authenticated to see this resource\x02Failed to send ver" +
@@ -93,9 +105,14 @@ const enData string = "" + // Size: 907 bytes
 	"new phone number is the same as the old one.\x02Expired or lost third-pa" +
 	"rty information\x02Failure to bind third party information\x02Two-step a" +
 	"uthentication not enabled\x02Two-step authentication code entered incorr" +
-	"ectly\x04\x00\x01 *\x02Error:Field validation for '%[1]s' failed"
+	"ectly\x04\x00\x01 *\x02Error:Field validation for '%[1]s' failed\x02Basi" +
+	"c Information\x02Email address\x02OpenID Connect\x02Personal Information" +
+	"\x02Read your Uid (login name) and Nickname\x02Read your Email address" +
+	"\x02Read your ID Token after authenticated\x02Read your GivenName, Surna" +
+	"me, BirthDate, etc."
 
-var zh_HansIndex = []uint32{ // 28 elements
+var zh_HansIndex = []uint32{ // 36 elements
+	// Entry 0 - 1F
 	0x00000000, 0x0000000d, 0x00000054, 0x00000061,
 	0x0000006e, 0x0000008e, 0x0000009b, 0x000000b1,
 	0x000000be, 0x000000db, 0x000000fc, 0x0000011d,
@@ -103,17 +120,22 @@ var zh_HansIndex = []uint32{ // 28 elements
 	0x000001cf, 0x000001e9, 0x0000020c, 0x00000223,
 	0x0000023a, 0x00000257, 0x0000027a, 0x00000299,
 	0x000002b5, 0x000002cb, 0x000002ed, 0x00000318,
-} // Size: 136 bytes
+	0x00000325, 0x00000332, 0x00000340, 0x0000034d,
+	// Entry 20 - 3F
+	0x00000371, 0x0000038a, 0x000003a5, 0x000003d0,
+} // Size: 168 bytes
 
-const zh_HansData string = "" + // Size: 792 bytes
+const zh_HansData string = "" + // Size: 976 bytes
 	"\x02系统错误\x02😓抱歉，系统正在升级维护，暂停注册和变更等功能\x02需要参数\x02参数无效\x02😓用户名或密码错误！\x02请先登" +
 	"录\x02发送验证码失败\x02注册失败\x02😓没有这个手机号！\x02🤔貌似不像合法的名称?\x02🤔您确认这是邮箱地址?\x02🤔您确" +
 	"认这是手机号码?\x02😓此用户已存在，请直接登录\x02解绑失败，手机和邮箱地址至少需要一个\x02😓此手机号已存在\x02😓验证码不正确" +
 	"\x02😓登录身份已过期\x02😓登录身份无效或已过期\x02😓原密码不正确\x02😓密码不能为空\x02😓您的密码太简单了\x02😓新手机号和" +
 	"旧的一样唉\x02第三方信息过期或丢失\x02绑定第三方信息失败\x02两步认证未开启\x02两步认证验证码输入有误\x04\x00\x01" +
-	" &\x02输入有误: '%[1]s' 为必填字段"
+	" &\x02输入有误: '%[1]s' 为必填字段\x02基本信息\x02邮箱地址\x02OpenID 连接\x02个人信息\x02读取您的UI" +
+	"D(用户名)和昵称\x02读取您的邮箱地址\x02读取您的 OpenID 票据\x02读取您的姓名和生日等私人信息"
 
-var zh_HantIndex = []uint32{ // 28 elements
+var zh_HantIndex = []uint32{ // 36 elements
+	// Entry 0 - 1F
 	0x00000000, 0x0000000d, 0x00000054, 0x00000061,
 	0x0000006e, 0x0000008e, 0x0000009b, 0x000000b1,
 	0x000000be, 0x000000db, 0x000000fc, 0x0000011d,
@@ -121,14 +143,18 @@ var zh_HantIndex = []uint32{ // 28 elements
 	0x000001cf, 0x000001e9, 0x0000020c, 0x00000223,
 	0x0000023a, 0x00000257, 0x0000027a, 0x00000299,
 	0x000002b5, 0x000002cb, 0x000002ed, 0x00000318,
-} // Size: 136 bytes
+	0x00000325, 0x00000332, 0x00000340, 0x0000034d,
+	// Entry 20 - 3F
+	0x00000371, 0x0000038a, 0x000003a5, 0x000003cd,
+} // Size: 168 bytes
 
-const zh_HantData string = "" + // Size: 792 bytes
+const zh_HantData string = "" + // Size: 973 bytes
 	"\x02系統錯誤\x02😓抱歉，系統正在升級維護，暫停註冊和變更等功能\x02需要參數\x02參數無效\x02😓用戶名或密碼錯誤！\x02請先登" +
 	"錄\x02發送驗證碼失敗\x02註冊失敗\x02😓沒有這個手機號！\x02🤔貌似不像合法的名稱?\x02🤔您確認這是郵箱地址?\x02🤔您確" +
 	"認這是手機號碼?\x02😓此用戶已存在，請直接登錄\x02解綁失敗，手機和郵箱地址至少需要一個\x02😓此手機號已存在\x02😓驗證碼不正確" +
 	"\x02😓登錄身份已過期\x02😓登錄身份無效或已過期\x02😓原密碼不正確\x02😓密碼不能為空\x02😓您的密碼太簡單了\x02😓新手機號和" +
 	"舊的一樣唉\x02第三方資訊過期或丟失\x02綁定第三方資訊失敗\x02兩步認證未開啟\x02兩步認證驗證碼輸入有誤\x04\x00\x01" +
-	" &\x02輸入有誤: '%[1]s' 為必填字段"
+	" &\x02輸入有誤: '%[1]s' 為必填字段\x02基本信息\x02電郵地址\x02OpenID 連接\x02個人信息\x02讀取您的UI" +
+	"D(用戶名)和暱稱\x02讀取您的電郵地址\x02讀取您的 OpenID 票據\x02讀取您的姓名和生日等私信息"
 
-	// Total table size 2899 bytes (2KiB); checksum: 1D243679
+	// Total table size 3577 bytes (3KiB); checksum: 2BFBAC6E

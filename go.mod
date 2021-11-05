@@ -22,7 +22,7 @@ require (
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.7
 	github.com/liut/staffio-backend v0.2.4
-	github.com/microcosm-cc/bluemonday v1.0.15
+	github.com/microcosm-cc/bluemonday v1.0.16
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mozillazg/go-slugify v0.2.0

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/openshift/osin"
 )
@@ -14,22 +15,31 @@ type serverMux interface {
 }
 
 type demo struct {
-	prefix string
+	base string
 }
 
-const (
+var (
 	demoId     = "1234"
 	demoSecret = "aabbccdda"
 )
 
-func (d *demo) strap(router serverMux) {
+func init() {
+	if s, ok := os.LookupEnv("DEMO_CLIENT_ID"); ok && len(s) > 0 {
+		demoId = s
+	}
+	if s, ok := os.LookupEnv("DEMO_CLIENT_SECRET"); ok && len(s) > 0 {
+		demoSecret = s
+	}
 
+}
+
+func (d *demo) strap(router serverMux) {
 	// Application home endpoint
 	router.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("<html><body>"))
 
-		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=code&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Code</a><br/>", url.QueryEscape(d.prefix+"/appauth/code"))))
-		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=token&client_id=1234&state=xyz&scope=everything&redirect_uri=%s\">Implict</a><br/>", url.QueryEscape(d.prefix+"/appauth/token"))))
+		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=code&client_id=%s&state=xyz&scope=everything&redirect_uri=%s\">Code</a><br/>", demoId, url.QueryEscape(d.base+"/appauth/code"))))
+		w.Write([]byte(fmt.Sprintf("<a href=\"/authorize?response_type=token&client_id=%s&state=xyz&scope=everything&redirect_uri=%s\">Implict</a><br/>", demoId, url.QueryEscape(d.base+"/appauth/token"))))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/password\">Password</a><br/>")))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/client_credentials\">Client Credentials</a><br/>")))
 		w.Write([]byte(fmt.Sprintf("<a href=\"/appauth/assertion\">Assertion</a><br/>")))
@@ -55,12 +65,12 @@ func (d *demo) strap(router serverMux) {
 		jr := make(map[string]interface{})
 
 		// build access code url
-		aurl := fmt.Sprintf("/token?grant_type=authorization_code&client_id=1234&state=xyz&redirect_uri=%s&code=%s",
-			url.QueryEscape(d.prefix+"/appauth/code"), url.QueryEscape(code))
+		aurl := fmt.Sprintf("/token?grant_type=authorization_code&client_id=%s&state=xyz&redirect_uri=%s&code=%s",
+			demoId, url.QueryEscape(d.base+"/appauth/code"), url.QueryEscape(code))
 
 		// if parse, download and parse json
 		if r.Form.Get("doparse") == "1" {
-			err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+			err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 				&osin.BasicAuth{demoId, demoSecret}, jr)
 			if err != nil {
 				w.Write([]byte(err.Error()))
@@ -126,7 +136,7 @@ func (d *demo) strap(router serverMux) {
 			"test", "test")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+		err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -171,7 +181,7 @@ func (d *demo) strap(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=client_credentials")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+		err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -216,7 +226,7 @@ func (d *demo) strap(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=assertion&assertion_type=urn:osin.example.complete&assertion=osin.data")
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+		err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -269,7 +279,7 @@ func (d *demo) strap(router serverMux) {
 		aurl := fmt.Sprintf("/token?grant_type=refresh_token&refresh_token=%s", url.QueryEscape(code))
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+		err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -320,7 +330,7 @@ func (d *demo) strap(router serverMux) {
 		aurl := fmt.Sprintf("/info/me?code=%s", url.QueryEscape(code))
 
 		// download token
-		err := DownloadAccessToken(fmt.Sprintf("%s%s", d.prefix, aurl),
+		err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
 			&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -370,8 +380,9 @@ func HandleLoginPage(ar *osin.AuthorizeRequest, w http.ResponseWriter, r *http.R
 	return false
 }
 
-func DownloadAccessToken(url string, auth *osin.BasicAuth, output map[string]interface{}) error {
+func downloadAccessToken(url string, auth *osin.BasicAuth, output map[string]interface{}) error {
 	// download access token
+	logger().Debugw("download access token", "url", url)
 	preq, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return err
@@ -383,6 +394,7 @@ func DownloadAccessToken(url string, auth *osin.BasicAuth, output map[string]int
 	pclient := &http.Client{}
 	presp, err := pclient.Do(preq)
 	if err != nil {
+		logger().Warnw("http do fail", "err", err)
 		return err
 	}
 

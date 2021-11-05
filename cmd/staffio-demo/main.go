@@ -3,25 +3,48 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
+	"net/http"
+	"time"
 
-	"github.com/liut/staffio/pkg/settings"
+	"github.com/liut/keeper/utils/reaper"
+
+	"github.com/liut/staffio/pkg/backends"
+	config "github.com/liut/staffio/pkg/settings"
 	"github.com/liut/staffio/pkg/web"
+)
+
+const (
+	readTimeout  time.Duration = 10 * time.Second
+	writeTimeout               = 15 * time.Second
 )
 
 func main() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
-	settings.Parse()
-	ws := web.Default()
-	if strings.HasPrefix(settings.HttpListen, "localhost") {
-		d := &demo{
-			prefix: "http://" + settings.HttpListen,
-		}
-		d.strap(ws)
+
+	settings := config.Current
+
+	cfg := web.Config{
+		Root:    ".",
+		FS:      "local",
+		BaseURI: settings.BaseURL,
+	}
+	ws := web.New(cfg)
+	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
+
+	srv := &http.Server{
+		Addr:         settings.HTTPListen,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		Handler:      ws,
 	}
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", settings.Version(), settings.HttpListen, settings.Root)
-	err := ws.Run(settings.HttpListen) // Start the server!
+	d := &demo{
+		base: settings.BaseURL,
+	}
+	d.strap(ws)
+
+	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", config.Version(), settings.HTTPListen, settings.Root)
+	err := srv.ListenAndServe() // Start the server!
 	if err != nil {
 		log.Fatal("Run ERR: ", err)
 	}
