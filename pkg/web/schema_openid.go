@@ -19,6 +19,7 @@ type IDToken struct {
 	Email         string `json:"email,omitempty"`
 	EmailVerified *bool  `json:"email_verified,omitempty"`
 
+	UID        string `json:"uid,omitempty"`
 	Name       string `json:"name,omitempty"`
 	FamilyName string `json:"family_name,omitempty"`
 	GivenName  string `json:"given_name,omitempty"`

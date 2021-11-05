@@ -101,6 +101,7 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 			Expiration: now.Add(time.Hour).Unix(),
 			IssuedAt:   now.Unix(),
 			Nonce:      c.Query("nonce"),
+			UID:        staff.UID,
 		}
 
 		if scopes["profile"] {

@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -52,7 +53,7 @@ func (s *DbStorage) Close() {
 }
 
 func (s *DbStorage) SaveAuthorize(data *osin.AuthorizeData) error {
-	extra, err := ToJSONKV(data.UserData)
+	extra, err := json.Marshal(data.UserData)
 	if err != nil {
 		logger().Infow("userData to json fail", "data", data, "err", err)
 		return err

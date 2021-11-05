@@ -78,7 +78,7 @@ syncutil:
 
 demo: # deprecated
 	echo "Building $@"
-	$(GO) build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
+	GO111MODULE=$(GOMOD) $(GO) build -ldflags "$(LDFLAGS)" $(ROOF)/cmd/$(NAME)-$@
 .PHONY: $@
 
 gen-key: # deprecated
