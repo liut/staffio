@@ -195,9 +195,65 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "fe.Field()"
+                    "expr": "f.Field()"
                 }
             ],
+            "fuzzy": true
+        },
+        {
+            "id": "Basic Information",
+            "message": "Basic Information",
+            "translation": "Basic Information",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Email address",
+            "message": "Email address",
+            "translation": "Email address",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "OpenID Connect",
+            "message": "OpenID Connect",
+            "translation": "OpenID Connect",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Personal Information",
+            "message": "Personal Information",
+            "translation": "Personal Information",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Read your Uid (login name) and Nickname",
+            "message": "Read your Uid (login name) and Nickname",
+            "translation": "Read your Uid (login name) and Nickname",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Read your Email address",
+            "message": "Read your Email address",
+            "translation": "Read your Email address",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Read your ID Token after authenticated",
+            "message": "Read your ID Token after authenticated",
+            "translation": "Read your ID Token after authenticated",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Read your GivenName, Surname, BirthDate, etc.",
+            "message": "Read your GivenName, Surname, BirthDate, etc.",
+            "translation": "Read your GivenName, Surname, BirthDate, etc.",
+            "translatorComment": "Copied from source.",
             "fuzzy": true
         }
     ]

@@ -142,9 +142,49 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 1,
-                    "expr": "fe.Field()"
+                    "expr": "f.Field()"
                 }
             ]
+        },
+        {
+            "id": "Basic Information",
+            "message": "Basic Information",
+            "translation": "基本信息"
+        },
+        {
+            "id": "Email address",
+            "message": "Email address",
+            "translation": "電郵地址"
+        },
+        {
+            "id": "OpenID Connect",
+            "message": "OpenID Connect",
+            "translation": "OpenID 連接"
+        },
+        {
+            "id": "Personal Information",
+            "message": "Personal Information",
+            "translation": "個人信息"
+        },
+        {
+            "id": "Read your Uid (login name) and Nickname",
+            "message": "Read your Uid (login name) and Nickname",
+            "translation": "讀取您的UID(用戶名)和暱稱"
+        },
+        {
+            "id": "Read your Email address",
+            "message": "Read your Email address",
+            "translation": "讀取您的電郵地址"
+        },
+        {
+            "id": "Read your ID Token after authenticated",
+            "message": "Read your ID Token after authenticated",
+            "translation": "讀取您的 OpenID 票據"
+        },
+        {
+            "id": "Read your GivenName, Surname, BirthDate, etc.",
+            "message": "Read your GivenName, Surname, BirthDate, etc.",
+            "translation": "讀取您的姓名和生日等私信息"
         }
     ]
 }

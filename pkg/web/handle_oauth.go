@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net/http"
 	"strings"
 	"time"
 
@@ -10,18 +11,14 @@ import (
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
+	"github.com/liut/staffio/pkg/web/i18n"
 )
 
 func (s *server) oauth2AuthorizeFirst(c *gin.Context, ar *osin.AuthorizeRequest) {
-	scopes, err := s.service.OSIN().LoadScopes()
-	if err != nil {
-		c.AbortWithError(404, err)
-		return
-	}
 	s.Render(c, "authorize.html", map[string]interface{}{
 		"link":          c.Request.RequestURI,
 		"response_type": ar.Type,
-		"scopes":        scopes,
+		"scopes":        s.loadScopes(c.Request),
 		"client":        ar.Client.(*oauth.Client),
 		"ctx":           c,
 	})
@@ -73,11 +70,8 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	}
 
 	if resp.IsError && resp.InternalError != nil {
-		logger().Infow("authorize ERROR", "err", resp.InternalError)
+		logger().Infow("authorize fail", "eid", resp.ErrorId, "err", resp.InternalError)
 	}
-	// if !resp.IsError {
-	// 	resp.Output["uid"] = c.user.UID
-	// }
 
 	logger().Debugw("oauthAuthorize", "resp", resp)
 	osin.OutputJSON(resp, c.Writer, r)
@@ -130,6 +124,21 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 	}
 
 	return nil
+}
+
+func (s *server) loadScopes(r *http.Request) (data []oauth.Scope) {
+	p := i18n.GetPrinter(r)
+	for _, s := range strings.Fields(r.FormValue("scope")) {
+		scope := i18n.Scope(s)
+		if !scope.Valid() {
+			continue
+		}
+		data = append(data, oauth.Scope{
+			Label:       scope.LabelP(p),
+			Description: scope.DescriptionP(p),
+		})
+	}
+	return
 }
 
 // Access token endpoint
