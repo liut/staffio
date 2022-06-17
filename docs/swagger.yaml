@@ -27,6 +27,9 @@ definitions:
     type: object
 info:
   contact: {}
+  description: 接口文档.
+  title: Web API
+  version: "1.0"
 paths:
   /api/login:
     post:

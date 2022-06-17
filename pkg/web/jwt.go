@@ -1,7 +1,9 @@
 package web
 
 import (
-	"log"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/openshift/osin"
@@ -10,7 +12,7 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
-// JWT access token generator
+// AccessTokenGenJWT JWT access token generator
 type AccessTokenGenJWT struct {
 	Key []byte
 }
@@ -51,11 +53,39 @@ func getTokenGenJWT() (tokenGen osin.AccessTokenGen, err error) {
 
 	hmacKey, err = jwt.DecodeSegment(settings.Current.TokenGenKey)
 	if err != nil {
-		log.Printf("ERROR: key %s\n", err)
+		logger().Warnw("getTokenGenJWT fail", "err", err)
 		return
 	}
 
 	tokenGen = &AccessTokenGenJWT{Key: hmacKey}
 
 	return
+}
+
+// LoadPrivateKey loads a private key from PEM/DER data.
+func LoadPrivateKey(data []byte) (interface{}, error) {
+	input := data
+
+	block, _ := pem.Decode(data)
+	if block != nil {
+		input = block.Bytes
+	}
+
+	var priv interface{}
+	priv, err0 := x509.ParsePKCS1PrivateKey(input)
+	if err0 == nil {
+		return priv, nil
+	}
+
+	priv, err1 := x509.ParsePKCS8PrivateKey(input)
+	if err1 == nil {
+		return priv, nil
+	}
+
+	priv, err2 := x509.ParseECPrivateKey(input)
+	if err2 == nil {
+		return priv, nil
+	}
+
+	return nil, fmt.Errorf("parse error, got '%s', '%s', '%s'", err0, err1, err2)
 }

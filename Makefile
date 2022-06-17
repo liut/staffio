@@ -10,6 +10,7 @@ ROOF:=github.com/liut/$(NAME)
 SOURCES=$(shell find cmd pkg templates -type f \( -name "*.go" ! -name "*_test.go" \) -print )
 UIFILES=$(shell find fe/{css,scripts} -type f \( -name "*.styl" -o -name "*.js" \) -print )
 STATICS=$(shell find htdocs -type f -print )
+WEBAPIS=$(shell find pkg/web -type f \( -name "*.go" ! -name "*_test.go" \) -print )
 TAG:=`git describe --tags --always`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 GO=$(shell which go)
@@ -23,7 +24,10 @@ all: vet dist package
 
 dep:
 	$(GO) install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
-	$(GO) get github.com/liut/staticfiles
+	GO111MODULE=on $(GO) install github.com/ddollar/forego@latest
+	GO111MODULE=on $(GO) install github.com/liut/rerun@latest
+	GO111MODULE=on $(GO) install github.com/swaggo/swag/cmd/swag@latest
+	GO111MODULE=on $(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 vet:
 	echo "Checking with GOMOD=$(GOMOD) ./pkg/... "
@@ -57,6 +61,14 @@ package: dist
 
 generate:
 	$(GO) generate ./...
+
+docs/swagger.yaml: $(WEBAPIS)
+	GO111MODULE=on swag init -g ./pkg/web/docs.go -d ./ --ot json,yaml --parseDependency
+
+touch-web-api:
+	touch pkg/web/server.go
+
+gen-apidoc: touch-web-api docs/swagger.yaml
 
 fetch-exmail: # deprecated
 	echo "Building $@"

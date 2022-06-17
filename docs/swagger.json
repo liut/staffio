@@ -1,7 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "接口文档.",
+        "title": "Web API",
+        "contact": {},
+        "version": "1.0"
     },
     "paths": {
         "/api/login": {
