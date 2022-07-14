@@ -1,9 +1,10 @@
-FROM golang:1.12
+FROM golang:1.18-alpine
 MAINTAINER Eagle Liut <eagle@dantin.me>
 
 ENV GO111MODULE=on GOPROXY=https://goproxy.io ROOF=github.com/liut/staffio
 WORKDIR /go/src/$ROOF/
 COPY main.go go.* ./
+COPY htdocs ./htdocs
 COPY pkg ./pkg
 
 RUN go mod download \
