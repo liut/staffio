@@ -7,7 +7,7 @@ WITH_ENV = env `cat .env 2>/dev/null | xargs`
 ORIG:=liut7
 NAME:=staffio
 ROOF:=github.com/liut/$(NAME)
-SOURCES=$(shell find cmd pkg templates -type f \( -name "*.go" ! -name "*_test.go" \) -print )
+SOURCES=$(shell find cmd pkg -type f \( -name "*.go" ! -name "*_test.go" \) -print )
 UIFILES=$(shell find fe/{css,scripts} -type f \( -name "*.styl" -o -name "*.js" \) -print )
 STATICS=$(shell find htdocs -type f -print )
 WEBAPIS=$(shell find pkg/web -type f \( -name "*.go" ! -name "*_test.go" \) -print )
@@ -108,11 +108,6 @@ fe-deps:
 	touch $@
 
 fe-build: .fe-build
-
-static:.fe-build $(STATICS)
-	echo 'packing UI files into static'
-	staticfiles --package static -o pkg/web/static/files.go ./htdocs
-.PHONY: $@
 
 gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \

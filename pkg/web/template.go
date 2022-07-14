@@ -2,19 +2,15 @@ package web
 
 import (
 	"html/template"
-	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/liut/staffio/pkg/settings"
+	xrefs "github.com/liut/staffio/pkg/xrefs"
 )
 
 var (
-	cachedTemplates = map[string]*template.Template{}
-	cachedMutex     sync.Mutex
-
 	avatarReplacer = strings.NewReplacer("/0", "/60")
 )
 
@@ -60,23 +56,17 @@ func (s *server) Render(c *gin.Context, name string, data interface{}) (err erro
 }
 
 func (s *server) tpl(name string) *template.Template {
-	cachedMutex.Lock()
-	defer cachedMutex.Unlock()
-
-	if t, ok := cachedTemplates[name]; ok {
-		return t
-	}
 
 	t := template.New("_base.html").Funcs(template.FuncMap{
 		"urlFor":     UrlFor,
 		"avatarHtml": AvatarHTML,
 		"isKeeper":   s.IsKeeper,
 	})
-	t = template.Must(t.ParseFiles(
-		filepath.Join(settings.Current.Root, "templates/_base.html"),
-		filepath.Join(settings.Current.Root, "templates", name),
+	t = template.Must(t.ParseFS(
+		xrefs.FS(),
+		"templates/_base.html",
+		"templates/"+name,
 	))
-	cachedTemplates[name] = t
 
 	return t
 }

@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/liut/keeper/utils/reaper"
+	"go.uber.org/zap"
 
+	"github.com/liut/keeper/utils/reaper"
 	"github.com/liut/staffio/pkg/backends"
+	zlog "github.com/liut/staffio/pkg/log"
 	config "github.com/liut/staffio/pkg/settings"
 	"github.com/liut/staffio/pkg/web"
 )
@@ -19,6 +20,15 @@ const (
 )
 
 func main() {
+	var zlogger *zap.Logger
+
+	zlogger, _ = zap.NewDevelopment()
+
+	defer zlogger.Sync() // flushes buffer, if any
+	sugar := zlogger.Sugar()
+
+	zlog.SetLogger(sugar)
+
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	settings := config.Current
@@ -43,7 +53,7 @@ func main() {
 	}
 	d.strap(ws)
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", config.Version(), settings.HTTPListen, settings.Root)
+	logger().Infow("Starting", "ver", config.Version(), "listen", settings.HTTPListen, "root", settings.Root)
 	err := srv.ListenAndServe() // Start the server!
 	if err != nil {
 		log.Fatal("Run ERR: ", err)

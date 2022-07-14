@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -74,7 +73,7 @@ func webRun() {
 	ws := web.New(cfg)
 	defer reaper.Quit(reaper.Run(0, backends.Cleanup))
 
-	fmt.Printf("Start service %s at addr %s\nRoot: %s\n", config.Version(), settings.HTTPListen, settings.Root)
+	logger().Infow("Starting", "ver", config.Version(), "listen", settings.HTTPListen, "root", settings.Root)
 
 	srv := &http.Server{
 		Addr:         settings.HTTPListen,

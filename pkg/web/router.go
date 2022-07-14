@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/liut/staffio/htdocs"
 	zlog "github.com/liut/staffio/pkg/log"
 )
 
@@ -150,7 +151,7 @@ func (s *server) StrapRouter() {
 
 	}
 
-	ah := gin.WrapH(staticHandler(s.cfg.FS))
+	ah := gin.WrapH(htdocs.Handler())
 	s.router.GET("/static/*filepath", ah)
 	s.router.GET("/favicon.ico", ah)
 	s.router.GET("/robots.txt", ah)
