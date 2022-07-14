@@ -57,7 +57,6 @@ dist: vet dist/linux_amd64/$(NAME) dist/darwin_amd64/$(NAME) dist/windows_amd64/
 package: dist
 	tar -cvJf $(NAME)-linux-amd64-$(TAG).tar.xz -C dist/linux_amd64 $(NAME)
 	tar -cvJf $(NAME)-darwin-amd64-$(TAG).tar.xz -C dist/darwin_amd64 $(NAME)
-	tar -cvJf $(NAME)-templates-$(TAG).tar.xz templates
 
 generate:
 	$(GO) generate ./...
@@ -139,7 +138,7 @@ docker-auto-build:
 
 docker-local-build: dist/linux_amd64/$(NAME)
 	echo "Building docker image"
-	cp -rf templates entrypoint.sh dist/
+	cp -rf entrypoint.sh dist/
 	cp -rf Dockerfile.local dist/Dockerfile
 	docker build --rm -t $(ORIG)/$(NAME):$(TAG) dist/
 	docker tag $(ORIG)/$(NAME):$(TAG) $(ORIG)/$(NAME):latest
