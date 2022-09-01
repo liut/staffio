@@ -119,8 +119,8 @@
         $("a.btnFetch").click(function(e){
             var uid = $("#uid").val()
             var src = 'mail'
-            console.log(e)
-            if (e.target.id == 'fetchExwechat') {src = 'wechat'}
+            console.log(e.currentTarget)
+            if (e.currentTarget.id == 'fetchExwechat') {src = 'wechat'}
             console.log("searching for uid:", uid)
             $.post(location.pathname + '?op=fetch-ex',{uid:uid,src:src},function(res,status,xhr){
                 console.log(res,status)
