@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"fhyx.online/tencent-api-go/exmail"
+	"daxv.cn/gopak/tencent-api-go/exmail"
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
 

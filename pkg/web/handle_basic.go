@@ -100,7 +100,7 @@ func (s *server) me(c *gin.Context) {
 	}
 	team, err := s.service.Team().GetWithMember(user.UID)
 	if err == nil {
-		user.TeamID = team.ID
+		user.TeamID = int64(team.ID)
 	} else {
 		log.Printf("get team with member %s ERR %s", user.UID, err)
 	}

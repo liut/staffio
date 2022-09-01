@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/openshift/osin"
 
+	"daxv.cn/gopak/tencent-api-go/wxwork"
 	"fhyx.online/lark-api-go/lark"
-	"fhyx.online/tencent-api-go/wxwork"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/settings"
@@ -41,7 +41,7 @@ type server struct {
 	service backends.Servicer
 	osvr    *osin.Server
 	wxAuth  *wxwork.API
-	checkin *wxwork.CAPI
+	checkin *wxwork.API
 	larkAPI *lark.API
 }
 
@@ -83,7 +83,7 @@ func New(c Config) *server {
 		service: service,
 		osvr:    osvr,
 		wxAuth:  wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
-		checkin: wxwork.NewCAPI(),
+		checkin: wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatCheckinSecret),
 		larkAPI: lark.NewAPI(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
 	}
 

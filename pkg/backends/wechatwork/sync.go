@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"fhyx.online/tencent-api-go/wxwork"
+	"daxv.cn/gopak/tencent-api-go/wxwork"
 
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/models"
@@ -93,7 +93,7 @@ func (s *Syncer) RunIt() error {
 				}
 				team.Members = append(team.Members, val.UID)
 				staff := UserToStaff(&val)
-				if val.IsLeader == 1 {
+				if len(val.LeaderInDepts) > 0 {
 					team.Leaders = append(team.Leaders, staff.UID)
 				}
 				// fmt.Println(staff)
