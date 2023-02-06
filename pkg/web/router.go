@@ -137,6 +137,7 @@ func (s *server) StrapRouter() {
 			apiMan.POST("/weekly/report/vacation/unmark", s.weeklyVacationRemove)
 
 			apiMan.DELETE("/staff/:uid", s.staffDelete)
+			apiMan.GET("/staff/ex/:src/:uid", s.fetchEx)
 		}
 
 		apiDev := api.Group("/", s.authGroup(gnAdmin, gnDev))

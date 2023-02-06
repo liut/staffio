@@ -23,12 +23,13 @@ div > img.avatar {max-height: 5em;}
         </div>
         <div class="col-xs-1">
             <img id="avatarLoad" class="avatar img-circle">
+            <input type="hidden" name="avatar">
         </div>
     </div>
 
     <div class="form-group">
         <label class="col-xs-3 control-label">Common name</label>
-        <div class="col-xs-5">
+        <div class="col-xs-6">
             <input type="text" class="form-control" name="cn" value="{{ .staff.CommonName }}" placeholder="姓名" id="CommonName" />
         </div>
     </div>
@@ -131,7 +132,7 @@ div > img.avatar {max-height: 5em;}
             console.log(e.currentTarget)
             if (e.currentTarget.id == 'fetchExwechat') {src = 'wechat'}
             console.log("searching for uid:", uid)
-            $.post(location.pathname + '?op=fetch-ex',{uid:uid,src:src},function(res,status,xhr){
+            $.get('/api/staff/ex/' + src + '/'+uid,function(res,status,xhr){
                 console.log(res,status)
                 var staff = res.staff
                 $("#CommonName").val(staff.cn)
@@ -147,6 +148,7 @@ div > img.avatar {max-height: 5em;}
                 }
                 if (typeof staff.avatarPath === "string" && staff.avatarPath.length > 0) {
                     $('#avatarLoad').attr('src',staff.avatarPath).removeClass('hidden')
+                    $('input[name=avatar]').val(staff.avatarPath)
                 } else {
                     $('#avatarLoad').addClass('hidden')
                 }

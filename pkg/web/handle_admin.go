@@ -188,82 +188,83 @@ func (s *server) staffForm(c *gin.Context) {
 	s.Render(c, "staff_edit.html", data)
 }
 
-func (s *server) staffPost(c *gin.Context) {
-	req := c.Request
+func (s *server) fetchEx(c *gin.Context) {
+	src := c.Param("src")
+	uid := c.Param("uid")
 
-	var (
-		uid           = c.Param("uid")
-		estaff, staff *models.Staff
-		res           = make(osin.ResponseData)
-		op            = req.FormValue("op")
-		src           = req.FormValue("src")
-		err           error
-	)
-	if uid == "" || uid == "new" {
-		uid = req.PostFormValue("uid")
-	}
-
-	if uid == "" || uid == "new" {
-		c.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-
-	estaff, err = s.service.Get(uid)
+	estaff, err := s.service.Get(uid)
 	if err != nil {
 		logger().Infow("get fail", "uid", uid, "err", err)
 		estaff = nil
 	}
-
-	if strings.HasPrefix(op, "fetch-ex") && uid != "" {
-		if src == "wechat" {
-			exuser, err := s.wxAuth.GetUser(uid)
-			if err != nil {
-				c.AbortWithError(404, err)
-				return
-			}
-			staff = wechatwork.UserToStaff(exuser)
-		} else {
-			email := uid + "@" + settings.Current.EmailDomain
-			staff, err = qqexmail.GetStaffFromExmail(email)
-			if err != nil {
-				c.AbortWithError(http.StatusNotFound, err)
-				logger().Infow("get fail", "uid", uid, "err", err)
-				return
-			}
+	logger().Debugw("fetch ex", "src", src, "uid", uid, "estaff", estaff)
+	var staff *models.Staff
+	switch src {
+	case "wechat":
+		exuser, err := s.wxAuth.GetUser(uid)
+		if err != nil {
+			c.AbortWithError(404, err)
+			return
 		}
-
-		// log.Print(staff)
-		if estaff != nil {
-			staff.CommonName = estaff.CommonName
-			staff.Surname = estaff.Surname
-			staff.GivenName = estaff.GivenName
-			staff.Gender = estaff.Gender
-			staff.Nickname = estaff.Nickname
-			if estaff.Mobile != "" {
-				staff.Mobile = estaff.Mobile
-			}
-			if estaff.Email != "" {
-				staff.Email = estaff.Email
-			}
-			if estaff.EmployeeNumber > 0 {
-				staff.EmployeeNumber = estaff.EmployeeNumber
-			}
-			if estaff.EmployeeType != "" {
-				staff.EmployeeType = estaff.EmployeeType
-			}
-			if estaff.Description != "" {
-				staff.Description = estaff.Description
-			}
+		staff = wechatwork.UserToStaff(exuser)
+		logger().Infow("fetch-ex", "src", src, "user", exuser, "staff", staff)
+	case "exmail":
+		email := uid + "@" + settings.Current.EmailDomain
+		staff, err = qqexmail.GetStaffFromExmail(email)
+		if err != nil {
+			c.AbortWithError(http.StatusNotFound, err)
+			logger().Infow("get fail", "uid", uid, "err", err)
+			return
 		}
-		res["ok"] = true
-		res["staff"] = staff
-		c.JSON(http.StatusOK, res)
+	default:
+		c.AbortWithError(400, err)
 		return
 	}
-	if op == "store" {
+
+	if estaff != nil {
+		staff.CommonName = estaff.CommonName
+		staff.Surname = estaff.Surname
+		staff.GivenName = estaff.GivenName
+		staff.Gender = estaff.Gender
+		staff.Nickname = estaff.Nickname
+		if estaff.Mobile != "" {
+			staff.Mobile = estaff.Mobile
+		}
+		if estaff.Email != "" {
+			staff.Email = estaff.Email
+		}
+		if estaff.EmployeeNumber > 0 {
+			staff.EmployeeNumber = estaff.EmployeeNumber
+		}
+		if estaff.EmployeeType != "" {
+			staff.EmployeeType = estaff.EmployeeType
+		}
+		if estaff.Description != "" {
+			staff.Description = estaff.Description
+		}
+	}
+	res := make(osin.ResponseData)
+	res["ok"] = true
+	res["staff"] = staff
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+func (s *server) staffPost(c *gin.Context) {
+	req := c.Request
+	uid := c.Param("uid")
+	if uid == "" || uid == "new" {
+		uid = req.PostFormValue("uid")
+		if uid == "" || uid == "new" {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+
+	if req.FormValue("op") == "store" {
 		fb := binding.Form
-		staff = new(models.Staff)
-		err = fb.Bind(req, staff)
+		staff := new(models.Staff)
+		err := fb.Bind(req, staff)
 		if err != nil {
 			logger().Infow("bind fail", "staff", staff, "err", err)
 			return
@@ -271,6 +272,7 @@ func (s *server) staffPost(c *gin.Context) {
 
 		err = s.service.SaveStaff(staff)
 		if err == nil {
+			res := make(osin.ResponseData)
 			res["ok"] = true
 			res["referer"] = "/contacts"
 			c.JSON(http.StatusOK, res)

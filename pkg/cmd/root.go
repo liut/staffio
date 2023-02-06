@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
+	talog "daxv.cn/gopak/tencent-api-go/log"
 	larklog "fhyx.online/lark-api-go/log"
 
 	"github.com/liut/staffio/pkg/backends"
@@ -76,6 +77,7 @@ func Execute() {
 	sugar := logger.Sugar()
 
 	zlog.SetLogger(sugar)
+	talog.SetLogger(sugar)
 	larklog.SetLogger(sugar)
 
 	backends.SetDSN(settings.BackendDSN)

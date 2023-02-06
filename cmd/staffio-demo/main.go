@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
+	talog "daxv.cn/gopak/tencent-api-go/log"
 	"github.com/liut/keeper/utils/reaper"
 	"github.com/liut/staffio/pkg/backends"
 	zlog "github.com/liut/staffio/pkg/log"
@@ -28,6 +29,7 @@ func main() {
 	sugar := zlogger.Sugar()
 
 	zlog.SetLogger(sugar)
+	talog.SetLogger(sugar)
 
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
