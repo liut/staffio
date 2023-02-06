@@ -34,7 +34,7 @@ func UserToStaff(user *wxwork.User) *models.Staff {
 	if user.Avatar != "" {
 		uri, err := url.Parse(user.Avatar)
 		if err == nil {
-			staff.AvatarPath = uri.Path
+			staff.AvatarPath = "//" + uri.Host + uri.Path
 		}
 	}
 	if user.Alias != "" {

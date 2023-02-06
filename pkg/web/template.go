@@ -76,5 +76,5 @@ func AvatarHTML(s string) template.HTML {
 	if len(s) == 0 {
 		return ""
 	}
-	return template.HTML("<img class=avatar src=\"" + s + "\">")
+	return template.HTML("<img class='avatar' src=\"" + s + "\">")
 }
