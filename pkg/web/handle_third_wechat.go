@@ -90,7 +90,7 @@ func (s *server) wechatOAuth2Callback(c *gin.Context) {
 		return
 	}
 
-	ou, err := s.wxAuth.GetOAuth2User(settings.Current.WechatPortalAgentID, code)
+	ou, err := s.wxAuth.GetOAuth2User(code)
 	if err != nil {
 		c.AbortWithError(http.StatusServiceUnavailable, err)
 		return

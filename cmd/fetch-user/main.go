@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"fhyx.online/tencent-api-go/exmail"
-	"fhyx.online/tencent-api-go/wxwork"
+	"daxv.cn/gopak/tencent-api-go/exmail"
+	"daxv.cn/gopak/tencent-api-go/wxwork"
 	"github.com/liut/staffio/pkg/backends"
 	"github.com/liut/staffio/pkg/settings"
 )

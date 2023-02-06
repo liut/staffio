@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"fhyx.online/tencent-api-go/wxwork"
+	"daxv.cn/gopak/tencent-api-go/wxwork"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/team"
@@ -17,17 +17,18 @@ func UserToStaff(user *wxwork.User) *models.Staff {
 	staff := &models.Staff{
 		UID:          strings.ToLower(user.UID),
 		CommonName:   user.Name,
-		Email:        user.Email,
 		Mobile:       user.Mobile,
 		Tel:          user.Tel,
 		Gender:       models.Gender(user.Gender).String(),
 		EmployeeType: user.Title,
 		// Leader:       user.IsLeader == 1,
 	}
-	fullname := user.Name
-	if user.EnglishName != "" {
-		fullname = user.EnglishName
+	if len(user.BizMail) > 0 {
+		staff.Email = user.BizMail
+	} else {
+		staff.Email = user.Email
 	}
+	fullname := user.Name
 	staff.Surname, staff.GivenName = models.SplitName(fullname)
 
 	if user.Avatar != "" {
@@ -46,15 +47,15 @@ func UserToStaff(user *wxwork.User) *models.Staff {
 // DepartmentToTeam ...
 func DepartmentToTeam(dept *wxwork.Department, all wxwork.Departments) *team.Team {
 	var team = &team.Team{
-		ID:       dept.ID,
+		ID:       int(dept.ID),
 		Name:     dept.Name,
 		OrigName: dept.Name,
-		ParentID: dept.ParentID,
-		OrderNo:  dept.Order,
+		ParentID: int(dept.ParentID),
+		OrderNo:  int(dept.Order),
 	}
 
 	if all != nil {
-		if parent := all.WithID(dept.ParentID); parent != nil {
+		if parent := all.WithID(int(dept.ParentID)); parent != nil {
 			team.Name = nameReplacer.Replace(parent.Name) + "-" + dept.Name
 		}
 	}

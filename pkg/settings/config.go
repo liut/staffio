@@ -43,10 +43,12 @@ type Config struct {
 	LDAPBindDN   string `envconfig:"LDAP_BIND_DN"`
 	LDAPPassword string `envconfig:"LDAP_PASSWD"`
 
-	WechatCorpID        string `envconfig:"wechat_corpid"`
-	WechatContactSecret string `envconfig:"wechat_contact_secret"`
-	WechatPortalSecret  string `envconfig:"wechat_portal_secret"`
-	WechatPortalAgentID int    `envconfig:"wechat_portal_agentid"`
+	WechatCorpID         string `envconfig:"wechat_corpid"`
+	WechatContactSecret  string `envconfig:"wechat_contact_secret"`
+	WechatPortalSecret   string `envconfig:"wechat_portal_secret"`
+	WechatPortalAgentID  int    `envconfig:"wechat_portal_agentid"`
+	WechatCheckinSecret  string `envconfig:"wechat_checkin_secret"`
+	WechatCheckinAgentID int    `envconfig:"wechat_checkin_agentid"`
 
 	LarkAppID      string `envconfig:"lark_app_id"`
 	LarkAppSecret  string `envconfig:"lark_app_secret"`
