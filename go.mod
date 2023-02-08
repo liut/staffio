@@ -84,3 +84,5 @@ require (
 )
 
 replace github.com/liut/staffio-backend => ../staffio-backend
+
+retract [v0.0.0-0, v0.11.2]
