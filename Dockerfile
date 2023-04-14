@@ -1,5 +1,5 @@
 FROM golang:1.18-alpine
-MAINTAINER Eagle Liut <eagle@dantin.me>
+LABEL maintainer="Eagle Liut <eagle@dantin.me>"
 
 ENV GO111MODULE=on GOPROXY=https://goproxy.io ROOF=github.com/liut/staffio
 WORKDIR /go/src/$ROOF/
