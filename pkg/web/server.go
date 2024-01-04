@@ -66,14 +66,14 @@ func New(c Config) *server {
 
 	// check ready
 	if err := service.Ready(); err != nil {
-		panic(err)
+		logger().Errorw("ready fail", "err", err)
 	}
 
 	osvr := osin.NewServer(newOsinConfig(), service.OSIN())
 	var err error
 	osvr.AccessTokenGen, err = getTokenGenJWT()
 	if err != nil {
-		panic(err)
+		logger().Fatalw("get tokenGen fail", "err", err)
 	}
 	osvr.Logger = &slogger{}
 

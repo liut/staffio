@@ -38,7 +38,7 @@ var clientCmd = &cobra.Command{
 Client add or revoke or list
 
 add client:
-	--add name --secret secret [--uri return URI]
+	--add name [--uri return URI]
 revoke client:
 	--revoke code
 list:

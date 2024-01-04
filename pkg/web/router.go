@@ -55,7 +55,8 @@ func (s *server) StrapRouter() {
 	gr.GET("/token", s.oauth2Token)
 	gr.POST("/token", s.oauth2Token)
 	gr.GET("/info/:topic", s.oauth2Info)
-	gr.POST("/info/:topic", s.oauth2Info)
+	gr.POST("/api/token", s.oauth2Token)
+	gr.GET("/api/info/:topic", s.oauth2Info)
 
 	keeper := authed.Group("/dust", s.authGroup(gnAdmin))
 	{
