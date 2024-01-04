@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/oauth"
+	"github.com/liut/staffio/pkg/models/oidc"
 	"github.com/liut/staffio/pkg/settings"
 	"github.com/liut/staffio/pkg/web/i18n"
 )
@@ -272,6 +274,8 @@ func (s *server) oauth2Info(c *gin.Context) {
 			} else if topic == "grafana" || topic == "generic" {
 				resp.Output["name"] = staff.GetName()
 				resp.Output["login"] = staff.UID
+				resp.Output["sub"] = staff.UID
+				resp.Output["preferred_username"] = staff.UID
 				resp.Output["username"] = staff.UID
 				resp.Output["email"] = staff.Email
 				resp.Output["attributes"] = map[string][]string{} // TODO: fill attributes
@@ -286,4 +290,24 @@ func (s *server) oauth2Info(c *gin.Context) {
 	}
 
 	osin.OutputJSON(resp, c.Writer, r)
+}
+
+func (s *server) oidcDiscovery(c *gin.Context) {
+	r := c.Request
+	baseURL := fmt.Sprintf("%s://%s", RequestScheme(r), r.Host)
+	od := oidc.DiscoveryWith(baseURL)
+	c.JSON(200, &od)
+}
+
+func RequestScheme(r *http.Request) string {
+	if s := r.URL.Scheme; s != "" {
+		return s
+	}
+	if s := r.Header.Get("X-Forwarded-Proto"); s != "" {
+		return s
+	}
+	if r.TLS != nil {
+		return "https"
+	}
+	return "http"
 }
