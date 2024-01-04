@@ -243,6 +243,9 @@ func (s *DbStorage) GetClient(id string) (c osin.Client, err error) {
 	err = withDbQuery(func(db dber) error {
 		return db.Get(c, "SELECT * FROM oauth_client WHERE id = $1", id)
 	})
+	if err != nil {
+		logger().Infow("getClient fail", "id", id, "err", err)
+	}
 	return
 }
 
@@ -301,9 +304,8 @@ func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client,
 		return db.Select(&clients, str)
 	})
 	if err != nil {
-		return
+		logger().Infow("list Clients fail", "err", err)
 	}
-
 	return
 }
 
