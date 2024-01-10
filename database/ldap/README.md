@@ -3,7 +3,7 @@
 
 ## build a docker image
 
-    make build
+    make build && make build-tag
 
 
 ## run a docker container
@@ -16,7 +16,7 @@
     	-e LDAP_BASE_DN="dc=mydomain,dc=net" \
     	-e LDAP_ADMIN_PASSWORD="mysecret" \
     	-p 1389:389 -p 1636:636 \
-    	-d liut7/staffio-ldap:2.4.48
+    	-d liut7/staffio-ldap:2.4
 
 ## write schema into slapd config (local only)
 

@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM arm64v8/alpine:3.18
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories \
 	&& apk add --update \

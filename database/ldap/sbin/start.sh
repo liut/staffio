@@ -7,16 +7,24 @@ CONF=/etc/openldap/slapd.conf
 
 if [ ! -e "$FIRST_START_DONE" ]; then
 
-	LDAP_ADMIN_PASSWORD_ENCRYPTED=$(slappasswd -s $LDAP_ADMIN_PASSWORD)
+new_includes="
+include		/etc/openldap/schema/core.schema
+include		/etc/openldap/schema/cosine.schema
+include		/etc/openldap/schema/dyngroup.schema
+include		/etc/openldap/schema/inetorgperson.schema
+include		/etc/openldap/schema/staffio.schema
+include	 	/etc/openldap/schema/nis.schema
+"
+for include in $(echo "$new_includes"); do
+    if ! grep -q "$include" ${CONF}; then
+        echo $include
+        last_include_line=$(grep -n "^include" ${CONF} | tail -1 | cut -d':' -f1)
 
-	sed -i 's|^include		/etc/openldap/schema/core.schema|&\
-include     /etc/openldap/schema/cosine.schema\
-include     /etc/openldap/schema/dyngroup.schema\
-include     /etc/openldap/schema/inetorgperson.schema\
-include     /etc/openldap/schema/staffio.schema\
-include     /etc/openldap/schema/misc.schema\
-include     /etc/openldap/schema/nis.schema\
-|g' $CONF
+        sed -i "${last_include_line}a include	 	${include}" ${CONF}
+    fi
+done
+
+	LDAP_ADMIN_PASSWORD_ENCRYPTED=$(slappasswd -s $LDAP_ADMIN_PASSWORD)
 
 	sed -i 's|^# rootdn can always read and write EVERYTHING!|&\n\
 access to *\
@@ -29,13 +37,15 @@ access to *\
 	sed -i "s|^rootdn	.*|rootdn 		\"cn=${LDAP_ADMIN_NAME},${LDAP_BASE_DN}\"|g" $CONF
 	sed -i "s|^rootpw	.*|rootpw 		\"${LDAP_ADMIN_PASSWORD_ENCRYPTED}\"|g" $CONF
 
-	echo 'index   uid         eq' >> $CONF
-	echo 'index   cn          eq' >> $CONF
-	echo 'index   sn          eq' >> $CONF
-	echo 'index   mail        eq' >> $CONF
-	echo 'index   mobile      eq' >> $CONF
-	echo 'index   entryCSN      eq' >> $CONF
-	echo 'index   entryUUID      eq' >> $CONF
+	sed -i 's|^index	objectClass	eq|&\
+index   uid         eq\
+index   cn          eq\
+index   sn          eq\
+index   mail        eq\
+index   mobile      eq\
+index   entryCSN      eq\
+index   entryUUID      eq\
+|g' $CONF
 
 	echo '' >> $CONF
 
