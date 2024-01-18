@@ -17,7 +17,7 @@ build-tag:
 run:
 	docker run -e LDAP_ORGANIZATION=$(org) \
 		-e LDAP_BASE_DN="$(base_dn)" -e LDAP_ADMIN_PASSWORD="$(password)" \
-		-d -p 389:389 -p 636:636 --name staffio-ldap $(IMAGE):stable
+		-d -p 389:389 -p 636:636 --name staffio-ldap $(IMAGE):latest
 
 build-arm64:
 	docker build --no-cache -t $(IMAGE):arm64 -f Dockerfile.arm64 .

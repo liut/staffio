@@ -30,7 +30,7 @@ olcAttributeTypes: {4}( 2.26.1325376000.1.5
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 SINGLE-VALUE )
 olcAttributeTypes: {5}( 2.26.1325376000.1.6
     NAME 'idcnNumber'
-    DESC 'identity number of china'
+    DESC 'identity number'
     EQUALITY numericStringMatch
     SUBSTR numericStringSubstringsMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.36{20} SINGLE-VALUE )
