@@ -79,7 +79,7 @@ An OAuth2 server that provides managed services for enterprise employees.
 # openldap
 docker run --name staffio-ldap -p 389:389 -p 636:636 \
 	-e LDAP_ADMIN_PASSWORD=mypassword \
-	-d liut7/staffio-ldap:2.4.48
+	-d liut7/staffio-ldap:latest
 
 # postgresql
 docker create --name staffio-db-data -v /var/lib/postgresql busybox:1 echo staffio db data
