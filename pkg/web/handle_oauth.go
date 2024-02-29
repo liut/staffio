@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 
 	"github.com/liut/staffio/pkg/models"
 	"github.com/liut/staffio/pkg/models/oauth"

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

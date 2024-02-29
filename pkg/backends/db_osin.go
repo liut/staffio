@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 
 	"github.com/liut/staffio/pkg/models/oauth"
 )

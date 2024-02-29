@@ -1,7 +1,7 @@
 package oauth
 
 import (
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 )
 
 // OSINStore ...

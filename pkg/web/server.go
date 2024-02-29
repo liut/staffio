@@ -7,7 +7,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/contrib/sentry"
 	"github.com/gin-gonic/gin"
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 
 	"daxv.cn/gopak/tencent-api-go/wxwork"
 	"fhyx.online/lark-api-go/lark"

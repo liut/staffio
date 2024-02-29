@@ -5,8 +5,8 @@ import (
 	"encoding/pem"
 	"fmt"
 
+	"github.com/go-osin/osin"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/openshift/osin"
 
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"

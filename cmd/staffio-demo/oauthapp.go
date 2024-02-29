@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 )
 
 type serverMux interface {

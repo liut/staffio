@@ -6,7 +6,7 @@ import (
 
 	"daxv.cn/gopak/tencent-api-go/exmail"
 	"github.com/gin-gonic/gin"
-	"github.com/openshift/osin"
+	"github.com/go-osin/osin"
 
 	"github.com/liut/staffio/pkg/backends/qqexmail"
 	"github.com/liut/staffio/pkg/settings"
