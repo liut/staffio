@@ -1,14 +1,16 @@
 module github.com/liut/staffio
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	daxv.cn/gopak/tencent-api-go v0.0.0-00010101000000-000000000000
 	fhyx.online/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec
 	fhyx.online/welink-api-go v0.0.0-20200606142605-e82b7908acf3
-	github.com/dchest/passwordreset v0.0.0-20120723102225-642cf836ac8d
+	github.com/dchest/passwordreset v0.0.0-20190826080013-4518b1f41006
 	github.com/getsentry/raven-go v0.2.0
-	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
+	github.com/gin-gonic/contrib v0.0.0-20221130124618-7e01895a63f2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-osin/session v1.3.4
 	github.com/golang-jwt/jwt/v4 v4.1.0
@@ -17,14 +19,14 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.8
-	github.com/liut/staffio-backend v0.0.0-00010101000000-000000000000
-	github.com/microcosm-cc/bluemonday v1.0.16
+	github.com/liut/staffio-backend v0.2.5
+	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/openshift/osin v1.0.1
-	github.com/russross/blackfriday v1.5.2
-	github.com/sethvargo/go-password v0.1.3
-	github.com/spf13/cast v1.3.1
-	github.com/spf13/cobra v1.4.0
+	github.com/russross/blackfriday v1.6.0
+	github.com/sethvargo/go-password v0.2.0
+	github.com/spf13/cast v1.6.0
+	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	github.com/ugorji/go/codec v1.2.11
 	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
@@ -37,7 +39,6 @@ replace (
 	daxv.cn/gopak/tencent-api-go => github.com/fhyx/tencent-api-go v0.0.0-20230112112450-825210b40b12
 	fhyx.online/lark-api-go => github.com/fhyx/lark-api-go v0.0.0-20200706120648-5b8e3ff1d8ec
 	fhyx.online/welink-api-go => github.com/fhyx/welink-api-go v0.0.0-20200606142605-e82b7908acf3
-	github.com/liut/staffio-backend => ../staffio-backend
 )
 
 require (
@@ -59,7 +60,7 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
@@ -79,7 +80,7 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
