@@ -40,6 +40,7 @@ type server struct {
 	router  *gin.Engine
 	service backends.Servicer
 	osvr    *osin.Server
+	tkgen   TokenGenerator
 	wxAuth  *wxwork.API
 	checkin *wxwork.API
 	larkAPI *lark.API
@@ -70,18 +71,19 @@ func New(c Config) *server {
 	}
 
 	osvr := osin.NewServer(newOsinConfig(), service.OSIN())
-	var err error
-	osvr.AccessTokenGen, err = getTokenGenJWT()
+	tkgen, err := getTokenGenJWT()
 	if err != nil {
 		logger().Fatalw("get tokenGen fail", "err", err)
 	}
 	osvr.Logger = &slogger{}
+	osvr.AccessTokenGen = tkgen
 
 	svr = &server{
 		cfg:     c,
 		router:  gin.New(),
 		service: service,
 		osvr:    osvr,
+		tkgen:   tkgen,
 		wxAuth:  wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatPortalSecret),
 		checkin: wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatCheckinSecret),
 		larkAPI: lark.NewAPI(settings.Current.LarkAppID, settings.Current.LarkAppSecret),
