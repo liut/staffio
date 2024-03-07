@@ -36,11 +36,11 @@ func DiscoveryWith(uriPrefix string) Discovery {
 		ResponseModesSupported:                 []string{"query"},
 		GrantTypesSupported:                    []string{"password", "authorization_code"},
 		SubjectTypesSupported:                  []string{"public"},
-		IdTokenSigningAlgValuesSupported:       []string{"RS256"},
+		IdTokenSigningAlgValuesSupported:       []string{"HS256", "HS384", "RS256"},
 		ScopesSupported:                        []string{"openid", "email", "profile", "address", "phone"},
 		ClaimsSupported:                        []string{"iss", "ver", "sub", "aud", "iat", "exp", "id", "type", "displayName", "avatar", "email", "phone"},
 		RequestParameterSupported:              true,
-		RequestObjectSigningAlgValuesSupported: []string{"HS256", "HS384", "HS512"},
+		RequestObjectSigningAlgValuesSupported: []string{"HS256", "HS384"},
 		EndSessionEndpoint:                     fmt.Sprintf("%s/api/logout", uriPrefix),
 	}
 	return od

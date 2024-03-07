@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"context"
 	"log"
 
 	"github.com/liut/staffio-backend/ldap"
@@ -38,14 +39,14 @@ type Servicer interface {
 	Ready() error
 	CloseAll()
 
-	SaveStaff(staff *models.Staff) error
+	SaveStaff(ctx context.Context, staff *models.Staff) error
 
 	InGroup(gn, uid string) bool
 	InGroupAny(uid string, names ...string) bool
 
 	ProfileModify(uid, password string, staff *models.Staff) error
 
-	PasswordForgot(at common.AliasType, target, uid string) error
+	PasswordForgot(ctx context.Context, at common.AliasType, target, uid string) error
 	PasswordResetTokenVerify(token string) (uid string, err error)
 	PasswordResetWithToken(login, token, passwd string) (err error)
 

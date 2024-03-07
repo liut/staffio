@@ -221,13 +221,14 @@ func (s *server) passwordForgot(c *gin.Context) {
 		c.JSON(http.StatusOK, res)
 		return
 	}
-	if staff.Mobile != param.Mobile {
-		res["ok"] = false
-		res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
-		c.JSON(http.StatusOK, res)
-		return
-	}
-	err = s.service.PasswordForgot(common.AtEmail, param.Email, param.Username)
+	// if staff.Mobile != param.Mobile {
+	// 	res["ok"] = false
+	// 	res["error"] = map[string]string{"message": "The mobile number is a mismatch", "field": "mobile"}
+	// 	c.JSON(http.StatusOK, res)
+	// 	return
+	// }
+	logger().Infow("forgot", "req.host", c.Request.Host, "url.host", c.Request.URL.Host)
+	err = s.service.PasswordForgot(ContextWithSiteFromRequest(c.Request), common.AtEmail, param.Email, param.Username)
 	if err != nil {
 		res["ok"] = false
 		res["error"] = map[string]string{"message": err.Error(), "field": "username"}
