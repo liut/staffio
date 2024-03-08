@@ -71,7 +71,7 @@ func (d *demo) strap(router serverMux) {
 		// if parse, download and parse json
 		if r.Form.Get("doparse") == "1" {
 			err := downloadAccessToken(fmt.Sprintf("%s%s", d.base, aurl),
-				&osin.BasicAuth{demoId, demoSecret}, jr)
+				&osin.BasicAuth{Username: demoId, Password: demoSecret}, jr)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				w.Write([]byte("<br/>"))

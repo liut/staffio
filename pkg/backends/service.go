@@ -27,12 +27,21 @@ type Group = schema.Group
 // Spec ...
 type Spec = schema.Spec
 
+type PasswordStore interface {
+	schema.PasswordStore
+	PasswordForgot(ctx context.Context, at common.AliasType, target, uid string) error
+	PasswordResetTokenVerify(token string) (uid string, err error)
+	PasswordResetWithToken(login, token, passwd string) (err error)
+}
+
 // Servicer ...
 type Servicer interface {
 	schema.Authenticator
 	schema.PeopleStore
-	schema.PasswordStore
 	schema.GroupStore
+
+	PasswordStore
+
 	cas.TicketStore
 
 	OSIN() OSINStore
@@ -40,15 +49,12 @@ type Servicer interface {
 	CloseAll()
 
 	SaveStaff(ctx context.Context, staff *models.Staff) error
+	SaveTeamAndStaffs(ctx context.Context, team *team.Team, staffs models.Staffs) (err error)
 
 	InGroup(gn, uid string) bool
 	InGroupAny(uid string, names ...string) bool
 
 	ProfileModify(uid, password string, staff *models.Staff) error
-
-	PasswordForgot(ctx context.Context, at common.AliasType, target, uid string) error
-	PasswordResetTokenVerify(token string) (uid string, err error)
-	PasswordResetWithToken(login, token, passwd string) (err error)
 
 	Team() team.Store
 	Watch() team.WatchStore

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
@@ -88,7 +89,7 @@ func syncDepartment(showStatus bool) {
 		WithStaff: true,
 	}
 
-	s.BulkFn = func(svc backends.Servicer, team *team.Team, staffs models.Staffs) error {
+	s.BulkFn = func(ctx context.Context, svc backends.Servicer, team *team.Team, staffs models.Staffs) error {
 		// logger().Infow("bulk ", "team", team)
 		if team.ParentID == 0 {
 			return nil
@@ -204,15 +205,15 @@ func teamToWelinkDeptUp(team *team.Team) *welink.DepartmentUp {
 
 func deptToWelinkDepartmentUp(dept *wechatwork.Department) *welink.DepartmentUp {
 	up := &welink.DepartmentUp{
-		CorpDeptID:   dept.Id,
-		CorpParentID: dept.ParentId,
+		CorpDeptID:   int(dept.ID),
+		CorpParentID: int(dept.ParentID),
 		NameCN:       dept.Name,
 		NameEN:       slugify.Slugify(dept.Name),
 		Valid:        1,
-		Level:        getTeamLevel(dept.ParentId),
-		OrderNo:      getOrderNo(dept.Order),
+		Level:        getTeamLevel(int(dept.ParentID)),
+		OrderNo:      getOrderNo(int(dept.Order)),
 	}
-	if dept.ParentId == 1 {
+	if dept.ParentID == 1 {
 		up.CorpParentID = 0
 	}
 
