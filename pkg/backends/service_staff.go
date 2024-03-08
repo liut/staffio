@@ -78,18 +78,23 @@ func WriteUserLog(uid, subject, message string) error {
 	return withDbQuery(qs)
 }
 
-// StoreTeamAndStaffs ...
+// StoreTeamAndStaffs = svc.SaveTeamAndStaffs
 func StoreTeamAndStaffs(ctx context.Context, svc Servicer, team *team.Team, staffs models.Staffs) (err error) {
+	return svc.SaveTeamAndStaffs(ctx, team, staffs)
+}
+
+// SaveTeamAndStaffs ...
+func (s *serviceImpl) SaveTeamAndStaffs(ctx context.Context, team *team.Team, staffs models.Staffs) (err error) {
 	if staffs != nil {
 		for _, staff := range staffs {
-			if err = svc.SaveStaff(ctx, &staff); err != nil {
+			if err = s.SaveStaff(ctx, &staff); err != nil {
 				logger().Infow("save staff fail", "staff", staff, "err", err)
 				return
 			}
 			logger().Debugw("bulk save staff ok", "cn", staff.CommonName, "uid", staff.UID)
 		}
 	}
-	err = svc.Team().Store(team)
+	err = s.Team().Store(team)
 	if err != nil {
 		logger().Infow("bulk save team fail", "name", team.Name, "err", err)
 		return
@@ -97,7 +102,7 @@ func StoreTeamAndStaffs(ctx context.Context, svc Servicer, team *team.Team, staf
 
 	logger().Infow("bulk team saved OK", "name", team.Name, "leaders", team.Leaders)
 	for _, leader := range team.Leaders {
-		err = svc.Team().AddManager(team.ID, leader)
+		err = s.Team().AddManager(team.ID, leader)
 		if err != nil {
 			logger().Infow("bulk add manager fail", "leader", leader, "teamID", team.ID, "err", err)
 		}
