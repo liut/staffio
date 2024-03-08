@@ -270,7 +270,7 @@ func (s *server) staffPost(c *gin.Context) {
 			return
 		}
 
-		err = s.service.SaveStaff(staff)
+		err = s.service.SaveStaff(ContextWithSiteFromRequest(req), staff)
 		if err == nil {
 			res := make(osin.ResponseData)
 			res["ok"] = true

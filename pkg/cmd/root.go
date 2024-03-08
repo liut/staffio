@@ -82,7 +82,6 @@ func Execute() {
 
 	backends.SetDSN(settings.BackendDSN)
 
-	backends.BaseURL = settings.BaseURL
 	backends.SetPasswordSecret(settings.PwdSecret)
 
 	if err := RootCmd.Execute(); err != nil {

@@ -1,9 +1,11 @@
 package backends
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dchest/passwordreset"
@@ -38,7 +40,7 @@ func (s *serviceImpl) getResetHash(uid string) ([]byte, error) {
 	return uv.CodeHashBytes(), nil
 }
 
-func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (err error) {
+func (s *serviceImpl) PasswordForgot(ctx context.Context, at common.AliasType, target, uid string) (err error) {
 	var staff *models.Staff
 	staff, err = s.Get(uid)
 	if err != nil {
@@ -52,10 +54,10 @@ func (s *serviceImpl) PasswordForgot(at common.AliasType, target, uid string) (e
 		err = fmt.Errorf("incorrect email %s", target)
 		return
 	}
-	return s.passwordForgotPrepare(staff)
+	return s.passwordForgotPrepare(SiteFromContext(ctx), staff)
 }
 
-func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
+func (s *serviceImpl) passwordForgotPrepare(site string, staff *models.Staff) (err error) {
 	if staff.Email == "" {
 		return ErrEmptyEmail
 	}
@@ -70,7 +72,7 @@ func (s *serviceImpl) passwordForgotPrepare(staff *models.Staff) (err error) {
 	}
 	// Generate reset token that expires in 2 hours
 	token := passwordreset.NewToken(staff.UID, 2*time.Hour, uv.CodeHashBytes(), secret)
-	err = sendResetEmail(staff, token)
+	err = sendResetEmail(site, staff, token)
 	return
 }
 
@@ -152,10 +154,10 @@ func (s *serviceImpl) LoadVerify(uid string) (*models.Verify, error) {
 }
 
 var (
-	BaseURL string
+	replSite = strings.NewReplacer("www.", "i.")
 )
 
-func sendResetEmail(staff *models.Staff, token string) error {
+func sendResetEmail(site string, staff *models.Staff, token string) error {
 	var (
 		smtpHost = settings.Current.MailHost
 		smtpPort = settings.Current.MailPort
@@ -172,9 +174,19 @@ func sendResetEmail(staff *models.Staff, token string) error {
 	m.SetHeader("From", fmt.Sprintf("%s <%s>", settings.Current.MailSenderName, smtpUser))
 	m.SetHeader("To", staff.Email)
 	m.SetHeader("Subject", "Password reset request")
-	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), BaseURL, token))
 
-	logger().Infow("sending reset email", "email", staff.Email, "host", smtpHost, "port", smtpPort, "sender", smtpUser)
+	prefix := settings.Current.BaseURL
+	switch site {
+	case "i":
+		prefix = replSite.Replace(prefix)
+	case "www", "":
+		prefix = prefix + "/password"
+	}
+
+	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), prefix, token))
+
+	logger().Infow("sending reset", "prefix", prefix, "email", staff.Email,
+		"host", smtpHost, "port", smtpPort, "sender", smtpUser)
 
 	d := mail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 

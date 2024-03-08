@@ -1,6 +1,7 @@
 package wechatwork
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -20,7 +21,7 @@ type Departments = wxwork.Departments
 // Syncer ...
 type Syncer struct {
 	DeptFn    func(dept *wxwork.Department, idx int)
-	BulkFn    func(svc backends.Servicer, t *team.Team, staffs models.Staffs) error
+	BulkFn    func(ctx context.Context, svc backends.Servicer, t *team.Team, staffs models.Staffs) error
 	WithTeam  bool
 	WithStaff bool
 	Output    bool
@@ -56,6 +57,7 @@ func SyncDepartment(action, uid string) {
 
 // RunIt ...
 func (s *Syncer) RunIt() error {
+	ctx := context.Background()
 	if s.api == nil {
 		s.api = wxwork.NewAPI(settings.Current.WechatCorpID, settings.Current.WechatContactSecret)
 	}
@@ -105,7 +107,7 @@ func (s *Syncer) RunIt() error {
 
 		// fmt.Printf("%2d:%2d  %10s   %v \n", team.ID, team.ParentID, team.Name, team.Members)
 		if s.WithTeam && s.BulkFn != nil {
-			err = s.BulkFn(svc, team, staffs)
+			err = s.BulkFn(ctx, svc, team, staffs)
 			if err != nil {
 				logger().Infow("call bulkFn fail", "err", err)
 				return err

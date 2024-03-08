@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -135,4 +136,10 @@ func newOsinConfig() *osin.ServerConfig {
 		AllowClientSecretInParams: true,
 		AllowGetAccessRequest:     false,
 	}
+}
+
+func ContextWithSiteFromRequest(req *http.Request) context.Context {
+	ctx := req.Context()
+	site := backends.SiteFromDomain(req.Host)
+	return backends.ContextWithSite(ctx, site)
 }

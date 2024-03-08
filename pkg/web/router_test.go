@@ -2,10 +2,26 @@ package web
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+
+	zlog "github.com/liut/staffio/pkg/log"
 )
+
+func TestMain(m *testing.M) {
+
+	lgr, _ := zap.NewDevelopment()
+	defer func() {
+		_ = lgr.Sync() // flushes buffer, if any
+	}()
+	sugar := lgr.Sugar()
+	zlog.SetLogger(sugar)
+
+	os.Exit(m.Run())
+}
 
 func TestUrlFor(t *testing.T) {
 

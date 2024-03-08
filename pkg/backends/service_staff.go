@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/liut/staffio/pkg/models"
@@ -8,7 +9,7 @@ import (
 )
 
 // save staff
-func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
+func (s *serviceImpl) SaveStaff(ctx context.Context, staff *models.Staff) error {
 	if staff.EmployeeNumber < 1 {
 		newID, err := NextStaffID()
 		if err != nil {
@@ -20,7 +21,7 @@ func (s *serviceImpl) SaveStaff(staff *models.Staff) error {
 	if err == nil {
 		if isNew {
 			logger().Infow("net staff", "staff", staff)
-			err = s.passwordForgotPrepare(staff)
+			err = s.passwordForgotPrepare(SiteFromContext(ctx), staff)
 			if err != nil {
 				logger().Infow("email of new user password send fail", "err", err)
 			} else {
@@ -78,10 +79,10 @@ func WriteUserLog(uid, subject, message string) error {
 }
 
 // StoreTeamAndStaffs ...
-func StoreTeamAndStaffs(svc Servicer, team *team.Team, staffs models.Staffs) (err error) {
+func StoreTeamAndStaffs(ctx context.Context, svc Servicer, team *team.Team, staffs models.Staffs) (err error) {
 	if staffs != nil {
 		for _, staff := range staffs {
-			if err = svc.SaveStaff(&staff); err != nil {
+			if err = svc.SaveStaff(ctx, &staff); err != nil {
 				logger().Infow("save staff fail", "staff", staff, "err", err)
 				return
 			}
