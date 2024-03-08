@@ -4,11 +4,11 @@ package web
 //
 // https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 type IDToken struct {
-	Issuer     string `json:"iss"`
-	UserID     string `json:"sub"`
-	ClientID   string `json:"aud"`
-	Expiration int64  `json:"exp"`
-	IssuedAt   int64  `json:"iat"`
+	Issuer     string `json:"iss"` // REQUIRED
+	UserID     string `json:"sub"` // REQUIRED
+	ClientID   string `json:"aud"` // REQUIRED
+	Expiration int64  `json:"exp"` // REQUIRED
+	IssuedAt   int64  `json:"iat"` // REQUIRED
 
 	Nonce string `json:"nonce,omitempty"` // Non-manditory fields MUST be "omitempty"
 
@@ -29,4 +29,18 @@ type IDToken struct {
 	Gender      string `json:"gender,omitempty"`
 	Nickname    string `json:"nickname,omitempty"`
 	PhoneNumber string `json:"phone_number,omitempty"`
+}
+
+func (z *IDToken) ToMap() map[string]any {
+	if len(z.Issuer) == 0 || len(z.UserID) == 0 || len(z.ClientID) == 0 ||
+		z.Expiration == 0 || z.IssuedAt == 0 {
+		return nil
+	}
+	return map[string]any{
+		"iss": z.Issuer,
+		"sub": z.UserID,
+		"aud": z.ClientID,
+		"exp": z.Expiration,
+		"iat": z.IssuedAt,
+	}
 }

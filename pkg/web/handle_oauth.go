@@ -129,6 +129,22 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 	return nil
 }
 
+func (s *server) buildJWT(staff *models.Staff, client, scope string) (string, error) {
+	if strings.Contains(scope, "openid") {
+		now := time.Now()
+		idToken := &IDToken{
+			Issuer:     settings.Current.BaseURL,
+			UserID:     staff.UID,
+			ClientID:   client,
+			Expiration: now.Add(time.Hour).Unix(),
+			IssuedAt:   now.Unix(),
+			UID:        staff.UID,
+		}
+		return s.tkgen.GenerateIDToken(idToken)
+	}
+	return "", fmt.Errorf("invalid scope: %s", scope)
+}
+
 func (s *server) loadScopes(r *http.Request) (data []oauth.Scope) {
 	p := i18n.GetPrinter(r)
 	for _, s := range strings.Fields(r.FormValue("scope")) {
@@ -171,6 +187,9 @@ func (s *server) oauth2Token(c *gin.Context) {
 				resp.InternalError = err
 			} else {
 				user = UserFromStaff(staff)
+			}
+			if idt, err := s.buildJWT(staff, ar.Client.GetId(), ar.Scope); err == nil {
+				resp.Output["id_token"] = idt
 			}
 			ar.Authorized = true
 		case osin.REFRESH_TOKEN:

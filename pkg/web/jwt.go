@@ -2,6 +2,7 @@ package web
 
 import (
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 
@@ -11,6 +12,15 @@ import (
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"
 )
+
+type MapGetter interface {
+	ToMap() map[string]any
+}
+
+type TokenGenerator interface {
+	osin.AccessTokenGen
+	GenerateIDToken(mg MapGetter) (string, error)
+}
 
 // AccessTokenGenJWT JWT access token generator
 type AccessTokenGenJWT struct {
@@ -46,12 +56,26 @@ func (c *AccessTokenGenJWT) GenerateAccessToken(data *osin.AccessData, generater
 	return
 }
 
-func getTokenGenJWT() (tokenGen osin.AccessTokenGen, err error) {
+func (c *AccessTokenGenJWT) GenerateIDToken(mg MapGetter) (string, error) {
+	mc := mg.ToMap()
+	if mc == nil {
+		return "", fmt.Errorf("invalid map")
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(mc))
+
+	idtoken, err := token.SignedString(c.Key)
+	if err != nil {
+		return "", err
+	}
+	return idtoken, nil
+}
+
+func getTokenGenJWT() (tokenGen TokenGenerator, err error) {
 	var (
 		hmacKey []byte
 	)
 
-	hmacKey, err = jwt.DecodeSegment(settings.Current.TokenGenKey)
+	hmacKey, err = base64.RawURLEncoding.DecodeString(settings.Current.TokenGenKey)
 	if err != nil {
 		logger().Warnw("getTokenGenJWT fail", "err", err)
 		return
