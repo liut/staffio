@@ -35,7 +35,7 @@ var addstaffCmd = &cobra.Command{
 	Short: "Add a simple user for develop",
 	Long:  `Add a simple user for develop`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.ParseFlags(args)
+		_ = cmd.ParseFlags(args)
 		uid, _ := cmd.Flags().GetString("uid")
 		password, _ := cmd.Flags().GetString("password")
 		if uid == "" {
@@ -93,7 +93,7 @@ func init() {
 	addstaffCmd.Flags().StringP("password", "p", "", "staff password")
 	addstaffCmd.Flags().StringP("name", "n", "", "staff name")
 	addstaffCmd.Flags().String("sn", "", "surname")
-	addstaffCmd.MarkFlagRequired("uid")
-	addstaffCmd.MarkFlagRequired("name")
-	addstaffCmd.MarkFlagRequired("sn")
+	addstaffCmd.MarkFlagRequired("uid")  //nolint
+	addstaffCmd.MarkFlagRequired("name") //nolint
+	addstaffCmd.MarkFlagRequired("sn")   //nolint
 }

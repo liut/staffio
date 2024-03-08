@@ -12,7 +12,7 @@ var usageCmd = &cobra.Command{
 	Short: "Print usage",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Usage()
+		_ = config.Usage()
 	},
 }
 

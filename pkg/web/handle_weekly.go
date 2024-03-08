@@ -326,7 +326,7 @@ func (s *server) weeklyStatusRemove(c *gin.Context) {
 }
 
 type simpStaff struct {
-	EID       int    `json:"id,omitempty"`
+	EID       string `json:"id,omitempty"`
 	UID       string `json:"uid"`
 	Name      string `json:"name"`
 	GivenName string `json:"gn,omitempty"`

@@ -53,8 +53,3 @@ func (f Field) Field() string {
 func (f Field) ErrorReq(r *http.Request) string {
 	return GetPrinter(r).Sprintf("Error:Field validation for '%s' failed ", f.Field())
 }
-
-type fieldError interface {
-	ErrorReq(r *http.Request) string
-	Field() string
-}

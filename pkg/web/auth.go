@@ -57,7 +57,7 @@ func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 		c.Set(kAuthUser, user)
 		c.Next()
 		user.Refresh()
-		user.Signin(c.Writer)
+		_ = user.Signin(c.Writer)
 	}
 }
 
@@ -95,6 +95,6 @@ func signinStaffGin(c *gin.Context, staff *models.Staff) {
 	log.Printf("login ok %v", user)
 	sess := ginSession(c)
 	sess.Set(kAuthUser, user)
-	authzr.Signin(user, c.Writer)
+	_ = authzr.Signin(user, c.Writer)
 	SessionSave(sess, c.Writer)
 }

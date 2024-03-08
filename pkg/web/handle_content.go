@@ -23,12 +23,12 @@ func (s *server) welcome(c *gin.Context) {
 
 	articles, err := backends.LoadArticles(LimitArticle, 0)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 	links, err := backends.LoadLinks(LimitLinks, 0)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 
@@ -43,16 +43,16 @@ func (s *server) welcome(c *gin.Context) {
 func (s *server) articleView(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusBadRequest, err) //nolint
 		return
 	}
 	if id < 1 {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusBadRequest, err) //nolint
 		return
 	}
 	article, err := backends.LoadArticle(id)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 
@@ -74,7 +74,7 @@ func (s *server) articleView(c *gin.Context) {
 func (s *server) articleForm(c *gin.Context) {
 	articles, err := backends.LoadArticles(9, 0)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 
@@ -90,7 +90,7 @@ func (s *server) articlePost(c *gin.Context) {
 	err := binding.FormPost.Bind(req, obj)
 	if err != nil {
 		log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 	user := UserWithContext(c)
@@ -109,7 +109,7 @@ func (s *server) articlePost(c *gin.Context) {
 func (s *server) linksForm(c *gin.Context) {
 	links, err := backends.LoadLinks(9, 0)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 
@@ -151,7 +151,7 @@ func (s *server) linksPost(c *gin.Context) {
 		}
 		id, err := strconv.Atoi(pk)
 		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
+			c.AbortWithError(http.StatusNotFound, err) //nolint
 			return
 		}
 		link, err := backends.LoadLink(id)

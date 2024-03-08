@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	avatarReplacer = strings.NewReplacer("/0", "/60")
+	avatarReplacer = strings.NewReplacer("/0", "/60") //nolint
 )
 
 const (
@@ -30,29 +30,27 @@ func markReferer(c *gin.Context) {
 	c.SetCookie(kReferer, c.Request.RequestURI, 10, "/", "", false, true)
 }
 
-func (s *server) Render(c *gin.Context, name string, data interface{}) (err error) {
+func (s *server) Render(c *gin.Context, name string, data map[string]any) {
 	instance := s.tpl(name)
-	if m, ok := data.(map[string]interface{}); ok {
-		m["base"] = base
-		m["appVersion"] = settings.Version()
-		m["navSimple"] = false
-		session := ginSession(c)
-		m["session"] = session.Values()
-		m["referer"] = refererWithContext(c)
-		var user *User
-		v, exist := c.Get(kAuthUser)
-		if exist {
-			user = v.(*User)
-		} else {
-			user, err = authzr.UserFromRequest(c.Request)
-		}
-		m["currUser"] = user
-		m["checkEmail"] = settings.Current.EmailCheck
-		err = instance.Execute(c.Writer, m)
+	m := data
+	m["base"] = base
+	m["appVersion"] = settings.Version()
+	m["navSimple"] = false
+	session := ginSession(c)
+	m["session"] = session.Values()
+	m["referer"] = refererWithContext(c)
+	var user *User
+	v, exist := c.Get(kAuthUser)
+	if exist {
+		user = v.(*User)
 	} else {
-		err = instance.Execute(c.Writer, data)
+		user, _ = authzr.UserFromRequest(c.Request)
 	}
-	return
+	m["currUser"] = user
+	m["checkEmail"] = settings.Current.EmailCheck
+	if err := instance.Execute(c.Writer, m); err != nil {
+		logger().Infow("render fail", "err", err)
+	}
 }
 
 func (s *server) tpl(name string) *template.Template {

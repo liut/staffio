@@ -49,7 +49,9 @@ func main() {
 	} else {
 		logger, _ = zap.NewProduction()
 	}
-	defer logger.Sync() // flushes buffer, if any
+	defer func() {
+		_ = logger.Sync() // flushes buffer, if any
+	}()
 	sugar := logger.Sugar()
 
 	zlog.SetLogger(sugar)
@@ -65,10 +67,8 @@ func main() {
 	switch action {
 	case "dept-sync":
 		syncDepartment(false)
-		break
 	case "dept-status":
 		syncDepartment(true)
-		break
 	}
 }
 
@@ -203,6 +203,8 @@ func teamToWelinkDeptUp(team *team.Team) *welink.DepartmentUp {
 	return up
 }
 
+// nolint
+// TODO: obsoleted
 func deptToWelinkDepartmentUp(dept *wechatwork.Department) *welink.DepartmentUp {
 	up := &welink.DepartmentUp{
 		CorpDeptID:   int(dept.ID),

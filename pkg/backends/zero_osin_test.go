@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	testClientName = "test client"
-	userDataEmpty  = JSONKV{}
-	userDataMock   = JSONKV{"name": "foobar"}
+	userDataEmpty = JSONKV{}
+	userDataMock  = JSONKV{"name": "foobar"}
 )
 
 func TestClientOperations(t *testing.T) {

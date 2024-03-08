@@ -34,16 +34,11 @@ func Fail(c *gin.Context, code int, args ...interface{}) {
 	c.AbortWithStatusJSON(code, res)
 }
 
-// respOK ...
-type respOK struct {
-	Ok bool `json:"ok,required" description:"操作成功"`
-}
-
 // RespDone 操作成功返回的结构
 type RespDone struct {
-	Ok    bool        `json:"ok,required" description:"操作成功"` // OK
-	Data  interface{} `json:"data,omitempty"`                 // main data
-	Extra interface{} `json:"extra,omitempty"`                // extra data
+	Ok    bool        `json:"ok" description:"操作成功"` // OK
+	Data  interface{} `json:"data,omitempty"`        // main data
+	Extra interface{} `json:"extra,omitempty"`       // extra data
 }
 
 // RespFail 出现错误，返回相关的错误码和消息文本
@@ -62,7 +57,7 @@ type IError interface {
 // Error ...
 type Error struct {
 	Code    int    `json:"code" description:"错误代码"`
-	Message string `json:"message,required" description:"错误信息"`
+	Message string `json:"message" description:"错误信息"`
 	Field   string `json:"field,omitempty" description:"错误字段,可选,多用于表单校验"`
 }
 
@@ -108,35 +103,4 @@ func GetError(r *http.Request, code int, err interface{}, args ...interface{}) E
 		}
 		return Error{Code: code, Message: "unkown error", Field: field}
 	}
-}
-
-// deprecated
-func getErrors(r *http.Request, code int, err interface{}, args ...string) (errors []Error) {
-	var field string
-	if len(args) > 0 {
-		field = args[0]
-	}
-	switch e := err.(type) {
-	case Error:
-		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
-	case *Error:
-		return append(errors, Error{Code: e.Code, Message: e.Message, Field: e.Field})
-	case ICodeErrorReq:
-		return append(errors, Error{Code: e.Code(), Message: e.ErrorReq(r), Field: field})
-	case IFieldErrorReq:
-		return append(errors, Error{Message: e.ErrorReq(r), Field: e.Field()})
-	case []IFieldErrorReq:
-		for _, _e := range e {
-			errors = append(errors, Error{Message: _e.ErrorReq(r), Field: _e.Field()})
-		}
-		return
-	case string:
-		return append(errors, Error{Code: code, Message: e, Field: field})
-	case interface{ GetMessage() string }:
-		return append(errors, Error{Code: code, Message: e.GetMessage(), Field: field})
-	case error:
-		return append(errors, Error{Code: code, Message: e.Error(), Field: field})
-	}
-
-	return
 }

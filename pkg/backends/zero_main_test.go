@@ -1,7 +1,6 @@
 package backends
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -20,7 +19,9 @@ var (
 
 func TestMain(m *testing.M) {
 	_logger, _ := zap.NewDevelopment()
-	defer _logger.Sync() // flushes buffer, if any
+	defer func() {
+		_ = _logger.Sync() // flushes buffer, if any
+	}()
 	sugar := _logger.Sugar()
 	log.SetLogger(sugar)
 
@@ -28,7 +29,7 @@ func TestMain(m *testing.M) {
 
 	db := getDb()
 	logger().Infow("cleaning schemas")
-	db.Exec("DROP SCHEMA IF EXISTS staffio CASCADE;")
+	db.Exec("DROP SCHEMA IF EXISTS staffio CASCADE;") //nolint
 
 	schemas := []string{
 		"staffio_0_schema.sql",
@@ -52,13 +53,13 @@ func TestMain(m *testing.M) {
 
 	svc = NewService()
 	store = svc.OSIN()
-	svc.Ready()
+	svc.Ready() //nolint
 	code := m.Run()
 	os.Exit(code)
 }
 
 func loadSQLs(name string) string {
-	content, err := ioutil.ReadFile(name)
+	content, err := os.ReadFile(name)
 	if err != nil {
 		logger().Fatalw("loadSQL fail", "err", err)
 	}

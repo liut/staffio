@@ -82,7 +82,7 @@ func (s *teamStore) Store(t *team.Team) error {
 					(name, parent_id, leaders, members, updated) = ($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $5`,
 					t.Name, t.ParentID, t.Leaders, t.Members, t.ID)
 			} else if err == ErrNoRows {
-				db.Exec("DELETE FROM teams WHERE parent_id = $1 AND name = $2", t.ParentID, t.Name)
+				_, _ = db.Exec("DELETE FROM teams WHERE parent_id = $1 AND name = $2", t.ParentID, t.Name)
 				_, err = db.Exec("INSERT INTO teams(id, name, parent_id, leaders, members) VALUES($1, $2, $3, $4, $5)",
 					t.ID, t.Name, t.ParentID, t.Leaders, t.Members)
 			}

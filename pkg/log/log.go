@@ -1,20 +1,22 @@
 package log
 
 import (
-	"fmt"
 	syslog "log"
+	"log/slog"
 
 	zlog "github.com/liut/staffio-backend/log"
 )
 
-type logger struct{}
+type logger struct {
+	slg *slog.Logger
+}
 
 // Default 默认实例
 var Default Logger
 
 func init() {
 	syslog.SetFlags(syslog.Ltime | syslog.Lshortfile)
-	Default = &logger{}
+	Default = &logger{slg: slog.Default()}
 }
 
 func SetLogger(logger Logger) {
@@ -29,19 +31,19 @@ func GetLogger() Logger {
 }
 
 func (z *logger) Debugw(msg string, keysAndValues ...interface{}) {
-	syslog.Output(2, fmt.Sprint("DEBUG: "+msg, keysAndValues))
+	z.slg.Debug(msg, keysAndValues...)
 }
 
 func (z *logger) Infow(msg string, keysAndValues ...interface{}) {
-	syslog.Output(2, fmt.Sprint("INFO: "+msg, keysAndValues))
+	z.slg.Info(msg, keysAndValues...)
 }
 
 func (z *logger) Warnw(msg string, keysAndValues ...interface{}) {
-	syslog.Output(2, fmt.Sprint("WARN: "+msg, keysAndValues))
+	z.slg.Warn(msg, keysAndValues...)
 }
 
 func (z *logger) Errorw(msg string, keysAndValues ...interface{}) {
-	syslog.Output(2, fmt.Sprint("ERROR: "+msg, keysAndValues))
+	z.slg.Error(msg, keysAndValues...)
 }
 
 func (z *logger) Fatalw(msg string, keysAndValues ...interface{}) {

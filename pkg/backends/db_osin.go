@@ -33,7 +33,6 @@ func NewClient(id, secret, redirectURI string) *Client {
 type DbStorage struct {
 	pageSize int
 	refresh  *sync.Map
-	isDebug  bool
 }
 
 func NewStorage() *DbStorage {
@@ -264,7 +263,7 @@ func (s *DbStorage) LoadClients(spec *oauth.ClientSpec) (clients []oauth.Client,
 	if spec.Page < 1 {
 		spec.Page = 1
 	} else {
-		withDbQuery(func(db dber) error {
+		err = withDbQuery(func(db dber) error {
 			err := db.Get(&spec.Total, "SELECT COUNT(id) as total FROM oauth_client")
 			if err != nil {
 				logger().Infow("count oauth_client ERR ", "err", err)
@@ -313,7 +312,7 @@ func (s *DbStorage) CountClients() (total uint) {
 	qs := func(db dber) error {
 		return db.QueryRow("SELECT COUND(id) FROM oauth_client").Scan(&total)
 	}
-	withDbQuery(qs)
+	_ = withDbQuery(qs)
 	return
 }
 

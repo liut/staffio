@@ -96,7 +96,7 @@ func New(c Config) *server {
 	} else {
 		fmt.Printf("In Release mode, gin: %s\n", gin.Mode())
 		if settings.Current.SentryDSN != "" {
-			raven.SetDSN(settings.Current.SentryDSN)
+			_ = raven.SetDSN(settings.Current.SentryDSN)
 			onlyCrashes := false
 			svr.router.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
 		}

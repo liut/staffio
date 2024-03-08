@@ -66,6 +66,7 @@ func openDb() *sqlx.DB {
 	return db
 }
 
+// nolint
 func closeDb() {
 	if dbc != nil {
 		err := dbc.Close()
@@ -139,16 +140,16 @@ func withTxQuery(query func(tx dbTxer) error) error {
 
 	tx, err := db.Beginx()
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return err
 	}
 
 	if err := query(tx); err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		logger().Warnw("tx query fail", "err", err)
 		return dbError
 	}
-	tx.Commit()
+	_ = tx.Commit()
 	return nil
 }
 

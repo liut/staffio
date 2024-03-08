@@ -88,7 +88,7 @@ func (s *server) larkOAuth2Callback(c *gin.Context) {
 
 	ou, err := s.larkAPI.AuthorizeCode(code)
 	if err != nil {
-		c.AbortWithError(http.StatusServiceUnavailable, err)
+		c.AbortWithError(http.StatusServiceUnavailable, err) //nolint
 		return
 	}
 	logger().Infow("auth2 with lark callback OK", "ou", ou)
