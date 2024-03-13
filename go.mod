@@ -27,7 +27,6 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	github.com/ugorji/go/codec v1.2.11
-	github.com/wealthworks/csmtp v0.0.0-20170830024811-e0ac040e90d6
 	go.uber.org/zap v1.27.0
 	golang.org/x/text v0.14.0
 	gopkg.in/mail.v2 v2.3.1
@@ -80,7 +79,7 @@ require (
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
