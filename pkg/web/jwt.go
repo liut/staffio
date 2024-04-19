@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/go-osin/osin"
-	"github.com/golang-jwt/jwt/v4"
+	jwt "github.com/golang-jwt/jwt/v4"
 
 	"github.com/liut/staffio/pkg/models/oauth"
 	"github.com/liut/staffio/pkg/settings"

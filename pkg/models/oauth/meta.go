@@ -30,7 +30,7 @@ func ToJSONKV(src interface{}) (JSONKV, error) {
 // WithKey ...
 func (m JSONKV) WithKey(key string) (v interface{}) {
 	var ok bool
-	if v, ok = m[key]; ok {
+	if v, ok = m[key]; ok { //nolint
 		return
 	}
 	return

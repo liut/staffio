@@ -43,7 +43,7 @@ var webCmd = &cobra.Command{
 	Short: "Start main web server",
 	Long:  `Start main web server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.ParseFlags(args)
+		_ = cmd.ParseFlags(args)
 		webRun()
 	},
 }
@@ -93,7 +93,7 @@ func webRun() {
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal, 2)
-	signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 	log.Print("Shutdown Server ...")
 

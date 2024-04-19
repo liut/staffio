@@ -10,12 +10,12 @@ import (
 
 // save staff
 func (s *serviceImpl) SaveStaff(ctx context.Context, staff *models.Staff) error {
-	if staff.EmployeeNumber < 1 {
+	if len(staff.EmployeeNumber) == 0 {
 		newID, err := NextStaffID()
 		if err != nil {
 			return err
 		}
-		staff.EmployeeNumber = newID
+		staff.EmployeeNumber = fmt.Sprintf("%04d", newID)
 	}
 	isNew, err := s.Save(staff)
 	if err == nil {
@@ -85,15 +85,15 @@ func StoreTeamAndStaffs(ctx context.Context, svc Servicer, team *team.Team, staf
 
 // SaveTeamAndStaffs ...
 func (s *serviceImpl) SaveTeamAndStaffs(ctx context.Context, team *team.Team, staffs models.Staffs) (err error) {
-	if staffs != nil {
-		for _, staff := range staffs {
-			if err = s.SaveStaff(ctx, &staff); err != nil {
-				logger().Infow("save staff fail", "staff", staff, "err", err)
-				return
-			}
-			logger().Debugw("bulk save staff ok", "cn", staff.CommonName, "uid", staff.UID)
+
+	for _, staff := range staffs {
+		if err = s.SaveStaff(ctx, &staff); err != nil {
+			logger().Infow("save staff fail", "staff", staff, "err", err)
+			return
 		}
+		logger().Debugw("bulk save staff ok", "cn", staff.CommonName, "uid", staff.UID)
 	}
+
 	err = s.Team().Store(team)
 	if err != nil {
 		logger().Infow("bulk save team fail", "name", team.Name, "err", err)

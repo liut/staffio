@@ -48,18 +48,18 @@ func (s *server) casValidateV1(c *gin.Context) {
 	ticket := c.Request.FormValue("ticket")
 
 	if ticket == "" {
-		fmt.Fprint(c.Writer, "no\n")
+		fmt.Fprint(c.Writer, "no\n") //nolint
 	} else {
 		t, err := s.service.GetTicket(ticket)
 		if err != nil {
 			log.Printf("load ticket %s ERR: %s", ticket, err)
-			fmt.Fprint(c.Writer, "no\n")
+			fmt.Fprint(c.Writer, "no\n") //nolint
 		} else {
 			if t.Service != service {
-				fmt.Fprint(c.Writer, "no\n")
+				fmt.Fprint(c.Writer, "no\n") //nolint
 			} else {
-				s.service.DeleteTicket(ticket)
-				fmt.Fprint(c.Writer, "yes\n"+t.UID)
+				_ = s.service.DeleteTicket(ticket)  //TODO: fix it
+				fmt.Fprint(c.Writer, "yes\n"+t.UID) //nolint
 			}
 		}
 	}
@@ -80,6 +80,7 @@ func (s *server) casValidateV2(c *gin.Context) {
 	}
 	st, err := s.service.GetTicket(ticket)
 	if err != nil {
+		//nolint
 		fmt.Fprintf(c.Writer, v2ResponseFailure(cas.NewCasError(
 			"ticket is invalid or expired", cas.ERROR_CODE_INVALID_TICKET), format))
 		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, err)
@@ -97,12 +98,12 @@ func (s *server) casValidateV2(c *gin.Context) {
 	}
 
 	if casErr != nil {
-		fmt.Fprintf(c.Writer, v2ResponseFailure(casErr, format))
+		fmt.Fprintf(c.Writer, v2ResponseFailure(casErr, format)) //nolint
 		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, casErr)
 		return
 	}
 
-	fmt.Fprintf(c.Writer, v2ResponseSuccess(st, format))
+	fmt.Fprintf(c.Writer, v2ResponseSuccess(st, format)) //nolint
 }
 
 // v2ResponseFailure produces XML string for failure

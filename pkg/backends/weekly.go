@@ -31,10 +31,13 @@ func (s *weeklyStore) Get(id int) (obj *weekly.Report, err error) {
 func (s *weeklyStore) All(spec weekly.ReportsSpec) (data weekly.Reports, total int, err error) {
 	logger().Debugw("weeklyStore.all", "spec", spec)
 	var where string
-	bind := []interface{}{}
+	bind := []any{}
 	if len(spec.UIDs) > 0 {
-		var args []interface{}
+		var args []any
 		where, args, err = sqlx.In("WHERE r.uid IN (?)", spec.UIDs)
+		if err != nil {
+			return
+		}
 		bind = append(bind, args...)
 	} else if spec.UID != "" {
 		where = " WHERE r.uid = ?"

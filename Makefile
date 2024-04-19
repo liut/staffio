@@ -23,7 +23,6 @@ main:
 all: vet dist package
 
 dep:
-	$(GO) install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
 	GO111MODULE=on $(GO) install github.com/ddollar/forego@latest
 	GO111MODULE=on $(GO) install github.com/liut/rerun@latest
 	GO111MODULE=on $(GO) install github.com/swaggo/swag/cmd/swag@latest
@@ -38,6 +37,9 @@ clean:
 	rm -rf dist fe/build
 	rm -f $(NAME) $(NAME)-*
 	rm -f .fe-build
+
+lint:
+	GO111MODULE=on golangci-lint run --disable structcheck ./cmd/... ./pkg/...
 
 dist/linux_amd64/$(NAME): $(SOURCES)
 	echo "Building $(NAME) of linux with GOMOD=$(GOMOD)"

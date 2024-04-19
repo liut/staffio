@@ -74,7 +74,7 @@ func (s *server) loginPost(c *gin.Context) {
 		st := cas.NewTicket("ST", param.Service, staff.UID, true)
 		err = s.service.SaveTicket(st)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			c.AbortWithError(http.StatusInternalServerError, err) //nolint
 			return
 		}
 		NewTGC(c, st)
@@ -332,7 +332,7 @@ func (s *server) profilePost(c *gin.Context) {
 	err := binding.Form.Bind(req, staff)
 	if err != nil {
 		log.Printf("bind %v: %s", staff, err)
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusBadRequest, err) //nolint
 		return
 	}
 	err = s.service.ProfileModify(user.UID, password, staff)

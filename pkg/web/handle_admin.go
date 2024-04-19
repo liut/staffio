@@ -25,7 +25,7 @@ func (s *server) clientsGet(c *gin.Context) {
 
 	clients, err := s.service.OSIN().LoadClients(spec)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 	if IsAjax(c.Request) {
@@ -140,13 +140,13 @@ func (s *server) clientsPost(c *gin.Context) {
 func (s *server) scopesForm(c *gin.Context) {
 	scopes, err := s.service.OSIN().LoadScopes()
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
 	s.Render(c, "scopes.html", map[string]interface{}{
 		"ctx":    c,
 		"scopes": scopes,
-	})
+	}) //nolint
 }
 
 func (s *server) contactsTable(c *gin.Context) {
@@ -157,7 +157,7 @@ func (s *server) contactsTable(c *gin.Context) {
 	s.Render(c, "contact.html", map[string]interface{}{
 		"staffs": staffs,
 		"ctx":    c,
-	})
+	}) //nolint
 }
 
 func (s *server) staffForm(c *gin.Context) {
@@ -203,7 +203,7 @@ func (s *server) fetchEx(c *gin.Context) {
 	case "wechat":
 		exuser, err := s.wxAuth.GetUser(uid)
 		if err != nil {
-			c.AbortWithError(404, err)
+			c.AbortWithError(404, err) //nolint
 			return
 		}
 		staff = wechatwork.UserToStaff(exuser)
@@ -212,12 +212,12 @@ func (s *server) fetchEx(c *gin.Context) {
 		email := uid + "@" + settings.Current.EmailDomain
 		staff, err = qqexmail.GetStaffFromExmail(email)
 		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
+			c.AbortWithError(http.StatusNotFound, err) //nolint
 			logger().Infow("get fail", "uid", uid, "err", err)
 			return
 		}
 	default:
-		c.AbortWithError(400, err)
+		c.AbortWithError(400, err) //nolint
 		return
 	}
 
@@ -233,7 +233,7 @@ func (s *server) fetchEx(c *gin.Context) {
 		if estaff.Email != "" {
 			staff.Email = estaff.Email
 		}
-		if estaff.EmployeeNumber > 0 {
+		if estaff.EmployeeNumber != "" {
 			staff.EmployeeNumber = estaff.EmployeeNumber
 		}
 		if estaff.EmployeeType != "" {
@@ -247,7 +247,6 @@ func (s *server) fetchEx(c *gin.Context) {
 	res["ok"] = true
 	res["staff"] = staff
 	c.JSON(http.StatusOK, res)
-	return
 }
 
 func (s *server) staffPost(c *gin.Context) {
@@ -256,7 +255,7 @@ func (s *server) staffPost(c *gin.Context) {
 	if uid == "" || uid == "new" {
 		uid = req.PostFormValue("uid")
 		if uid == "" || uid == "new" {
-			c.AbortWithStatus(http.StatusNotFound)
+			c.AbortWithStatus(http.StatusNotFound) //nolint
 			return
 		}
 	}
@@ -279,7 +278,6 @@ func (s *server) staffPost(c *gin.Context) {
 		}
 	}
 
-	return
 }
 
 func (s *server) staffDelete(c *gin.Context) {
@@ -305,13 +303,13 @@ func (s *server) staffDelete(c *gin.Context) {
 
 	_, err := s.service.Get(uid)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		c.AbortWithError(http.StatusNotFound, err) //nolint
 		logger().Infow("get fail", "uid", uid, "err", err)
 		return
 	}
 	err = s.service.Delete(uid)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithError(http.StatusInternalServerError, err) //nolint
 		logger().Infow("delete fail", "uid", uid, "err", err)
 		return
 	}

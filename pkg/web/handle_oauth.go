@@ -76,7 +76,7 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 	}
 
 	logger().Debugw("oauthAuthorize", "resp", resp)
-	osin.OutputJSON(resp, c.Writer, r)
+	osin.OutputJSON(resp, c.Writer, r) //nolint
 }
 
 func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
@@ -234,7 +234,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 
 	logger().Infow("oauthToken", "resp", resp)
 
-	osin.OutputJSON(resp, c.Writer, r)
+	osin.OutputJSON(resp, c.Writer, r) //nolint
 }
 
 // Information endpoint
@@ -308,7 +308,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 		logger().Infow("info ERROR", "err", resp.InternalError)
 	}
 
-	osin.OutputJSON(resp, c.Writer, r)
+	osin.OutputJSON(resp, c.Writer, r) //nolint
 }
 
 func (s *server) oidcDiscovery(c *gin.Context) {

@@ -22,7 +22,7 @@ func (s *server) countNewMail(c *gin.Context) {
 	count, err := exmail.CountNewMail(email)
 	if err != nil {
 		log.Printf("check new mail failed: %s", err)
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithError(http.StatusInternalServerError, err) //nolint
 		return
 	}
 	res["unseen"] = count
@@ -36,7 +36,7 @@ func (s *server) loginToExmail(c *gin.Context) {
 	email := user.UID + "@" + settings.Current.EmailDomain
 	url, err := exmail.GetLoginURL(email)
 	if err != nil {
-		c.AbortWithError(http.StatusForbidden, err)
+		c.AbortWithError(http.StatusForbidden, err) //nolint
 		return
 	}
 	c.Redirect(http.StatusFound, url)

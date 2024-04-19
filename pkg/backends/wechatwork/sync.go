@@ -51,7 +51,7 @@ func SyncDepartment(action, uid string) {
 		logger().Infow("empty uid")
 		return
 	}
-	s.RunIt()
+	_ = s.RunIt()
 
 }
 

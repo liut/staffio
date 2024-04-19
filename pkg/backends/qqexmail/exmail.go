@@ -2,7 +2,6 @@ package qqexmail
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"daxv.cn/gopak/tencent-api-go/exmail"
@@ -26,18 +25,15 @@ func GetStaffFromExmail(email string) (*models.Staff, error) {
 	// log.Printf("got %q %q %q", user.Name, sn, gn)
 
 	staff := &models.Staff{
-		UID:          strings.Split(user.Alias, "@")[0],
-		Email:        user.Alias,
-		CommonName:   user.Name,
-		Surname:      sn,
-		GivenName:    gn,
-		EmployeeType: user.Title,
-		Mobile:       user.Mobile,
-		Gender:       models.Gender(user.Gender).String(),
-	}
-	eid, _ := strconv.Atoi(user.ExtId)
-	if eid > 0 {
-		staff.EmployeeNumber = eid
+		UID:            strings.Split(user.Alias, "@")[0],
+		Email:          user.Alias,
+		CommonName:     user.Name,
+		Surname:        sn,
+		GivenName:      gn,
+		EmployeeNumber: user.ExtId,
+		EmployeeType:   user.Title,
+		Mobile:         user.Mobile,
+		Gender:         models.Gender(user.Gender).String(),
 	}
 	return staff, nil
 }

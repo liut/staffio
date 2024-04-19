@@ -43,11 +43,11 @@ var RootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.ParseFlags(args)
+		_ = cmd.ParseFlags(args)
 		if v, err := cmd.Flags().GetBool("version"); err == nil && v {
 			fmt.Println(config.Version())
 		} else {
-			cmd.Usage()
+			_ = cmd.Usage()
 		}
 
 	},
@@ -73,7 +73,9 @@ func Execute() {
 	} else {
 		logger, _ = zap.NewProduction()
 	}
-	defer logger.Sync() // flushes buffer, if any
+	defer func() {
+		_ = logger.Sync() // flushes buffer, if any
+	}()
 	sugar := logger.Sugar()
 
 	zlog.SetLogger(sugar)
