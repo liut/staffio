@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
-	"github.com/getsentry/raven-go"
-	"github.com/gin-gonic/contrib/sentry"
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/go-osin/osin"
 
@@ -96,9 +97,15 @@ func New(c Config) *server {
 	} else {
 		fmt.Printf("In Release mode, gin: %s\n", gin.Mode())
 		if settings.Current.SentryDSN != "" {
-			_ = raven.SetDSN(settings.Current.SentryDSN)
-			onlyCrashes := false
-			svr.router.Use(sentry.Recovery(raven.DefaultClient, onlyCrashes))
+			if err := sentry.Init(sentry.ClientOptions{
+				Dsn: settings.Current.SentryDSN,
+			}); err != nil {
+				fmt.Printf("Sentry initialization failed: %v\n", err)
+			} else {
+				svr.router.Use(sentrygin.New(sentrygin.Options{
+					Timeout: time.Second * 5,
+				}))
+			}
 		}
 	}
 
