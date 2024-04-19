@@ -33,6 +33,7 @@ func init() {
 
 }
 
+// nolint
 func (d *demo) strap(router serverMux) {
 	// Application home endpoint
 	router.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
@@ -357,6 +358,7 @@ func (d *demo) strap(router serverMux) {
 
 }
 
+// nolint
 func HandleLoginPage(ar *osin.AuthorizeRequest, w http.ResponseWriter, r *http.Request) bool {
 	r.ParseForm()
 	if r.Method == "POST" && r.Form.Get("login") == "test" && r.Form.Get("password") == "test" {
@@ -380,6 +382,7 @@ func HandleLoginPage(ar *osin.AuthorizeRequest, w http.ResponseWriter, r *http.R
 	return false
 }
 
+// nolint
 func downloadAccessToken(url string, auth *osin.BasicAuth, output map[string]interface{}) error {
 	// download access token
 	logger().Debugw("download access token", "url", url)

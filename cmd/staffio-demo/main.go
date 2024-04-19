@@ -25,7 +25,10 @@ func main() {
 
 	zlogger, _ = zap.NewDevelopment()
 
-	defer zlogger.Sync() // flushes buffer, if any
+	defer func() {
+		_ = zlogger.Sync() // flushes buffer, if any
+	}()
+
 	sugar := zlogger.Sugar()
 
 	zlog.SetLogger(sugar)
