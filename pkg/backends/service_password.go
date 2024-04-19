@@ -178,9 +178,9 @@ func sendResetEmail(site string, staff *models.Staff, token string) error {
 	prefix := settings.Current.BaseURL
 	switch site {
 	case "i":
-		prefix = replSite.Replace(prefix)
-	case "www", "":
-		prefix = prefix + "/password"
+		prefix = replSite.Replace(prefix) + "/reset?token="
+	default: // "www", ""
+		prefix = prefix + "/password/reset?rt="
 	}
 
 	m.SetBody("text/html", fmt.Sprintf(tplPasswordReset, staff.Name(), prefix, token))
@@ -207,5 +207,5 @@ const (
 	// tplPasswordReset = `Dear %s: <br/><br/>
 	// To reset your password, pls <a href="%s/password/reset?rt=%s">click here</a>.`
 	tplPasswordReset = `Dear %s: <br/><br/>
-	To reset your password, pls <a href="%s/reset?token=%s">click here</a>.`
+	To reset your password, pls <a href="%s%s">click here</a>.`
 )
