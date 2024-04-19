@@ -17,14 +17,14 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.8
-	github.com/liut/staffio-backend v0.2.5
+	github.com/liut/staffio-backend v0.3.0
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/russross/blackfriday v1.6.0
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/ugorji/go/codec v1.2.12
 	go.uber.org/zap v1.27.0
 	golang.org/x/text v0.14.0

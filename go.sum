@@ -94,8 +94,8 @@ github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa h1:snrBCiX68CGwtRbnCiG
 github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa/go.mod h1:imStkVI0mPNQcaJ/Ipax2bKFaNHWrRJlzzgPGcNLVig=
 github.com/liut/simpauth v0.1.8 h1:2QDkfkfmipKmB6/8yQw1efikiId1mmrxk3KNjTuKeDs=
 github.com/liut/simpauth v0.1.8/go.mod h1:Wdxb5loVN34YhHFpxbBy9qCdT/dlUrG2uLt+Ja6wMFo=
-github.com/liut/staffio-backend v0.2.5 h1:6ve0EZRrYXw5NBqmQGxrw9iejRTMcToQ51nv0biLNC4=
-github.com/liut/staffio-backend v0.2.5/go.mod h1:pCncvBWhwVtnDrm3m4zxqp6DsbLyqW10kLQm8SOe1Oo=
+github.com/liut/staffio-backend v0.3.0 h1:Y4XvBnrImkNBPvVfoUbbQnlA9cSc40cDJ3W0GQNSCEs=
+github.com/liut/staffio-backend v0.3.0/go.mod h1:Wc9H1zWaRpma1rJKt9AyBdswLVSjJcGCtEz31CbSo3A=
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
 github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-sqlite3 v1.9.0 h1:pDRiWfl+++eC2FEFRy6jXmQlvp4Yh3z1MJKg4UeYM/4=
@@ -148,8 +148,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
+github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
+github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tinylib/msgp v1.1.8 h1:FCXC1xanKO4I8plpHGH2P7koL/RzZs12l/+r7vakfm0=
 github.com/tinylib/msgp v1.1.8/go.mod h1:qkpG+2ldGg4xRFmx+jfTvZPxfGFhi64BcnL9vkCm/Tw=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
