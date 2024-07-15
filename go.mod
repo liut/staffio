@@ -1,6 +1,6 @@
 module github.com/liut/staffio
 
-go 1.21.6
+go 1.22
 
 require (
 	daxv.cn/gopak/tencent-api-go v0.0.0-00010101000000-000000000000
@@ -16,7 +16,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.10.3
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
-	github.com/liut/simpauth v0.1.8
+	github.com/liut/simpauth v0.1.13
 	github.com/liut/staffio-backend v0.3.0
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/mozillazg/go-slugify v0.2.0
@@ -69,7 +69,7 @@ require (
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tinylib/msgp v1.1.8 // indirect
+	github.com/tinylib/msgp v1.1.9 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect

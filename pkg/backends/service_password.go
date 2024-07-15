@@ -70,8 +70,8 @@ func (s *serviceImpl) passwordForgotPrepare(site string, staff *models.Staff) (e
 	if err != nil {
 		logger().Warnw("userLog fail", "uid", staff.UID, "err", err)
 	}
-	// Generate reset token that expires in 2 hours
-	token := passwordreset.NewToken(staff.UID, 2*time.Hour, uv.CodeHashBytes(), secret)
+	// Generate reset token that expires in 4 hours
+	token := passwordreset.NewToken(staff.UID, 4*time.Hour, uv.CodeHashBytes(), secret)
 	err = sendResetEmail(site, staff, token)
 	return
 }
