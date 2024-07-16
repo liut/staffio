@@ -16,7 +16,7 @@ import (
 
 const (
 	LimitArticle = 3
-	LimitLinks   = 10
+	LimitLinks   = 20
 )
 
 func (s *server) welcome(c *gin.Context) {
@@ -107,7 +107,7 @@ func (s *server) articlePost(c *gin.Context) {
 }
 
 func (s *server) linksForm(c *gin.Context) {
-	links, err := backends.LoadLinks(9, 0)
+	links, err := backends.LoadLinks(LimitLinks, 0)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
