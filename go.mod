@@ -9,6 +9,7 @@ require (
 	github.com/dchest/passwordreset v0.0.0-20190826080013-4518b1f41006
 	github.com/getsentry/sentry-go v0.27.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/go-osin/osin v0.0.0-20240229065344-f0845653461e
 	github.com/go-osin/session v1.3.4
 	github.com/golang-jwt/jwt/v4 v4.5.1
@@ -24,7 +25,7 @@ require (
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/ugorji/go/codec v1.2.12
 	go.uber.org/zap v1.27.0
 	golang.org/x/text v0.21.0
@@ -73,9 +74,9 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

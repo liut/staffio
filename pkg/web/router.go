@@ -155,6 +155,7 @@ func (s *server) StrapRouter() {
 
 	// oidc
 	gr.GET("/.well-known/openid-configuration", s.oidcDiscovery)
+	gr.GET("/.well-known/jwks", s.oidcJwks)
 
 	ah := gin.WrapH(htdocs.Handler())
 	s.router.GET("/static/*filepath", ah)

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-jose/go-jose/v4"
 	"github.com/go-osin/osin"
 
 	"github.com/liut/staffio/pkg/models"
@@ -316,6 +317,12 @@ func (s *server) oidcDiscovery(c *gin.Context) {
 	baseURL := fmt.Sprintf("%s://%s", RequestScheme(r), r.Host)
 	od := oidc.DiscoveryWith(baseURL)
 	c.JSON(200, &od)
+}
+
+func (s *server) oidcJwks(c *gin.Context) {
+	jwks := jose.JSONWebKeySet{}
+	// TODO: add keys
+	c.JSON(200, &jwks)
 }
 
 func RequestScheme(r *http.Request) string {
