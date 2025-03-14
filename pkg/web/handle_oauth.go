@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-jose/go-jose/v4"
+	jose "github.com/go-jose/go-jose/v4"
 	"github.com/go-osin/osin"
 
 	"github.com/liut/staffio/pkg/models"
@@ -233,7 +233,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 
 	}
 
-	logger().Infow("oauthToken", "resp", resp)
+	logger().Infow("oauthToken resp", "data", resp.Output)
 
 	osin.OutputJSON(resp, c.Writer, r) //nolint
 }
@@ -321,6 +321,7 @@ func (s *server) oidcDiscovery(c *gin.Context) {
 
 func (s *server) oidcJwks(c *gin.Context) {
 	jwks := jose.JSONWebKeySet{}
+	jwks.Keys = make([]jose.JSONWebKey, 0)
 	// TODO: add keys
 	c.JSON(200, &jwks)
 }

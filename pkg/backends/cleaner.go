@@ -44,8 +44,10 @@ func deleteWithEnd(name, field string, end time.Time) error {
 			log.Printf("clean %q ERR %s", name, err)
 			return err
 		}
-		count, _ := res.RowsAffected()
-		log.Printf("clean %q: %d affected", name, count)
+		if count, _ := res.RowsAffected(); count > 0 {
+			log.Printf("clean %q: %d affected", name, count)
+		}
+
 		return nil
 	})
 }
