@@ -37,14 +37,27 @@ func (z *IDToken) ToMap() map[string]any {
 		z.Expiration == 0 || z.IssuedAt == 0 {
 		return nil
 	}
-	return map[string]any{
+	res := map[string]any{
 		"iss": z.Issuer,
 		"sub": z.UserID,
 		"aud": z.ClientID,
 		"exp": z.Expiration,
 		"iat": z.IssuedAt,
 
-		"nonce": z.Nonce,
 		"scope": "openid",
 	}
+	if len(z.Nonce) > 0 {
+		res["nonce"] = z.Nonce
+	}
+	if len(z.Email) > 0 && z.EmailVerified != nil && *z.EmailVerified {
+		res["email"] = z.Email
+	}
+	if len(z.Name) > 0 {
+		res["name"] = z.Name
+	}
+	if len(z.Picture) > 0 {
+		res["picture"] = z.Picture
+	}
+
+	return res
 }
