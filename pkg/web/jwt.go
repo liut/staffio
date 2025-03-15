@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"fmt"
 
+	jose "github.com/go-jose/go-jose/v4"
 	"github.com/go-osin/osin"
 	jwt "github.com/golang-jwt/jwt/v4"
 
@@ -20,6 +21,7 @@ type MapGetter interface {
 type TokenGenerator interface {
 	osin.AccessTokenGen
 	GenerateIDToken(mg MapGetter) (string, error)
+	getJSONWebKey() jose.JSONWebKey
 }
 
 // AccessTokenGenJWT JWT access token generator
@@ -84,6 +86,18 @@ func getTokenGenJWT() (tokenGen TokenGenerator, err error) {
 	tokenGen = &AccessTokenGenJWT{Key: hmacKey}
 
 	return
+}
+
+func (c *AccessTokenGenJWT) getJSONWebKey() jose.JSONWebKey {
+
+	var jwk jose.JSONWebKey
+	jwk.Key = c.Key
+	jwk.Certificates = []*x509.Certificate{}
+	jwk.KeyID = "cust"
+	jwk.Algorithm = jwt.SigningMethodHS256.Name
+	jwk.Use = "sig"
+
+	return jwk
 }
 
 // LoadPrivateKey loads a private key from PEM/DER data.

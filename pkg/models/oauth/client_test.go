@@ -27,5 +27,7 @@ func TestClient(t *testing.T) {
 
 func TestJSONKV(t *testing.T) {
 	m := JSONKV{"name": "eagle"}
-	assert.Equal(t, m.WithKey("name"), "eagle")
+	v, ok := m.Get("name")
+	assert.True(t, ok)
+	assert.Equal(t, v, "eagle")
 }

@@ -4,11 +4,11 @@ package web
 //
 // https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 type IDToken struct {
-	Issuer     string `json:"iss"` // REQUIRED
-	UserID     string `json:"sub"` // REQUIRED
-	ClientID   string `json:"aud"` // REQUIRED
-	Expiration int64  `json:"exp"` // REQUIRED
-	IssuedAt   int64  `json:"iat"` // REQUIRED
+	Issuer     string `json:"iss"` // REQUIRED. Issuer Identifier for the Issuer of the response.
+	UserID     string `json:"sub"` // REQUIRED. Subject Identifier.
+	ClientID   string `json:"aud"` // REQUIRED. Audience(s) that this ID Token is intended for.
+	Expiration int64  `json:"exp"` // REQUIRED. Expiration time on or after which the ID Token
+	IssuedAt   int64  `json:"iat"` // REQUIRED. Time at which the JWT was issued.
 
 	Nonce string `json:"nonce,omitempty"` // Non-manditory fields MUST be "omitempty"
 
@@ -28,6 +28,7 @@ type IDToken struct {
 	BirthDate   string `json:"birthdate,omitempty"`
 	Gender      string `json:"gender,omitempty"`
 	Nickname    string `json:"nickname,omitempty"`
+	Picture     string `json:"picture,omitempty"`
 	PhoneNumber string `json:"phone_number,omitempty"`
 }
 
@@ -42,5 +43,8 @@ func (z *IDToken) ToMap() map[string]any {
 		"aud": z.ClientID,
 		"exp": z.Expiration,
 		"iat": z.IssuedAt,
+
+		"nonce": z.Nonce,
+		"scope": "openid",
 	}
 }

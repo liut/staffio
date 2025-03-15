@@ -83,12 +83,17 @@ func (s *server) oauth2Authorize(c *gin.Context) {
 func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 	user *User) error {
 
-	staff, err := s.service.Get(user.UID)
-	if err != nil {
-		return err
+	ar.UserData = oauth.JSONKV{
+		"uid":   user.UID,
+		"nonce": c.Query("nonce"),
 	}
+
+	return nil
+}
+
+func buildIDToken(staff *models.Staff, client, scope string, nonce string) *IDToken {
 	scopes := make(map[string]bool)
-	for _, s := range strings.Fields(ar.Scope) {
+	for _, s := range strings.Fields(scope) {
 		scopes[s] = true
 	}
 	// If the "openid" connect scope is specified, attach an ID Token to the
@@ -100,11 +105,11 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 		idToken := IDToken{
 			Issuer:     settings.Current.BaseURL,
 			UserID:     staff.UID,
-			ClientID:   ar.Client.GetId(),
+			ClientID:   client,
 			Expiration: now.Add(time.Hour).Unix(),
 			IssuedAt:   now.Unix(),
-			Nonce:      c.Query("nonce"),
 			UID:        staff.UID,
+			Nonce:      nonce,
 		}
 
 		if scopes["profile"] {
@@ -113,6 +118,7 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 			idToken.FamilyName = staff.Surname
 			idToken.BirthDate = staff.Birthday
 			idToken.Nickname = staff.Nickname
+			idToken.Picture = staff.AvatarURI()
 			idToken.Locale = staff.OrgDepartment
 		}
 
@@ -122,26 +128,16 @@ func (s *server) oauth2UserData(c *gin.Context, ar *osin.AuthorizeRequest,
 			idToken.EmailVerified = &t
 		}
 		// NOTE: The storage must be able to encode and decode this object.
-		ar.UserData = &idToken
-	} else {
-		ar.UserData = oauth.JSONKV{"uid": user.UID}
+		return &idToken
 	}
-
 	return nil
 }
 
-func (s *server) buildJWT(staff *models.Staff, client, scope string) (string, error) {
-	if strings.Contains(scope, "openid") {
-		now := time.Now()
-		idToken := &IDToken{
-			Issuer:     settings.Current.BaseURL,
-			UserID:     staff.UID,
-			ClientID:   client,
-			Expiration: now.Add(time.Hour).Unix(),
-			IssuedAt:   now.Unix(),
-			UID:        staff.UID,
-		}
-		return s.tkgen.GenerateIDToken(idToken)
+func (s *server) buildJWT(staff *models.Staff, client, scope string, nonce string) (string, error) {
+	idTok := buildIDToken(staff, client, scope, nonce)
+	if idTok != nil {
+		logger().Infow("build jwt", "idToken", idTok)
+		return s.tkgen.GenerateIDToken(idTok)
 	}
 	return "", fmt.Errorf("invalid scope: %s", scope)
 }
@@ -177,9 +173,12 @@ func (s *server) oauth2Token(c *gin.Context) {
 		logger().Debugw("HandleAccessRequest", "code", ar.Code, "scope", ar.Scope)
 		switch ar.Type {
 		case osin.AUTHORIZATION_CODE:
-			kv, _ := oauth.ToJSONKV(ar.UserData)
-			if v, ok := kv["uid"]; ok {
-				uid = v.(string)
+			var nonce string
+			if kv, err := oauth.ToJSONKV(ar.UserData); err == nil {
+				if v, ok := kv.Get("uid"); ok {
+					uid = v.(string)
+				}
+				nonce = kv.GetStr("nonce")
 			}
 
 			staff, err = s.service.Get(uid)
@@ -189,7 +188,7 @@ func (s *server) oauth2Token(c *gin.Context) {
 			} else {
 				user = UserFromStaff(staff)
 			}
-			if idt, err := s.buildJWT(staff, ar.Client.GetId(), ar.Scope); err == nil {
+			if idt, err := s.buildJWT(staff, ar.Client.GetId(), ar.Scope, nonce); err == nil {
 				resp.Output["id_token"] = idt
 			}
 			ar.Authorized = true
@@ -320,9 +319,25 @@ func (s *server) oidcDiscovery(c *gin.Context) {
 }
 
 func (s *server) oidcJwks(c *gin.Context) {
+	_ = c.Request.ParseForm()
+	bearer := osin.CheckBearerAuth(c.Request)
+	if bearer == nil {
+		logger().Infow("no token in header")
+		c.AbortWithStatus(400)
+		return
+	}
+
+	// load access data
+	_, err := s.osvr.Storage.LoadAccess(bearer.Code)
+	if err != nil {
+		logger().Infow("load access fail", "err", err)
+		c.AbortWithStatus(401)
+		return
+	}
+
 	jwks := jose.JSONWebKeySet{}
-	jwks.Keys = make([]jose.JSONWebKey, 0)
-	// TODO: add keys
+	jwks.Keys = append(jwks.Keys, s.tkgen.getJSONWebKey())
+
 	c.JSON(200, &jwks)
 }
 
