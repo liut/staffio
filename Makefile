@@ -11,7 +11,7 @@ SOURCES=$(shell find cmd pkg -type f \( -name "*.go" ! -name "*_test.go" \) -pri
 UIFILES=$(shell find fe/{css,scripts} -type f \( -name "*.styl" -o -name "*.js" \) -print )
 STATICS=$(shell find htdocs -type f -print )
 WEBAPIS=$(shell find pkg/web -type f \( -name "*.go" ! -name "*_test.go" \) -print )
-TAG:=`git describe --tags --always`
+TAG:=`git describe --tags --always --long`
 LDFLAGS:=-X $(ROOF)/pkg/settings.buildVersion=$(TAG)-$(DATE)
 GO=$(shell which go)
 GOMOD=$(shell echo "$${GO111MODULE:-auto}")
