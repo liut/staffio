@@ -39,21 +39,25 @@ clean:
 	rm -f .fe-build
 
 lint:
-	GO111MODULE=on golangci-lint run --disable structcheck ./cmd/... ./pkg/...
+	GO111MODULE=on golangci-lint run -v ./cmd/... ./pkg/...
 
 dist/linux_amd64/$(NAME): $(SOURCES)
 	echo "Building $(NAME) of linux with GOMOD=$(GOMOD)"
 	mkdir -p dist/linux_amd64 && cd dist/linux_amd64 && GO111MODULE=$(GOMOD) GOOS=linux GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 
 dist/darwin_amd64/$(NAME): $(SOURCES)
-	echo "Building $(NAME) of darwin with GOMOD=$(GOMOD)"
+	echo "Building $(NAME) of darwin x64 with GOMOD=$(GOMOD)"
 	mkdir -p dist/darwin_amd64 && cd dist/darwin_amd64 && GO111MODULE=$(GOMOD) GOOS=darwin GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -w" $(ROOF)
+
+dist/darwin_arm64/$(NAME): $(SOURCES)
+	echo "Building $(NAME) of darwin arm64 with GOMOD=$(GOMOD)"
+	mkdir -p dist/darwin_arm64 && cd dist/darwin_arm64 && GO111MODULE=$(GOMOD) GOOS=darwin GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS) -w" $(ROOF)
 
 dist/windows_amd64/$(NAME): $(SOURCES)
 	echo "Building $(NAME) of windows with GOMOD=$(GOMOD)"
 	mkdir -p dist/windows_amd64 && cd dist/windows_amd64 && GO111MODULE=$(GOMOD) GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(LDFLAGS) -s -w" $(ROOF)
 
-dist: vet dist/linux_amd64/$(NAME) dist/darwin_amd64/$(NAME) dist/windows_amd64/$(NAME)
+dist: vet dist/linux_amd64/$(NAME) dist/darwin_amd64/$(NAME) dist/darwin_arm64/$(NAME) dist/windows_amd64/$(NAME)
 
 
 package: dist
