@@ -2,7 +2,6 @@ package backends
 
 import (
 	"context"
-	"log"
 
 	"github.com/liut/staffio-backend/ldap"
 	schema "github.com/liut/staffio-backend/model"
@@ -93,7 +92,7 @@ func NewService() Servicer {
 
 	store, err := ldap.NewStore(cfg)
 	if err != nil {
-		log.Fatalf("new service ERR %s", err)
+		logger().Fatalw("new service fail", "err", err)
 	}
 	// LDAP is a special store
 	return &serviceImpl{

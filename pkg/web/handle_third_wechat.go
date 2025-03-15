@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -95,7 +94,7 @@ func (s *server) wechatOAuth2Callback(c *gin.Context) {
 		c.AbortWithError(http.StatusServiceUnavailable, err) //nolint
 		return
 	}
-	log.Printf("auth2 with wechat work OK %v", ou)
+	logger().Infow("auth with wework ok", "ou", ou)
 
 	staff, err := s.service.Get(strings.ToLower(ou.UserID))
 	if err != nil {

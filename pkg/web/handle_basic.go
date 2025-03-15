@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -79,7 +78,7 @@ func (s *server) loginPost(c *gin.Context) {
 		}
 		NewTGC(c, st)
 		res["referer"] = param.Service + "?ticket=" + st.Value
-		log.Printf("ref: %q", res["referer"])
+		logger().Infow("login", "ref", res["referer"])
 	} else {
 		if referer == "" {
 			referer = "/"
@@ -102,7 +101,7 @@ func (s *server) me(c *gin.Context) {
 	if err == nil {
 		user.TeamID = int64(team.ID)
 	} else {
-		log.Printf("get team with member %s ERR %s", user.UID, err)
+		logger().Infow("get team fail", "uid", user.UID, "err", err)
 	}
 	if s.IsKeeper(user.UID) {
 		user.Roles = append(user.Roles, "admin")
@@ -331,7 +330,7 @@ func (s *server) profilePost(c *gin.Context) {
 	staff := new(models.Staff)
 	err := binding.Form.Bind(req, staff)
 	if err != nil {
-		log.Printf("bind %v: %s", staff, err)
+		logger().Infow("bind fail", "err", err)
 		c.AbortWithError(http.StatusBadRequest, err) //nolint
 		return
 	}

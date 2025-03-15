@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -41,11 +40,11 @@ func deleteWithEnd(name, field string, end time.Time) error {
 		qs := fmt.Sprintf("DELETE FROM %s WHERE %s < $1", name, field)
 		res, err := db.Exec(qs, end)
 		if err != nil {
-			log.Printf("clean %q ERR %s", name, err)
+			logger().Warnw("db exec fail", "name", name, "err", err)
 			return err
 		}
 		if count, _ := res.RowsAffected(); count > 0 {
-			log.Printf("clean %q: %d affected", name, count)
+			logger().Infow("cleaned", "name", name, "affected", count)
 		}
 
 		return nil

@@ -2,7 +2,6 @@ package backends
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/liut/staffio/pkg/models/content"
 )
@@ -72,14 +71,14 @@ func LoadLinks(limit, offset int) (data []*content.Link, err error) {
 
 func SaveArticle(a *content.Article) error {
 	qs := func(db dbTxer) error {
-		log.Printf("save %d", a.Id)
+		logger().Debugw("save", "article.title", a.Title)
 		if a.Id > 0 {
 			str := `UPDATE articles SET title = $1, content = $2, updated = CURRENT_TIMESTAMP WHERE id = $3`
 			_, err := db.Exec(str, a.Title, a.Content, a.Id)
 			if err == nil {
 				return nil
 			}
-			log.Printf("UPDATE article ERR %s", err)
+			logger().Infow("update article fail", "err", err)
 			return err
 		}
 		var id int

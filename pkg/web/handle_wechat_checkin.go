@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ func (s *server) wechatCheckinList(c *gin.Context) {
 	}
 	data, err := s.checkin.ListCheckin(days, c.QueryArray("uid")...)
 	if err != nil {
-		log.Printf("get checkin ERR %s", err)
+		logger().Infow("ListCheckin fail", "err", err)
 		apiError(c, 400, err)
 		return
 	}

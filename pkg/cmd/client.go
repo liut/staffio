@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 
@@ -64,7 +63,7 @@ func clientRun(cmd *cobra.Command, args []string) {
 
 	if revoke, err := cmd.Flags().GetString("revoke"); err == nil && revoke != "" {
 		if err = service.OSIN().RemoveClient(revoke); err != nil {
-			log.Printf("remove client failed, err %s", err)
+			logger().Infow("remove client fail", "err", err)
 			return
 		}
 		fmt.Printf("remove client %q OK\n", revoke)
@@ -78,7 +77,7 @@ func clientRun(cmd *cobra.Command, args []string) {
 		spec := &oauth.ClientSpec{Limit: limit}
 		data, err := service.OSIN().LoadClients(spec)
 		if err != nil {
-			log.Printf("list failed, err %s", err)
+			logger().Infow("list fail", "err", err)
 			return
 		}
 		for _, c := range data {
@@ -90,7 +89,7 @@ func clientRun(cmd *cobra.Command, args []string) {
 		client := backends.GenNewClient(name, uri)
 		fmt.Printf("generate new client %s, id %s, secret %s \n", client.GetName(), client.GetId(), client.GetSecret())
 		if err := service.OSIN().SaveClient(client); err != nil {
-			log.Printf("save client failed, error %s", err)
+			logger().Infow("savf client fail", "err", err)
 			return
 		}
 		fmt.Print("save client done\n")

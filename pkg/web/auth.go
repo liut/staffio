@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,7 @@ func AuthUserMiddleware(redirect bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := authzr.UserFromRequest(c.Request)
 		if err != nil {
-			log.Printf("user from request ERR %s", err)
+			logger().Infow("user from request", "err", err)
 			if redirect {
 				markReferer(c)
 				c.Redirect(302, UrlFor("login"))
@@ -93,7 +92,7 @@ func UserWithContext(c *gin.Context) (user *User) {
 func signinStaffGin(c *gin.Context, staff *models.Staff) {
 	user := UserFromStaff(staff)
 	user.Refresh()
-	log.Printf("login ok %v", user)
+	logger().Debugw("login ok", "user", user)
 	sess := ginSession(c)
 	sess.Set(kAuthUser, user)
 	_ = authzr.Signin(user, c.Writer)

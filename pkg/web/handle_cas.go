@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 
@@ -52,7 +51,7 @@ func (s *server) casValidateV1(c *gin.Context) {
 	} else {
 		t, err := s.service.GetTicket(ticket)
 		if err != nil {
-			log.Printf("load ticket %s ERR: %s", ticket, err)
+			logger().Infow("load tick fail", "val", ticket, "err", err)
 			fmt.Fprint(c.Writer, "no\n") //nolint
 		} else {
 			if t.Service != service {
@@ -80,10 +79,10 @@ func (s *server) casValidateV2(c *gin.Context) {
 	}
 	st, err := s.service.GetTicket(ticket)
 	if err != nil {
+		logger().Infow("load tick fail", "val", ticket, "err", err)
 		//nolint
 		fmt.Fprintf(c.Writer, v2ResponseFailure(cas.NewCasError(
 			"ticket is invalid or expired", cas.ERROR_CODE_INVALID_TICKET), format))
-		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, err)
 		return
 	}
 
@@ -99,7 +98,7 @@ func (s *server) casValidateV2(c *gin.Context) {
 
 	if casErr != nil {
 		fmt.Fprintf(c.Writer, v2ResponseFailure(casErr, format)) //nolint
-		log.Printf("casValidateV2 %s ERR: %s", c.Request.URL, casErr)
+		logger().Infow("casValidateV2 fail", "uri", c.Request.URL, "err", casErr)
 		return
 	}
 

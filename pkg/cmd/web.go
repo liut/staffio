@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -85,7 +84,7 @@ func webRun() {
 	go func() {
 		// service connections
 		if err := srv.ListenAndServe(); err != nil {
-			log.Fatalf("listen failed: %s", err)
+			logger().Fatalw("listen failed", "err", err)
 		}
 	}()
 
@@ -95,13 +94,12 @@ func webRun() {
 	quit := make(chan os.Signal, 2)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
-	log.Print("Shutdown Server ...")
+	logger().Infow("shutdown server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		logger().Fatalw("shutdown failed", "err", err)
 	}
-	log.Print("Server exit")
-
+	logger().Infow("server exit")
 }

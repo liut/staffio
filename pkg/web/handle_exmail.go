@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"net/http"
 
 	"daxv.cn/gopak/tencent-api-go/exmail"
@@ -12,16 +11,16 @@ import (
 	"github.com/liut/staffio/pkg/settings"
 )
 
+// TODO: upgrade to new api of wework
 func (s *server) countNewMail(c *gin.Context) {
 	user := UserWithContext(c)
-	// log.Printf("user %q", user.UID)
 	email := qqexmail.GetEmailAddress(user.UID)
 	res := make(osin.ResponseData)
 	res["email"] = email
 
 	count, err := exmail.CountNewMail(email)
 	if err != nil {
-		log.Printf("check new mail failed: %s", err)
+		logger().Infow("check new mail fail", "err", err)
 		c.AbortWithError(http.StatusInternalServerError, err) //nolint
 		return
 	}

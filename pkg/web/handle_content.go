@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -89,7 +88,7 @@ func (s *server) articlePost(c *gin.Context) {
 	obj := new(content.Article)
 	err := binding.FormPost.Bind(req, obj)
 	if err != nil {
-		log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
+		logger().Infow("bind fail", "err", err)
 		c.AbortWithError(http.StatusNotFound, err) //nolint
 		return
 	}
@@ -101,7 +100,7 @@ func (s *server) articlePost(c *gin.Context) {
 		res["ok"] = true
 	} else {
 		res["ok"] = false
-		log.Printf("save article ERR %s", err)
+		logger().Infow("save fail", "post", obj, "err", err)
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -127,7 +126,7 @@ func (s *server) linksPost(c *gin.Context) {
 		obj := new(content.Link)
 		err := binding.FormPost.Bind(req, obj)
 		if err != nil {
-			log.Printf("bind %v to obj ERR: %s", req.PostForm, err)
+			logger().Infow("bind fail", "err", err)
 			res["ok"] = false
 			res["error"] = map[string]string{"message": err.Error()}
 		}
@@ -142,7 +141,6 @@ func (s *server) linksPost(c *gin.Context) {
 		}
 	} else {
 		pk, name, value := req.PostFormValue("pk"), req.PostFormValue("name"), req.PostFormValue("value")
-		// log.Printf("new post: pk %s, name %s, value %s", pk, name, value)
 		if pk == "" {
 			res["ok"] = false
 			res["error"] = map[string]string{"message": "pk is empty"}
