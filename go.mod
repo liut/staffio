@@ -15,9 +15,9 @@ require (
 	github.com/go-osin/osin v0.0.0-20240229065344-f0845653461e
 	github.com/go-osin/session v1.3.4
 	github.com/golang-jwt/jwt/v4 v4.5.1
-	github.com/jmoiron/sqlx v1.2.0
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.10.3
+	github.com/lib/pq v1.10.9
 	github.com/liut/keeper v0.0.0-20200616150248-5eedf612cdaa
 	github.com/liut/simpauth v0.1.13
 	github.com/liut/staffio-backend v0.3.0
