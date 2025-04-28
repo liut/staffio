@@ -297,6 +297,7 @@ func (s *server) oauth2Info(c *gin.Context) {
 				resp.Output["preferred_username"] = staff.UID
 				resp.Output["username"] = staff.UID
 				resp.Output["email"] = staff.Email
+				resp.Output["role"] = "Editor"                    // 临时方案
 				resp.Output["attributes"] = map[string][]string{} // TODO: fill attributes
 			}
 
