@@ -81,7 +81,7 @@ func (s *server) casValidateV2(c *gin.Context) {
 	if err != nil {
 		logger().Infow("load tick fail", "val", ticket, "err", err)
 		//nolint
-		fmt.Fprintf(c.Writer, v2ResponseFailure(cas.NewCasError(
+		fmt.Fprint(c.Writer, v2ResponseFailure(cas.NewCasError(
 			"ticket is invalid or expired", cas.ERROR_CODE_INVALID_TICKET), format))
 		return
 	}
@@ -97,12 +97,12 @@ func (s *server) casValidateV2(c *gin.Context) {
 	}
 
 	if casErr != nil {
-		fmt.Fprintf(c.Writer, v2ResponseFailure(casErr, format)) //nolint
+		fmt.Fprint(c.Writer, v2ResponseFailure(casErr, format)) //nolint
 		logger().Infow("casValidateV2 fail", "uri", c.Request.URL, "err", casErr)
 		return
 	}
 
-	fmt.Fprintf(c.Writer, v2ResponseSuccess(st, format)) //nolint
+	fmt.Fprint(c.Writer, v2ResponseSuccess(st, format)) //nolint
 }
 
 // v2ResponseFailure produces XML string for failure
