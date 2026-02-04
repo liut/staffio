@@ -39,6 +39,8 @@ jobs:
           mkdir -p dist/darwin_arm64
           mkdir -p dist/windows_amd64
 
+          cp -rf pkg/xrefs/templates dist/
+
           GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux_amd64/staffio .
           GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin_amd64/staffio .
           GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin_arm64/staffio .
@@ -46,11 +48,17 @@ jobs:
 
       - name: Package
         run: |
+          tar -cvJf staffio-templates-${{ steps.version.outputs.VERSION }}.tar.xz -C dist templates
           tar -cvJf staffio-linux-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/linux_amd64 staffio
           tar -cvJf staffio-darwin-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/darwin_amd64 staffio
           tar -cvJf staffio-darwin-arm64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/darwin_arm64 staffio
           tar -cvJf staffio-windows-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/windows_amd64 staffio.exe
 
+  release:
+    name: release
+    needs: [lint, build]
+    runs-on: ubuntu-latest
+    steps:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
