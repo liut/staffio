@@ -55,6 +55,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            staffio-templates-*.tar.xz
             staffio-linux-amd64-*.tar.xz
             staffio-darwin-amd64-*.tar.xz
             staffio-darwin-arm64-*.tar.xz
