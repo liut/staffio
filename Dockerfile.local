@@ -6,8 +6,7 @@ RUN apk add --update \
   su-exec \
   && rm -rf /var/cache/apk/*
 
-ENV VERSION=v0.8.5 \
-    PGHOST="staffio-db" \
+ENV PGHOST="staffio-db" \
     STAFFIO_BACKEND_DSN='postgres://staffio:mypassword@staffio-db/staffio?sslmode=disable' \
     STAFFIO_HTTP_LISTEN=":3030" \
     STAFFIO_LDAP_HOSTS="slapd" \
@@ -22,6 +21,7 @@ WORKDIR /app
 
 ADD linux_amd64/staffio /usr/bin/
 
+ADD htdocs /app/htdocs
 ADD templates /app/templates
 ADD entrypoint.sh /start.sh
 

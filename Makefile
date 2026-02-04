@@ -144,6 +144,8 @@ docker-auto-build:
 
 docker-local-build: dist/linux_amd64/$(NAME)
 	echo "Building docker image"
+	cp -rf htdocs dist/
+	cp -rf pkg/xrefs/templates dist/
 	cp -rf entrypoint.sh dist/
 	cp -rf Dockerfile.local dist/Dockerfile
 	docker build --rm -t $(ORIG)/$(NAME):$(TAG) dist/
