@@ -1,0 +1,80 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+            ext: tar.xz
+          - os: windows-latest
+            arch: amd64
+            ext: zip
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: false
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p dist/linux_amd64
+          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux_amd64/staffio .
+
+      - name: Build (windows amd64)
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir -p dist/windows_amd64
+          GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o dist/windows_amd64/staffio.exe .
+
+      - name: Package
+        if: matrix.os == 'ubuntu-latest'
+        run: tar -cvJf staffio-linux-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/linux_amd64 staffio
+
+      - name: Package (windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path dist/windows_amd64/staffio.exe -DestinationPath staffio-windows-amd64-${{ steps.version.outputs.VERSION }}.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: staffio-${{ matrix.os }}-${{ matrix.arch }}
+          path: staffio-*
+
+  release:
+    name: release
+    needs: [lint, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            staffio-linux-amd64-*.tar.xz
+            staffio-windows-amd64-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
