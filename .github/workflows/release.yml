@@ -17,15 +17,6 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            arch: amd64
-            ext: tar.xz
-          - os: windows-latest
-            arch: amd64
-            ext: zip
     steps:
       - uses: actions/checkout@v5
 
@@ -39,42 +30,34 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Build
-        if: matrix.os == 'ubuntu-latest'
+      - name: Build all platforms
+        env:
+          CGO_ENABLED: 0
         run: |
           mkdir -p dist/linux_amd64
-          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux_amd64/staffio .
-
-      - name: Build (windows amd64)
-        if: matrix.os == 'windows-latest'
-        run: |
+          mkdir -p dist/darwin_amd64
+          mkdir -p dist/darwin_arm64
           mkdir -p dist/windows_amd64
+
+          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux_amd64/staffio .
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin_amd64/staffio .
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin_arm64/staffio .
           GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o dist/windows_amd64/staffio.exe .
 
       - name: Package
-        if: matrix.os == 'ubuntu-latest'
-        run: tar -cvJf staffio-linux-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/linux_amd64 staffio
+        run: |
+          tar -cvJf staffio-linux-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/linux_amd64 staffio
+          tar -cvJf staffio-darwin-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/darwin_amd64 staffio
+          tar -cvJf staffio-darwin-arm64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/darwin_arm64 staffio
+          tar -cvJf staffio-windows-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/windows_amd64 staffio.exe
 
-      - name: Package (windows)
-        if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path dist/windows_amd64/staffio.exe -DestinationPath staffio-windows-amd64-${{ steps.version.outputs.VERSION }}.zip
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: staffio-${{ matrix.os }}-${{ matrix.arch }}
-          path: staffio-*
-
-  release:
-    name: release
-    needs: [lint, build]
-    runs-on: ubuntu-latest
-    steps:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             staffio-linux-amd64-*.tar.xz
-            staffio-windows-amd64-*.zip
+            staffio-darwin-amd64-*.tar.xz
+            staffio-darwin-arm64-*.tar.xz
+            staffio-windows-amd64-*.tar.xz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
