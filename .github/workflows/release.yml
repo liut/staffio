@@ -15,7 +15,8 @@ jobs:
         uses: golangci/golangci-lint-action@v6
 
   build:
-    name: build
+    name: build-and-release
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -54,11 +55,6 @@ jobs:
           tar -cvJf staffio-darwin-arm64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/darwin_arm64 staffio
           tar -cvJf staffio-windows-amd64-${{ steps.version.outputs.VERSION }}.tar.xz -C dist/windows_amd64 staffio.exe
 
-  release:
-    name: release
-    needs: [lint, build]
-    runs-on: ubuntu-latest
-    steps:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
