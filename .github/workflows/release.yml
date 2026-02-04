@@ -34,18 +34,15 @@ jobs:
       - name: Build all platforms
         env:
           CGO_ENABLED: 0
+          TAG: ${{ steps.version.outputs.VERSION }}
         run: |
-          mkdir -p dist/linux_amd64
-          mkdir -p dist/darwin_amd64
-          mkdir -p dist/darwin_arm64
-          mkdir -p dist/windows_amd64
+          echo "tag: $TAG"
+          make dist/linux_amd64/staffio
+          make dist/darwin_amd64/staffio
+          make dist/darwin_arm64/staffio
+          make dist/windows_amd64/staffio
 
           cp -rf pkg/xrefs/templates dist/
-
-          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux_amd64/staffio .
-          GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin_amd64/staffio .
-          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin_arm64/staffio .
-          GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o dist/windows_amd64/staffio.exe .
 
       - name: Package
         run: |
