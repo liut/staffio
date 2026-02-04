@@ -25,11 +25,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
-          cache: false
 
       - name: Get version
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Build all platforms
         env:
