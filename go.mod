@@ -9,8 +9,8 @@ require (
 	fhyx.online/lark-api-go v0.0.0-00010101000000-000000000000
 	fhyx.online/welink-api-go v0.0.0-00010101000000-000000000000
 	github.com/dchest/passwordreset v0.0.0-20190826080013-4518b1f41006
-	github.com/getsentry/sentry-go v0.38.0
-	github.com/getsentry/sentry-go/gin v0.38.0
+	github.com/getsentry/sentry-go v0.42.0
+	github.com/getsentry/sentry-go/gin v0.42.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-jose/go-jose/v4 v4.1.3
 	github.com/go-osin/osin v0.0.0-20250924045844-018bf11a6d9e
@@ -18,16 +18,16 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.1
 	github.com/liut/keeper v0.0.0-20230310035549-ee21cc0ffcdd
 	github.com/liut/simpauth v0.1.15
-	github.com/liut/staffio-backend v0.3.2-0.20251120090145-5c67ea9a669d
+	github.com/liut/staffio-backend v0.3.2-0.20260204072536-016a0846a484
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/russross/blackfriday v1.6.0
 	github.com/sethvargo/go-password v0.3.1
 	github.com/spf13/cast v1.10.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/ugorji/go/codec v1.3.1
 	go.uber.org/zap v1.27.1
