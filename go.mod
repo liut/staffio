@@ -12,7 +12,7 @@ require (
 	github.com/getsentry/sentry-go v0.42.0
 	github.com/getsentry/sentry-go/gin v0.42.0
 	github.com/gin-gonic/gin v1.11.0
-	github.com/go-jose/go-jose/v4 v4.1.3
+	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/go-osin/osin v0.0.0-20250924045844-018bf11a6d9e
 	github.com/go-osin/session v1.3.5-0.20251120091128-4df8a06a5152
 	github.com/golang-jwt/jwt/v4 v4.5.2
