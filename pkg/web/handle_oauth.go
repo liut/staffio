@@ -320,21 +320,21 @@ func (s *server) oidcDiscovery(c *gin.Context) {
 }
 
 func (s *server) oidcJwks(c *gin.Context) {
-	_ = c.Request.ParseForm()
-	bearer := osin.CheckBearerAuth(c.Request)
-	if bearer == nil {
-		logger().Infow("no token in header")
-		c.AbortWithStatus(400)
-		return
-	}
+	// _ = c.Request.ParseForm()
+	// bearer := osin.CheckBearerAuth(c.Request)
+	// if bearer == nil {
+	// 	logger().Infow("no token in header", "headers",c.Request.Header)
+	// 	c.AbortWithStatus(400)
+	// 	return
+	// }
 
-	// load access data
-	_, err := s.osvr.Storage.LoadAccess(bearer.Code)
-	if err != nil {
-		logger().Infow("load access fail", "err", err)
-		c.AbortWithStatus(401)
-		return
-	}
+	// // load access data
+	// _, err := s.osvr.Storage.LoadAccess(bearer.Code)
+	// if err != nil {
+	// 	logger().Infow("load access fail", "err", err)
+	// 	c.AbortWithStatus(401)
+	// 	return
+	// }
 
 	jwks := jose.JSONWebKeySet{}
 	jwks.Keys = append(jwks.Keys, s.tkgen.getJSONWebKey())
