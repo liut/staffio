@@ -1,11 +1,9 @@
 module github.com/liut/staffio
 
-go 1.24.0
-
-toolchain go1.24.2
+go 1.25
 
 require (
-	daxv.cn/gopak/tencent-api-go v0.0.0-20250414082502-b24302591099
+	daxv.cn/gopak/tencent-api-go v0.0.0-20260327100814-1749fa8b32c6
 	fhyx.online/lark-api-go v0.0.0-00010101000000-000000000000
 	fhyx.online/welink-api-go v0.0.0-00010101000000-000000000000
 	github.com/dchest/passwordreset v0.0.0-20190826080013-4518b1f41006
@@ -20,7 +18,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.11.1
 	github.com/liut/keeper v0.0.0-20230310035549-ee21cc0ffcdd
-	github.com/liut/simpauth v0.1.15
+	github.com/liut/simpauth v0.1.20
 	github.com/liut/staffio-backend v0.3.2-0.20260204072536-016a0846a484
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mozillazg/go-slugify v0.2.0
