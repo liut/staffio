@@ -11,8 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: golangci-lint
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
+        with:
+          install-mode: "goinstall"
+          version: v1.64
+
 
   build:
     name: build-and-release
@@ -24,7 +28,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version-file: go.mod
 
       - name: Get version
         id: version
