@@ -1,6 +1,6 @@
 module github.com/liut/staffio
 
-go 1.25
+go 1.25.0
 
 require (
 	daxv.cn/gopak/tencent-api-go v0.0.0-20260327100814-1749fa8b32c6
@@ -16,10 +16,10 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lib/pq v1.11.1
+	github.com/lib/pq v1.12.3
 	github.com/liut/keeper v0.0.0-20230310035549-ee21cc0ffcdd
 	github.com/liut/simpauth v0.1.20
-	github.com/liut/staffio-backend v0.3.2-0.20260204072536-016a0846a484
+	github.com/liut/staffio-backend v0.3.2-0.20260703144839-45ca85970d5f
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mozillazg/go-slugify v0.2.0
 	github.com/russross/blackfriday v1.6.0
@@ -29,7 +29,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/ugorji/go/codec v1.3.1
 	go.uber.org/zap v1.27.1
-	golang.org/x/text v0.31.0
+	golang.org/x/text v0.38.0
 	gopkg.in/mail.v2 v2.3.1
 )
 
@@ -40,7 +40,7 @@ replace (
 )
 
 require (
-	github.com/Azure/go-ntlmssp v0.1.0 // indirect
+	github.com/Azure/go-ntlmssp v0.1.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.2 // indirect
@@ -51,7 +51,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.11 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
-	github.com/go-ldap/ldap/v3 v3.4.12 // indirect
+	github.com/go-ldap/ldap/v3 v3.4.13 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.28.0 // indirect
@@ -78,9 +78,9 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.23.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
